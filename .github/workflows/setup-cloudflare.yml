@@ -1,0 +1,108 @@
+name: Setup Cloudflare Workers
+
+on:
+  workflow_dispatch:
+    inputs:
+      admin_password:
+        description: 'Admin Passwort für die Website'
+        required: true
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      # WICHTIG: Token nach dem Setup löschen und aus Git-History entfernen!
+      CLOUDFLARE_API_TOKEN: "KDm1Wn8-RkXLjc8VqTn80q44vtrfC8GSmPG0ypnl"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Create D1 Database
+        id: d1
+        run: |
+          OUTPUT=$(wrangler d1 create sechszirbenhuette-db 2>&1 || true)
+          echo "$OUTPUT"
+          # Extract database_id
+          DB_ID=$(echo "$OUTPUT" | grep -oP 'database_id = "\K[^"]+' || echo "")
+          if [ -z "$DB_ID" ]; then
+            # Try alternative pattern
+            DB_ID=$(echo "$OUTPUT" | grep "database_id" | sed 's/.*database_id = "\([^"]*\)".*/\1/')
+          fi
+          echo "db_id=$DB_ID" >> $GITHUB_OUTPUT
+          echo "D1 Database ID: $DB_ID"
+
+      - name: Create KV Namespace
+        id: kv
+        run: |
+          OUTPUT=$(wrangler kv:namespace create KV 2>&1 || true)
+          echo "$OUTPUT"
+          # Extract id
+          KV_ID=$(echo "$OUTPUT" | grep -oP 'id = "\K[^"]+' | head -1 || echo "")
+          if [ -z "$KV_ID" ]; then
+            KV_ID=$(echo "$OUTPUT" | grep "id = " | head -1 | sed 's/.*id = "\([^"]*\)".*/\1/')
+          fi
+          echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
+          echo "KV Namespace ID: $KV_ID"
+
+      - name: Create R2 Bucket
+        run: |
+          wrangler r2 bucket create sechszirbenhuette-media 2>&1 || echo "Bucket existiert möglicherweise bereits"
+
+      - name: Update wrangler.toml
+        run: |
+          echo "Updating wrangler.toml with:"
+          echo "  D1 ID: ${{ steps.d1.outputs.db_id }}"
+          echo "  KV ID: ${{ steps.kv.outputs.kv_id }}"
+
+          if [ -n "${{ steps.d1.outputs.db_id }}" ]; then
+            sed -i 's/YOUR_DATABASE_ID_HERE/${{ steps.d1.outputs.db_id }}/' wrangler.toml
+          fi
+
+          if [ -n "${{ steps.kv.outputs.kv_id }}" ]; then
+            sed -i 's/YOUR_KV_NAMESPACE_ID_HERE/${{ steps.kv.outputs.kv_id }}/' wrangler.toml
+          fi
+
+          echo "Updated wrangler.toml:"
+          cat wrangler.toml
+
+      - name: Apply Database Schema
+        run: |
+          wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote
+
+      - name: Set Admin Password Secret
+        run: |
+          echo "${{ inputs.admin_password }}" | wrangler secret put ADMIN_PASSWORD
+
+      - name: Commit Updated Config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add wrangler.toml
+          git diff --staged --quiet || git commit -m "Update wrangler.toml with Cloudflare resource IDs"
+          git push
+
+      - name: Summary
+        run: |
+          echo "## Cloudflare Setup Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Erstellte Ressourcen:" >> $GITHUB_STEP_SUMMARY
+          echo "- D1 Database: sechszirbenhuette-db" >> $GITHUB_STEP_SUMMARY
+          echo "- KV Namespace: KV" >> $GITHUB_STEP_SUMMARY
+          echo "- R2 Bucket: sechszirbenhuette-media" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Nächste Schritte:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Deploy mit Cloudflare Pages verbinden" >> $GITHUB_STEP_SUMMARY
+          echo "2. Custom Domain konfigurieren" >> $GITHUB_STEP_SUMMARY
