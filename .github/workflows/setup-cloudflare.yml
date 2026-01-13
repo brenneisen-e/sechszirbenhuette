@@ -43,7 +43,7 @@ jobs:
       - name: Create KV Namespace
         id: kv
         run: |
-          OUTPUT=$(wrangler kv:namespace create KV 2>&1 || true)
+          OUTPUT=$(wrangler kv namespace create KV 2>&1 || true)
           echo "$OUTPUT"
           # Extract id
           KV_ID=$(echo "$OUTPUT" | grep -oP 'id = "\K[^"]+' | head -1 || echo "")
