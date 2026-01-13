@@ -104,8 +104,8 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build Next.js App
-        run: npm run build
+      - name: Build Next.js App for Cloudflare
+        run: npx @cloudflare/next-on-pages
 
       - name: Create Pages Project
         run: |
@@ -116,7 +116,7 @@ jobs:
         id: deploy
         run: |
           set +e
-          OUTPUT=$(wrangler pages deploy .next --project-name $PROJECT_NAME --branch main 2>&1)
+          OUTPUT=$(wrangler pages deploy .vercel/output/static --project-name $PROJECT_NAME --branch main 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
           if [ $EXIT_CODE -ne 0 ]; then
