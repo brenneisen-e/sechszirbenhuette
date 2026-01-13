@@ -2,10 +2,11 @@ import { setRequestLocale } from 'next-intl/server';
 import { SITE_CONFIG } from '@/lib/constants';
 
 interface PageProps {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
-export async function generateMetadata({ params: { locale } }: PageProps) {
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
   return {
     title: locale === 'de' ? 'Impressum | Sechszirbenhütte' : 'Imprint | Sechszirbenhütte',
     description: locale === 'de'
@@ -15,7 +16,8 @@ export async function generateMetadata({ params: { locale } }: PageProps) {
   };
 }
 
-export default function ImpressumPage({ params: { locale } }: PageProps) {
+export default async function ImpressumPage({ params }: PageProps) {
+  const { locale } = await params;
   setRequestLocale(locale);
 
   return (

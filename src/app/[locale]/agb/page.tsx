@@ -1,10 +1,11 @@
 import { setRequestLocale } from 'next-intl/server';
 
 interface PageProps {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
-export async function generateMetadata({ params: { locale } }: PageProps) {
+export async function generateMetadata({ params }: PageProps) {
+  const { locale } = await params;
   return {
     title: locale === 'de' ? 'AGB | Sechszirbenhütte' : 'Terms | Sechszirbenhütte',
     description: locale === 'de'
@@ -14,7 +15,8 @@ export async function generateMetadata({ params: { locale } }: PageProps) {
   };
 }
 
-export default function AGBPage({ params: { locale } }: PageProps) {
+export default async function AGBPage({ params }: PageProps) {
+  const { locale } = await params;
   setRequestLocale(locale);
 
   const isDE = locale === 'de';
