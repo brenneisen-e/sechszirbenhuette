@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "title": "Sechszirbenhütte at Falkert | Premium Mountain Retreat in the Nockberge",
+    "description": "Historic mountain cabin with sauna in secluded location at 1,700m. Hiking, skiing & relaxation in Carinthia. Families & dogs welcome. Book now!"
+  },
+  "navigation": {
+    "home": "Home",
+    "ferienhaus": "Holiday Home",
+    "umgebung": "Surroundings",
+    "buchung": "Book Now",
+    "bewertungen": "Reviews",
+    "impressum": "Imprint",
+    "datenschutz": "Privacy Policy",
+    "agb": "Terms"
+  },
+  "hero": {
+    "title": "Welcome to the Sechszirbenhütte",
+    "subtitle": "Premium mountain retreat at 1,700m in the Carinthian Nockberge",
+    "description": "Experience unforgettable vacation days in our over 250-year-old mountain cabin – lovingly restored, with a sauna annex and in complete seclusion amidst Swiss stone pine and larch forests at Falkert.",
+    "cta_book": "Book Now",
+    "cta_explore": "Explore the Cabin"
+  },
+  "features": {
+    "altitude": {
+      "title": "1,700m Altitude",
+      "description": "Alpine panorama with views to the Karawanken mountains"
+    },
+    "secluded": {
+      "title": "Secluded Location",
+      "description": "Absolute tranquility amidst Swiss stone pine and larch forests"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "description": "Private sauna annex with relaxation room and rain shower"
+    },
+    "guests": {
+      "title": "Up to 5 Guests",
+      "description": "Ideal for families and small groups"
+    },
+    "dogs": {
+      "title": "Dog-Friendly",
+      "description": "Your four-legged friends are welcome"
+    },
+    "rating": {
+      "title": "5-Star Reviews",
+      "description": "Our guests love the Sechszirbenhütte"
+    }
+  },
+  "heidiAlm": {
+    "title": "Heidi Alm Mountain Resort: Close to Heaven, Far from Everyday Life",
+    "description": "Experience an unforgettable vacation at the Heidi Alm Mountain Resort, surrounded by healthy mountain air, crystal-clear mountain water, and colorful alpine nature. Discover gentian, alpine roses, and edelweiss – and with a bit of luck, marmots in their natural habitat."
+  },
+  "winter": {
+    "title": "Winter Vacation at Heidi-Alm",
+    "description": "The family-friendly ski resort offers three lifts, a magic carpet, and varied slopes for beginners to advanced skiers.",
+    "activities": {
+      "skiing": "Relaxed skiing without queues",
+      "crossCountry": "Cross-country skiing on groomed trails",
+      "skating": "Ice skating on Falkertsee",
+      "snowshoe": "Guided snowshoe tours",
+      "skiSchool": "Peter's ski school for children and adults",
+      "tours": "Ski tours and torchlight hikes"
+    }
+  },
+  "ferienhaus": {
+    "title": "The Sechszirbenhütte – Rustic Romance with Modern Comfort",
+    "intro": "Treat yourself to an unforgettable cabin vacation in our over 250-year-old mountain cabin in secluded location – right at the Nockberge National Park and just 800m from the picturesque Falkertsee.",
+    "details": {
+      "grundstueck": "1,200 m² alpine property",
+      "wohnflaeche": "80 m²",
+      "hoehe": "1,700m above sea level",
+      "personen": "2–5 persons"
+    },
+    "rooms": {
+      "title": "Bedrooms",
+      "bedroom1": "Bedroom 1: Double bed",
+      "bedroom2": "Bedroom 2: Double bed",
+      "living": "Living area with sleeping option"
+    },
+    "kitchen": {
+      "title": "Kitchen",
+      "items": ["Fully equipped kitchen", "Dishwasher", "Refrigerator with freezer", "Coffee maker", "Kettle", "Toaster"]
+    },
+    "bathroom": {
+      "title": "Bathroom",
+      "items": ["Shower bath with WC", "Underfloor heating"]
+    },
+    "sauna": {
+      "title": "Sauna",
+      "items": ["Private sauna annex", "Finnish sauna", "Relaxation room with loungers", "Floor-level rain shower", "Private terrace", "Underfloor heating"]
+    },
+    "living": {
+      "title": "Living Area",
+      "items": ["Cozy seating area", "Dining table", "Modern wood pellet stove", "Satellite TV", "WiFi"]
+    },
+    "outdoor": {
+      "title": "Outdoor Area",
+      "items": ["Wraparound balcony", "Garden furniture", "Private parking", "Ski and sled cellar"]
+    }
+  },
+  "umgebung": {
+    "title": "Year-Round Vacation Destination for the Whole Family",
+    "subtitle": "Southern Austria: Skiing & Nature Vacation in Perfect Climate",
+    "intro": "Discover the idyllic ski village of Falkertsee in southern Austria, where ski and nature enthusiasts find perfect climate conditions. Experience from December to April dream-like snow conditions and in summer lush green meadows in Carinthia's highest ski village.",
+    "features": {
+      "central": {
+        "title": "Sechszirbenhütte: Central Accommodation for All Activities",
+        "description": "The Sechszirbenhütte is the ideal accommodation for your vacation in Falkertsee. Thanks to its central location, you have easy access to all ski areas, hiking trails, the Nockberge National Park, and the picturesque Carinthian lakes."
+      },
+      "nationalpark": {
+        "title": "Nockberge National Park & Adjacent Ski Areas",
+        "description": "Explore the impressive Nockberge National Park in close proximity to the Sechszirbenhütte. Also benefit from the proximity to the excellent ski areas of Turracher Höhe and Bad Kleinkirchheim for even more variety."
+      },
+      "dreilaendereck": {
+        "title": "Three-Country Corner: Italy, Slovenia & Austria",
+        "description": "The central location of the Sechszirbenhütte allows you to conveniently explore the three-country corner of Italy, Slovenia, and Austria and discover the cultural highlights of the region."
+      },
+      "activities": {
+        "title": "Year-Round Activities for the Whole Family",
+        "description": "No matter the season, there are numerous activities for the whole family around the Sechszirbenhütte. Experience unforgettable moments skiing, hiking, golfing, or visiting the picturesque Carinthian lakes."
+      },
+      "heidiAlm": {
+        "title": "Heidi-Alm, Golfing, Hiking & More",
+        "description": "Explore the diverse mountain world around the Sechszirbenhütte or use the golf opportunities (18-hole) in Bad Kleinkirchheim. The famous Heidi-Alm especially attracts young visitors to the mountain."
+      },
+      "kaerntenCard": {
+        "title": "Save with the Kärnten Card",
+        "description": "Learn about the attractive Kärnten Card, with which you can save a lot of money during your stay. Especially great for families – it usually pays for itself after the 2nd gondola ride."
+      }
+    },
+    "dogTrips": {
+      "title": "The 5 Most Beautiful Trips with Dogs in Carinthia",
+      "trips": [
+        {
+          "title": "Falkert and Falkertsee",
+          "description": "A walk around the Falkertsee is a fixed part of our stay on the mountain and is also manageable for older dogs. A hike to the Falkert is also a must. Depending on fitness, it takes 1 to 3 hours. A steep or moderate ascent and descent are possible. The dog should be mountain-experienced and fit.",
+          "difficulty": "easy to moderate",
+          "duration": "1-3 hours"
+        },
+        {
+          "title": "Hike Rodresnock/Moschelitzen/Marmot Valley",
+          "description": "An extensive, partly sporty and mostly quite windy circular hike. Our secret favorite – often you don't meet a soul and have the Nockberge to yourself.",
+          "difficulty": "challenging",
+          "tip": "Dog coat for the summit"
+        },
+        {
+          "title": "Three Lakes Hike at Turracher Höhe",
+          "description": "A moderate hike along the three lakes. Suitable for all levels. Easy to reach by car. Be sure to stop by the Karl-Hütte for Kaiserschmarrn.",
+          "difficulty": "easy",
+          "tip": "Kaiserschmarrn at the Karl-Hütte"
+        },
+        {
+          "title": "Panorama Trail Hochrindl",
+          "description": "Various hiking trails start from here, including a beautiful panorama hike with many fresh water opportunities. Perfect for dogs.",
+          "difficulty": "easy to moderate"
+        },
+        {
+          "title": "Beach Tschinder at Millstätter See",
+          "description": "If you're looking for a cool-off in summer and want to bring your four-legged friend, head to Beach Tschinder at Millstätter See. There's an area for dogs, of course with leash!",
+          "difficulty": "easy",
+          "tip": "Dog area with leash requirement"
+        }
+      ]
+    },
+    "kidsTrips": {
+      "title": "The 7 Most Beautiful Trips with Children in Carinthia",
+      "trips": [
+        {
+          "title": "Heidi-Alm at Falkert",
+          "description": "The Heidi-Alm at Falkert is just around the corner and offers a fairytale walk through the Heidi world with views of the surrounding mountains. A large slide and a modern playground complete the excursion.",
+          "distance": "5 minutes walk",
+          "age": "All ages"
+        },
+        {
+          "title": "Turracher Höhe and Nocky-Flitzer",
+          "description": "The Turracher Höhe is a beautiful ski area for beginners and pros. Outside the winter season, the Alpine roller coaster Nockyflitzer is an absolute excursion highlight. From 3 years, it's a fast ride down the mountain.",
+          "distance": "15 minutes by car",
+          "age": "From 3 years"
+        },
+        {
+          "title": "Ossiacher See and Familywald",
+          "description": "Lake Ossiach is about 30 minutes drive from the Sechszirbenhütte. Right next to it is the adventure and climbing forest Familywald. Here, small and big children get their money's worth.",
+          "distance": "30 minutes by car",
+          "age": "From 4 years"
+        },
+        {
+          "title": "Panorama Trail St. Oswald (with Brunnachbahn)",
+          "description": "Our standard hike when we're at Falkert. Take the Brunnachbahn in Bad Kleinkirchheim to the Panorama Trail St. Oswald. The hike is kid-friendly and not too steep.",
+          "distance": "16 minutes by car",
+          "age": "All ages",
+          "tip": "Stop at the Bockhütte"
+        },
+        {
+          "title": "Animal Park Feld am See",
+          "description": "The Alpine Animal Park Feld am See is a wildlife park at the foot of a mountain. Here you can observe various native animals as well as a small petting zoo. Two playgrounds provide variety.",
+          "distance": "25 minutes by car",
+          "age": "All ages",
+          "tip": "Stroller-friendly"
+        },
+        {
+          "title": "Mountain Railway Gerlitzen-Alpe",
+          "description": "The Gerlitzen-Alpe is a well-known starting point for paragliders. In good conditions, there's always a lot to marvel at. At the individual stations of the mountain railways, various playgrounds await.",
+          "distance": "40 minutes by car",
+          "age": "All ages"
+        },
+        {
+          "title": "Panorama Road Nockalm",
+          "description": "The Nockberge have a unique beauty. Like warm green giants, the natural wonders lie in the landscape. They can be especially impressively admired on the Nockalm Panorama Road.",
+          "distance": "15 minutes by car",
+          "age": "All ages",
+          "tip": "Best during nap time"
+        }
+      ]
+    },
+    "directions": {
+      "title": "Hiking – Winter Sports – Relaxation: How to Find Us",
+      "description": "Coming from the Tauern motorway A10, take the exit Spittal/Millstätter See and drive east along the lake to Radenthein. There, at the roundabout at the town exit, take the direction towards Bad Kleinkirchheim. Drive through Bad Kleinkirchheim and after about 2 km at the next intersection turn left towards Turrach and Falkertsee. After about 500 m, a Heidi figure shows the mountain road up (about 8 km) to Falkertsee. In the village you will find signposts with the corresponding house numbers.",
+      "note": "For car access from November to April, snow chains should be in your luggage."
+    }
+  },
+  "buchung": {
+    "title": "Send a Non-Binding Inquiry",
+    "subtitle": "Book Your Dream Vacation at the Sechszirbenhütte",
+    "prices": {
+      "title": "Price Overview",
+      "base": "Rental price per night (up to 4 persons)",
+      "lowSeason": "Low Season",
+      "highSeason": "High Season",
+      "minStay": "Minimum stay: 3 nights (High season: 7 nights)"
+    },
+    "extras": {
+      "title": "Additional Services",
+      "person5": "5th Person",
+      "dog": "Dog",
+      "laundry": "Laundry Package"
+    },
+    "included": {
+      "title": "Included",
+      "items": ["Electricity (20 kWh/night)", "Heating", "Water", "Waste disposal", "Final cleaning (without dog)", "WiFi", "Tourist tax (adults)", "Sauna use"]
+    },
+    "form": {
+      "title": "Booking Request",
+      "salutation": "Salutation",
+      "mr": "Mr.",
+      "mrs": "Mrs.",
+      "diverse": "Diverse",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "street": "Street & House Number",
+      "zip": "Postal Code",
+      "city": "City",
+      "country": "Country",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "adults": "Adults",
+      "children": "Children",
+      "childrenAge": "Age of Children",
+      "dogs": "Dogs",
+      "laundryPackage": "Laundry Package",
+      "laundryCount": "Number of Laundry Packages",
+      "message": "Message",
+      "agb": "I accept the Terms and Conditions",
+      "datenschutz": "I accept the Privacy Policy",
+      "submit": "Send Inquiry",
+      "success": "Thank you! Your inquiry has been successfully submitted.",
+      "error": "An error occurred. Please try again later."
+    }
+  },
+  "bewertungen": {
+    "title": "Guest Reviews",
+    "subtitle": "What Our Guests Say",
+    "intro": "Did you enjoy your stay at the Sechszirbenhütte at Falkert? Help us get even better! We cordially invite you to share your experiences and valuable moments in the Nockberge with other guests.",
+    "cta": "Write a Review on Google",
+    "thankYou": "We appreciate praise, criticism, and suggestions! Thank you for your support!"
+  },
+  "footer": {
+    "contact": "Contact",
+    "legal": "Legal",
+    "followUs": "Follow Us",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "copyright": "© {year} Sechszirbenhütte. All rights reserved."
+  },
+  "common": {
+    "learnMore": "Learn More",
+    "bookNow": "Book Now",
+    "contactUs": "Contact",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading...",
+    "persons": "Persons",
+    "nights": "Nights",
+    "perNight": "per night"
+  }
+}

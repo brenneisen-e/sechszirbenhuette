@@ -1,0 +1,30 @@
+name = "sechszirbenhuette"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Pages Projekt
+pages_build_output_dir = ".next"
+
+# D1 Datenbank Binding
+# Nach `wrangler d1 create sechszirbenhuette-db` die database_id einfügen
+[[d1_databases]]
+binding = "DB"
+database_name = "sechszirbenhuette-db"
+database_id = "YOUR_DATABASE_ID_HERE"
+
+# KV Namespace für Sessions/Cache
+# Nach `wrangler kv:namespace create KV` die id einfügen
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID_HERE"
+
+# R2 Bucket für Bilder & Videos
+# Nach `wrangler r2 bucket create sechszirbenhuette-media` einfügen
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "sechszirbenhuette-media"
+
+# Umgebungsvariablen (Secrets über Dashboard oder wrangler secret put)
+[vars]
+ENVIRONMENT = "production"
+PUBLIC_R2_URL = "https://media.sechszirbenhuette.com"

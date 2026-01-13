@@ -1,0 +1,128 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
+
+export function Hero() {
+  const t = useTranslations('hero');
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/media?category=hero&type=video')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.media?.[0]) {
+          setVideoUrl(data.media[0].url);
+        }
+      })
+      .catch(() => {
+        // Use fallback
+      });
+  }, []);
+
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <section id="hero" className="relative h-screen w-full overflow-hidden">
+      {/* Video/Image Background */}
+      <div className="absolute inset-0">
+        {videoUrl ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/images/fallback/hero-fallback.jpg"
+            className="h-full w-full object-cover"
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <div
+            className="h-full w-full bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/fallback/hero-fallback.jpg')" }}
+          />
+        )}
+      </div>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+
+      {/* Content */}
+      <div className="relative z-10 flex h-full items-center justify-center text-white text-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-4xl"
+        >
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
+          >
+            {t('title')}
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="text-xl md:text-2xl mb-4 text-white/90"
+          >
+            {t('subtitle')}
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="text-base md:text-lg mb-8 text-white/80 max-w-2xl mx-auto"
+          >
+            {t('description')}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <button
+              onClick={() => scrollToSection('#buchung')}
+              className="px-8 py-4 bg-wood-700 text-white rounded-lg font-semibold hover:bg-wood-800 transition-colors"
+            >
+              {t('cta_book')}
+            </button>
+            <button
+              onClick={() => scrollToSection('#ferienhaus')}
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+            >
+              {t('cta_explore')}
+            </button>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        onClick={() => scrollToSection('#features')}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white animate-bounce"
+        aria-label="Scroll down"
+      >
+        <ChevronDown size={40} />
+      </motion.button>
+    </section>
+  );
+}

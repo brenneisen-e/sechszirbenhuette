@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "title": "Sechszirbenhütte am Falkert | Premium-Hüttenurlaub in den Nockbergen",
+    "description": "Historische Berghütte mit Sauna in Alleinlage auf 1.700m. Wandern, Skifahren & Erholung in Kärnten. Familien & Hunde willkommen. Jetzt buchen!"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "ferienhaus": "Ferienhaus",
+    "umgebung": "Umgebung",
+    "buchung": "Buchen",
+    "bewertungen": "Bewertungen",
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "agb": "AGB"
+  },
+  "hero": {
+    "title": "Herzlich Willkommen in der Sechszirbenhütte",
+    "subtitle": "Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen",
+    "description": "Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.",
+    "cta_book": "Jetzt anfragen & buchen",
+    "cta_explore": "Ferienhaus entdecken"
+  },
+  "features": {
+    "altitude": {
+      "title": "1.700 m Höhe",
+      "description": "Alpines Panorama mit Blick bis zu den Karawanken"
+    },
+    "secluded": {
+      "title": "Alleinlage",
+      "description": "Absolute Ruhe inmitten von Zirben- und Lärchenwäldern"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "description": "Privater Sauna-Anbau mit Ruheraum und Regendusche"
+    },
+    "guests": {
+      "title": "Bis zu 5 Personen",
+      "description": "Ideal für Familien und kleine Gruppen"
+    },
+    "dogs": {
+      "title": "Hundefreundlich",
+      "description": "Ihre Vierbeiner sind bei uns herzlich willkommen"
+    },
+    "rating": {
+      "title": "5-Sterne Bewertungen",
+      "description": "Unsere Gäste lieben die Sechszirbenhütte"
+    }
+  },
+  "heidiAlm": {
+    "title": "Heidi Alm Bergresort: Dem Himmel nahe, dem Alltag fern",
+    "description": "Erleben Sie einen unvergesslichen Urlaub im Heidi Alm Bergresort, umgeben von gesunder Bergluft, kristallklarem Gebirgswasser und farbenfroher alpiner Natur. Entdecken Sie Enzian, Almrausch und Edelweiß – und mit etwas Glück Murmeltiere in ihrer natürlichen Umgebung."
+  },
+  "winter": {
+    "title": "Winterurlaub in der Heidi-Alm",
+    "description": "Das familiäre Skigebiet bietet drei Lifte, einen Zauberteppich und abwechslungsreiche Pisten für Anfänger bis Fortgeschrittene.",
+    "activities": {
+      "skiing": "Entspanntes Skifahren ohne Warteschlangen",
+      "crossCountry": "Langlaufen auf gepflegten Loipen",
+      "skating": "Eislaufen auf dem Falkertsee",
+      "snowshoe": "Geführte Schneeschuhwanderungen",
+      "skiSchool": "Peters Skischule für Kinder und Erwachsene",
+      "tours": "Ski-Touren und Fackelwanderungen"
+    }
+  },
+  "ferienhaus": {
+    "title": "Die Sechszirbenhütte – Urige Romantik mit modernem Komfort",
+    "intro": "Gönnen Sie sich einen unvergesslichen Hüttenurlaub in unserer über 250 Jahre alten Berghütte in Alleinlage – direkt am Nationalpark Nockberge und nur 800 m vom malerischen Falkertsee entfernt.",
+    "details": {
+      "grundstueck": "1.200 m² Almgrundstück",
+      "wohnflaeche": "80 m²",
+      "hoehe": "1.700 m ü.d.M.",
+      "personen": "2–5 Personen"
+    },
+    "rooms": {
+      "title": "Schlafzimmer",
+      "bedroom1": "Schlafzimmer 1: Doppelbett",
+      "bedroom2": "Schlafzimmer 2: Doppelbett",
+      "living": "Wohnbereich mit Schlafmöglichkeit"
+    },
+    "kitchen": {
+      "title": "Küche",
+      "items": ["Vollausgestattete Küche", "Geschirrspüler", "Kühlschrank mit Gefrierfach", "Kaffeemaschine", "Wasserkocher", "Toaster"]
+    },
+    "bathroom": {
+      "title": "Bad",
+      "items": ["Duschbad mit WC", "Fußbodenheizung"]
+    },
+    "sauna": {
+      "title": "Sauna",
+      "items": ["Privater Sauna-Anbau", "Finnische Sauna", "Ruheraum mit Liegen", "Bodentiefe Regendusche", "Eigene Terrasse", "Fußbodenheizung"]
+    },
+    "living": {
+      "title": "Wohnbereich",
+      "items": ["Gemütliche Sitzgruppe", "Esstisch", "Moderner Holz-Pelletofen", "SAT-TV", "WLAN"]
+    },
+    "outdoor": {
+      "title": "Außenbereich",
+      "items": ["Umlaufender Balkon", "Gartenmöbel", "Eigener Parkplatz", "Ski- und Schlittenkeller"]
+    }
+  },
+  "umgebung": {
+    "title": "Ganzjähriges Urlaubsziel für die ganze Familie",
+    "subtitle": "Südösterreich: Ski- & Natururlaub in besten Klimabedingungen",
+    "intro": "Entdecken Sie das idyllische Skidorf Falkertsee im Süden Österreichs, wo Ski- und Naturfreunde perfekte klimatische Bedingungen vorfinden. Erleben Sie von Dezember bis April traumhafte Schneeverhältnisse und im Sommer saftig grüne Wiesen in Kärntens höchst gelegenem Skidorf.",
+    "features": {
+      "central": {
+        "title": "Sechszirbenhütte: Zentrale Unterkunft für alle Aktivitäten",
+        "description": "Die Sechszirbenhütte ist die ideale Unterkunft für Ihren Urlaub in Falkertsee. Dank ihrer zentralen Lage haben Sie bequemen Zugang zu allen Skigebieten, Wanderwegen, dem Nationalpark Nockberge und den malerischen Kärntner Seen."
+      },
+      "nationalpark": {
+        "title": "Nationalpark Nockberge & angrenzende Skigebiete",
+        "description": "Erkunden Sie den beeindruckenden Nationalpark Nockberge in unmittelbarer Nähe zur Sechszirbenhütte. Profitieren Sie zudem von der Nähe zu den erstklassigen Skigebieten Turracher Höhe und Bad Kleinkirchheim für noch mehr Abwechslung."
+      },
+      "dreilaendereck": {
+        "title": "Dreiländereck: Italien, Slowenien & Österreich",
+        "description": "Die zentrale Lage der Sechszirbenhütte ermöglicht es Ihnen, bequem das Dreiländereck von Italien, Slowenien und Österreich zu erkunden und die kulturellen Highlights der Region zu entdecken."
+      },
+      "activities": {
+        "title": "Ganzjährige Aktivitäten für die ganze Familie",
+        "description": "Egal zu welcher Jahreszeit, in der Umgebung der Sechszirbenhütte gibt es zahlreiche Aktivitäten für die ganze Familie. Erleben Sie unvergessliche Momente beim Skifahren, Wandern, Golfen oder beim Besuch der malerischen Kärntner Seen."
+      },
+      "heidiAlm": {
+        "title": "Heidi-Alm, Golfen, Wandern & mehr",
+        "description": "Erkunden Sie die abwechslungsreiche Bergwelt rund um die Sechszirbenhütte oder nutzen Sie die Golfmöglichkeiten (18-Loch) in Bad Kleinkirchheim. Die bekannte Heidi-Alm lockt besonders junge Besucher auf den Berg."
+      },
+      "kaerntenCard": {
+        "title": "Sparen mit der Kärnten Card",
+        "description": "Informieren Sie sich über die attraktive Kärnten Card, mit der Sie während Ihres Aufenthalts eine Menge Geld sparen können. Für Familien besonders toll – meist rechnet sie sich ab der 2. Gondelfahrt."
+      }
+    },
+    "dogTrips": {
+      "title": "Die 5 schönsten Ausflüge mit Hund in Kärnten",
+      "trips": [
+        {
+          "title": "Falkert und Falkertsee",
+          "description": "Ein Spaziergang um den Falkertsee ist fester Bestandteil unseres Aufenthalts am Berg und ist auch für ältere Hunde gut zu bewerkstelligen. Nicht wegzudenken ist natürlich eine Wanderung auf den Falkert. Je nach Fitness dauert es 1 bis 3 Stunden. Ein steiler oder ein gemäßigter Auf- und Abstieg sind möglich. Der Hund sollte bergerfahren und fit sein.",
+          "difficulty": "leicht bis mittel",
+          "duration": "1-3 Stunden"
+        },
+        {
+          "title": "Wanderung Rodresnock/Moschelitzen/Murmeltiertal",
+          "description": "Eine ausgedehnte, teilweise sportliche und meistens recht windige Rundwanderung. Unser heimlicher Favorit – oftmals trifft man keine Menschenseele und hat die Nockberge für sich.",
+          "difficulty": "anspruchsvoll",
+          "tip": "Hundemantel für den Gipfel"
+        },
+        {
+          "title": "Drei-Seen-Wanderung an der Turracher Höhe",
+          "description": "Eine gemäßigte Wanderung entlang der Drei-Seen. Für alle Level geeignet. Gut mit dem Auto zu erreichen. Unbedingt in der Karl-Hütte vorbeischauen und Kaiserschmarrn essen.",
+          "difficulty": "leicht",
+          "tip": "Kaiserschmarrn in der Karl-Hütte"
+        },
+        {
+          "title": "Panoramaweg Hochrindl",
+          "description": "Von hier aus starten verschiedene Wanderwege, u.a. eine schöne Panoramawanderung mit vielen Frischwassermöglichkeiten. Für Hunde perfekt.",
+          "difficulty": "leicht bis mittel"
+        },
+        {
+          "title": "Strandbad Tschinder am Millstätter See",
+          "description": "Wer im Sommer eine Abkühlung sucht und seinen Vierbeiner mitnehmen möchte, sollte ins Strandbad Tschinder am Millstätter See. Hier gibt es einen Bereich für Hunde, natürlich mit Leine!",
+          "difficulty": "leicht",
+          "tip": "Hundebereich mit Leinenpflicht"
+        }
+      ]
+    },
+    "kidsTrips": {
+      "title": "Die 7 schönsten Ausflüge mit Kindern in Kärnten",
+      "trips": [
+        {
+          "title": "Die Heidi-Alm am Falkert",
+          "description": "Die Heidi-Alm am Falkert ist direkt ums Eck und bietet einen märchenhaften Spaziergang durch die Heidi-Welt mit Blick auf die umliegenden Berge. Eine große Rutsche und ein moderner Spielplatz runden den Ausflug ab.",
+          "distance": "5 Gehminuten",
+          "age": "Alle Altersgruppen"
+        },
+        {
+          "title": "Turracher Höhe und Nocky-Flitzer",
+          "description": "Die Turracher Höhe ist ein wunderschönes Skigebiet für Anfänger und Profis. Außerhalb der Wintersaison ist die Alpen-Achterbahn Nockyflitzer ein absolutes Ausflugs-Highlight. Ab 3 Jahren geht's rasant den Berg herunter.",
+          "distance": "15 Autominuten",
+          "age": "Ab 3 Jahren"
+        },
+        {
+          "title": "Ossiacher See und Familywald",
+          "description": "Der Ossiacher See liegt ca. 30 Fahrminuten von der Sechszirbenhütte entfernt. Direkt daran gelegen ist der Abenteuer- und Kletterwald Familywald. Hier kommen kleine und große Kinder voll auf ihre Kosten.",
+          "distance": "30 Autominuten",
+          "age": "Ab 4 Jahren"
+        },
+        {
+          "title": "Panoramaweg St. Oswald (mit Brunnachbahn)",
+          "description": "Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil.",
+          "distance": "16 Autominuten",
+          "age": "Alle Altersgruppen",
+          "tip": "Einkehr in der Bockhütte"
+        },
+        {
+          "title": "Tierpark Feld am See",
+          "description": "Der Alpen Tierpark Feld am See ist ein Wildpark am Fuße eines Berges. Hier gibt es diverse heimische Tiere zu beobachten sowie einen kleinen Streichelzoo. Zwei Spielplätze sorgen für Abwechslung.",
+          "distance": "25 Autominuten",
+          "age": "Alle Altersgruppen",
+          "tip": "Kinderwagen-geeignet"
+        },
+        {
+          "title": "Bergbahn Gerlitzen-Alpe",
+          "description": "Die Gerlitzen-Alpe ist ein bekannter Startpunkt für Paraglider. Hier gibt es bei guten Bedingungen also immer viel zu bestaunen. An den einzelnen Stationen der Bergbahnen warten verschiedene Spielplätze.",
+          "distance": "40 Autominuten",
+          "age": "Alle Altersgruppen"
+        },
+        {
+          "title": "Panoramastraße Nockalm",
+          "description": "Die Nockberge haben eine einzigartige Schönheit. Wie warme grüne Riesen liegen die Naturwunder in der Landschaft. Besonders eindrucksvoll lassen sie sich auf der Panoramastraße Nockalm bestaunen.",
+          "distance": "15 Autominuten",
+          "age": "Alle Altersgruppen",
+          "tip": "Am besten während des Mittagsschlafs"
+        }
+      ]
+    },
+    "directions": {
+      "title": "Wandern – Wintersport – Entspannung: So finden Sie uns",
+      "description": "Über die Tauernautobahn A10 kommend, nehmen Sie die Abfahrt Spittal/Millstätter See und fahren östlich entlang des Sees, bis Radenthein. Dort fahren Sie am Ortsausgang im Kreisverkehr Richtung Bad Kleinkirchheim ab. Sie fahren durch Bad Kleinkirchheim und biegen nach ca. 2 km an der nächsten Kreuzung nach links Richtung Turrach und Falkertsee ab. Nach ca. 500 m zeigt eine Heidi-Figur die Bergstraße hinauf (ca. 8 km) zum Falkertsee. Im Ort finden Sie Hinweistafeln mit den entsprechenden Hausnummern.",
+      "note": "Für die Autozufahrt sollten von November bis April Schneeketten im Gepäck sein."
+    }
+  },
+  "buchung": {
+    "title": "Jetzt unverbindlich anfragen",
+    "subtitle": "Buchen Sie Ihren Traumurlaub in der Sechszirbenhütte",
+    "prices": {
+      "title": "Preisübersicht",
+      "base": "Mietpreis pro Nacht (bis 4 Personen)",
+      "lowSeason": "Nebensaison",
+      "highSeason": "Hauptsaison",
+      "minStay": "Mindestaufenthalt: 3 Nächte (Hauptsaison: 7 Nächte)"
+    },
+    "extras": {
+      "title": "Zusatzleistungen",
+      "person5": "5. Person",
+      "dog": "Hund",
+      "laundry": "Wäschepaket"
+    },
+    "included": {
+      "title": "Inklusive",
+      "items": ["Strom (20 kWh/Nacht)", "Heizung", "Wasser", "Müllentsorgung", "Endreinigung (ohne Hund)", "WLAN", "Ortstaxe (Erwachsene)", "Sauna-Nutzung"]
+    },
+    "form": {
+      "title": "Buchungsanfrage",
+      "salutation": "Anrede",
+      "mr": "Herr",
+      "mrs": "Frau",
+      "diverse": "Divers",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "street": "Straße & Hausnummer",
+      "zip": "PLZ",
+      "city": "Ort",
+      "country": "Land",
+      "arrival": "Anreise",
+      "departure": "Abreise",
+      "adults": "Erwachsene",
+      "children": "Kinder",
+      "childrenAge": "Alter der Kinder",
+      "dogs": "Hunde",
+      "laundryPackage": "Wäschepaket",
+      "laundryCount": "Anzahl Wäschepakete",
+      "message": "Nachricht",
+      "agb": "Ich akzeptiere die AGB",
+      "datenschutz": "Ich akzeptiere die Datenschutzerklärung",
+      "submit": "Anfrage absenden",
+      "success": "Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt.",
+      "error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+    }
+  },
+  "bewertungen": {
+    "title": "Gästebewertungen",
+    "subtitle": "Was unsere Gäste sagen",
+    "intro": "Haben Sie Ihren Aufenthalt in der Sechszirbenhütte am Falkert genossen? Helfen Sie uns, noch besser zu werden! Wir laden Sie herzlich ein, Ihre Erfahrungen und wertvollen Momente in den Nockbergen mit anderen Gästen zu teilen.",
+    "cta": "Bewertung auf Google schreiben",
+    "thankYou": "Wir freuen uns über Lob, Kritik und Anregungen! Vielen Dank für Ihre Unterstützung!"
+  },
+  "footer": {
+    "contact": "Kontakt",
+    "legal": "Rechtliches",
+    "followUs": "Folgen Sie uns",
+    "phone": "Telefon",
+    "email": "E-Mail",
+    "address": "Adresse",
+    "copyright": "© {year} Sechszirbenhütte. Alle Rechte vorbehalten."
+  },
+  "common": {
+    "learnMore": "Mehr erfahren",
+    "bookNow": "Jetzt buchen",
+    "contactUs": "Kontakt",
+    "back": "Zurück",
+    "close": "Schließen",
+    "loading": "Laden...",
+    "persons": "Personen",
+    "nights": "Nächte",
+    "perNight": "pro Nacht"
+  }
+}
