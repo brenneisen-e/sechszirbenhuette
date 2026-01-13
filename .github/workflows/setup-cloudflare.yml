@@ -33,30 +33,45 @@ jobs:
           echo "Account ID: $CLOUDFLARE_ACCOUNT_ID"
           wrangler whoami
 
-      - name: Create D1 Database
+      - name: Create or Get D1 Database
         id: d1
         run: |
+          # Try to create, or get existing
           OUTPUT=$(wrangler d1 create sechszirbenhuette-db 2>&1 || true)
           echo "$OUTPUT"
-          # Extract database_id
+
+          # Extract from creation output
           DB_ID=$(echo "$OUTPUT" | grep -oP 'database_id = "\K[^"]+' || echo "")
+
+          # If not found, database might already exist - list and find it
           if [ -z "$DB_ID" ]; then
-            # Try alternative pattern
-            DB_ID=$(echo "$OUTPUT" | grep "database_id" | sed 's/.*database_id = "\([^"]*\)".*/\1/')
+            echo "Database might already exist, listing..."
+            LIST_OUTPUT=$(wrangler d1 list --json 2>&1 || true)
+            echo "$LIST_OUTPUT"
+            DB_ID=$(echo "$LIST_OUTPUT" | jq -r '.[] | select(.name=="sechszirbenhuette-db") | .uuid' 2>/dev/null || echo "")
           fi
+
           echo "db_id=$DB_ID" >> $GITHUB_OUTPUT
           echo "D1 Database ID: $DB_ID"
 
-      - name: Create KV Namespace
+      - name: Create or Get KV Namespace
         id: kv
         run: |
+          # Try to create, or get existing
           OUTPUT=$(wrangler kv namespace create KV 2>&1 || true)
           echo "$OUTPUT"
-          # Extract id
+
+          # Extract from creation output
           KV_ID=$(echo "$OUTPUT" | grep -oP 'id = "\K[^"]+' | head -1 || echo "")
+
+          # If not found, namespace might already exist - list and find it
           if [ -z "$KV_ID" ]; then
-            KV_ID=$(echo "$OUTPUT" | grep "id = " | head -1 | sed 's/.*id = "\([^"]*\)".*/\1/')
+            echo "KV namespace might already exist, listing..."
+            LIST_OUTPUT=$(wrangler kv namespace list --json 2>&1 || true)
+            echo "$LIST_OUTPUT"
+            KV_ID=$(echo "$LIST_OUTPUT" | jq -r '.[] | select(.title=="KV") | .id' 2>/dev/null || echo "")
           fi
+
           echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
           echo "KV Namespace ID: $KV_ID"
 
