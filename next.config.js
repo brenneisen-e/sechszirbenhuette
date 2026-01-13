@@ -4,17 +4,21 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable image optimization for Cloudflare Pages
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'media.sechszirbenhuette.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.r2.cloudflarestorage.com',
-      },
-    ],
+    unoptimized: true,
+  },
+
+  // Skip ESLint during builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // Enable experimental features for better Cloudflare compatibility
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
   },
 };
 

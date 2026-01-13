@@ -64,16 +64,18 @@ jobs:
               "name": "'"$PROJECT_NAME"'",
               "production_branch": "main",
               "build_config": {
-                "build_command": "npx @cloudflare/next-on-pages",
-                "destination_dir": ".vercel/output/static",
+                "build_command": "npm run pages:build",
+                "destination_dir": ".open-next/assets",
                 "root_dir": ""
               },
               "deployment_configs": {
                 "preview": {
-                  "compatibility_date": "2024-01-01"
+                  "compatibility_date": "2024-09-23",
+                  "compatibility_flags": ["nodejs_compat"]
                 },
                 "production": {
-                  "compatibility_date": "2024-01-01"
+                  "compatibility_date": "2024-09-23",
+                  "compatibility_flags": ["nodejs_compat"]
                 }
               },
               "source": {
@@ -104,9 +106,9 @@ jobs:
 
       - name: Initial Build and Deploy
         run: |
-          npm ci --legacy-peer-deps
-          npx @cloudflare/next-on-pages
-          wrangler pages deploy .vercel/output/static --project-name $PROJECT_NAME --branch main
+          npm ci
+          npm run pages:build
+          wrangler pages deploy .open-next/assets --project-name $PROJECT_NAME --branch main
 
       - name: Summary
         run: |
