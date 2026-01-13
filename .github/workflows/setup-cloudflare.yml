@@ -17,6 +17,7 @@ jobs:
     env:
       # WICHTIG: Token nach dem Setup löschen und aus Git-History entfernen!
       CLOUDFLARE_API_TOKEN: "KDm1Wn8-RkXLjc8VqTn80q44vtrfC8GSmPG0ypnl"
+      PROJECT_NAME: "sechszirbenhuette"
 
     steps:
       - name: Checkout Repository
@@ -82,9 +83,29 @@ jobs:
         run: |
           wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote
 
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Build Next.js App
+        run: npm run build
+
+      - name: Create Pages Project
+        run: |
+          # Erstelle Pages Projekt (ignoriere Fehler falls es bereits existiert)
+          wrangler pages project create $PROJECT_NAME --production-branch main 2>&1 || echo "Projekt existiert möglicherweise bereits"
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        run: |
+          OUTPUT=$(wrangler pages deploy .next --project-name $PROJECT_NAME --branch main 2>&1)
+          echo "$OUTPUT"
+          # Extract deployment URL
+          DEPLOY_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1 || echo "")
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+
       - name: Set Admin Password Secret
         run: |
-          echo "${{ inputs.admin_password }}" | wrangler secret put ADMIN_PASSWORD
+          echo "${{ inputs.admin_password }}" | wrangler pages secret put ADMIN_PASSWORD --project $PROJECT_NAME
 
       - name: Commit Updated Config
         run: |
@@ -96,13 +117,18 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## Cloudflare Setup Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "## Cloudflare Setup & Deployment Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Erstellte Ressourcen:" >> $GITHUB_STEP_SUMMARY
           echo "- D1 Database: sechszirbenhuette-db" >> $GITHUB_STEP_SUMMARY
           echo "- KV Namespace: KV" >> $GITHUB_STEP_SUMMARY
           echo "- R2 Bucket: sechszirbenhuette-media" >> $GITHUB_STEP_SUMMARY
+          echo "- Pages Project: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment:" >> $GITHUB_STEP_SUMMARY
+          echo "- URL: ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Production: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Nächste Schritte:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Deploy mit Cloudflare Pages verbinden" >> $GITHUB_STEP_SUMMARY
-          echo "2. Custom Domain konfigurieren" >> $GITHUB_STEP_SUMMARY
+          echo "1. Custom Domain im Cloudflare Dashboard konfigurieren" >> $GITHUB_STEP_SUMMARY
+          echo "2. API Token löschen und aus Git-History entfernen" >> $GITHUB_STEP_SUMMARY
