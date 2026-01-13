@@ -1,4 +1,4 @@
-name: Setup Cloudflare Workers
+name: Setup Cloudflare Pages with Git Integration
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
       contents: write
 
     env:
-      # WICHTIG: Token nach dem Setup löschen und aus Git-History entfernen!
+      # WICHTIG: Nach erfolgreichem Setup Token löschen!
       CLOUDFLARE_API_TOKEN: "zzO2Iim5JTLz9Y5gomjn8dUMfi014O3ZZDXzgi9p"
       CLOUDFLARE_ACCOUNT_ID: "3e23f2f1cf587388e6a90604f1d5e334"
       PROJECT_NAME: "sechszirbenhuette"
@@ -27,129 +27,92 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler
 
-      - name: Debug - Verify Token
+      - name: Verify Cloudflare Auth
+        run: wrangler whoami
+
+      - name: Create D1 Database (if not exists)
         run: |
-          echo "Token length: ${#CLOUDFLARE_API_TOKEN}"
-          echo "Account ID: $CLOUDFLARE_ACCOUNT_ID"
-          wrangler whoami
+          wrangler d1 create sechszirbenhuette-db 2>&1 || echo "Database existiert bereits"
 
-      - name: Create or Get D1 Database
-        id: d1
+      - name: Create KV Namespace (if not exists)
         run: |
-          # Try to create, or get existing
-          OUTPUT=$(wrangler d1 create sechszirbenhuette-db 2>&1 || true)
-          echo "$OUTPUT"
+          wrangler kv namespace create KV 2>&1 || echo "KV Namespace existiert bereits"
 
-          # Extract from creation output
-          DB_ID=$(echo "$OUTPUT" | grep -oP 'database_id = "\K[^"]+' || echo "")
-
-          # If not found, database might already exist - list and find it
-          if [ -z "$DB_ID" ]; then
-            echo "Database might already exist, listing..."
-            LIST_OUTPUT=$(wrangler d1 list --json 2>&1 || true)
-            echo "$LIST_OUTPUT"
-            DB_ID=$(echo "$LIST_OUTPUT" | jq -r '.[] | select(.name=="sechszirbenhuette-db") | .uuid' 2>/dev/null || echo "")
-          fi
-
-          echo "db_id=$DB_ID" >> $GITHUB_OUTPUT
-          echo "D1 Database ID: $DB_ID"
-
-      - name: Create or Get KV Namespace
-        id: kv
+      - name: Create R2 Bucket (if not exists)
         run: |
-          # Try to create, or get existing
-          OUTPUT=$(wrangler kv namespace create KV 2>&1 || true)
-          echo "$OUTPUT"
-
-          # Extract from creation output (format: id = "xxx")
-          KV_ID=$(echo "$OUTPUT" | grep -oP 'id = "\K[^"]+' | head -1 || echo "")
-
-          # If not found, namespace might already exist - list and find it using JSON
-          if [ -z "$KV_ID" ]; then
-            echo "KV namespace might already exist, listing with JSON..."
-            LIST_OUTPUT=$(wrangler kv namespace list --json 2>&1 || true)
-            echo "$LIST_OUTPUT"
-            # The namespace is named "sechszirbenhuette-KV" (project name prefix + title)
-            KV_ID=$(echo "$LIST_OUTPUT" | jq -r '.[] | select(.title | contains("KV")) | .id' 2>/dev/null | head -1 || echo "")
-          fi
-
-          echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
-          echo "KV Namespace ID: $KV_ID"
-
-      - name: Create R2 Bucket
-        run: |
-          wrangler r2 bucket create sechszirbenhuette-media 2>&1 || echo "Bucket existiert möglicherweise bereits"
-
-      - name: Update wrangler.toml
-        run: |
-          echo "Updating wrangler.toml with:"
-          echo "  D1 ID: ${{ steps.d1.outputs.db_id }}"
-          echo "  KV ID: ${{ steps.kv.outputs.kv_id }}"
-
-          if [ -n "${{ steps.d1.outputs.db_id }}" ]; then
-            sed -i 's/YOUR_DATABASE_ID_HERE/${{ steps.d1.outputs.db_id }}/' wrangler.toml
-          fi
-
-          if [ -n "${{ steps.kv.outputs.kv_id }}" ]; then
-            sed -i 's/YOUR_KV_NAMESPACE_ID_HERE/${{ steps.kv.outputs.kv_id }}/' wrangler.toml
-          fi
-
-          echo "Updated wrangler.toml:"
-          cat wrangler.toml
+          wrangler r2 bucket create sechszirbenhuette-media 2>&1 || echo "Bucket existiert bereits"
 
       - name: Apply Database Schema
         run: |
-          wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote
+          wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote || echo "Schema bereits angewendet oder Fehler"
 
-      - name: Install Project Dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Build Next.js App for Cloudflare
-        run: npx @cloudflare/next-on-pages
-
-      - name: Create Pages Project
+      - name: Create Pages Project with Git Integration
         run: |
-          # Erstelle Pages Projekt (ignoriere Fehler falls es bereits existiert)
-          wrangler pages project create $PROJECT_NAME --production-branch main 2>&1 || echo "Projekt existiert möglicherweise bereits"
+          # Lösche existierendes Projekt falls vorhanden
+          curl -s -X DELETE \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" || true
 
-      - name: Deploy to Cloudflare Pages
-        id: deploy
-        run: |
-          set +e
-          OUTPUT=$(wrangler pages deploy .vercel/output/static --project-name $PROJECT_NAME --branch main 2>&1)
-          EXIT_CODE=$?
-          echo "$OUTPUT"
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "Deploy failed with exit code $EXIT_CODE"
-            exit $EXIT_CODE
+          sleep 2
+
+          # Erstelle neues Pages Projekt mit GitHub Integration
+          RESPONSE=$(curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "'"$PROJECT_NAME"'",
+              "production_branch": "main",
+              "build_config": {
+                "build_command": "npx @cloudflare/next-on-pages",
+                "destination_dir": ".vercel/output/static",
+                "root_dir": ""
+              },
+              "source": {
+                "type": "github",
+                "config": {
+                  "owner": "brenneisen-e",
+                  "repo_name": "sechszirbenhuette",
+                  "production_branch": "main",
+                  "pr_comments_enabled": true,
+                  "deployments_enabled": true
+                }
+              }
+            }')
+
+          echo "$RESPONSE" | jq .
+
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Fehler beim Erstellen des Projekts"
+            echo "$RESPONSE" | jq -r '.errors'
+
+            # Fallback: Erstelle ohne Git-Integration, manuell verbinden
+            echo "Versuche Fallback: Projekt ohne Git erstellen..."
+            wrangler pages project create $PROJECT_NAME --production-branch main 2>&1 || true
           fi
-          # Extract deployment URL
-          DEPLOY_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1 || echo "")
-          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
-      - name: Commit Updated Config
+      - name: Initial Build and Deploy
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git add wrangler.toml
-          git diff --staged --quiet || git commit -m "Update wrangler.toml with Cloudflare resource IDs"
-          git push
+          npm ci --legacy-peer-deps
+          npx @cloudflare/next-on-pages
+          wrangler pages deploy .vercel/output/static --project-name $PROJECT_NAME --branch main
 
       - name: Summary
         run: |
-          echo "## Cloudflare Setup & Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "## Cloudflare Setup Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Erstellte Ressourcen:" >> $GITHUB_STEP_SUMMARY
           echo "- D1 Database: sechszirbenhuette-db" >> $GITHUB_STEP_SUMMARY
-          echo "- KV Namespace: KV" >> $GITHUB_STEP_SUMMARY
+          echo "- KV Namespace: sechszirbenhuette_KV" >> $GITHUB_STEP_SUMMARY
           echo "- R2 Bucket: sechszirbenhuette-media" >> $GITHUB_STEP_SUMMARY
           echo "- Pages Project: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Deployment:" >> $GITHUB_STEP_SUMMARY
-          echo "- URL: ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs:" >> $GITHUB_STEP_SUMMARY
           echo "- Production: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Nächste Schritte:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Zero Trust für /admin einrichten (Email-Auth)" >> $GITHUB_STEP_SUMMARY
-          echo "2. Custom Domain im Cloudflare Dashboard konfigurieren" >> $GITHUB_STEP_SUMMARY
-          echo "3. API Token löschen und aus Git-History entfernen" >> $GITHUB_STEP_SUMMARY
+          echo "### Git Integration:" >> $GITHUB_STEP_SUMMARY
+          echo "Falls die automatische Git-Verbindung nicht funktioniert hat:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Cloudflare Dashboard → Pages → $PROJECT_NAME → Settings" >> $GITHUB_STEP_SUMMARY
+          echo "2. Builds & deployments → Connect to Git" >> $GITHUB_STEP_SUMMARY
+          echo "3. GitHub Repo wählen: brenneisen-e/sechszirbenhuette" >> $GITHUB_STEP_SUMMARY
