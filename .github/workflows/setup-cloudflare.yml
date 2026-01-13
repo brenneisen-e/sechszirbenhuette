@@ -2,11 +2,6 @@ name: Setup Cloudflare Workers
 
 on:
   workflow_dispatch:
-    inputs:
-      admin_password:
-        description: 'Admin Passwort für die Website'
-        required: true
-        type: string
 
 jobs:
   setup:
@@ -103,10 +98,6 @@ jobs:
           DEPLOY_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1 || echo "")
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
-      - name: Set Admin Password Secret
-        run: |
-          echo "${{ inputs.admin_password }}" | wrangler pages secret put ADMIN_PASSWORD --project $PROJECT_NAME
-
       - name: Commit Updated Config
         run: |
           git config user.name "GitHub Actions Bot"
@@ -130,5 +121,6 @@ jobs:
           echo "- Production: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Nächste Schritte:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Custom Domain im Cloudflare Dashboard konfigurieren" >> $GITHUB_STEP_SUMMARY
-          echo "2. API Token löschen und aus Git-History entfernen" >> $GITHUB_STEP_SUMMARY
+          echo "1. Zero Trust für /admin einrichten (Email-Auth)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Custom Domain im Cloudflare Dashboard konfigurieren" >> $GITHUB_STEP_SUMMARY
+          echo "3. API Token löschen und aus Git-History entfernen" >> $GITHUB_STEP_SUMMARY
