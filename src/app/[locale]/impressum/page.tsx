@@ -1,6 +1,8 @@
 import { setRequestLocale } from 'next-intl/server';
 import { SITE_CONFIG } from '@/lib/constants';
 
+export const runtime = 'edge';
+
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
