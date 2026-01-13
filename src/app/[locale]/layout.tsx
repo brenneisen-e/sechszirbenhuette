@@ -6,7 +6,6 @@ import { routing } from '@/i18n/routing';
 import { Header, Footer } from '@/components/layout';
 import '@/styles/globals.css';
 
-export const runtime = 'edge';
 
 const inter = Inter({ subsets: ['latin'] });
 

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
 
 // Placeholder media data - in production this would come from Cloudflare D1/R2
 const PLACEHOLDER_MEDIA = {
