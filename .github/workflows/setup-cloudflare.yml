@@ -27,6 +27,12 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler
 
+      - name: Debug - Verify Token
+        run: |
+          echo "Token length: ${#CLOUDFLARE_API_TOKEN}"
+          echo "Account ID: $CLOUDFLARE_ACCOUNT_ID"
+          wrangler whoami
+
       - name: Create D1 Database
         id: d1
         run: |
