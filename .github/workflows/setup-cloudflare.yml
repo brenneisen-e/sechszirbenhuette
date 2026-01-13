@@ -14,6 +14,10 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      # WICHTIG: Token nach dem Setup löschen und aus Git-History entfernen!
+      CLOUDFLARE_API_TOKEN: "KDm1Wn8-RkXLjc8VqTn80q44vtrfC8GSmPG0ypnl"
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -28,8 +32,6 @@ jobs:
 
       - name: Create D1 Database
         id: d1
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           OUTPUT=$(wrangler d1 create sechszirbenhuette-db 2>&1 || true)
           echo "$OUTPUT"
@@ -44,8 +46,6 @@ jobs:
 
       - name: Create KV Namespace
         id: kv
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           OUTPUT=$(wrangler kv:namespace create KV 2>&1 || true)
           echo "$OUTPUT"
@@ -58,8 +58,6 @@ jobs:
           echo "KV Namespace ID: $KV_ID"
 
       - name: Create R2 Bucket
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           wrangler r2 bucket create sechszirbenhuette-media 2>&1 || echo "Bucket existiert möglicherweise bereits"
 
@@ -81,14 +79,10 @@ jobs:
           cat wrangler.toml
 
       - name: Apply Database Schema
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote
 
       - name: Set Admin Password Secret
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           echo "${{ inputs.admin_password }}" | wrangler secret put ADMIN_PASSWORD
 
