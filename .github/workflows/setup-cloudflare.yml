@@ -61,16 +61,16 @@ jobs:
           OUTPUT=$(wrangler kv namespace create KV 2>&1 || true)
           echo "$OUTPUT"
 
-          # Extract from creation output
+          # Extract from creation output (format: id = "xxx")
           KV_ID=$(echo "$OUTPUT" | grep -oP 'id = "\K[^"]+' | head -1 || echo "")
 
-          # If not found, namespace might already exist - list and find it
+          # If not found, namespace might already exist - list and find it using JSON
           if [ -z "$KV_ID" ]; then
-            echo "KV namespace might already exist, listing..."
-            LIST_OUTPUT=$(wrangler kv namespace list 2>&1 || true)
+            echo "KV namespace might already exist, listing with JSON..."
+            LIST_OUTPUT=$(wrangler kv namespace list --json 2>&1 || true)
             echo "$LIST_OUTPUT"
-            # Parse the table output to find the KV namespace ID
-            KV_ID=$(echo "$LIST_OUTPUT" | grep -E "│.*KV.*│" | head -1 | awk -F'│' '{print $3}' | tr -d ' ' || echo "")
+            # The namespace is named "sechszirbenhuette-KV" (project name prefix + title)
+            KV_ID=$(echo "$LIST_OUTPUT" | jq -r '.[] | select(.title | contains("KV")) | .id' 2>/dev/null | head -1 || echo "")
           fi
 
           echo "kv_id=$KV_ID" >> $GITHUB_OUTPUT
