@@ -10,8 +10,9 @@ jobs:
       contents: write
 
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # WICHTIG: Nach erfolgreichem Setup Token löschen!
+      CLOUDFLARE_API_TOKEN: "zzO2Iim5JTLz9Y5gomjn8dUMfi014O3ZZDXzgi9p"
+      CLOUDFLARE_ACCOUNT_ID: "3e23f2f1cf587388e6a90604f1d5e334"
       PROJECT_NAME: "sechszirbenhuette"
 
     steps:
