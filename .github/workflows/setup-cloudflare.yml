@@ -11,7 +11,7 @@ jobs:
 
     env:
       # WICHTIG: Token nach dem Setup löschen und aus Git-History entfernen!
-      CLOUDFLARE_API_TOKEN: "1r4xznYys0XZJPGGdb1wD64rpG6cP5b279I2FGvZ"
+      CLOUDFLARE_API_TOKEN: "zzO2Iim5JTLz9Y5gomjn8dUMfi014O3ZZDXzgi9p"
       CLOUDFLARE_ACCOUNT_ID: "3e23f2f1cf587388e6a90604f1d5e334"
       PROJECT_NAME: "sechszirbenhuette"
 
