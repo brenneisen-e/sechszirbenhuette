@@ -104,8 +104,8 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build Next.js App
-        run: npm run build
+      - name: Build Next.js App for Cloudflare
+        run: npx @cloudflare/next-on-pages
 
       - name: Create Pages Project
         run: |
@@ -115,8 +115,14 @@ jobs:
       - name: Deploy to Cloudflare Pages
         id: deploy
         run: |
-          OUTPUT=$(wrangler pages deploy .next --project-name $PROJECT_NAME --branch main 2>&1)
+          set +e
+          OUTPUT=$(wrangler pages deploy .vercel/output/static --project-name $PROJECT_NAME --branch main 2>&1)
+          EXIT_CODE=$?
           echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "Deploy failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
           # Extract deployment URL
           DEPLOY_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+\.pages\.dev' | head -1 || echo "")
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
