@@ -10,13 +10,13 @@ pages_build_output_dir = ".next"
 [[d1_databases]]
 binding = "DB"
 database_name = "sechszirbenhuette-db"
-database_id = "YOUR_DATABASE_ID_HERE"
+database_id = "d8834b59-2896-49c5-a619-ca0ad7cb10a2"
 
-# KV Namespace für Sessions/Cache
-# Nach `wrangler kv:namespace create KV` die id einfügen
-[[kv_namespaces]]
-binding = "KV"
-id = "YOUR_KV_NAMESPACE_ID_HERE"
+# KV Namespace für Sessions/Cache (optional, später hinzufügen)
+# Nach erfolgreicher KV-Erstellung hier einfügen:
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "KV_NAMESPACE_ID"
 
 # R2 Bucket für Bilder & Videos
 # Nach `wrangler r2 bucket create sechszirbenhuette-media` einfügen
