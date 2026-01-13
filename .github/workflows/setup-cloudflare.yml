@@ -55,7 +55,7 @@ jobs:
 
           sleep 2
 
-          # Erstelle neues Pages Projekt mit GitHub Integration
+          # Erstelle neues Pages Projekt mit GitHub Integration (nur Production, keine Previews)
           RESPONSE=$(curl -s -X POST \
             "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
@@ -68,14 +68,24 @@ jobs:
                 "destination_dir": ".vercel/output/static",
                 "root_dir": ""
               },
+              "deployment_configs": {
+                "preview": {
+                  "compatibility_date": "2024-01-01"
+                },
+                "production": {
+                  "compatibility_date": "2024-01-01"
+                }
+              },
               "source": {
                 "type": "github",
                 "config": {
                   "owner": "brenneisen-e",
                   "repo_name": "sechszirbenhuette",
                   "production_branch": "main",
-                  "pr_comments_enabled": true,
-                  "deployments_enabled": true
+                  "pr_comments_enabled": false,
+                  "deployments_enabled": true,
+                  "production_deployments_enabled": true,
+                  "preview_deployment_setting": "none"
                 }
               }
             }')
