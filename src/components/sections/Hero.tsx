@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 export function Hero() {
-  const t = useTranslations('hero');
+  const { t } = useLanguage();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
           >
-            {t('title')}
+            {t.hero.title}
           </motion.h1>
 
           <motion.p
@@ -78,7 +78,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-xl md:text-2xl mb-4 text-white/90"
           >
-            {t('subtitle')}
+            {t.hero.subtitle}
           </motion.p>
 
           <motion.p
@@ -87,7 +87,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="text-base md:text-lg mb-8 text-white/80 max-w-2xl mx-auto"
           >
-            {t('description')}
+            {t.hero.description}
           </motion.p>
 
           <motion.div
@@ -100,13 +100,13 @@ export function Hero() {
               onClick={() => scrollToSection('#buchung')}
               className="px-8 py-4 bg-wood-700 text-white rounded-lg font-semibold hover:bg-wood-800 transition-colors"
             >
-              {t('cta_book')}
+              {t.hero.cta_book}
             </button>
             <button
               onClick={() => scrollToSection('#ferienhaus')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
             >
-              {t('cta_explore')}
+              {t.hero.cta_explore}
             </button>
           </motion.div>
         </motion.div>

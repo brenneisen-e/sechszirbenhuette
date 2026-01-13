@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { CalendarCheck, Check, Phone, Mail } from 'lucide-react';
 import { SITE_CONFIG, DESKLINE_CONFIG } from '@/lib/constants';
@@ -13,8 +13,7 @@ declare global {
 }
 
 export function Buchung() {
-  const t = useTranslations('buchung');
-  const locale = useLocale();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     // Initialize Deskline Widget
@@ -32,7 +31,7 @@ export function Buchung() {
           productIds: [],
           packageIds: []
         },
-        lang: locale
+        lang: language
       }
     );
 
@@ -47,9 +46,9 @@ export function Buchung() {
         document.body.removeChild(script);
       }
     };
-  }, [locale]);
+  }, [language]);
 
-  const includedItems = t.raw('included.items') as string[];
+  const includedItems = t.buchung.included.items;
 
   return (
     <section id="buchung" className="py-20 bg-white">
@@ -65,10 +64,10 @@ export function Buchung() {
             <CalendarCheck size={32} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t('title')}
+            {t.buchung.title}
           </h2>
           <p className="text-lg text-gray-600">
-            {t('subtitle')}
+            {t.buchung.subtitle}
           </p>
         </motion.div>
 
@@ -83,42 +82,42 @@ export function Buchung() {
             {/* Price Info */}
             <div className="bg-wood-50 rounded-xl p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t('prices.title')}
+                {t.buchung.prices.title}
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                {t('prices.base')}
+                {t.buchung.prices.base}
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('prices.lowSeason')}</span>
+                  <span className="text-gray-600">{t.buchung.prices.lowSeason}</span>
                   <span className="font-semibold">auf Anfrage</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('prices.highSeason')}</span>
+                  <span className="text-gray-600">{t.buchung.prices.highSeason}</span>
                   <span className="font-semibold">auf Anfrage</span>
                 </div>
               </div>
               <p className="mt-4 text-xs text-gray-500">
-                {t('prices.minStay')}
+                {t.buchung.prices.minStay}
               </p>
             </div>
 
             {/* Extras */}
             <div className="bg-gray-50 rounded-xl p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t('extras.title')}
+                {t.buchung.extras.title}
               </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('extras.person5')}</span>
+                  <span className="text-gray-600">{t.buchung.extras.person5}</span>
                   <span>50 € / Aufenthalt</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('extras.dog')}</span>
+                  <span className="text-gray-600">{t.buchung.extras.dog}</span>
                   <span>40 € / Tier</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('extras.laundry')}</span>
+                  <span className="text-gray-600">{t.buchung.extras.laundry}</span>
                   <span>25 € / Person</span>
                 </div>
               </div>
@@ -127,7 +126,7 @@ export function Buchung() {
             {/* Included */}
             <div className="bg-green-50 rounded-xl p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t('included.title')}
+                {t.buchung.included.title}
               </h3>
               <ul className="space-y-2">
                 {includedItems.map((item: string, index: number) => (
@@ -142,7 +141,7 @@ export function Buchung() {
             {/* Contact */}
             <div className="bg-wood-700 text-white rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4">
-                {locale === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
+                {language === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
               </h3>
               <div className="space-y-3">
                 <a
@@ -172,7 +171,7 @@ export function Buchung() {
           >
             <div className="bg-gray-50 rounded-xl p-6 md:p-8">
               <h3 className="text-xl font-bold text-gray-900 mb-6">
-                {t('form.title')}
+                {t.buchung.form.title}
               </h3>
 
               {/* Deskline Widget Container */}
@@ -181,7 +180,7 @@ export function Buchung() {
                 <div className="flex items-center justify-center h-full py-12 text-gray-500">
                   <div className="text-center">
                     <div className="animate-spin w-8 h-8 border-2 border-wood-600 border-t-transparent rounded-full mx-auto mb-4" />
-                    <p>{locale === 'de' ? 'Buchungskalender wird geladen...' : 'Loading booking calendar...'}</p>
+                    <p>{language === 'de' ? 'Buchungskalender wird geladen...' : 'Loading booking calendar...'}</p>
                   </div>
                 </div>
               </div>

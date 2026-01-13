@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -36,7 +36,7 @@ const amenityIcons = {
 const amenityKeys = ['rooms', 'kitchen', 'bathroom', 'sauna', 'living', 'outdoor'] as const;
 
 export function Ferienhaus() {
-  const t = useTranslations('ferienhaus');
+  const { t } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
@@ -87,10 +87,10 @@ export function Ferienhaus() {
             <Home size={32} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t('title')}
+            {t.ferienhaus.title}
           </h2>
           <p className="text-lg text-gray-600">
-            {t('intro')}
+            {t.ferienhaus.intro}
           </p>
         </motion.div>
 
@@ -101,10 +101,10 @@ export function Ferienhaus() {
           viewport={{ once: true }}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
         >
-          {['grundstueck', 'wohnflaeche', 'hoehe', 'personen'].map((key) => (
+          {(['grundstueck', 'wohnflaeche', 'hoehe', 'personen'] as const).map((key) => (
             <div key={key} className="bg-wood-50 rounded-lg p-4 text-center">
               <p className="text-wood-700 font-semibold">
-                {t(`details.${key}`)}
+                {t.ferienhaus.details[key]}
               </p>
             </div>
           ))}
@@ -142,9 +142,6 @@ export function Ferienhaus() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {amenityKeys.map((key, index) => {
             const Icon = amenityIcons[key];
-            const items = key === 'rooms'
-              ? ['bedroom1', 'bedroom2', 'living']
-              : t.raw(`${key}.items`) as string[];
 
             return (
               <motion.div
@@ -160,7 +157,7 @@ export function Ferienhaus() {
                     <Icon size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">
-                    {t(`${key}.title`)}
+                    {t.ferienhaus[key].title}
                   </h3>
                 </div>
                 <ul className="space-y-2">
@@ -168,19 +165,19 @@ export function Ferienhaus() {
                     <>
                       <li className="flex items-center gap-2 text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t('rooms.bedroom1')}
+                        {t.ferienhaus.rooms.bedroom1}
                       </li>
                       <li className="flex items-center gap-2 text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t('rooms.bedroom2')}
+                        {t.ferienhaus.rooms.bedroom2}
                       </li>
                       <li className="flex items-center gap-2 text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t('rooms.living')}
+                        {t.ferienhaus.rooms.living}
                       </li>
                     </>
                   ) : (
-                    items.map((item: string, i: number) => (
+                    t.ferienhaus[key].items.map((item: string, i: number) => (
                       <li key={i} className="flex items-center gap-2 text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
                         {item}

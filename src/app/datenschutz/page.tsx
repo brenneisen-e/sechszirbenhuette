@@ -1,27 +1,11 @@
-import { setRequestLocale } from 'next-intl/server';
+'use client';
+
+import { useLanguage } from '@/contexts/LanguageContext';
 import { SITE_CONFIG } from '@/lib/constants';
 
-
-interface PageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const { locale } = await params;
-  return {
-    title: locale === 'de' ? 'Datenschutzerklärung | Sechszirbenhütte' : 'Privacy Policy | Sechszirbenhütte',
-    description: locale === 'de'
-      ? 'Datenschutzerklärung der Sechszirbenhütte – Informationen zur Verarbeitung Ihrer personenbezogenen Daten.'
-      : 'Privacy policy of Sechszirbenhütte – Information about the processing of your personal data.',
-    robots: 'noindex, follow',
-  };
-}
-
-export default async function DatenschutzPage({ params }: PageProps) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  const isDE = locale === 'de';
+export default function DatenschutzPage() {
+  const { language } = useLanguage();
+  const isDE = language === 'de';
 
   return (
     <div className="pt-24 pb-16">
@@ -48,8 +32,8 @@ export default async function DatenschutzPage({ params }: PageProps) {
           </p>
           <p>
             <strong>Malte Brenneisen</strong><br />
-            {SITE_CONFIG.addressGermany.street}<br />
-            {SITE_CONFIG.addressGermany.zip} {SITE_CONFIG.addressGermany.city}<br />
+            {SITE_CONFIG.addressGermany?.street || SITE_CONFIG.address.street}<br />
+            {SITE_CONFIG.addressGermany?.zip || SITE_CONFIG.address.zip} {SITE_CONFIG.addressGermany?.city || SITE_CONFIG.address.city}<br />
             {isDE ? 'Telefon' : 'Phone'}: {SITE_CONFIG.phone}<br />
             E-Mail: {SITE_CONFIG.email}
           </p>
