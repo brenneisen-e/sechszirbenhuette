@@ -86,7 +86,7 @@ jobs:
           wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote
 
       - name: Install Project Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build Next.js App
         run: npm run build
