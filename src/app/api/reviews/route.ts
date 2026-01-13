@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
 
 // Placeholder reviews - in production this would come from Cloudflare D1
 const PLACEHOLDER_REVIEWS = [
