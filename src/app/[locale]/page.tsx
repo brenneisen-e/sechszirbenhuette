@@ -10,10 +10,11 @@ import {
 } from '@/components/sections';
 
 interface PageProps {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
-export default function HomePage({ params: { locale } }: PageProps) {
+export default async function HomePage({ params }: PageProps) {
+  const { locale } = await params;
   setRequestLocale(locale);
 
   return (
