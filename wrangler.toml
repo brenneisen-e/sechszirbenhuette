@@ -1,9 +1,9 @@
 name = "sechszirbenhuette"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# Cloudflare Pages Projekt - Output von @cloudflare/next-on-pages
-pages_build_output_dir = ".vercel/output/static"
+# Cloudflare Pages Projekt - Output von OpenNext
+pages_build_output_dir = ".open-next/assets"
 
 # D1 Datenbank Binding
 # Nach `wrangler d1 create sechszirbenhuette-db` die database_id einfügen
