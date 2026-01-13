@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -13,10 +13,10 @@ const navItems = [
   { key: 'umgebung', href: '#umgebung' },
   { key: 'buchung', href: '#buchung' },
   { key: 'bewertungen', href: '#bewertungen' },
-];
+] as const;
 
 export function Header() {
-  const t = useTranslations('navigation');
+  const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -69,7 +69,7 @@ export function Header() {
                 isScrolled ? 'text-gray-700' : 'text-white'
               )}
             >
-              {t(item.key)}
+              {t.navigation[item.key]}
             </button>
           ))}
         </nav>
@@ -86,7 +86,7 @@ export function Header() {
                 : 'bg-white text-wood-700 hover:bg-gray-100'
             )}
           >
-            {t('buchung')}
+            {t.navigation.buchung}
           </button>
         </div>
 
@@ -112,7 +112,7 @@ export function Header() {
                 onClick={() => scrollToSection(item.href)}
                 className="py-2 text-gray-700 hover:text-wood-600 text-left"
               >
-                {t(item.key)}
+                {t.navigation[item.key]}
               </button>
             ))}
             <div className="pt-4 border-t mt-2">

@@ -1,10 +1,9 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
-const languages = [
+const languages: { code: Language; label: string; flag: string }[] = [
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
 ];
@@ -14,25 +13,17 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const switchLocale = (newLocale: string) => {
-    const pathWithoutLocale = pathname.replace(`/${locale}`, '');
-    const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
-    router.push(newPath);
-  };
+  const { language, setLanguage } = useLanguage();
 
   return (
     <div className="flex items-center gap-1">
       {languages.map((lang) => (
         <button
           key={lang.code}
-          onClick={() => switchLocale(lang.code)}
+          onClick={() => setLanguage(lang.code)}
           className={cn(
             'px-2 py-1 text-lg rounded transition-all',
-            locale === lang.code
+            language === lang.code
               ? 'opacity-100 scale-110'
               : 'opacity-60 hover:opacity-100',
             !isScrolled && 'filter drop-shadow-md'

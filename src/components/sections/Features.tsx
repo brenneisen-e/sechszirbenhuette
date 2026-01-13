@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { Mountain, TreePine, Flame, Users, Dog, Star } from 'lucide-react';
 
@@ -16,7 +16,7 @@ const iconMap = {
 const featureKeys = ['altitude', 'secluded', 'sauna', 'guests', 'dogs', 'rating'] as const;
 
 export function Features() {
-  const t = useTranslations('features');
+  const { t } = useLanguage();
 
   return (
     <section id="features" className="py-20 bg-white">
@@ -24,6 +24,7 @@ export function Features() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {featureKeys.map((key, index) => {
             const Icon = iconMap[key];
+            const feature = t.features[key];
             return (
               <motion.div
                 key={key}
@@ -37,10 +38,10 @@ export function Features() {
                   <Icon size={32} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {t(`${key}.title`)}
+                  {feature.title}
                 </h3>
                 <p className="text-gray-600">
-                  {t(`${key}.description`)}
+                  {feature.description}
                 </p>
               </motion.div>
             );

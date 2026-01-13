@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -43,7 +43,7 @@ const featureIcons = {
 const featureKeys = ['central', 'nationalpark', 'dreilaendereck', 'activities', 'heidiAlm', 'kaerntenCard'] as const;
 
 export function Umgebung() {
-  const t = useTranslations('umgebung');
+  const { t } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [expandedDogTrip, setExpandedDogTrip] = useState<number | null>(null);
   const [expandedKidsTrip, setExpandedKidsTrip] = useState<number | null>(null);
@@ -60,21 +60,8 @@ export function Umgebung() {
       .catch(() => {});
   }, []);
 
-  const dogTrips = t.raw('dogTrips.trips') as Array<{
-    title: string;
-    description: string;
-    difficulty: string;
-    duration?: string;
-    tip?: string;
-  }>;
-
-  const kidsTrips = t.raw('kidsTrips.trips') as Array<{
-    title: string;
-    description: string;
-    distance: string;
-    age: string;
-    tip?: string;
-  }>;
+  const dogTrips = t.umgebung.dogTrips.trips;
+  const kidsTrips = t.umgebung.kidsTrips.trips;
 
   return (
     <section id="umgebung" className="py-20 bg-gray-50">
@@ -90,13 +77,13 @@ export function Umgebung() {
             <Map size={32} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t('title')}
+            {t.umgebung.title}
           </h2>
           <p className="text-xl text-wood-600 font-medium mb-4">
-            {t('subtitle')}
+            {t.umgebung.subtitle}
           </p>
           <p className="text-lg text-gray-600">
-            {t('intro')}
+            {t.umgebung.intro}
           </p>
         </motion.div>
 
@@ -132,6 +119,7 @@ export function Umgebung() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {featureKeys.map((key, index) => {
             const Icon = featureIcons[key];
+            const feature = t.umgebung.features[key];
             return (
               <motion.div
                 key={key}
@@ -146,11 +134,11 @@ export function Umgebung() {
                     <Icon size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">
-                    {t(`features.${key}.title`)}
+                    {feature.title}
                   </h3>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  {t(`features.${key}.description`)}
+                  {feature.description}
                 </p>
                 {key === 'kaerntenCard' && (
                   <div className="mt-4 flex gap-3">
@@ -189,7 +177,7 @@ export function Umgebung() {
               <Dog size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {t('dogTrips.title')}
+              {t.umgebung.dogTrips.title}
             </h3>
           </div>
           <div className="space-y-4">
@@ -247,7 +235,7 @@ export function Umgebung() {
               <Baby size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {t('kidsTrips.title')}
+              {t.umgebung.kidsTrips.title}
             </h3>
           </div>
           <div className="space-y-4">
@@ -301,15 +289,15 @@ export function Umgebung() {
               <MapPin size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {t('directions.title')}
+              {t.umgebung.directions.title}
             </h3>
           </div>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            {t('directions.description')}
+            {t.umgebung.directions.description}
           </p>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
             <p className="text-amber-800 font-medium">
-              {t('directions.note')}
+              {t.umgebung.directions.note}
             </p>
           </div>
           <div className="rounded-xl overflow-hidden">
