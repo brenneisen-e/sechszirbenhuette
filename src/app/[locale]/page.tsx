@@ -1,4 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+
+export const runtime = 'edge';
+
 import {
   Hero,
   Features,
