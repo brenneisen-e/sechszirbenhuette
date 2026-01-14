@@ -56,9 +56,9 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible',
         isScrolled
-          ? 'bg-white shadow-md py-2'
+          ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
           : 'bg-transparent py-3'
       )}
     >
@@ -83,19 +83,30 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Centered Logo - larger, extends beyond header */}
+          {/* Centered Logo - extends beyond header */}
           <button
             onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative"
+            className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
+            style={{ marginTop: isScrolled ? '20px' : '30px' }}
           >
-            <Image
-              src="/images/logo.svg"
-              alt="Sechszirbenhütte"
-              width={240}
-              height={100}
-              className="h-20 md:h-24 w-auto transition-all"
-              priority
-            />
+            <div
+              className={cn(
+                "rounded-full transition-all duration-300",
+                isScrolled ? "bg-white/95 shadow-lg p-2" : "bg-white/90 p-3"
+              )}
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={280}
+                height={120}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-20" : "h-28"
+                )}
+                priority
+              />
+            </div>
           </button>
 
           {/* Right Navigation - justify-start to push items towards center */}
@@ -140,19 +151,30 @@ export function Header() {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Centered Logo (Mobile) - larger */}
+          {/* Centered Logo (Mobile) - extends beyond header */}
           <button
             onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105"
+            className="transition-transform hover:scale-105 relative z-10"
+            style={{ marginTop: isScrolled ? '10px' : '15px' }}
           >
-            <Image
-              src="/images/logo.svg"
-              alt="Sechszirbenhütte"
-              width={180}
-              height={70}
-              className="h-16 w-auto transition-all"
-              priority
-            />
+            <div
+              className={cn(
+                "rounded-full transition-all duration-300",
+                isScrolled ? "bg-white/95 shadow-lg p-1.5" : "bg-white/90 p-2"
+              )}
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={180}
+                height={70}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-14" : "h-18"
+                )}
+                priority
+              />
+            </div>
           </button>
 
           {/* Language Switcher (Mobile) */}
