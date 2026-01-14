@@ -53,16 +53,16 @@ export function Header() {
       )}
     >
       <div className="container">
-        {/* Desktop Layout - Logo centered */}
-        <div className="hidden md:flex items-center justify-between">
-          {/* Left Navigation */}
-          <nav className="flex items-center gap-6 flex-1">
+        {/* Desktop Layout - Logo centered with symmetric nav */}
+        <div className="hidden md:flex items-center justify-center">
+          {/* Left Navigation - justify-end to push items towards center */}
+          <nav className="flex items-center gap-8 justify-end" style={{ minWidth: '280px' }}>
             {leftNavItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => scrollToSection(item.href)}
                 className={cn(
-                  'font-medium transition-colors uppercase tracking-wide',
+                  'font-medium transition-colors uppercase tracking-wide text-sm',
                   isScrolled
                     ? 'text-gray-700 hover:text-wood-600'
                     : 'text-white hover:text-white/80'
@@ -76,29 +76,26 @@ export function Header() {
           {/* Centered Logo */}
           <button
             onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105 mx-8"
+            className="transition-transform hover:scale-105 mx-6 flex-shrink-0"
           >
             <Image
               src="/images/logo.svg"
               alt="Sechszirbenhütte"
-              width={220}
-              height={85}
-              className={cn(
-                'h-16 md:h-20 w-auto transition-all',
-                !isScrolled && 'brightness-0 invert'
-              )}
+              width={200}
+              height={80}
+              className="h-16 md:h-[70px] w-auto transition-all"
               priority
             />
           </button>
 
-          {/* Right Navigation */}
-          <nav className="flex items-center gap-6 flex-1 justify-end">
+          {/* Right Navigation - justify-start to push items towards center */}
+          <nav className="flex items-center gap-8 justify-start" style={{ minWidth: '280px' }}>
             {rightNavItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => scrollToSection(item.href)}
                 className={cn(
-                  'font-medium transition-colors uppercase tracking-wide',
+                  'font-medium transition-colors uppercase tracking-wide text-sm',
                   isScrolled
                     ? 'text-gray-700 hover:text-wood-600'
                     : 'text-white hover:text-white/80'
@@ -132,12 +129,9 @@ export function Header() {
             <Image
               src="/images/logo.svg"
               alt="Sechszirbenhütte"
-              width={180}
-              height={70}
-              className={cn(
-                'h-14 w-auto transition-all',
-                !isScrolled && 'brightness-0 invert'
-              )}
+              width={160}
+              height={60}
+              className="h-12 w-auto transition-all"
               priority
             />
           </button>
