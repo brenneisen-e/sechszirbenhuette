@@ -26,8 +26,16 @@ interface MediaItem {
   title: string;
 }
 
+interface AmenityCard {
+  key: string;
+  icon: React.ComponentType<{ size?: number }>;
+  galleryCategory: string | null;
+  items: string[];
+  hint?: string;
+}
+
 // Card configuration with gallery category mapping
-const amenityCards = [
+const amenityCards: AmenityCard[] = [
   {
     key: 'living',
     icon: Sofa,
@@ -78,7 +86,7 @@ const amenityCards = [
     galleryCategory: 'umgebung',
     items: ['Skigebiet Falkert vor Ort', 'Turracher Höhe (20 Min.)', 'Bad Kleinkirchheim (25 Min.)', 'Viele Wanderwege']
   },
-] as const;
+];
 
 // German titles for the cards
 const cardTitles: Record<string, { de: string; en: string }> = {
