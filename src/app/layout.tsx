@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Header, Footer } from '@/components/layout';
+import { PineBackground } from '@/components/ui/PineBackground';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -71,8 +72,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <LanguageProvider>
+          <PineBackground />
           <Header />
-          <main>{children}</main>
+          <main className="relative z-10">{children}</main>
           <Footer />
         </LanguageProvider>
       </body>
