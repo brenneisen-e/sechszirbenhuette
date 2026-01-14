@@ -197,12 +197,12 @@ export function Buchung() {
             <CalendarCheck size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.buchung.title}
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600">
             {t.buchung.subtitle}
           </p>
         </motion.div>

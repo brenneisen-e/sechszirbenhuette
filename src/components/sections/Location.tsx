@@ -20,10 +20,10 @@ export function Location() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-wood-100 rounded-full mb-4">
             <MapPin className="w-8 h-8 text-wood-700" strokeWidth={1.5} />
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             {language === 'de'
               ? 'Die Sechszirbenhütte liegt auf 1.700 m direkt am Nationalpark Nockberge'
               : 'The Sechszirbenhütte is located at 1,700m right at the Nockberge National Park'}
