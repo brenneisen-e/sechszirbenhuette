@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 export function Hero() {
-  const { t } = useLanguage();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,71 +49,35 @@ export function Hero() {
       {/* Overlay - nur leichter Gradient für Lesbarkeit */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center text-white text-center px-4">
+      {/* Content - positioned in lower third */}
+      <div className="relative z-10 flex h-full items-end justify-center text-white text-center px-4 pb-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="max-w-5xl"
         >
-          {/* Herzlich Willkommen - GROSS */}
+          {/* Herzlich Willkommen in der Sechszirbenhütte! */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-7xl md:text-8xl lg:text-9xl mb-6 text-white drop-shadow-lg"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            className="text-4xl md:text-6xl lg:text-7xl mb-4 text-white drop-shadow-lg"
+            style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
           >
-            Herzlich Willkommen
+            Herzlich Willkommen in der Sechszirbenh&uuml;tte!
           </motion.p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 text-balance drop-shadow-lg"
-          >
-            {t.hero.title}
-          </motion.h1>
-
+          {/* Ihr Hüttenurlaub am Falkert */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-xl md:text-2xl lg:text-3xl mb-6 text-white drop-shadow-md"
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-3xl md:text-5xl lg:text-6xl text-white drop-shadow-lg"
+            style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
           >
-            {t.hero.subtitle}
+            Ihr H&uuml;ttenurlaub am Falkert
           </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-base md:text-lg lg:text-xl mb-10 text-white/90 max-w-3xl mx-auto drop-shadow-sm"
-          >
-            {t.hero.description}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <button
-              onClick={() => scrollToSection('#buchung')}
-              className="px-8 py-4 bg-wood-700 text-white rounded-lg font-semibold hover:bg-wood-800 transition-colors"
-            >
-              {t.hero.cta_book}
-            </button>
-            <button
-              onClick={() => scrollToSection('#ferienhaus')}
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
-            >
-              {t.hero.cta_explore}
-            </button>
-          </motion.div>
         </motion.div>
       </div>
 
