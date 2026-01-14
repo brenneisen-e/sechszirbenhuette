@@ -46,6 +46,12 @@ const categoryMap: Record<string, string> = {
   'tierpark': 'tierpark',
   'gerlitzen': 'gerlitzen',
   'nockalm': 'nockalm',
+  // Hundewanderungen
+  'hund-falkert': 'hund-falkert',
+  'hund-rodresnock': 'hund-rodresnock',
+  'hund-drei-seen': 'hund-drei-seen',
+  'hund-hochrindl': 'hund-hochrindl',
+  'hund-millstaetter': 'hund-millstaetter',
 };
 
 // Fallback static images
@@ -87,7 +93,9 @@ export function Galerie() {
             'umgebung', 'extras',
             // Kinderausflüge
             'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg',
-            'tierpark', 'gerlitzen', 'nockalm'
+            'tierpark', 'gerlitzen', 'nockalm',
+            // Hundewanderungen
+            'hund-falkert', 'hund-rodresnock', 'hund-drei-seen', 'hund-hochrindl', 'hund-millstaetter'
           ];
           const allMedia = data.media;
           const dbImages: GalleryImage[] = allMedia
@@ -133,11 +141,18 @@ export function Galerie() {
     'tierpark': { de: 'Tierpark', en: 'Animal Park' },
     'gerlitzen': { de: 'Gerlitzen-Alpe', en: 'Gerlitzen-Alpe' },
     'nockalm': { de: 'Nockalm', en: 'Nockalm' },
+    // Hundewanderungen
+    'hund-falkert': { de: 'Falkert & See', en: 'Falkert & Lake' },
+    'hund-rodresnock': { de: 'Rodresnock', en: 'Rodresnock' },
+    'hund-drei-seen': { de: 'Drei Seen', en: 'Three Lakes' },
+    'hund-hochrindl': { de: 'Hochrindl', en: 'Hochrindl' },
+    'hund-millstaetter': { de: 'Millstätter See', en: 'Millstätter See' },
   };
 
   // Build categories dynamically - only show categories that have images (except 'all')
   const categoryIds = ['all', 'aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras',
-    'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg', 'tierpark', 'gerlitzen', 'nockalm'];
+    'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg', 'tierpark', 'gerlitzen', 'nockalm',
+    'hund-falkert', 'hund-rodresnock', 'hund-drei-seen', 'hund-hochrindl', 'hund-millstaetter'];
 
   const categories = categoryIds.map(id => ({
     id,

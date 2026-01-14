@@ -42,12 +42,22 @@ const featureIcons = {
 
 const featureKeys = ['central', 'nationalpark', 'dreilaendereck', 'activities', 'heidiAlm', 'kaerntenCard'] as const;
 
+// Dog trip category keys mapping to database categories
+const DOG_TRIP_CATEGORIES = [
+  'hund-falkert',
+  'hund-rodresnock',
+  'hund-drei-seen',
+  'hund-hochrindl',
+  'hund-millstaetter',
+];
+
 export function Umgebung() {
   const { t } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
-  const [expandedDogTrip, setExpandedDogTrip] = useState<number | null>(null);
   const [expandedKidsTrip, setExpandedKidsTrip] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [dogTripImages, setDogTripImages] = useState<Record<string, MediaItem[]>>({});
+  const [currentDogTrip, setCurrentDogTrip] = useState(0);
 
   useEffect(() => {
     fetch('/api/media?category=aussen&type=image')
@@ -55,6 +65,20 @@ export function Umgebung() {
       .then((data) => {
         if (data.media) {
           setImages(data.media);
+        }
+      })
+      .catch(() => {});
+
+    // Load dog trip images
+    fetch('/api/media')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.media) {
+          const grouped: Record<string, MediaItem[]> = {};
+          DOG_TRIP_CATEGORIES.forEach(cat => {
+            grouped[cat] = data.media.filter((m: MediaItem & { category: string }) => m.category === cat);
+          });
+          setDogTripImages(grouped);
         }
       })
       .catch(() => {});
@@ -165,7 +189,7 @@ export function Umgebung() {
           })}
         </div>
 
-        {/* Dog Trips */}
+        {/* Dog Trips - Swipeable Carousel */}
         <motion.div
           id="dog-trips"
           initial={{ opacity: 0, y: 30 }}
@@ -181,46 +205,105 @@ export function Umgebung() {
               {t.umgebung.dogTrips.title}
             </h3>
           </div>
-          <div className="space-y-4">
-            {dogTrips.map((trip, index) => (
+
+          {/* Carousel Container */}
+          <div className="relative">
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => setCurrentDogTrip(prev => Math.max(0, prev - 1))}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentDogTrip === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+              disabled={currentDogTrip === 0}
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={() => setCurrentDogTrip(prev => Math.min(dogTrips.length - 1, prev + 1))}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentDogTrip === dogTrips.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+              disabled={currentDogTrip === dogTrips.length - 1}
+            >
+              <ChevronRight size={24} />
+            </button>
+
+            {/* Carousel Track */}
+            <div className="overflow-hidden mx-4 md:mx-8">
               <div
-                key={index}
-                className="bg-white rounded-xl overflow-hidden shadow-sm"
+                className="flex transition-transform duration-300 ease-out"
+                style={{ transform: `translateX(-${currentDogTrip * 100}%)` }}
               >
-                <button
-                  onClick={() => setExpandedDogTrip(expandedDogTrip === index ? null : index)}
-                  className="w-full p-4 md:p-6 flex items-center justify-between text-left"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-full bg-wood-100 flex items-center justify-center text-wood-700 font-bold text-sm">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <h4 className="font-bold text-gray-900">{trip.title}</h4>
-                      <p className="text-sm text-gray-500">{trip.difficulty}</p>
+                {dogTrips.map((trip, index) => {
+                  const categoryKey = DOG_TRIP_CATEGORIES[index];
+                  const tripImages = dogTripImages[categoryKey] || [];
+                  const firstImage = tripImages[0];
+
+                  return (
+                    <div
+                      key={index}
+                      className="w-full flex-shrink-0 px-2"
+                    >
+                      <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md mx-auto">
+                        {/* Portrait Image */}
+                        <div className="relative aspect-[3/4] bg-gray-100">
+                          {firstImage ? (
+                            <Image
+                              src={firstImage.url}
+                              alt={firstImage.alt_text || trip.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 400px"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
+                              <div className="text-center text-wood-600">
+                                <Dog size={48} className="mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">Bild im Admin hinzufügen</p>
+                              </div>
+                            </div>
+                          )}
+                          {/* Number Badge */}
+                          <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold shadow-lg">
+                            {index + 1}
+                          </div>
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="p-5">
+                          <h4 className="text-lg font-bold text-gray-900 mb-1">{trip.title}</h4>
+                          <p className="text-sm text-wood-600 font-medium mb-3">{trip.difficulty}</p>
+                          <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
+                          <div className="flex flex-wrap gap-3 text-sm">
+                            {trip.duration && (
+                              <span className="flex items-center gap-1 text-gray-500">
+                                <Clock size={14} /> {trip.duration}
+                              </span>
+                            )}
+                            {trip.tip && (
+                              <span className="text-wood-600 font-medium">
+                                Tipp: {trip.tip}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  {expandedDogTrip === index ? <ChevronUp /> : <ChevronDown />}
-                </button>
-                {expandedDogTrip === index && (
-                  <div className="px-4 md:px-6 pb-4 md:pb-6">
-                    <p className="text-gray-600 mb-4">{trip.description}</p>
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      {trip.duration && (
-                        <span className="flex items-center gap-1 text-gray-500">
-                          <Clock size={16} /> {trip.duration}
-                        </span>
-                      )}
-                      {trip.tip && (
-                        <span className="text-wood-600 font-medium">
-                          Tipp: {trip.tip}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
-            ))}
+            </div>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-6">
+              {dogTrips.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentDogTrip(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    currentDogTrip === index
+                      ? 'bg-wood-600 w-6'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </motion.div>
 

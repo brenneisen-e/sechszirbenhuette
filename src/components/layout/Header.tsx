@@ -83,30 +83,22 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Centered Logo - extends beyond header */}
+          {/* Centered Logo */}
           <button
             onClick={() => scrollToSection('#hero')}
             className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
-            style={{ marginTop: isScrolled ? '20px' : '30px' }}
           >
-            <div
+            <Image
+              src="/images/logo.svg"
+              alt="Sechszirbenhütte"
+              width={240}
+              height={100}
               className={cn(
-                "rounded-full transition-all duration-300",
-                isScrolled ? "bg-white/95 shadow-lg p-2" : "bg-white/90 p-3"
+                "w-auto transition-all duration-300",
+                isScrolled ? "h-16" : "h-20"
               )}
-            >
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={280}
-                height={120}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-20" : "h-28"
-                )}
-                priority
-              />
-            </div>
+              priority
+            />
           </button>
 
           {/* Right Navigation - justify-start to push items towards center */}
@@ -151,30 +143,22 @@ export function Header() {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Centered Logo (Mobile) - extends beyond header */}
+          {/* Centered Logo (Mobile) */}
           <button
             onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105 relative z-10"
-            style={{ marginTop: isScrolled ? '10px' : '15px' }}
+            className="transition-transform hover:scale-105"
           >
-            <div
+            <Image
+              src="/images/logo.svg"
+              alt="Sechszirbenhütte"
+              width={160}
+              height={60}
               className={cn(
-                "rounded-full transition-all duration-300",
-                isScrolled ? "bg-white/95 shadow-lg p-1.5" : "bg-white/90 p-2"
+                "w-auto transition-all duration-300",
+                isScrolled ? "h-12" : "h-14"
               )}
-            >
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={180}
-                height={70}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-14" : "h-18"
-                )}
-                priority
-              />
-            </div>
+              priority
+            />
           </button>
 
           {/* Language Switcher (Mobile) */}

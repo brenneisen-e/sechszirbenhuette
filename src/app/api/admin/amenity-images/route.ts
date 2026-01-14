@@ -25,6 +25,29 @@ async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
   }
 }
 
+// Auto-create table if it doesn't exist
+async function ensureTableExists(db: D1Database): Promise<void> {
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS amenity_card_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        card_key TEXT NOT NULL,
+        media_id TEXT NOT NULL,
+        display_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(card_key, media_id)
+      )
+    `).run();
+
+    // Create index if not exists
+    await db.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_amenity_card_images_key ON amenity_card_images(card_key)
+    `).run();
+  } catch (error) {
+    console.log('Table might already exist or error creating:', error);
+  }
+}
+
 interface AmenityCardImage {
   id: number;
   card_key: string;
@@ -44,6 +67,9 @@ export async function GET(request: NextRequest) {
     if (!env) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
+
+    // Ensure table exists
+    await ensureTableExists(env.DB);
 
     const { searchParams } = new URL(request.url);
     const cardKey = searchParams.get('card_key');
@@ -96,6 +122,9 @@ export async function POST(request: NextRequest) {
     if (!env) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
+
+    // Ensure table exists
+    await ensureTableExists(env.DB);
 
     const body = await request.json();
     const { card_key, media_id } = body;
