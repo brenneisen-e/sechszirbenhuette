@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && wrangler pages deploy .next",
+    "pages:build": "opennextjs-cloudflare build && cp -r .open-next/cloudflare .open-next/middleware .open-next/server-functions .open-next/.build .open-next/assets/ && cp .open-next/worker.js .open-next/assets/_worker.js && cp public/_routes.json .open-next/assets/_routes.json",
+    "preview": "opennextjs-cloudflare build && wrangler dev",
+    "deploy": "opennextjs-cloudflare build && wrangler pages deploy .open-next/assets --project-name=sechszirbenhuette",
     "db:migrate": "wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql",
     "db:seed": "wrangler d1 execute sechszirbenhuette-db --file=./db/seed.sql"
   },
@@ -26,21 +28,22 @@
   "author": "Malte + Mareike Brenneisen",
   "license": "UNLICENSED",
   "dependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
     "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "framer-motion": "^12.26.2",
     "lucide-react": "^0.562.0",
-    "next": "^14.2.35",
-    "next-intl": "^4.7.0",
+    "next": "^15.0.0",
     "postcss": "^8.5.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "resend": "^6.7.0",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.14.8"
   }
 }

@@ -1,0 +1,130 @@
+name: Setup Cloudflare Pages with Git Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      # WICHTIG: Nach erfolgreichem Setup Token löschen!
+      CLOUDFLARE_API_TOKEN: "zzO2Iim5JTLz9Y5gomjn8dUMfi014O3ZZDXzgi9p"
+      CLOUDFLARE_ACCOUNT_ID: "3e23f2f1cf587388e6a90604f1d5e334"
+      PROJECT_NAME: "sechszirbenhuette"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Verify Cloudflare Auth
+        run: wrangler whoami
+
+      - name: Create D1 Database (if not exists)
+        run: |
+          wrangler d1 create sechszirbenhuette-db 2>&1 || echo "Database existiert bereits"
+
+      - name: Create KV Namespace (if not exists)
+        run: |
+          wrangler kv namespace create KV 2>&1 || echo "KV Namespace existiert bereits"
+
+      - name: Create R2 Bucket (if not exists)
+        run: |
+          wrangler r2 bucket create sechszirbenhuette-media 2>&1 || echo "Bucket existiert bereits"
+
+      - name: Apply Database Schema
+        run: |
+          wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql --remote || echo "Schema bereits angewendet oder Fehler"
+
+      - name: Create Pages Project with Git Integration
+        run: |
+          # Lösche existierendes Projekt falls vorhanden
+          curl -s -X DELETE \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" || true
+
+          sleep 2
+
+          # Erstelle neues Pages Projekt mit GitHub Integration (nur Production, keine Previews)
+          RESPONSE=$(curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "'"$PROJECT_NAME"'",
+              "production_branch": "main",
+              "build_config": {
+                "build_command": "npm run pages:build",
+                "destination_dir": ".open-next/assets",
+                "root_dir": ""
+              },
+              "deployment_configs": {
+                "preview": {
+                  "compatibility_date": "2024-09-23",
+                  "compatibility_flags": ["nodejs_compat"]
+                },
+                "production": {
+                  "compatibility_date": "2024-09-23",
+                  "compatibility_flags": ["nodejs_compat"]
+                }
+              },
+              "source": {
+                "type": "github",
+                "config": {
+                  "owner": "brenneisen-e",
+                  "repo_name": "sechszirbenhuette",
+                  "production_branch": "main",
+                  "pr_comments_enabled": false,
+                  "deployments_enabled": true,
+                  "production_deployments_enabled": true,
+                  "preview_deployment_setting": "none"
+                }
+              }
+            }')
+
+          echo "$RESPONSE" | jq .
+
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "Fehler beim Erstellen des Projekts"
+            echo "$RESPONSE" | jq -r '.errors'
+
+            # Fallback: Erstelle ohne Git-Integration, manuell verbinden
+            echo "Versuche Fallback: Projekt ohne Git erstellen..."
+            wrangler pages project create $PROJECT_NAME --production-branch main 2>&1 || true
+          fi
+
+      - name: Initial Build and Deploy
+        run: |
+          npm ci
+          npm run pages:build
+          wrangler pages deploy .open-next/assets --project-name $PROJECT_NAME --branch main
+
+      - name: Summary
+        run: |
+          echo "## Cloudflare Setup Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Erstellte Ressourcen:" >> $GITHUB_STEP_SUMMARY
+          echo "- D1 Database: sechszirbenhuette-db" >> $GITHUB_STEP_SUMMARY
+          echo "- KV Namespace: sechszirbenhuette_KV" >> $GITHUB_STEP_SUMMARY
+          echo "- R2 Bucket: sechszirbenhuette-media" >> $GITHUB_STEP_SUMMARY
+          echo "- Pages Project: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs:" >> $GITHUB_STEP_SUMMARY
+          echo "- Production: https://$PROJECT_NAME.pages.dev" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Git Integration:" >> $GITHUB_STEP_SUMMARY
+          echo "Falls die automatische Git-Verbindung nicht funktioniert hat:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Cloudflare Dashboard → Pages → $PROJECT_NAME → Settings" >> $GITHUB_STEP_SUMMARY
+          echo "2. Builds & deployments → Connect to Git" >> $GITHUB_STEP_SUMMARY
+          echo "3. GitHub Repo wählen: brenneisen-e/sechszirbenhuette" >> $GITHUB_STEP_SUMMARY

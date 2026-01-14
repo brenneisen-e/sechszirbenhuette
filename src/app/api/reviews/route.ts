@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+
 // Placeholder reviews - in production this would come from Cloudflare D1
 const PLACEHOLDER_REVIEWS = [
   {

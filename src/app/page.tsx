@@ -1,4 +1,3 @@
-import { setRequestLocale } from 'next-intl/server';
 import {
   Hero,
   Features,
@@ -9,21 +8,15 @@ import {
   Bewertungen,
 } from '@/components/sections';
 
-interface PageProps {
-  params: { locale: string };
-}
-
-export default function HomePage({ params: { locale } }: PageProps) {
-  setRequestLocale(locale);
-
+export default function HomePage() {
   return (
     <>
       <Hero />
       <Features />
+      <Buchung />
       <HeidiAlm />
       <Ferienhaus />
       <Umgebung />
-      <Buchung />
       <Bewertungen />
     </>
   );

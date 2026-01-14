@@ -1,13 +1,12 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
 import { Phone, Mail, MapPin, Instagram } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/constants';
 
 export function Footer() {
-  const t = useTranslations('footer');
-  const tNav = useTranslations('navigation');
+  const { t } = useLanguage();
 
   const currentYear = new Date().getFullYear();
 
@@ -26,7 +25,7 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold mb-4">{t('contact')}</h4>
+            <h4 className="font-semibold mb-4">{t.footer.contact}</h4>
             <ul className="space-y-3 text-gray-400 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin size={18} className="text-wood-400 flex-shrink-0 mt-0.5" />
@@ -53,21 +52,21 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4">{t('legal')}</h4>
+            <h4 className="font-semibold mb-4">{t.footer.legal}</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>
                 <Link href="/impressum" className="hover:text-white transition-colors">
-                  {tNav('impressum')}
+                  {t.navigation.impressum}
                 </Link>
               </li>
               <li>
                 <Link href="/datenschutz" className="hover:text-white transition-colors">
-                  {tNav('datenschutz')}
+                  {t.navigation.datenschutz}
                 </Link>
               </li>
               <li>
                 <Link href="/agb" className="hover:text-white transition-colors">
-                  {tNav('agb')}
+                  {t.navigation.agb}
                 </Link>
               </li>
             </ul>
@@ -75,7 +74,7 @@ export function Footer() {
 
           {/* Social */}
           <div>
-            <h4 className="font-semibold mb-4">{t('followUs')}</h4>
+            <h4 className="font-semibold mb-4">{t.footer.followUs}</h4>
             <a
               href={`https://instagram.com/${SITE_CONFIG.social.instagram.replace('@', '')}`}
               target="_blank"
@@ -90,9 +89,14 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-          <p>{t('copyright', { year: currentYear })}</p>
+          <p>{t.footer.copyright.replace('{year}', currentYear.toString())}</p>
           <p className="mt-2">
             {SITE_CONFIG.owners}
+          </p>
+          <p className="mt-4">
+            <Link href="/admin" className="text-gray-600 hover:text-gray-400 transition-colors text-xs">
+              Admin
+            </Link>
           </p>
         </div>
       </div>

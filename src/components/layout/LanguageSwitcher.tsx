@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { Globe, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const languages = [
+const languages: { code: Language; label: string }[] = [
   { code: 'de', label: 'Deutsch' },
   { code: 'en', label: 'English' },
 ];
@@ -16,9 +15,7 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+  const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,10 +30,8 @@ export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const switchLocale = (newLocale: string) => {
-    const pathWithoutLocale = pathname.replace(`/${locale}`, '');
-    const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
-    router.push(newPath);
+  const switchLanguage = (newLanguage: Language) => {
+    setLanguage(newLanguage);
     setIsOpen(false);
   };
 
@@ -61,10 +56,10 @@ export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
           {languages.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => switchLocale(lang.code)}
+              onClick={() => switchLanguage(lang.code)}
               className={cn(
                 'w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors',
-                locale === lang.code
+                language === lang.code
                   ? 'text-wood-700 font-medium bg-wood-50'
                   : 'text-gray-700'
               )}

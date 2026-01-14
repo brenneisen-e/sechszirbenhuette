@@ -1,23 +1,10 @@
-import { setRequestLocale } from 'next-intl/server';
+'use client';
 
-interface PageProps {
-  params: { locale: string };
-}
+import { useLanguage } from '@/contexts/LanguageContext';
 
-export async function generateMetadata({ params: { locale } }: PageProps) {
-  return {
-    title: locale === 'de' ? 'AGB | Sechszirbenhütte' : 'Terms | Sechszirbenhütte',
-    description: locale === 'de'
-      ? 'Allgemeine Geschäftsbedingungen für die Vermietung der Sechszirbenhütte am Falkert.'
-      : 'General Terms and Conditions for renting the Sechszirbenhütte at Falkert.',
-    robots: 'noindex, follow',
-  };
-}
-
-export default function AGBPage({ params: { locale } }: PageProps) {
-  setRequestLocale(locale);
-
-  const isDE = locale === 'de';
+export default function AGBPage() {
+  const { language } = useLanguage();
+  const isDE = language === 'de';
 
   return (
     <div className="pt-24 pb-16">
@@ -84,11 +71,6 @@ export default function AGBPage({ params: { locale } }: PageProps) {
             </li>
             <li>
               {isDE
-                ? 'Eine Zahlung mit Scheck ist auch möglich, wobei dieser ebenfalls 4 Wochen vor Mietbeginn beim Vermieter eintreffen muss.'
-                : 'Payment by check is also possible, although this must also reach the landlord 4 weeks before the start of the rental.'}
-            </li>
-            <li>
-              {isDE
                 ? 'Zahlungsverzug berechtigt den Vermieter zum Rücktritt und zur Berechnung von Schadenersatz.'
                 : 'Default of payment entitles the landlord to withdraw and to claim damages.'}
             </li>
@@ -146,8 +128,8 @@ export default function AGBPage({ params: { locale } }: PageProps) {
           <ol>
             <li>
               {isDE
-                ? 'Der Mieter hat das Mietobjekt einschließlich Grundstück samt Inventar pfleglich zu behandeln und darf es ausschließlich zu Wohnzwecken benutzen. Während Ihres Aufenthaltes ist im Winter der Parkplatz sowie der Zugang zum Haus selbst von Schnee und Eis frei zu halten.'
-                : 'The tenant must treat the rental property including the grounds and inventory with care and may only use it for residential purposes. During your stay in winter, the parking lot and the access to the house must be kept free of snow and ice.'}
+                ? 'Der Mieter hat das Mietobjekt einschließlich Grundstück samt Inventar pfleglich zu behandeln und darf es ausschließlich zu Wohnzwecken benutzen.'
+                : 'The tenant must treat the rental property including the grounds and inventory with care and may only use it for residential purposes.'}
             </li>
             <li>
               {isDE
@@ -163,40 +145,6 @@ export default function AGBPage({ params: { locale } }: PageProps) {
               {isDE
                 ? 'Das Mitbringen von Haustieren ist nur nach Absprache mit dem Vermieter erlaubt.'
                 : 'Bringing pets is only allowed after consultation with the landlord.'}
-            </li>
-            <li>
-              {isDE
-                ? 'Bitte keinen Hunde-Kot im Haus und auf dem Grundstück hinterlassen.'
-                : 'Please do not leave dog excrement in the house or on the property.'}
-            </li>
-            <li>
-              {isDE
-                ? 'Aus hygienischen Gründen sollen sich die Haustiere nicht in den Schlafräumen aufhalten.'
-                : 'For hygienic reasons, pets should not stay in the bedrooms.'}
-            </li>
-            <li>
-              {isDE
-                ? 'Bettwäsche und Handtücher müssen vom Mieter mitgebracht werden. Eine Benutzung der Betten ist ohne Bettwäsche nicht erlaubt.'
-                : 'Bed linen and towels must be brought by the tenant. Use of the beds without bed linen is not permitted.'}
-            </li>
-          </ol>
-
-          <h2>{isDE ? 'Pflichten des Vermieters' : 'Landlord Obligations'}</h2>
-          <ol>
-            <li>
-              {isDE
-                ? 'Der Vermieter verpflichtet sich, das Mietobjekt zum vereinbarten Mietzeitraum bereitzustellen und alle gemachten Angaben einzuhalten.'
-                : 'The landlord undertakes to provide the rental property for the agreed rental period and to comply with all information provided.'}
-            </li>
-            <li>
-              {isDE
-                ? 'Änderungen von Ausstattung und Einrichtung bleiben dem Vermieter vorbehalten und begründen keine Ansprüche des Mieters.'
-                : 'Changes to equipment and furnishings are reserved by the landlord and do not give rise to any claims by the tenant.'}
-            </li>
-            <li>
-              {isDE
-                ? 'Der Verwalter ist während Ihres Aufenthaltes nicht verpflichtet, das Grundstück von Schnee und Eis freizuhalten.'
-                : 'The manager is not obliged to keep the property free of snow and ice during your stay.'}
             </li>
           </ol>
 

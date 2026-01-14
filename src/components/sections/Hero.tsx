@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 export function Hero() {
-  const t = useTranslations('hero');
+  const { t } = useLanguage();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,23 +32,19 @@ export function Hero() {
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
           <video
             autoPlay
             muted
             loop
             playsInline
-            poster="/images/fallback/hero-fallback.jpg"
             className="h-full w-full object-cover"
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
         ) : (
-          <div
-            className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/fallback/hero-fallback.jpg')" }}
-          />
+          <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}
       </div>
 
@@ -63,13 +59,24 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="max-w-5xl"
         >
+          {/* Herzlich Willkommen */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-5xl md:text-6xl lg:text-7xl mb-4 text-white drop-shadow-lg"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
+            Herzlich Willkommen
+          </motion.p>
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 text-balance drop-shadow-lg"
           >
-            {t('title')}
+            {t.hero.title}
           </motion.h1>
 
           <motion.p
@@ -78,7 +85,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-xl md:text-2xl lg:text-3xl mb-6 text-white drop-shadow-md"
           >
-            {t('subtitle')}
+            {t.hero.subtitle}
           </motion.p>
 
           <motion.p
@@ -87,7 +94,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="text-base md:text-lg lg:text-xl mb-10 text-white/90 max-w-3xl mx-auto drop-shadow-sm"
           >
-            {t('description')}
+            {t.hero.description}
           </motion.p>
 
           <motion.div
@@ -100,13 +107,13 @@ export function Hero() {
               onClick={() => scrollToSection('#buchung')}
               className="px-8 py-4 bg-wood-700 text-white rounded-lg font-semibold hover:bg-wood-800 transition-colors"
             >
-              {t('cta_book')}
+              {t.hero.cta_book}
             </button>
             <button
               onClick={() => scrollToSection('#ferienhaus')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
             >
-              {t('cta_explore')}
+              {t.hero.cta_explore}
             </button>
           </motion.div>
         </motion.div>

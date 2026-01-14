@@ -88,29 +88,23 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 -- Medien-Verwaltung (Bilder & Videos in R2)
 CREATE TABLE IF NOT EXISTS media (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,               -- UUID-style ID
 
     -- Datei-Infos
-    filename TEXT NOT NULL,
-    original_name TEXT NOT NULL,
-    r2_key TEXT NOT NULL UNIQUE,      -- Pfad im R2 Bucket
-    url TEXT NOT NULL,                 -- Öffentliche URL
+    file_key TEXT NOT NULL UNIQUE,     -- Pfad im R2 Bucket (z.B. "hero/123456-abc.mp4")
+    url TEXT NOT NULL,                 -- API URL zum Abrufen der Datei
 
     -- Kategorisierung
-    category TEXT NOT NULL,            -- innen, aussen, header, hero
-    type TEXT NOT NULL,                -- image, video
-    mime_type TEXT,
-    size_bytes INTEGER,
+    category TEXT NOT NULL,            -- hero, header, innen, aussen, umgebung, winter, sommer
+    media_type TEXT NOT NULL,          -- image, video
 
-    -- Für Galerie
+    -- Metadaten für Galerie und SEO
     title TEXT,
     alt_text TEXT,                     -- SEO wichtig!
-    sort_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0,
 
     -- Timestamps
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Admin-Sessions
@@ -127,4 +121,4 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_availability_datum ON availability(datum);
 CREATE INDEX IF NOT EXISTS idx_reviews_sichtbar ON reviews(sichtbar);
 CREATE INDEX IF NOT EXISTS idx_media_category ON media(category);
-CREATE INDEX IF NOT EXISTS idx_media_active ON media(is_active, category);
+CREATE INDEX IF NOT EXISTS idx_media_order ON media(category, display_order);

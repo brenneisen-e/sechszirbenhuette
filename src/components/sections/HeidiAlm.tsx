@@ -1,12 +1,11 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { Snowflake, Sunrise, Mountain, Navigation } from 'lucide-react';
+import { Snowflake, Sunrise } from 'lucide-react';
 
 export function HeidiAlm() {
-  const t = useTranslations('heidiAlm');
-  const tWinter = useTranslations('winter');
+  const { t } = useLanguage();
 
   const winterActivities = [
     'skiing',
@@ -15,7 +14,7 @@ export function HeidiAlm() {
     'snowshoe',
     'skiSchool',
     'tours',
-  ];
+  ] as const;
 
   return (
     <section className="py-20 bg-gray-50">
@@ -31,10 +30,10 @@ export function HeidiAlm() {
             <Sunrise size={32} />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            {t('title')}
+            {t.heidiAlm.title}
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed">
-            {t('description')}
+            {t.heidiAlm.description}
           </p>
         </motion.div>
 
@@ -50,10 +49,10 @@ export function HeidiAlm() {
               <Snowflake size={32} />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              {tWinter('title')}
+              {t.winter.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              {tWinter('description')}
+              {t.winter.description}
             </p>
           </div>
 
@@ -69,7 +68,7 @@ export function HeidiAlm() {
               >
                 <div className="flex-shrink-0 w-2 h-2 rounded-full bg-wood-500" />
                 <span className="text-gray-700">
-                  {tWinter(`activities.${activity}`)}
+                  {t.winter.activities[activity]}
                 </span>
               </motion.div>
             ))}
