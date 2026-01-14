@@ -166,51 +166,48 @@
     },
     "kidsTrips": {
       "title": "The 7 Most Beautiful Trips with Children in Carinthia",
+      "featured": {
+        "title": "Heidi-Alm at Falkert",
+        "description": "The Heidi-Alm at Falkert is just around the corner and offers a fairytale walk through the Heidi world with views of the surrounding mountains. A large slide and a modern playground complete the excursion. On the lake of the Heidi-Alm, there is also the opportunity to fish. Please contact the Heidi-Alm team in advance. After the Heidi-Alm, you can refuel at the adjacent restaurants Seehütte or Bogi Alm. Adults can enjoy a walk around the Falkertsee.",
+        "distance": "5 minutes walk",
+        "age": "All ages"
+      },
       "trips": [
         {
-          "title": "Heidi-Alm at Falkert",
-          "description": "The Heidi-Alm at Falkert is just around the corner and offers a fairytale walk through the Heidi world with views of the surrounding mountains. A large slide and a modern playground complete the excursion.",
-          "distance": "5 minutes walk",
-          "age": "All ages"
-        },
-        {
           "title": "Turracher Höhe and Nocky-Flitzer",
-          "description": "The Turracher Höhe is a beautiful ski area for beginners and pros. Outside the winter season, the Alpine roller coaster Nockyflitzer is an absolute excursion highlight. From 3 years, it's a fast ride down the mountain.",
+          "description": "The Turracher Höhe is a beautiful ski area for beginners and pros. The picturesque landscape between fir trees and mountain peaks, the snow reliability and its 43 kilometers of slopes are perfect for families. Outside the winter season, the Alpine roller coaster Nockyflitzer is an absolute excursion highlight. From 3 years, it's a fast ride down the mountain, of course accompanied by an adult. The Nockyflitzer opens its gates from June. Great playgrounds and Nocky's Alpine Time (a child-friendly discovery hike with stamp card) make the day fly by. No vacation at the Sechszirbenhütte passes without a visit to the Turracher Höhe.",
           "distance": "15 minutes by car",
           "age": "From 3 years"
         },
         {
           "title": "Ossiacher See and Familywald",
-          "description": "Lake Ossiach is about 30 minutes drive from the Sechszirbenhütte. Right next to it is the adventure and climbing forest Familywald. Here, small and big children get their money's worth.",
+          "description": "Lake Ossiach is about 30 minutes drive from the Sechszirbenhütte. Right next to it is the adventure and climbing forest Familywald. Here, small and big children get their money's worth. The grounds are lovingly designed, there is something to discover in every tree, sound journeys, balance parks, a fly-line and a high ropes course - you can really spend hours here. With the Tree-Net, the Familywald has created an absolute highlight. Here, small and big can walk through the treetops on nets, slide from tree to tree and are absolutely fall-proof.",
           "distance": "30 minutes by car",
           "age": "From 4 years"
         },
         {
           "title": "Panorama Trail St. Oswald (with Brunnachbahn)",
-          "description": "Our standard hike when we're at Falkert. Take the Brunnachbahn in Bad Kleinkirchheim to the Panorama Trail St. Oswald. The hike is kid-friendly and not too steep.",
+          "description": "Our standard hike when we're at Falkert. Take the Brunnachbahn in Bad Kleinkirchheim to the Panorama Trail St. Oswald. The hike is kid-friendly and not too steep, perfect for carrying smaller ones in a baby carrier. The view is stunning and there are numerous detours for more extensive hikes if one parent wants to continue alone. Halfway is the Bockhütte, a perfect rest stop and like something out of a picture book. Back at the Brunnachbahn, an Active Park and water playground await you, where tired legs can cool off, children can raft and adults can take a break on the sun loungers.",
           "distance": "16 minutes by car",
-          "age": "All ages",
-          "tip": "Stop at the Bockhütte"
+          "age": "All ages"
         },
         {
           "title": "Animal Park Feld am See",
-          "description": "The Alpine Animal Park Feld am See is a wildlife park at the foot of a mountain. Here you can observe various native animals as well as a small petting zoo. Two playgrounds provide variety.",
+          "description": "The Alpine Animal Park Feld am See is a wildlife park at the foot of a mountain. Here you can observe various native animals as well as a small petting zoo. Two playgrounds provide variety. The tour is stroller-friendly, with only a few small inclines.",
           "distance": "25 minutes by car",
-          "age": "All ages",
-          "tip": "Stroller-friendly"
+          "age": "All ages"
         },
         {
           "title": "Mountain Railway Gerlitzen-Alpe",
-          "description": "The Gerlitzen-Alpe is a well-known starting point for paragliders. In good conditions, there's always a lot to marvel at. At the individual stations of the mountain railways, various playgrounds await.",
+          "description": "The Gerlitzen-Alpe is a well-known starting point for paragliders. In good conditions, there's always a lot to marvel at. At the individual stations of the mountain railways (at the top and middle), various playgrounds await. At the very top of the mountain, children can swing with the most wonderful panorama and, thanks to very low gradients, also take a relaxed little hike with their parents.",
           "distance": "40 minutes by car",
           "age": "All ages"
         },
         {
           "title": "Panorama Road Nockalm",
-          "description": "The Nockberge have a unique beauty. Like warm green giants, the natural wonders lie in the landscape. They can be especially impressively admired on the Nockalm Panorama Road.",
+          "description": "The Nockberge have a unique beauty. Like warm green giants, the natural wonders lie in the landscape. They can be especially impressively admired on the Nockalm Panorama Road. Parents optimally plan this around nap time and enjoy the peace and the view. But be careful: it's curvy, weak stomachs might make themselves known.",
           "distance": "15 minutes by car",
-          "age": "All ages",
-          "tip": "Best during nap time"
+          "age": "All ages"
         }
       ]
     },

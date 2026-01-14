@@ -101,6 +101,63 @@ const CATEGORIES = [
     supportsVideo: true,
     maxItems: null
   },
+  // Kinderausflüge Kategorien
+  {
+    value: 'heidi-alm',
+    label: '🎢 Heidi-Alm am Falkert',
+    description: 'Bilder der Heidi-Alm mit Spielplatz und Falkertsee',
+    location: 'Umgebung - Kinderausflüge - Heidi-Alm',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'turracher-hoehe',
+    label: '🎿 Turracher Höhe & Nocky-Flitzer',
+    description: 'Bilder vom Skigebiet und der Alpen-Achterbahn',
+    location: 'Umgebung - Kinderausflüge - Turracher Höhe',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'ossiacher-see',
+    label: '🧗 Ossiacher See & Familywald',
+    description: 'Bilder vom See und Kletterwald',
+    location: 'Umgebung - Kinderausflüge - Ossiacher See',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'panoramaweg',
+    label: '🥾 Panoramaweg St. Oswald',
+    description: 'Bilder vom Panoramaweg und der Brunnachbahn',
+    location: 'Umgebung - Kinderausflüge - Panoramaweg',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'tierpark',
+    label: '🦌 Tierpark Feld am See',
+    description: 'Bilder vom Wildpark und Streichelzoo',
+    location: 'Umgebung - Kinderausflüge - Tierpark',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'gerlitzen',
+    label: '🚡 Bergbahn Gerlitzen-Alpe',
+    description: 'Bilder von der Bergbahn und Paraglider-Aussicht',
+    location: 'Umgebung - Kinderausflüge - Gerlitzen',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'nockalm',
+    label: '🛣️ Panoramastraße Nockalm',
+    description: 'Bilder der Nockberge und Panoramastraße',
+    location: 'Umgebung - Kinderausflüge - Nockalm',
+    supportsVideo: true,
+    maxItems: null
+  },
 ];
 
 // Amenity cards configuration
