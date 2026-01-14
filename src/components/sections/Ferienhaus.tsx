@@ -12,6 +12,8 @@ import {
   Flame,
   Sofa,
   TreePine,
+  Wifi,
+  MapPin,
   X,
   ChevronLeft,
   ChevronRight,
@@ -24,19 +26,74 @@ interface MediaItem {
   title: string;
 }
 
-const amenityIcons = {
-  rooms: Bed,
-  kitchen: UtensilsCrossed,
-  bathroom: Bath,
-  sauna: Flame,
-  living: Sofa,
-  outdoor: TreePine,
+// Card configuration with gallery category mapping
+const amenityCards = [
+  {
+    key: 'living',
+    icon: Sofa,
+    galleryCategory: 'wohnen',
+    items: ['Schwedenofen', 'Essecke für 8-10 Personen', 'Satellit-TV & DVD', 'Stereoanlage']
+  },
+  {
+    key: 'kitchen',
+    icon: UtensilsCrossed,
+    galleryCategory: 'kueche',
+    items: ['Voll ausgestattet', 'Spülmaschine', 'Ceranherd & Backofen', 'Mikrowelle mit Grill']
+  },
+  {
+    key: 'rooms',
+    icon: Bed,
+    galleryCategory: 'schlafen',
+    items: ['1 Galeriezimmer (2 Einzelbetten)', '1 Doppelbettzimmer', '1 Zimmer mit 2 Stockbetten', 'Platz für 8 Personen'],
+    hint: 'Bettwäsche selbst mitbringen oder Komfort-Paket buchen'
+  },
+  {
+    key: 'sauna',
+    icon: Flame,
+    galleryCategory: 'bad',
+    items: ['Sauna mit Sanarium', 'Ruheraum mit Liegen', 'Extra Dusche mit Kneipp-Schlauch', 'Fußbodenheizung']
+  },
+  {
+    key: 'bathroom',
+    icon: Bath,
+    galleryCategory: 'bad',
+    items: ['Dusche & WC', 'Doppelwaschbecken', 'Fußbodenheizung', 'Modern ausgestattet'],
+    hint: 'Handtücher selbst mitbringen oder Komfort-Paket buchen'
+  },
+  {
+    key: 'outdoor',
+    icon: TreePine,
+    galleryCategory: 'aussen',
+    items: ['15m² Balkon mit Außentreppe', '650m² Grundstück', '2 Parkplätze', 'Grill & Gartenmöbel']
+  },
+  {
+    key: 'equipment',
+    icon: Wifi,
+    galleryCategory: null,
+    items: ['WLAN / ADSL', 'Satelliten-TV', 'Grill', 'Haustiere willkommen']
+  },
+  {
+    key: 'location',
+    icon: MapPin,
+    galleryCategory: 'umgebung',
+    items: ['Skigebiet Falkert vor Ort', 'Turracher Höhe (20 Min.)', 'Bad Kleinkirchheim (25 Min.)', 'Viele Wanderwege']
+  },
+] as const;
+
+// German titles for the cards
+const cardTitles: Record<string, { de: string; en: string }> = {
+  living: { de: 'Wohnbereich', en: 'Living Area' },
+  kitchen: { de: 'Küche', en: 'Kitchen' },
+  rooms: { de: 'Schlafzimmer', en: 'Bedrooms' },
+  sauna: { de: 'Sauna & Wellness', en: 'Sauna & Wellness' },
+  bathroom: { de: 'Badezimmer', en: 'Bathroom' },
+  outdoor: { de: 'Außenbereich', en: 'Outdoor' },
+  equipment: { de: 'Ausstattung', en: 'Amenities' },
+  location: { de: 'Lage', en: 'Location' },
 };
 
-const amenityKeys = ['rooms', 'kitchen', 'bathroom', 'sauna', 'living', 'outdoor'] as const;
-
 export function Ferienhaus() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
@@ -73,6 +130,21 @@ export function Ferienhaus() {
     }
   };
 
+  const scrollToGalleryCategory = (category: string | null) => {
+    const galerie = document.querySelector('#galerie');
+    if (galerie) {
+      galerie.scrollIntoView({ behavior: 'smooth' });
+      if (category) {
+        setTimeout(() => {
+          const categoryButton = document.querySelector(`#galerie button[data-category="${category}"]`) as HTMLButtonElement;
+          if (categoryButton) {
+            categoryButton.click();
+          }
+        }, 500);
+      }
+    }
+  };
+
   return (
     <section id="ferienhaus" className="py-20 bg-white">
       <div className="container">
@@ -81,111 +153,66 @@ export function Ferienhaus() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-4xl mx-auto mb-16"
+          className="text-center max-w-4xl mx-auto mb-12"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
-            <Home size={32} />
-          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t.ferienhaus.title}
+            Ausstattung & Komfort
           </h2>
           <p className="text-lg text-gray-600">
-            {t.ferienhaus.intro}
+            Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.
           </p>
         </motion.div>
 
-        {/* Quick Facts */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
-        >
-          {(['grundstueck', 'wohnflaeche', 'hoehe', 'personen'] as const).map((key) => (
-            <div key={key} className="bg-wood-50 rounded-lg p-4 text-center">
-              <p className="text-wood-700 font-semibold">
-                {t.ferienhaus.details[key]}
-              </p>
-            </div>
-          ))}
-        </motion.div>
-
-        {/* Image Gallery */}
-        {images.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-16"
-          >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.slice(0, 8).map((img, index) => (
-                <button
-                  key={img.id}
-                  onClick={() => openLightbox(index)}
-                  className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition group"
-                >
-                  <Image
-                    src={img.url}
-                    alt={img.alt_text || 'Sechszirbenhütte Innenansicht'}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Amenities */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {amenityKeys.map((key, index) => {
-            const Icon = amenityIcons[key];
+        {/* Amenity Cards - 4x2 Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {amenityCards.map((card, index) => {
+            const Icon = card.icon;
+            const title = cardTitles[card.key][language as 'de' | 'en'];
 
             return (
-              <motion.div
-                key={key}
+              <motion.button
+                key={card.key}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-gray-50 rounded-xl p-6"
+                transition={{ delay: index * 0.05 }}
+                onClick={() => scrollToGalleryCategory(card.galleryCategory)}
+                className="bg-gray-50 rounded-xl p-6 text-left group cursor-pointer
+                  border-2 border-transparent
+                  hover:border-wood-300 hover:shadow-lg hover:bg-white
+                  transition-all duration-300 ease-out
+                  hover:-translate-y-1"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
-                    <Icon size={20} />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {t.ferienhaus[key].title}
-                  </h3>
+                {/* Icon */}
+                <div className="w-12 h-12 rounded-xl bg-wood-100 flex items-center justify-center text-wood-700 mb-4
+                  group-hover:bg-wood-200 group-hover:scale-110 transition-all duration-300">
+                  <Icon size={24} />
                 </div>
-                <ul className="space-y-2">
-                  {key === 'rooms' ? (
-                    <>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t.ferienhaus.rooms.bedroom1}
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t.ferienhaus.rooms.bedroom2}
-                      </li>
-                      <li className="flex items-center gap-2 text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {t.ferienhaus.rooms.living}
-                      </li>
-                    </>
-                  ) : (
-                    t.ferienhaus[key].items.map((item: string, i: number) => (
-                      <li key={i} className="flex items-center gap-2 text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400" />
-                        {item}
-                      </li>
-                    ))
-                  )}
+
+                {/* Title */}
+                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-wood-700 transition-colors">
+                  {title}
+                </h3>
+
+                {/* Items */}
+                <ul className="space-y-1.5">
+                  {card.items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-wood-400 mt-1.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
-              </motion.div>
+
+                {/* Hint if exists */}
+                {card.hint && (
+                  <div className="mt-4 p-3 bg-wood-50 rounded-lg border border-wood-100">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-semibold text-wood-700">Hinweis:</span> {card.hint}
+                    </p>
+                  </div>
+                )}
+              </motion.button>
             );
           })}
         </div>
