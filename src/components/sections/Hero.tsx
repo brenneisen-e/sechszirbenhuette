@@ -32,23 +32,19 @@ export function Hero() {
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
           <video
             autoPlay
             muted
             loop
             playsInline
-            poster="/images/fallback/hero-fallback.jpg"
             className="h-full w-full object-cover"
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
         ) : (
-          <div
-            className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/fallback/hero-fallback.jpg')" }}
-          />
+          <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}
       </div>
 
@@ -68,7 +64,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-3xl md:text-4xl lg:text-5xl mb-2 text-white/90"
+            className="text-5xl md:text-6xl lg:text-7xl mb-4 text-white drop-shadow-lg"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             Herzlich Willkommen
@@ -78,7 +74,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-balance"
           >
             {t.hero.title}
           </motion.h1>

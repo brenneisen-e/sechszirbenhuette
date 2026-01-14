@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -44,7 +43,7 @@ export function Header() {
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         isScrolled
           ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
-          : 'bg-transparent py-4'
+          : 'bg-white/30 backdrop-blur-sm py-3'
       )}
     >
       <div className="container flex items-center justify-between">
@@ -56,12 +55,9 @@ export function Header() {
           <Image
             src="/images/logo.svg"
             alt="Sechszirbenhütte"
-            width={180}
-            height={70}
-            className={cn(
-              'h-12 md:h-14 w-auto transition-all',
-              isScrolled ? 'brightness-0' : 'brightness-100'
-            )}
+            width={220}
+            height={85}
+            className="h-16 md:h-20 w-auto"
             priority
           />
         </button>
@@ -74,7 +70,7 @@ export function Header() {
               onClick={() => scrollToSection(item.href)}
               className={cn(
                 'font-medium transition-colors hover:text-wood-600',
-                isScrolled ? 'text-gray-700' : 'text-white'
+                isScrolled ? 'text-gray-700' : 'text-gray-800'
               )}
             >
               {t.navigation[item.key]}
@@ -84,15 +80,10 @@ export function Header() {
 
         {/* Right Side: Language Switcher + CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <LanguageSwitcher isScrolled={isScrolled} />
+          <LanguageSwitcher />
           <button
             onClick={() => scrollToSection('#buchung')}
-            className={cn(
-              'px-4 py-2 rounded-lg font-medium transition-colors',
-              isScrolled
-                ? 'bg-wood-700 text-white hover:bg-wood-800'
-                : 'bg-white text-wood-700 hover:bg-gray-100'
-            )}
+            className="px-4 py-2 rounded-lg font-medium bg-wood-700 text-white hover:bg-wood-800 transition-colors"
           >
             {t.navigation.buchung}
           </button>
@@ -101,10 +92,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={cn(
-            'md:hidden p-2 rounded-lg transition-colors',
-            isScrolled ? 'text-gray-700' : 'text-white'
-          )}
+          className="md:hidden p-2 rounded-lg text-gray-700 transition-colors"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -124,7 +112,7 @@ export function Header() {
               </button>
             ))}
             <div className="pt-4 border-t mt-2">
-              <LanguageSwitcher isScrolled={true} />
+              <LanguageSwitcher />
             </div>
           </nav>
         </div>
