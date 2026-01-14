@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "Sechszirbenhütte am Falkert | Premium-Hüttenurlaub in den Nockbergen",
-    "description": "Historische Berghütte mit Sauna in Alleinlage auf 1.700m. Wandern, Skifahren & Erholung in Kärnten. Familien & Hunde willkommen. Jetzt buchen!"
+    "description": "Historische Berghütte mit Sauna in Alleinlage auf 1.800m. Wandern, Skifahren & Erholung in Kärnten. Familien & Hunde willkommen. Jetzt buchen!"
   },
   "navigation": {
     "home": "Startseite",
@@ -17,14 +17,14 @@
   },
   "hero": {
     "title": "in der Sechszirbenhütte",
-    "subtitle": "Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen",
+    "subtitle": "Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen",
     "description": "Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.",
     "cta_book": "Jetzt anfragen & buchen",
     "cta_explore": "Ferienhaus entdecken"
   },
   "features": {
     "altitude": {
-      "title": "1.700 m Höhe",
+      "title": "1.800 m Höhe",
       "description": "Alpines Panorama mit Blick bis zu den Karawanken"
     },
     "secluded": {
@@ -70,7 +70,7 @@
     "details": {
       "grundstueck": "1.200 m² Almgrundstück",
       "wohnflaeche": "80 m²",
-      "hoehe": "1.700 m ü.d.M.",
+      "hoehe": "1.800 m ü.d.M.",
       "personen": "2–5 Personen"
     },
     "rooms": {
