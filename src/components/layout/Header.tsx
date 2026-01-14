@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -50,12 +51,19 @@ export function Header() {
         {/* Logo */}
         <button
           onClick={() => scrollToSection('#hero')}
-          className={cn(
-            'text-xl md:text-2xl font-bold transition-colors',
-            isScrolled ? 'text-wood-800' : 'text-white'
-          )}
+          className="transition-transform hover:scale-105"
         >
-          Sechszirbenhütte
+          <Image
+            src="/images/logo.svg"
+            alt="Sechszirbenhütte"
+            width={180}
+            height={70}
+            className={cn(
+              'h-12 md:h-14 w-auto transition-all',
+              isScrolled ? 'brightness-0' : 'brightness-100'
+            )}
+            priority
+          />
         </button>
 
         {/* Desktop Navigation */}
