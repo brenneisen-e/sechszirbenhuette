@@ -1,7 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Cloudflare types
+interface R2Object {
+  body: ReadableStream;
+  httpMetadata?: {
+    contentType?: string;
+  };
+}
+
+interface R2Bucket {
+  get(key: string): Promise<R2Object | null>;
+  put(key: string, value: ArrayBuffer | ReadableStream | string, options?: { httpMetadata?: { contentType?: string } }): Promise<R2Object>;
+  delete(key: string): Promise<void>;
+}
+
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  all<T>(): Promise<{ results?: T[] }>;
+  first<T>(): Promise<T | null>;
+  run(): Promise<unknown>;
+}
+
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+}
+
+interface CloudflareEnv {
+  DB: D1Database;
+  R2: R2Bucket;
+}
+
 // Dynamic import for Cloudflare context (only works in Cloudflare environment)
-async function getCloudflareEnv(): Promise<{ DB: unknown; R2: unknown } | null> {
+async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
   if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
     return null;
   }
@@ -9,7 +39,7 @@ async function getCloudflareEnv(): Promise<{ DB: unknown; R2: unknown } | null> 
     // Use Function constructor to avoid webpack bundling
     const importFn = new Function('specifier', 'return import(specifier)');
     const mod = await importFn('@opennextjs/cloudflare');
-    return (await mod.getCloudflareContext()).env;
+    return (await mod.getCloudflareContext()).env as CloudflareEnv;
   } catch {
     return null;
   }
