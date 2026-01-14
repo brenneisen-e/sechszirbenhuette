@@ -3,6 +3,7 @@ import {
   Features,
   HeidiAlm,
   Ferienhaus,
+  Galerie,
   Umgebung,
   Buchung,
   Bewertungen,
@@ -13,10 +14,11 @@ export default function HomePage() {
     <>
       <Hero />
       <Features />
-      <Buchung />
-      <HeidiAlm />
       <Ferienhaus />
+      <Galerie />
       <Umgebung />
+      <HeidiAlm />
+      <Buchung />
       <Bewertungen />
     </>
   );
