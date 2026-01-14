@@ -239,38 +239,60 @@ export function Umgebung() {
               {t.umgebung.kidsTrips.title}
             </h3>
           </div>
-          <div className="space-y-4">
+
+          {/* Featured: Heidi-Alm */}
+          {t.umgebung.kidsTrips.featured && (
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-wood-50 to-green-50 rounded-2xl p-6 md:p-8 shadow-md border-2 border-wood-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold">
+                    1
+                  </span>
+                  <div>
+                    <h4 className="text-xl md:text-2xl font-bold text-gray-900">
+                      {t.umgebung.kidsTrips.featured.title}
+                    </h4>
+                    <p className="text-sm text-wood-600 font-medium">
+                      <Car className="inline w-4 h-4 mr-1" />
+                      {t.umgebung.kidsTrips.featured.distance} | {t.umgebung.kidsTrips.featured.age}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  {t.umgebung.kidsTrips.featured.description}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Grid: 6 weitere Ausflugsziele (2x3) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {kidsTrips.map((trip, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl overflow-hidden shadow-sm"
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
                 <button
                   onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
-                  className="w-full p-4 md:p-6 flex items-center justify-between text-left"
+                  className="w-full p-4 md:p-5 flex items-center justify-between text-left"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
-                      {index + 1}
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                      {index + 2}
                     </span>
                     <div>
-                      <h4 className="font-bold text-gray-900">{trip.title}</h4>
-                      <p className="text-sm text-gray-500">
-                        <Car className="inline w-4 h-4 mr-1" />
+                      <h4 className="font-bold text-gray-900 text-sm md:text-base">{trip.title}</h4>
+                      <p className="text-xs text-gray-500">
+                        <Car className="inline w-3 h-3 mr-1" />
                         {trip.distance} | {trip.age}
                       </p>
                     </div>
                   </div>
-                  {expandedKidsTrip === index ? <ChevronUp /> : <ChevronDown />}
+                  {expandedKidsTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedKidsTrip === index && (
-                  <div className="px-4 md:px-6 pb-4 md:pb-6">
-                    <p className="text-gray-600 mb-4">{trip.description}</p>
-                    {trip.tip && (
-                      <span className="text-wood-600 text-sm font-medium">
-                        Tipp: {trip.tip}
-                      </span>
-                    )}
+                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-gray-100">
+                    <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
                   </div>
                 )}
               </div>

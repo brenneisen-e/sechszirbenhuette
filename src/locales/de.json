@@ -166,51 +166,48 @@
     },
     "kidsTrips": {
       "title": "Die 7 schönsten Ausflüge mit Kindern in Kärnten",
+      "featured": {
+        "title": "Die Heidi-Alm am Falkert",
+        "description": "Die Heidi-Alm am Falkert ist direkt ums Eck und bietet einen märchenhaften Spaziergang durch die Heidi-Welt mit Blick auf die umliegenden Berge. Eine große Rutsche und ein moderner Spielplatz runden den Ausflug ab. Auf dem See der Heidi-Alm gibt es außerdem die Möglichkeit zu angeln. Bitte sprechen Sie vorab das Team der Heidi-Alm an. Nach der Heidi-Alm kann sich in der direkt angrenzenden Gastronomie der Seehütte oder der Bogi Alm gestärkt werden. Erwachsene kommen bei einem Spaziergang um den Falkertsee auf ihre Kosten.",
+        "distance": "5 Gehminuten",
+        "age": "Alle Altersgruppen"
+      },
       "trips": [
         {
-          "title": "Die Heidi-Alm am Falkert",
-          "description": "Die Heidi-Alm am Falkert ist direkt ums Eck und bietet einen märchenhaften Spaziergang durch die Heidi-Welt mit Blick auf die umliegenden Berge. Eine große Rutsche und ein moderner Spielplatz runden den Ausflug ab.",
-          "distance": "5 Gehminuten",
-          "age": "Alle Altersgruppen"
-        },
-        {
           "title": "Turracher Höhe und Nocky-Flitzer",
-          "description": "Die Turracher Höhe ist ein wunderschönes Skigebiet für Anfänger und Profis. Außerhalb der Wintersaison ist die Alpen-Achterbahn Nockyflitzer ein absolutes Ausflugs-Highlight. Ab 3 Jahren geht's rasant den Berg herunter.",
+          "description": "Die Turracher Höhe ist ein wunderschönes Skigebiet für Anfänger und Profis. Die malerische Landschaft zwischen Tannen und Bergspitzen, die Schneesicherheit und ihre 43 Pistenkilometer sind für Familien perfekt. Außerhalb der Wintersaison ist die Alpen-Achterbahn Nockyflitzer ein absolutes Ausflugs-Highlight. Ab 3 Jahren geht's rasant den Berg herunter, natürlich in Begleitung eines Erwachsenen. Die Nockyflitzer öffnet ab Juni seine Tore. Tolle Spielplätze und Nockys Almzeit (eine kindgerechte Entdeckungs-Wanderung mit Stempelkarte) lassen den Tag wie im Flug vergehen. Bei uns vergeht kein Urlaub in der Sechszirbenhütte ohne einen Besuch der Turracher Höhe.",
           "distance": "15 Autominuten",
           "age": "Ab 3 Jahren"
         },
         {
           "title": "Ossiacher See und Familywald",
-          "description": "Der Ossiacher See liegt ca. 30 Fahrminuten von der Sechszirbenhütte entfernt. Direkt daran gelegen ist der Abenteuer- und Kletterwald Familywald. Hier kommen kleine und große Kinder voll auf ihre Kosten.",
+          "description": "Der Ossiacher See liegt ca. 30 Fahrminuten von der Sechszirbenhütte entfernt. Direkt daran gelegen ist der Abenteuer- und Kletterwald Familywald. Hier kommen kleine und große Kinder voll auf ihre Kosten. Das Gelände ist liebevoll gestaltet, in jedem Baum gibt es etwas zu entdecken, Klangreisen, Balancier-Parks, eine Fly-Line und ein Hochseilgarten - hier lassen sich wirklich Stunden verbringen. Mit dem Tree-Net hat der Familywald ein absolutes Highlight geschaffen. Hier können Kleine und Große auf Netzen durch die Baumwipfel laufen, von Baum zu Baum rutschen und sind dabei absolut fallsicher.",
           "distance": "30 Autominuten",
           "age": "Ab 4 Jahren"
         },
         {
           "title": "Panoramaweg St. Oswald (mit Brunnachbahn)",
-          "description": "Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil.",
+          "description": "Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil, um z.B. auch kleinere Kandidaten mit einer Kraxel zu transportieren. Der Ausblick ist traumhaft und es gibt zahlreiche Abzweigungen für ausgedehntere Wanderungen, wenn z.B. ein Elternteil alleine weiterziehen möchte. Auf halber Strecke liegt die Bockhütte, eine perfekte Rast und wie im Bilderbuch. Wieder an der Biosphärenparkbahn Brunnachbahn angekommen wartet ein Aktiv Park und Wasserspielplatz auf euch, hier können sich müde Beine abkühlen, die Kinder Floß fahren und die Erwachsenen auf den Sonnenbänken eine Pause einlegen.",
           "distance": "16 Autominuten",
-          "age": "Alle Altersgruppen",
-          "tip": "Einkehr in der Bockhütte"
+          "age": "Alle Altersgruppen"
         },
         {
           "title": "Tierpark Feld am See",
-          "description": "Der Alpen Tierpark Feld am See ist ein Wildpark am Fuße eines Berges. Hier gibt es diverse heimische Tiere zu beobachten sowie einen kleinen Streichelzoo. Zwei Spielplätze sorgen für Abwechslung.",
+          "description": "Der Alpen Tierpark Feld am See ist ein Wildpark am Fuße eines Berges. Hier gibt es diverse heimische Tiere zu beobachten sowie einen kleinen Streichelzoo. Zwei Spielplätze sorgen für Abwechslung. Die Tour ist kinderwagen-geeignet, es gibt nur ein paar kleine Steigungen.",
           "distance": "25 Autominuten",
-          "age": "Alle Altersgruppen",
-          "tip": "Kinderwagen-geeignet"
+          "age": "Alle Altersgruppen"
         },
         {
           "title": "Bergbahn Gerlitzen-Alpe",
-          "description": "Die Gerlitzen-Alpe ist ein bekannter Startpunkt für Paraglider. Hier gibt es bei guten Bedingungen also immer viel zu bestaunen. An den einzelnen Stationen der Bergbahnen warten verschiedene Spielplätze.",
+          "description": "Die Gerlitzen-Alpe ist ein bekannter Startpunkt für Paraglider. Hier gibt es bei guten Bedingungen also immer viel zu bestaunen. An den einzelnen Stationen der Bergbahnen (ganz oben und Mitte) warten verschiedene Spielplätze. Ganz oben auf dem Berg können die Kinder mit tollstem Panorama schaukeln und dank super geringer Steigungen auch entspannt eine kleine Wanderung mit ihren Eltern machen.",
           "distance": "40 Autominuten",
           "age": "Alle Altersgruppen"
         },
         {
           "title": "Panoramastraße Nockalm",
-          "description": "Die Nockberge haben eine einzigartige Schönheit. Wie warme grüne Riesen liegen die Naturwunder in der Landschaft. Besonders eindrucksvoll lassen sie sich auf der Panoramastraße Nockalm bestaunen.",
+          "description": "Die Nockberge haben eine einzigartige Schönheit. Wie warme grüne Riesen liegen die Naturwunder in der Landschaft. Besonders eindrucksvoll lassen sie sich auf der Panoramastraße Nockalm bestaunen. Eltern planen das optimalerweise rund um den Mittagsschlaf und genießen dabei die Ruhe und den Ausblick. Aber Achtung: Es ist kurvig, schwache Mägen könnten sich bemerkbar machen.",
           "distance": "15 Autominuten",
-          "age": "Alle Altersgruppen",
-          "tip": "Am besten während des Mittagsschlafs"
+          "age": "Alle Altersgruppen"
         }
       ]
     },

@@ -38,6 +38,14 @@ const categoryMap: Record<string, string> = {
   surroundings: 'umgebung',
   umgebung: 'umgebung',
   extras: 'extras',
+  // Kinderausflüge
+  'heidi-alm': 'heidi-alm',
+  'turracher-hoehe': 'turracher-hoehe',
+  'ossiacher-see': 'ossiacher-see',
+  'panoramaweg': 'panoramaweg',
+  'tierpark': 'tierpark',
+  'gerlitzen': 'gerlitzen',
+  'nockalm': 'nockalm',
 };
 
 // Fallback static images
@@ -73,7 +81,14 @@ export function Galerie() {
         const data = await response.json() as { media?: MediaItem[] };
 
         if (data.media && data.media.length > 0) {
-          const galleryCategories = ['exterior', 'aussen', 'living', 'wohnen', 'innen', 'bedrooms', 'schlafen', 'kitchen', 'kueche', 'bathroom', 'bad', 'sauna', 'wellness', 'surroundings', 'umgebung', 'extras'];
+          const galleryCategories = [
+            'exterior', 'aussen', 'living', 'wohnen', 'innen', 'bedrooms', 'schlafen',
+            'kitchen', 'kueche', 'bathroom', 'bad', 'sauna', 'wellness', 'surroundings',
+            'umgebung', 'extras',
+            // Kinderausflüge
+            'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg',
+            'tierpark', 'gerlitzen', 'nockalm'
+          ];
           const allMedia = data.media;
           const dbImages: GalleryImage[] = allMedia
             .filter((img: MediaItem) => galleryCategories.includes(img.category))
@@ -110,18 +125,25 @@ export function Galerie() {
     bad: { de: 'Bad & Sauna', en: 'Bath & Sauna' },
     umgebung: { de: 'Umgebung', en: 'Surroundings' },
     extras: { de: 'Extras', en: 'Extras' },
+    // Kinderausflüge
+    'heidi-alm': { de: 'Heidi-Alm', en: 'Heidi-Alm' },
+    'turracher-hoehe': { de: 'Turracher Höhe', en: 'Turracher Höhe' },
+    'ossiacher-see': { de: 'Ossiacher See', en: 'Lake Ossiach' },
+    'panoramaweg': { de: 'Panoramaweg', en: 'Panorama Trail' },
+    'tierpark': { de: 'Tierpark', en: 'Animal Park' },
+    'gerlitzen': { de: 'Gerlitzen-Alpe', en: 'Gerlitzen-Alpe' },
+    'nockalm': { de: 'Nockalm', en: 'Nockalm' },
   };
 
-  const categories = [
-    { id: 'all', label: categoryLabels.all[language as 'de' | 'en'], count: images.length },
-    { id: 'aussen', label: categoryLabels.aussen[language as 'de' | 'en'], count: images.filter(img => img.category === 'aussen').length },
-    { id: 'wohnen', label: categoryLabels.wohnen[language as 'de' | 'en'], count: images.filter(img => img.category === 'wohnen').length },
-    { id: 'schlafen', label: categoryLabels.schlafen[language as 'de' | 'en'], count: images.filter(img => img.category === 'schlafen').length },
-    { id: 'kueche', label: categoryLabels.kueche[language as 'de' | 'en'], count: images.filter(img => img.category === 'kueche').length },
-    { id: 'bad', label: categoryLabels.bad[language as 'de' | 'en'], count: images.filter(img => img.category === 'bad').length },
-    { id: 'umgebung', label: categoryLabels.umgebung[language as 'de' | 'en'], count: images.filter(img => img.category === 'umgebung').length },
-    { id: 'extras', label: categoryLabels.extras[language as 'de' | 'en'], count: images.filter(img => img.category === 'extras').length },
-  ];
+  // Build categories dynamically - only show categories that have images (except 'all')
+  const categoryIds = ['all', 'aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras',
+    'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg', 'tierpark', 'gerlitzen', 'nockalm'];
+
+  const categories = categoryIds.map(id => ({
+    id,
+    label: categoryLabels[id]?.[language as 'de' | 'en'] || id,
+    count: id === 'all' ? images.length : images.filter(img => img.category === id).length,
+  }));
 
   const filteredImages = selectedCategory === 'all'
     ? images
