@@ -1,6 +1,5 @@
 export { Hero } from './Hero';
 export { Reviews } from './Reviews';
-export { Features } from './Features';
 export { HeidiAlm } from './HeidiAlm';
 export { Ferienhaus } from './Ferienhaus';
 export { Galerie } from './Galerie';

@@ -236,7 +236,7 @@ export function Buchung() {
             </div>
 
             {/* Extras */}
-            <div className="bg-gray-50 rounded-xl p-6">
+            <div id="extras" className="bg-gray-50 rounded-xl p-6 scroll-mt-24">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 {t.buchung.extras.title}
               </h3>
