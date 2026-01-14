@@ -94,7 +94,6 @@ function getPlaceholderResponse(category: string | null, type: string | null) {
   if (category && category in PLACEHOLDER_MEDIA) {
     media = PLACEHOLDER_MEDIA[category as keyof typeof PLACEHOLDER_MEDIA];
   } else {
-    // Return all media if no category specified
     media = Object.values(PLACEHOLDER_MEDIA).flat();
   }
 

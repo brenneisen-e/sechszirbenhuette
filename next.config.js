@@ -16,6 +16,12 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
+  // Erhöhe Body-Limit für Bild-Uploads (100MB)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
+  },
 };
 
 module.exports = nextConfig;

@@ -48,8 +48,8 @@ export function Hero() {
         )}
       </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+      {/* Overlay - nur leichter Gradient für Lesbarkeit */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center justify-center text-white text-center px-4">
@@ -57,7 +57,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-4xl"
+          className="max-w-5xl"
         >
           {/* Herzlich Willkommen */}
           <motion.p
@@ -73,8 +73,8 @@ export function Hero() {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-balance"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 text-balance drop-shadow-lg"
           >
             {t.hero.title}
           </motion.h1>
@@ -83,7 +83,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-xl md:text-2xl mb-4 text-white/90"
+            className="text-xl md:text-2xl lg:text-3xl mb-6 text-white drop-shadow-md"
           >
             {t.hero.subtitle}
           </motion.p>
@@ -92,7 +92,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-base md:text-lg mb-8 text-white/80 max-w-2xl mx-auto"
+            className="text-base md:text-lg lg:text-xl mb-10 text-white/90 max-w-3xl mx-auto drop-shadow-sm"
           >
             {t.hero.description}
           </motion.p>
