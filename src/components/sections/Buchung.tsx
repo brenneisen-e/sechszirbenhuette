@@ -194,9 +194,12 @@ export function Buchung() {
           className="text-center max-w-4xl mx-auto mb-16"
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
-            <CalendarCheck size={32} />
+            <CalendarCheck size={32} strokeWidth={1.5} />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2
+            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             {t.buchung.title}
           </h2>
           <p className="text-lg text-gray-600">

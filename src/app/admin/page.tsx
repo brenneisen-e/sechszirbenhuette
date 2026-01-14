@@ -4,30 +4,22 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  Image as ImageIcon,
   Upload,
   Trash2,
-  Home,
   Loader2,
-  AlertCircle,
   X,
   RefreshCw,
-  GripVertical,
   Video,
   Eye,
   Edit2,
   Check,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
+  AlertCircle,
   Info,
-  Sofa,
-  UtensilsCrossed,
-  Bed,
-  Flame,
-  Bath,
-  TreePine,
-  Wifi,
-  MapPin,
+  ImageIcon,
+  GripVertical,
   Plus,
 } from 'lucide-react';
 
@@ -43,7 +35,7 @@ interface MediaRecord {
   created_at: string;
 }
 
-// Category configuration with display locations
+// Category configuration with display locations - NO EMOJIS
 const CATEGORIES = [
   {
     value: 'hero',
@@ -51,7 +43,8 @@ const CATEGORIES = [
     description: 'Hauptvideo/Bild auf der Startseite',
     location: 'Startseite - ganz oben, volle Breite',
     supportsVideo: true,
-    maxItems: 1
+    maxItems: 1,
+    group: 'Haupt'
   },
   {
     value: 'header',
@@ -59,158 +52,176 @@ const CATEGORIES = [
     description: 'Hintergrundbild im Header-Bereich',
     location: 'Navigation/Header - dezenter Hintergrund',
     supportsVideo: false,
-    maxItems: 1
+    maxItems: 1,
+    group: 'Haupt'
   },
   {
     value: 'innen',
     label: 'Innenbereich',
     description: 'Bilder der Innenräume der Hütte',
-    location: 'Galerie-Sektion "Ferienhaus" - Innenräume',
+    location: 'Galerie - Innenräume',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Galerie'
   },
   {
     value: 'aussen',
     label: 'Außenbereich',
     description: 'Bilder der Außenansichten',
-    location: 'Galerie-Sektion "Ferienhaus" - Außenansicht',
+    location: 'Galerie - Außenansicht',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Galerie'
   },
   {
     value: 'umgebung',
     label: 'Umgebung',
     description: 'Bilder der umliegenden Landschaft',
-    location: 'Sektion "Umgebung" - Landschaftsbilder',
+    location: 'Sektion Umgebung',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Galerie'
   },
   {
     value: 'winter',
     label: 'Winter',
     description: 'Winterbilder und Schneelandschaften',
-    location: 'Saisonale Galerie - Wintermotive',
+    location: 'Saisonale Galerie',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Galerie'
   },
   {
     value: 'sommer',
     label: 'Sommer',
     description: 'Sommerbilder und grüne Landschaften',
-    location: 'Saisonale Galerie - Sommermotive',
+    location: 'Saisonale Galerie',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Galerie'
   },
-  // Kinderausflüge Kategorien
+  // Kinderausflüge
   {
     value: 'heidi-alm',
-    label: '🎢 Heidi-Alm am Falkert',
-    description: 'Bilder der Heidi-Alm mit Spielplatz und Falkertsee',
-    location: 'Umgebung - Kinderausflüge - Heidi-Alm',
+    label: 'Heidi-Alm am Falkert',
+    description: 'Bilder der Heidi-Alm',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'turracher-hoehe',
-    label: '🎿 Turracher Höhe & Nocky-Flitzer',
-    description: 'Bilder vom Skigebiet und der Alpen-Achterbahn',
-    location: 'Umgebung - Kinderausflüge - Turracher Höhe',
+    label: 'Turracher Höhe',
+    description: 'Bilder vom Skigebiet',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'ossiacher-see',
-    label: '🧗 Ossiacher See & Familywald',
+    label: 'Ossiacher See',
     description: 'Bilder vom See und Kletterwald',
-    location: 'Umgebung - Kinderausflüge - Ossiacher See',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'panoramaweg',
-    label: '🥾 Panoramaweg St. Oswald',
-    description: 'Bilder vom Panoramaweg und der Brunnachbahn',
-    location: 'Umgebung - Kinderausflüge - Panoramaweg',
+    label: 'Panoramaweg St. Oswald',
+    description: 'Bilder vom Panoramaweg',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'tierpark',
-    label: '🦌 Tierpark Feld am See',
-    description: 'Bilder vom Wildpark und Streichelzoo',
-    location: 'Umgebung - Kinderausflüge - Tierpark',
+    label: 'Tierpark Feld am See',
+    description: 'Bilder vom Wildpark',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'gerlitzen',
-    label: '🚡 Bergbahn Gerlitzen-Alpe',
-    description: 'Bilder von der Bergbahn und Paraglider-Aussicht',
-    location: 'Umgebung - Kinderausflüge - Gerlitzen',
+    label: 'Bergbahn Gerlitzen',
+    description: 'Bilder von der Bergbahn',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
   {
     value: 'nockalm',
-    label: '🛣️ Panoramastraße Nockalm',
-    description: 'Bilder der Nockberge und Panoramastraße',
-    location: 'Umgebung - Kinderausflüge - Nockalm',
+    label: 'Panoramastraße Nockalm',
+    description: 'Bilder der Nockberge',
+    location: 'Kinderausflüge',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Kinder'
   },
-  // Hundewanderungen Kategorien
+  // Hundewanderungen
   {
     value: 'hund-falkert',
-    label: '🐕 Falkert & Falkertsee',
-    description: 'Bilder vom Falkert-Gipfel und Falkertsee',
-    location: 'Umgebung - Hundewanderungen - Falkert',
+    label: 'Falkert & Falkertsee',
+    description: 'Bilder vom Falkert-Gipfel',
+    location: 'Hundewanderungen',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Hund'
   },
   {
     value: 'hund-rodresnock',
-    label: '🐕 Rodresnock/Moschelitzen',
-    description: 'Bilder der Rundwanderung durchs Murmeltiertal',
-    location: 'Umgebung - Hundewanderungen - Rodresnock',
+    label: 'Rodresnock/Moschelitzen',
+    description: 'Bilder der Rundwanderung',
+    location: 'Hundewanderungen',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Hund'
   },
   {
     value: 'hund-drei-seen',
-    label: '🐕 Drei-Seen-Wanderung',
-    description: 'Bilder der Drei-Seen-Wanderung an der Turracher Höhe',
-    location: 'Umgebung - Hundewanderungen - Drei Seen',
+    label: 'Drei-Seen-Wanderung',
+    description: 'Bilder der Drei-Seen-Wanderung',
+    location: 'Hundewanderungen',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Hund'
   },
   {
     value: 'hund-hochrindl',
-    label: '🐕 Panoramaweg Hochrindl',
-    description: 'Bilder vom Panoramaweg mit Frischwasserstellen',
-    location: 'Umgebung - Hundewanderungen - Hochrindl',
+    label: 'Panoramaweg Hochrindl',
+    description: 'Bilder vom Panoramaweg',
+    location: 'Hundewanderungen',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Hund'
   },
   {
     value: 'hund-millstaetter',
-    label: '🐕 Strandbad Millstätter See',
-    description: 'Bilder vom Hundestrand am Millstätter See',
-    location: 'Umgebung - Hundewanderungen - Millstätter See',
+    label: 'Strandbad Millstätter See',
+    description: 'Bilder vom Hundestrand',
+    location: 'Hundewanderungen',
     supportsVideo: true,
-    maxItems: null
+    maxItems: null,
+    group: 'Hund'
   },
 ];
 
-// Amenity cards configuration
+// Amenity cards configuration - NO ICONS
 const AMENITY_CARDS = [
-  { key: 'living', label: 'Wohnbereich', icon: Sofa },
-  { key: 'kitchen', label: 'Küche', icon: UtensilsCrossed },
-  { key: 'rooms', label: 'Schlafzimmer', icon: Bed },
-  { key: 'sauna', label: 'Sauna & Wellness', icon: Flame },
-  { key: 'bathroom', label: 'Badezimmer', icon: Bath },
-  { key: 'outdoor', label: 'Außenbereich', icon: TreePine },
-  { key: 'equipment', label: 'Ausstattung', icon: Wifi },
-  { key: 'location', label: 'Lage', icon: MapPin },
+  { key: 'living', label: 'Wohnbereich' },
+  { key: 'kitchen', label: 'Küche' },
+  { key: 'rooms', label: 'Schlafzimmer' },
+  { key: 'sauna', label: 'Sauna & Wellness' },
+  { key: 'bathroom', label: 'Badezimmer' },
+  { key: 'outdoor', label: 'Außenbereich' },
+  { key: 'equipment', label: 'Ausstattung' },
+  { key: 'location', label: 'Lage' },
 ];
 
 interface AmenityCardImage {
@@ -272,18 +283,25 @@ export default function AdminPage() {
 
   const handleAddImageToCard = async (cardKey: string, mediaId: string) => {
     try {
+      // First, delete any existing images for this card
+      const existingImages = amenityCardImages[cardKey] || [];
+      for (const img of existingImages) {
+        await fetch(`/api/admin/amenity-images?id=${img.id}`, { method: 'DELETE' });
+      }
+
+      // Then add the new image
       const response = await fetch('/api/admin/amenity-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ card_key: cardKey, media_id: mediaId }),
       });
       if (!response.ok) throw new Error('Failed to add image');
-      setSuccess('Bild zur Kachel hinzugefügt');
+      setSuccess('Bild gespeichert');
       await loadAmenityCardImages();
       setSelectingForCard(null);
     } catch (err) {
       console.error('Error adding image to card:', err);
-      setError('Fehler beim Hinzufügen des Bildes');
+      setError('Fehler beim Speichern des Bildes');
     }
   };
 
@@ -492,12 +510,16 @@ export default function AdminPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/" className="p-2 text-gray-500 hover:text-wood-700">
-                <Home className="w-5 h-5" />
+              <Link
+                href="/"
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-wood-700 hover:bg-wood-50 rounded-lg transition"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="text-sm font-medium">Zur Homepage</span>
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin-Panel</h1>
-                <p className="text-sm text-gray-500">Sechszirbenhütte - Medien verwalten</p>
+              <div className="border-l pl-4">
+                <h1 className="text-xl font-bold text-gray-900">Admin-Panel</h1>
+                <p className="text-sm text-gray-500">Medien verwalten</p>
               </div>
             </div>
             <button
@@ -882,16 +904,12 @@ export default function AdminPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {AMENITY_CARDS.map((card) => {
-              const Icon = card.icon;
               const cardImages = amenityCardImages[card.key] || [];
               const firstImage = cardImages[0];
 
               return (
                 <div key={card.key} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-wood-100 flex items-center justify-center text-wood-700">
-                      <Icon size={16} />
-                    </div>
                     <span className="font-medium text-sm">{card.label}</span>
                   </div>
 

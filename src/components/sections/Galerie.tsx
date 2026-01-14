@@ -171,7 +171,10 @@ export function Galerie() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-wood-100 rounded-full mb-4">
             <Images className="w-8 h-8 text-wood-700" strokeWidth={1.5} />
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2
+            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             {language === 'de' ? 'Galerie' : 'Gallery'}
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">

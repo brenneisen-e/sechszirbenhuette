@@ -110,7 +110,7 @@ export function Ferienhaus() {
   const { t, language } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
+  const [cardImages, setCardImages] = useState<Record<string, CardImage[]>>({});
 
   useEffect(() => {
     // Fetch gallery images
@@ -181,7 +181,13 @@ export function Ferienhaus() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
+            <Home size={32} strokeWidth={1.5} />
+          </div>
+          <h2
+            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             Ausstattung & Komfort
           </h2>
           <p className="text-lg text-gray-600">
@@ -194,7 +200,8 @@ export function Ferienhaus() {
           {amenityCards.map((card, index) => {
             const Icon = card.icon;
             const title = cardTitles[card.key][language as 'de' | 'en'];
-            const cardImage = cardImages[card.key];
+            const cardImageArray = cardImages[card.key];
+            const cardImage = cardImageArray && cardImageArray[0];
 
             return (
               <motion.button
@@ -212,7 +219,7 @@ export function Ferienhaus() {
               >
                 {/* Card Image (if assigned) */}
                 {cardImage?.url && (
-                  <div className="relative aspect-video w-full overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
                     <Image
                       src={cardImage.url}
                       alt={cardImage.alt_text || title}
