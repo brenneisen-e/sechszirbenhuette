@@ -59,12 +59,12 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="max-w-5xl"
         >
-          {/* Herzlich Willkommen */}
+          {/* Herzlich Willkommen - GROSS */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-5xl md:text-6xl lg:text-7xl mb-4 text-white drop-shadow-lg"
+            className="text-7xl md:text-8xl lg:text-9xl mb-6 text-white drop-shadow-lg"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             Herzlich Willkommen
@@ -74,7 +74,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 text-balance drop-shadow-lg"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 text-balance drop-shadow-lg"
           >
             {t.hero.title}
           </motion.h1>
