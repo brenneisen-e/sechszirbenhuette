@@ -91,7 +91,7 @@ export function Reviews() {
   };
 
   return (
-    <section className="py-12 bg-gradient-to-b from-wood-50 to-white">
+    <section id="reviews" className="py-12 bg-gradient-to-b from-wood-50 to-white scroll-mt-20">
       <div className="container mx-auto px-4">
         {/* Rating Header */}
         <div className="text-center mb-8">
