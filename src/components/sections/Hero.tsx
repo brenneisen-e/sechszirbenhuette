@@ -100,7 +100,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.7 }}
               className="text-xl md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
             >
-              Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen
+              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
             </motion.p>
 
             {/* Description */}

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "Sechszirbenhütte at Falkert | Premium Mountain Retreat in the Nockberge",
-    "description": "Historic mountain cabin with sauna in secluded location at 1,800m. Hiking, skiing & relaxation in Carinthia. Families & dogs welcome. Book now!"
+    "description": "Historic mountain cabin with sauna in secluded location at 1,700m. Hiking, skiing & relaxation in Carinthia. Families & dogs welcome. Book now!"
   },
   "navigation": {
     "home": "Home",
@@ -17,14 +17,14 @@
   },
   "hero": {
     "title": "at the Sechszirbenhütte",
-    "subtitle": "Premium mountain retreat at 1,800m in the Carinthian Nockberge",
+    "subtitle": "Premium mountain retreat at 1,700m in the Carinthian Nockberge",
     "description": "Experience unforgettable vacation days in our over 250-year-old mountain cabin – lovingly restored, with a sauna annex and in complete seclusion amidst Swiss stone pine and larch forests at Falkert.",
     "cta_book": "Book Now",
     "cta_explore": "Explore the Cabin"
   },
   "features": {
     "altitude": {
-      "title": "1,800m Altitude",
+      "title": "1,700m Altitude",
       "description": "Alpine panorama with views to the Karawanken mountains"
     },
     "secluded": {
@@ -70,7 +70,7 @@
     "details": {
       "grundstueck": "1,200 m² alpine property",
       "wohnflaeche": "80 m²",
-      "hoehe": "1,800m above sea level",
+      "hoehe": "1,700m above sea level",
       "personen": "2–5 persons"
     },
     "rooms": {
