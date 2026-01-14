@@ -100,17 +100,35 @@ const cardTitles: Record<string, { de: string; en: string }> = {
   location: { de: 'Lage', en: 'Location' },
 };
 
+interface CardImage {
+  url: string;
+  title?: string;
+  alt_text?: string;
+}
+
 export function Ferienhaus() {
   const { t, language } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
 
   useEffect(() => {
+    // Fetch gallery images
     fetch('/api/media?category=innen&type=image')
       .then((res) => res.json())
       .then((data) => {
         if (data.media) {
           setImages(data.media);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch amenity card images
+    fetch('/api/amenity-images')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.byCard) {
+          setCardImages(data.byCard);
         }
       })
       .catch(() => {});
@@ -176,6 +194,7 @@ export function Ferienhaus() {
           {amenityCards.map((card, index) => {
             const Icon = card.icon;
             const title = cardTitles[card.key][language as 'de' | 'en'];
+            const cardImage = cardImages[card.key];
 
             return (
               <motion.button
@@ -185,41 +204,56 @@ export function Ferienhaus() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => scrollToGalleryCategory(card.galleryCategory)}
-                className="bg-gray-50 rounded-xl p-6 text-left group cursor-pointer
+                className="bg-gray-50 rounded-xl overflow-hidden text-left group cursor-pointer
                   border-2 border-transparent
                   hover:border-wood-300 hover:shadow-lg hover:bg-white
                   transition-all duration-300 ease-out
                   hover:-translate-y-1"
               >
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-wood-100 flex items-center justify-center text-wood-700 mb-4
-                  group-hover:bg-wood-200 group-hover:scale-110 transition-all duration-300">
-                  <Icon size={24} />
-                </div>
-
-                {/* Title */}
-                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-wood-700 transition-colors">
-                  {title}
-                </h3>
-
-                {/* Items */}
-                <ul className="space-y-1.5">
-                  {card.items.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-wood-400 mt-1.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Hint if exists */}
-                {card.hint && (
-                  <div className="mt-4 p-3 bg-wood-50 rounded-lg border border-wood-100">
-                    <p className="text-xs text-gray-600">
-                      <span className="font-semibold text-wood-700">Hinweis:</span> {card.hint}
-                    </p>
+                {/* Card Image (if assigned) */}
+                {cardImage?.url && (
+                  <div className="relative aspect-video w-full overflow-hidden">
+                    <Image
+                      src={cardImage.url}
+                      alt={cardImage.alt_text || title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
                   </div>
                 )}
+
+                <div className="p-6">
+                  {/* Icon */}
+                  <div className="w-12 h-12 rounded-xl bg-wood-100 flex items-center justify-center text-wood-700 mb-4
+                    group-hover:bg-wood-200 group-hover:scale-110 transition-all duration-300">
+                    <Icon size={24} />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-wood-700 transition-colors">
+                    {title}
+                  </h3>
+
+                  {/* Items */}
+                  <ul className="space-y-1.5">
+                    {card.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400 mt-1.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Hint if exists */}
+                  {card.hint && (
+                    <div className="mt-4 p-3 bg-wood-50 rounded-lg border border-wood-100">
+                      <p className="text-xs text-gray-600">
+                        <span className="font-semibold text-wood-700">Hinweis:</span> {card.hint}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </motion.button>
             );
           })}
