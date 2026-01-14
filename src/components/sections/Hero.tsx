@@ -46,7 +46,7 @@ export function Hero() {
     { icon: TreePine, label: 'Alleinlage', onClick: () => scrollToGalleryCategory('aussen') },
     { icon: Flame, label: 'Sauna & Wellness', onClick: () => scrollToGalleryCategory('bad') },
     { icon: Users, label: 'Bis zu 5 Personen', onClick: () => scrollToGalleryCategory('schlafen') },
-    { icon: Dog, label: 'Hundefreundlich', onClick: () => scrollToSection('#extras') },
+    { icon: Dog, label: 'Hundefreundlich', onClick: () => scrollToSection('#dog-trips') },
     { icon: Star, label: '5-Sterne Bewertungen', onClick: () => scrollToSection('#reviews') },
   ];
 

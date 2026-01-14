@@ -167,10 +167,11 @@ export function Umgebung() {
 
         {/* Dog Trips */}
         <motion.div
+          id="dog-trips"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-20"
+          className="mb-20 scroll-mt-24"
         >
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
