@@ -87,7 +87,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl mb-2 text-white drop-shadow-lg"
+              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-2 text-white drop-shadow-lg"
               style={{ fontFamily: 'BrittanySignature, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte!
@@ -97,7 +97,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl text-white drop-shadow-lg"
+              className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white drop-shadow-lg"
               style={{ fontFamily: 'BrittanySignature, cursive' }}
             >
               Ihr Hüttenurlaub am Falkert

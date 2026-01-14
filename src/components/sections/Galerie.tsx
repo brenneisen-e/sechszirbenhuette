@@ -121,7 +121,7 @@ export function Galerie() {
     { id: 'bad', label: categoryLabels.bad[language as 'de' | 'en'], count: images.filter(img => img.category === 'bad').length },
     { id: 'umgebung', label: categoryLabels.umgebung[language as 'de' | 'en'], count: images.filter(img => img.category === 'umgebung').length },
     { id: 'extras', label: categoryLabels.extras[language as 'de' | 'en'], count: images.filter(img => img.category === 'extras').length },
-  ].filter(cat => cat.id === 'all' || cat.count > 0);
+  ];
 
   const filteredImages = selectedCategory === 'all'
     ? images
