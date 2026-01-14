@@ -1,12 +1,14 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
+import { Globe, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const languages = [
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'en', label: 'English' },
 ];
 
 interface LanguageSwitcherProps {
@@ -17,32 +19,61 @@ export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const switchLocale = (newLocale: string) => {
     const pathWithoutLocale = pathname.replace(`/${locale}`, '');
     const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
     router.push(newPath);
+    setIsOpen(false);
   };
 
   return (
-    <div className="flex items-center gap-1">
-      {languages.map((lang) => (
-        <button
-          key={lang.code}
-          onClick={() => switchLocale(lang.code)}
-          className={cn(
-            'px-2 py-1 text-lg rounded transition-all',
-            locale === lang.code
-              ? 'opacity-100 scale-110'
-              : 'opacity-60 hover:opacity-100',
-            !isScrolled && 'filter drop-shadow-md'
-          )}
-          title={lang.label}
-          aria-label={`Switch to ${lang.label}`}
-        >
-          {lang.flag}
-        </button>
-      ))}
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          'flex items-center gap-1 p-2 rounded-lg transition-colors',
+          isScrolled
+            ? 'text-gray-700 hover:bg-gray-100'
+            : 'text-white hover:bg-white/10'
+        )}
+        aria-label="Sprache wählen"
+      >
+        <Globe size={20} />
+        <ChevronDown size={16} className={cn('transition-transform', isOpen && 'rotate-180')} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => switchLocale(lang.code)}
+              className={cn(
+                'w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors',
+                locale === lang.code
+                  ? 'text-wood-700 font-medium bg-wood-50'
+                  : 'text-gray-700'
+              )}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
