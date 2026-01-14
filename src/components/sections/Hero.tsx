@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Users, Dog, Star } from 'lucide-react';
 
 export function Hero() {
-  const { t } = useLanguage();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,75 +46,106 @@ export function Hero() {
         )}
       </div>
 
-      {/* Overlay - nur leichter Gradient für Lesbarkeit */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+      {/* Overlay - leichter Gradient für Lesbarkeit */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center text-white text-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-5xl"
-        >
-          {/* Herzlich Willkommen - GROSS */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-7xl md:text-8xl lg:text-9xl mb-6 text-white drop-shadow-lg"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
-          >
-            Herzlich Willkommen
-          </motion.p>
+      {/* Content Container - Full height with flex column */}
+      <div className="relative z-10 flex flex-col h-full text-white text-center px-4">
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 text-balance drop-shadow-lg"
-          >
-            {t.hero.title}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-xl md:text-2xl lg:text-3xl mb-6 text-white drop-shadow-md"
-          >
-            {t.hero.subtitle}
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-base md:text-lg lg:text-xl mb-10 text-white/90 max-w-3xl mx-auto drop-shadow-sm"
-          >
-            {t.hero.description}
-          </motion.p>
-
+        {/* Upper Third - Brittany Signature Headlines */}
+        <div className="flex-1 flex items-center justify-center pt-16">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="max-w-5xl"
           >
-            <button
-              onClick={() => scrollToSection('#buchung')}
-              className="px-8 py-4 bg-wood-700 text-white rounded-lg font-semibold hover:bg-wood-800 transition-colors"
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-4xl md:text-6xl lg:text-7xl mb-2 text-white drop-shadow-lg"
+              style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
             >
-              {t.hero.cta_book}
-            </button>
-            <button
-              onClick={() => scrollToSection('#ferienhaus')}
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+              Herzlich Willkommen in der Sechszirbenhütte!
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-3xl md:text-5xl lg:text-6xl text-white drop-shadow-lg"
+              style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
             >
-              {t.hero.cta_explore}
-            </button>
+              Ihr Hüttenurlaub am Falkert
+            </motion.p>
           </motion.div>
-        </motion.div>
+        </div>
+
+        {/* Middle Third - Empty space */}
+        <div className="flex-1" />
+
+        {/* Lower Third - Text and Icons */}
+        <div className="flex-1 flex flex-col items-center justify-center pb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="max-w-4xl"
+          >
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="text-xl md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
+            >
+              Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen
+            </motion.p>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.9 }}
+              className="text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-8"
+            >
+              Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
+            </motion.p>
+
+            {/* Icons Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.1 }}
+              className="flex justify-center gap-8 md:gap-16"
+            >
+              {/* Bis zu 5 Personen */}
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
+                  <Users className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                </div>
+                <span className="text-sm md:text-base text-white drop-shadow-sm">Bis zu 5 Personen</span>
+              </div>
+
+              {/* Hundefreundlich */}
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
+                  <Dog className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                </div>
+                <span className="text-sm md:text-base text-white drop-shadow-sm">Hundefreundlich</span>
+              </div>
+
+              {/* 5-Sterne Bewertung */}
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
+                  <Star className="w-6 h-6 md:w-7 md:h-7 text-white" />
+                </div>
+                <span className="text-sm md:text-base text-white drop-shadow-sm">5-Sterne Bewertung</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}
@@ -125,7 +154,7 @@ export function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
         onClick={() => scrollToSection('#features')}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white animate-bounce"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white animate-bounce"
         aria-label="Scroll down"
       >
         <ChevronDown size={40} />
