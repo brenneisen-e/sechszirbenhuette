@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 // Erlaubte Dateitypen
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;  // 10 MB
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB (Cloudflare Worker Limit)
 
-// In-Memory Speicher für Demo (in Produktion: R2)
-const mediaStore: Array<{
-  id: number;
-  url: string;
-  filename: string;
-  category: string;
-  type: string;
-  alt_text: string;
-  created_at: string;
-}> = [];
-
-let nextId = 1;
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,51 +43,72 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Größen-Check
-    if (isImage && file.size > MAX_IMAGE_SIZE) {
+    // Größen-Check (Worker Limit)
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `Bild zu groß (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum: 10 MB` },
-        { status: 400 }
-      );
-    }
-
-    if (isVideo && file.size > MAX_VIDEO_SIZE) {
-      return NextResponse.json(
-        { error: `Video zu groß (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum: 100 MB` },
+        { error: `Datei zu groß (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum: 25 MB. Bitte komprimieren Sie die Datei.` },
         { status: 400 }
       );
     }
 
     // Eindeutiger Dateiname
-    const ext = file.name.split('.').pop();
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 8);
-    const filename = `${timestamp}-${randomId}.${ext}`;
+    const filename = `${category}/${timestamp}-${randomId}.${ext}`;
 
-    // TODO: In Produktion zu R2 hochladen
-    // Für jetzt: Speichere in Memory und gib eine Platzhalter-URL zurück
-    const url = `/images/${category}/${filename}`;
+    try {
+      // R2 Binding holen
+      const { env } = getRequestContext();
+      const r2 = env.R2;
 
-    const mediaItem = {
-      id: nextId++,
-      url,
-      filename,
-      category,
-      type: isVideo ? 'video' : 'image',
-      alt_text: altText,
-      created_at: new Date().toISOString(),
-    };
+      if (!r2) {
+        // Fallback wenn R2 nicht verfügbar (z.B. lokal)
+        return NextResponse.json({
+          success: true,
+          message: 'R2 nicht konfiguriert - Datei nicht hochgeladen',
+          url: `/images/${category}/placeholder.jpg`,
+          filename,
+          category,
+          type: isVideo ? 'video' : 'image',
+        });
+      }
 
-    mediaStore.push(mediaItem);
+      // Datei zu R2 hochladen
+      const arrayBuffer = await file.arrayBuffer();
 
-    // Hinweis: Bei Cloudflare Pages müssen Bilder zu R2 hochgeladen werden
-    // Diese Route speichert momentan nur Metadaten
+      await r2.put(filename, arrayBuffer, {
+        httpMetadata: {
+          contentType: file.type,
+        },
+        customMetadata: {
+          originalName: file.name,
+          category: category,
+          altText: altText,
+        },
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Datei erfolgreich registriert. Hinweis: Für Produktion muss R2 eingerichtet werden.',
-      ...mediaItem,
-    });
+      // Öffentliche URL (erfordert Public Access auf dem Bucket)
+      const publicUrl = env.PUBLIC_R2_URL
+        ? `${env.PUBLIC_R2_URL}/${filename}`
+        : `https://media.sechszirbenhuette.com/${filename}`;
+
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        filename,
+        category,
+        type: isVideo ? 'video' : 'image',
+        size: file.size,
+      });
+
+    } catch (r2Error) {
+      console.error('R2 Upload error:', r2Error);
+      return NextResponse.json(
+        { error: `R2 Upload fehlgeschlagen: ${r2Error instanceof Error ? r2Error.message : 'Unbekannter Fehler'}` },
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
     console.error('Upload error:', error);
@@ -107,8 +117,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-export async function GET() {
-  return NextResponse.json({ media: mediaStore });
 }
