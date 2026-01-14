@@ -2,7 +2,7 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { Snowflake, Sunrise } from 'lucide-react';
+import { Mountain, Snowflake } from 'lucide-react';
 
 export function HeidiAlm() {
   const { t } = useLanguage();
@@ -26,10 +26,13 @@ export function HeidiAlm() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-20"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
-            <Sunrise size={32} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-700 mb-6">
+            <Mountain size={32} strokeWidth={1.5} />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+          <h2
+            className="text-4xl md:text-5xl text-wood-700 mb-6"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             {t.heidiAlm.title}
           </h2>
           <p className="text-lg text-gray-600 leading-relaxed">
@@ -45,10 +48,13 @@ export function HeidiAlm() {
           className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
         >
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-6">
-              <Snowflake size={32} />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sky-100 text-sky-600 mb-6">
+              <Snowflake size={32} strokeWidth={1.5} />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2
+              className="text-4xl md:text-5xl text-wood-700 mb-4"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.winter.title}
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">

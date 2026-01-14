@@ -181,7 +181,13 @@ export function Ferienhaus() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
+            <Home size={32} strokeWidth={1.5} />
+          </div>
+          <h2
+            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             Ausstattung & Komfort
           </h2>
           <p className="text-lg text-gray-600">
