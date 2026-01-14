@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Dog, Star } from 'lucide-react';
+import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 
 export function Hero() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -26,6 +26,29 @@ export function Hero() {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const scrollToGalleryCategory = (category: string) => {
+    const galerie = document.querySelector('#galerie');
+    if (galerie) {
+      galerie.scrollIntoView({ behavior: 'smooth' });
+      // Wait for scroll, then click the category button
+      setTimeout(() => {
+        const categoryButton = document.querySelector(`#galerie button[data-category="${category}"]`) as HTMLButtonElement;
+        if (categoryButton) {
+          categoryButton.click();
+        }
+      }, 500);
+    }
+  };
+
+  const features = [
+    { icon: Mountain, label: '1.800 m Höhe', onClick: () => scrollToSection('#heidiAlm') },
+    { icon: TreePine, label: 'Alleinlage', onClick: () => scrollToGalleryCategory('aussen') },
+    { icon: Flame, label: 'Sauna & Wellness', onClick: () => scrollToGalleryCategory('bad') },
+    { icon: Users, label: 'Bis zu 5 Personen', onClick: () => scrollToGalleryCategory('schlafen') },
+    { icon: Dog, label: 'Hundefreundlich', onClick: () => scrollToSection('#extras') },
+    { icon: Star, label: '5-Sterne Bewertungen', onClick: () => scrollToSection('#reviews') },
+  ];
 
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
@@ -58,14 +81,14 @@ export function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="max-w-5xl"
+            className="max-w-6xl"
           >
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-4xl md:text-6xl lg:text-7xl mb-2 text-white drop-shadow-lg"
-              style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
+              className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl mb-2 text-white drop-shadow-lg"
+              style={{ fontFamily: 'BrittanySignature, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte!
             </motion.p>
@@ -74,8 +97,8 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-3xl md:text-5xl lg:text-6xl text-white drop-shadow-lg"
-              style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
+              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl text-white drop-shadow-lg"
+              style={{ fontFamily: 'BrittanySignature, cursive' }}
             >
               Ihr Hüttenurlaub am Falkert
             </motion.p>
@@ -86,19 +109,19 @@ export function Hero() {
         <div className="flex-1" />
 
         {/* Lower Third - Text and Icons */}
-        <div className="flex-1 flex flex-col items-center justify-center pb-20">
+        <div className="flex-1 flex flex-col items-center justify-center pb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="max-w-4xl"
+            className="max-w-5xl"
           >
             {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-xl md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
+              className="text-lg md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md whitespace-nowrap"
             >
               Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen
             </motion.p>
@@ -113,36 +136,27 @@ export function Hero() {
               Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
             </motion.p>
 
-            {/* Icons Row */}
+            {/* 6 Icons Row */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.1 }}
-              className="flex justify-center gap-8 md:gap-16"
+              className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6"
             >
-              {/* Bis zu 5 Personen */}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
-                  <Users className="w-6 h-6 md:w-7 md:h-7 text-white" />
-                </div>
-                <span className="text-sm md:text-base text-white drop-shadow-sm">Bis zu 5 Personen</span>
-              </div>
-
-              {/* Hundefreundlich */}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
-                  <Dog className="w-6 h-6 md:w-7 md:h-7 text-white" />
-                </div>
-                <span className="text-sm md:text-base text-white drop-shadow-sm">Hundefreundlich</span>
-              </div>
-
-              {/* 5-Sterne Bewertung */}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2">
-                  <Star className="w-6 h-6 md:w-7 md:h-7 text-white" />
-                </div>
-                <span className="text-sm md:text-base text-white drop-shadow-sm">5-Sterne Bewertung</span>
-              </div>
+              {features.map((feature, index) => (
+                <button
+                  key={index}
+                  onClick={feature.onClick}
+                  className="flex flex-col items-center group cursor-pointer hover:scale-105 transition-transform"
+                >
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2 group-hover:bg-white/30 transition-colors">
+                    <feature.icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                  </div>
+                  <span className="text-xs md:text-sm font-semibold text-white drop-shadow-sm">
+                    {feature.label}
+                  </span>
+                </button>
+              ))}
             </motion.div>
           </motion.div>
         </div>
@@ -153,7 +167,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        onClick={() => scrollToSection('#features')}
+        onClick={() => scrollToSection('#reviews')}
         className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white animate-bounce"
         aria-label="Scroll down"
       >

@@ -7,6 +7,9 @@ import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { cn } from '@/lib/utils';
 
+// Logo green color (matches the logo)
+const LOGO_GREEN = '#1e5631';
+
 // Navigation links - split for left and right of logo
 const leftNavItems = [
   { key: 'ferienhaus', href: '#ferienhaus' },
@@ -24,11 +27,18 @@ const allNavItems = [...leftNavItems, ...rightNavItems];
 export function Header() {
   const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      // Check if scrolled past hero section
+      const heroSection = document.querySelector('#hero');
+      if (heroSection) {
+        const heroBottom = heroSection.getBoundingClientRect().bottom;
+        setIsPastHero(heroBottom < 0);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -73,37 +83,46 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Centered Logo */}
+          {/* Centered Logo - larger, extends beyond header */}
           <button
             onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105 mx-6 flex-shrink-0"
+            className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative"
           >
             <Image
               src="/images/logo.svg"
               alt="Sechszirbenhütte"
-              width={200}
-              height={80}
-              className="h-16 md:h-[70px] w-auto transition-all"
+              width={240}
+              height={100}
+              className="h-20 md:h-24 w-auto transition-all"
               priority
             />
           </button>
 
           {/* Right Navigation - justify-start to push items towards center */}
           <nav className="flex items-center gap-8 justify-start" style={{ minWidth: '280px' }}>
-            {rightNavItems.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => scrollToSection(item.href)}
-                className={cn(
-                  'font-medium transition-colors uppercase tracking-wide text-sm',
-                  isScrolled
-                    ? 'text-gray-700 hover:text-wood-600'
-                    : 'text-white hover:text-white/80'
-                )}
-              >
-                {t.navigation[item.key]}
-              </button>
-            ))}
+            {rightNavItems.map((item) => {
+              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => scrollToSection(item.href)}
+                  className={cn(
+                    'font-medium transition-all uppercase tracking-wide text-sm',
+                    isScrolled
+                      ? 'text-gray-700 hover:text-wood-600'
+                      : 'text-white hover:text-white/80',
+                    isAnfrageHighlighted && 'font-bold'
+                  )}
+                  style={isAnfrageHighlighted ? {
+                    borderBottom: `3px solid ${LOGO_GREEN}`,
+                    paddingBottom: '2px',
+                    color: isScrolled ? LOGO_GREEN : 'white'
+                  } : undefined}
+                >
+                  {t.navigation[item.key]}
+                </button>
+              );
+            })}
             <LanguageSwitcher isScrolled={isScrolled} />
           </nav>
         </div>
@@ -121,7 +140,7 @@ export function Header() {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Centered Logo (Mobile) */}
+          {/* Centered Logo (Mobile) - larger */}
           <button
             onClick={() => scrollToSection('#hero')}
             className="transition-transform hover:scale-105"
@@ -129,9 +148,9 @@ export function Header() {
             <Image
               src="/images/logo.svg"
               alt="Sechszirbenhütte"
-              width={160}
-              height={60}
-              className="h-12 w-auto transition-all"
+              width={180}
+              height={70}
+              className="h-16 w-auto transition-all"
               priority
             />
           </button>
@@ -145,15 +164,25 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg">
           <nav className="container py-4 flex flex-col gap-2">
-            {allNavItems.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => scrollToSection(item.href)}
-                className="py-2 text-gray-700 hover:text-wood-600 text-left uppercase tracking-wide"
-              >
-                {t.navigation[item.key]}
-              </button>
-            ))}
+            {allNavItems.map((item) => {
+              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => scrollToSection(item.href)}
+                  className={cn(
+                    'py-2 text-gray-700 hover:text-wood-600 text-left uppercase tracking-wide',
+                    isAnfrageHighlighted && 'font-bold'
+                  )}
+                  style={isAnfrageHighlighted ? {
+                    borderBottom: `3px solid ${LOGO_GREEN}`,
+                    color: LOGO_GREEN
+                  } : undefined}
+                >
+                  {t.navigation[item.key]}
+                </button>
+              );
+            })}
           </nav>
         </div>
       )}

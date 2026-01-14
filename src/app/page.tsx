@@ -1,7 +1,7 @@
 import {
   Hero,
   Reviews,
-  Features,
+  IntroText,
   Ferienhaus,
   Location,
   HeidiAlm,
@@ -16,7 +16,7 @@ export default function HomePage() {
     <>
       <Hero />
       <Reviews />
-      <Features />
+      <IntroText />
       <Ferienhaus />
       <Location />
       <HeidiAlm />
