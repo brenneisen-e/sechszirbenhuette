@@ -40,8 +40,10 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white',
-        isScrolled ? 'shadow-md py-2' : 'py-3'
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        isScrolled
+          ? 'bg-white shadow-md py-2'
+          : 'bg-transparent py-3'
       )}
     >
       <div className="container flex items-center justify-between">
@@ -55,7 +57,10 @@ export function Header() {
             alt="Sechszirbenhütte"
             width={220}
             height={85}
-            className="h-16 md:h-20 w-auto"
+            className={cn(
+              'h-16 md:h-20 w-auto transition-all',
+              !isScrolled && 'brightness-0 invert' // weißes Logo wenn nicht gescrollt
+            )}
             priority
           />
         </button>
@@ -67,8 +72,10 @@ export function Header() {
               key={item.key}
               onClick={() => scrollToSection(item.href)}
               className={cn(
-                'font-medium transition-colors hover:text-wood-600',
-                isScrolled ? 'text-gray-700' : 'text-gray-800'
+                'font-medium transition-colors',
+                isScrolled
+                  ? 'text-gray-700 hover:text-wood-600'
+                  : 'text-white hover:text-white/80'
               )}
             >
               {t.navigation[item.key]}
@@ -78,7 +85,7 @@ export function Header() {
 
         {/* Right Side: Language Switcher + CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <LanguageSwitcher />
+          <LanguageSwitcher isScrolled={isScrolled} />
           <button
             onClick={() => scrollToSection('#buchung')}
             className="px-4 py-2 rounded-lg font-medium bg-wood-700 text-white hover:bg-wood-800 transition-colors"
@@ -90,7 +97,10 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 rounded-lg text-gray-700 transition-colors"
+          className={cn(
+            'md:hidden p-2 rounded-lg transition-colors',
+            isScrolled ? 'text-gray-700' : 'text-white'
+          )}
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
