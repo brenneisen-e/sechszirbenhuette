@@ -7,13 +7,19 @@ import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { key: 'home', href: '#hero' },
+// Navigation links - split for left and right of logo
+const leftNavItems = [
   { key: 'ferienhaus', href: '#ferienhaus' },
   { key: 'umgebung', href: '#umgebung' },
-  { key: 'buchung', href: '#buchung' },
+] as const;
+
+const rightNavItems = [
+  { key: 'galerie', href: '#galerie' },
+  { key: 'anfrage', href: '#buchung' },
   { key: 'bewertungen', href: '#bewertungen' },
 ] as const;
+
+const allNavItems = [...leftNavItems, ...rightNavItems];
 
 export function Header() {
   const { t } = useLanguage();
@@ -46,82 +52,114 @@ export function Header() {
           : 'bg-transparent py-3'
       )}
     >
-      <div className="container flex items-center justify-between">
-        {/* Logo */}
-        <button
-          onClick={() => scrollToSection('#hero')}
-          className="transition-transform hover:scale-105"
-        >
-          <Image
-            src="/images/logo.svg"
-            alt="Sechszirbenhütte"
-            width={220}
-            height={85}
-            className={cn(
-              'h-16 md:h-20 w-auto transition-all',
-              !isScrolled && 'brightness-0 invert' // weißes Logo wenn nicht gescrollt
-            )}
-            priority
-          />
-        </button>
+      <div className="container">
+        {/* Desktop Layout - Logo centered */}
+        <div className="hidden md:flex items-center justify-between">
+          {/* Left Navigation */}
+          <nav className="flex items-center gap-6 flex-1">
+            {leftNavItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => scrollToSection(item.href)}
+                className={cn(
+                  'font-medium transition-colors uppercase tracking-wide',
+                  isScrolled
+                    ? 'text-gray-700 hover:text-wood-600'
+                    : 'text-white hover:text-white/80'
+                )}
+              >
+                {t.navigation[item.key]}
+              </button>
+            ))}
+          </nav>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => scrollToSection(item.href)}
-              className={cn(
-                'font-medium transition-colors',
-                isScrolled
-                  ? 'text-gray-700 hover:text-wood-600'
-                  : 'text-white hover:text-white/80'
-              )}
-            >
-              {t.navigation[item.key]}
-            </button>
-          ))}
-        </nav>
-
-        {/* Right Side: Language Switcher + CTA */}
-        <div className="hidden md:flex items-center gap-4">
-          <LanguageSwitcher isScrolled={isScrolled} />
+          {/* Centered Logo */}
           <button
-            onClick={() => scrollToSection('#buchung')}
-            className="px-4 py-2 rounded-lg font-medium bg-wood-700 text-white hover:bg-wood-800 transition-colors"
+            onClick={() => scrollToSection('#hero')}
+            className="transition-transform hover:scale-105 mx-8"
           >
-            {t.navigation.buchung}
+            <Image
+              src="/images/logo.svg"
+              alt="Sechszirbenhütte"
+              width={220}
+              height={85}
+              className={cn(
+                'h-16 md:h-20 w-auto transition-all',
+                !isScrolled && 'brightness-0 invert'
+              )}
+              priority
+            />
           </button>
+
+          {/* Right Navigation */}
+          <nav className="flex items-center gap-6 flex-1 justify-end">
+            {rightNavItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => scrollToSection(item.href)}
+                className={cn(
+                  'font-medium transition-colors uppercase tracking-wide',
+                  isScrolled
+                    ? 'text-gray-700 hover:text-wood-600'
+                    : 'text-white hover:text-white/80'
+                )}
+              >
+                {t.navigation[item.key]}
+              </button>
+            ))}
+            <LanguageSwitcher isScrolled={isScrolled} />
+          </nav>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={cn(
-            'md:hidden p-2 rounded-lg transition-colors',
-            isScrolled ? 'text-gray-700' : 'text-white'
-          )}
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Mobile Layout */}
+        <div className="md:hidden flex items-center justify-between">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={cn(
+              'p-2 rounded-lg transition-colors',
+              isScrolled ? 'text-gray-700' : 'text-white'
+            )}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Centered Logo (Mobile) */}
+          <button
+            onClick={() => scrollToSection('#hero')}
+            className="transition-transform hover:scale-105"
+          >
+            <Image
+              src="/images/logo.svg"
+              alt="Sechszirbenhütte"
+              width={180}
+              height={70}
+              className={cn(
+                'h-14 w-auto transition-all',
+                !isScrolled && 'brightness-0 invert'
+              )}
+              priority
+            />
+          </button>
+
+          {/* Language Switcher (Mobile) */}
+          <LanguageSwitcher isScrolled={isScrolled} />
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg">
           <nav className="container py-4 flex flex-col gap-2">
-            {navItems.map((item) => (
+            {allNavItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => scrollToSection(item.href)}
-                className="py-2 text-gray-700 hover:text-wood-600 text-left"
+                className="py-2 text-gray-700 hover:text-wood-600 text-left uppercase tracking-wide"
               >
                 {t.navigation[item.key]}
               </button>
             ))}
-            <div className="pt-4 border-t mt-2">
-              <LanguageSwitcher />
-            </div>
           </nav>
         </div>
       )}
