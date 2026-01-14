@@ -211,9 +211,9 @@ export function Reviews() {
           </div>
 
           {/* Translated from German note */}
-          {language !== 'de' && t.reviews?.translatedFrom && (
+          {language !== 'de' && (
             <div className="text-center mt-3 text-xs text-gray-400 italic">
-              ({t.reviews.translatedFrom})
+              (Translated from German)
             </div>
           )}
 
