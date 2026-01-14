@@ -277,6 +277,32 @@
     "cta": "Bewertung auf Google schreiben",
     "thankYou": "Wir freuen uns über Lob, Kritik und Anregungen! Vielen Dank für Ihre Unterstützung!"
   },
+  "reviews": {
+    "source": "Bewertung auf",
+    "basedOn": "basierend auf Gästebewertungen",
+    "alsoBookableOn": "Buchbar auch auf",
+    "and": "und",
+    "commissionFree": "Provisionsfrei hier direkt anfragen!",
+    "swipe": "wischen",
+    "goToReview": "Zur Bewertung",
+    "quotes": [
+      {
+        "quote": "Ein traumhafter Ort zum Entspannen! Die Hütte ist wunderschön eingerichtet und die Sauna ist ein absolutes Highlight. Wir kommen wieder!",
+        "author": "Familie M.",
+        "date": "Januar 2025"
+      },
+      {
+        "quote": "Perfekt für Familien mit Hund. Die Alleinlage ist einzigartig und die Aussicht auf die Berge unbezahlbar.",
+        "author": "Thomas R.",
+        "date": "Dezember 2024"
+      },
+      {
+        "quote": "Hervorragende Ausstattung, gemütliche Atmosphäre und sehr freundliche Vermieter. Absolut empfehlenswert!",
+        "author": "Sandra K.",
+        "date": "November 2024"
+      }
+    ]
+  },
   "footer": {
     "contact": "Kontakt",
     "legal": "Rechtliches",

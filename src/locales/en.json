@@ -277,6 +277,33 @@
     "cta": "Write a Review on Google",
     "thankYou": "We appreciate praise, criticism, and suggestions! Thank you for your support!"
   },
+  "reviews": {
+    "source": "Rating on",
+    "basedOn": "based on guest reviews",
+    "alsoBookableOn": "Also bookable on",
+    "and": "and",
+    "commissionFree": "Book commission-free directly here!",
+    "swipe": "swipe",
+    "goToReview": "Go to review",
+    "translatedFrom": "Translated from German",
+    "quotes": [
+      {
+        "quote": "A wonderful place to relax! The cabin is beautifully decorated and the sauna is an absolute highlight. We'll be back!",
+        "author": "Family M.",
+        "date": "January 2025"
+      },
+      {
+        "quote": "Perfect for families with dogs. The secluded location is unique and the mountain views are priceless.",
+        "author": "Thomas R.",
+        "date": "December 2024"
+      },
+      {
+        "quote": "Excellent amenities, cozy atmosphere and very friendly hosts. Highly recommended!",
+        "author": "Sandra K.",
+        "date": "November 2024"
+      }
+    ]
+  },
   "footer": {
     "contact": "Contact",
     "legal": "Legal",
