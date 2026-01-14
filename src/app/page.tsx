@@ -13,10 +13,10 @@ export default function HomePage() {
     <>
       <Hero />
       <Features />
+      <Buchung />
       <HeidiAlm />
       <Ferienhaus />
       <Umgebung />
-      <Buchung />
       <Bewertungen />
     </>
   );

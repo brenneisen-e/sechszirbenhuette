@@ -93,6 +93,11 @@ export function Footer() {
           <p className="mt-2">
             {SITE_CONFIG.owners}
           </p>
+          <p className="mt-4">
+            <Link href="/admin" className="text-gray-600 hover:text-gray-400 transition-colors text-xs">
+              Admin
+            </Link>
+          </p>
         </div>
       </div>
     </footer>
