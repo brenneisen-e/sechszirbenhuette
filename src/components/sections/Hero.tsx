@@ -50,7 +50,7 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
       {/* Content - positioned in lower third */}
-      <div className="relative z-10 flex h-full items-end justify-center text-white text-center px-4 pb-32">
+      <div className="relative z-10 flex h-full items-end justify-center text-white text-center px-4 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -62,10 +62,10 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl mb-4 text-white drop-shadow-lg"
+            className="text-4xl md:text-6xl lg:text-7xl mb-2 text-white drop-shadow-lg"
             style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
           >
-            Herzlich Willkommen in der Sechszirbenh&uuml;tte!
+            Herzlich Willkommen in der Sechszirbenhütte!
           </motion.p>
 
           {/* Ihr Hüttenurlaub am Falkert */}
@@ -73,10 +73,30 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-3xl md:text-5xl lg:text-6xl text-white drop-shadow-lg"
+            className="text-3xl md:text-5xl lg:text-6xl mb-6 text-white drop-shadow-lg"
             style={{ fontFamily: 'BrittanySignature, RetroSignature, cursive' }}
           >
-            Ihr H&uuml;ttenurlaub am Falkert
+            Ihr Hüttenurlaub am Falkert
+          </motion.p>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="text-xl md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
+          >
+            Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen
+          </motion.p>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            className="text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-sm"
+          >
+            Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
           </motion.p>
         </motion.div>
       </div>
