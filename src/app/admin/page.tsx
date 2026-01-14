@@ -158,6 +158,47 @@ const CATEGORIES = [
     supportsVideo: true,
     maxItems: null
   },
+  // Hundewanderungen Kategorien
+  {
+    value: 'hund-falkert',
+    label: '🐕 Falkert & Falkertsee',
+    description: 'Bilder vom Falkert-Gipfel und Falkertsee',
+    location: 'Umgebung - Hundewanderungen - Falkert',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'hund-rodresnock',
+    label: '🐕 Rodresnock/Moschelitzen',
+    description: 'Bilder der Rundwanderung durchs Murmeltiertal',
+    location: 'Umgebung - Hundewanderungen - Rodresnock',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'hund-drei-seen',
+    label: '🐕 Drei-Seen-Wanderung',
+    description: 'Bilder der Drei-Seen-Wanderung an der Turracher Höhe',
+    location: 'Umgebung - Hundewanderungen - Drei Seen',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'hund-hochrindl',
+    label: '🐕 Panoramaweg Hochrindl',
+    description: 'Bilder vom Panoramaweg mit Frischwasserstellen',
+    location: 'Umgebung - Hundewanderungen - Hochrindl',
+    supportsVideo: true,
+    maxItems: null
+  },
+  {
+    value: 'hund-millstaetter',
+    label: '🐕 Strandbad Millstätter See',
+    description: 'Bilder vom Hundestrand am Millstätter See',
+    location: 'Umgebung - Hundewanderungen - Millstätter See',
+    supportsVideo: true,
+    maxItems: null
+  },
 ];
 
 // Amenity cards configuration
