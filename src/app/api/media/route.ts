@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 interface MediaRecord {
   id: string;
@@ -11,6 +10,21 @@ interface MediaRecord {
   media_type: 'image' | 'video';
   display_order: number;
   created_at: string;
+}
+
+// Dynamic import for Cloudflare context (only works in Cloudflare environment)
+async function getCloudflareEnv(): Promise<{ DB: unknown; R2: unknown } | null> {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+    return null;
+  }
+  try {
+    // Use Function constructor to avoid webpack bundling
+    const importFn = new Function('specifier', 'return import(specifier)');
+    const mod = await importFn('@opennextjs/cloudflare');
+    return (await mod.getCloudflareContext()).env;
+  } catch {
+    return null;
+  }
 }
 
 // Fallback placeholder data for development/when no R2 data exists
@@ -43,7 +57,12 @@ export async function GET(request: NextRequest) {
 
   try {
     // Try to get data from D1
-    const { env } = await getCloudflareContext();
+    const env = await getCloudflareEnv();
+
+    if (!env || !env.DB) {
+      // Not in Cloudflare environment, use placeholders
+      return getPlaceholderResponse(category, type);
+    }
 
     let query = 'SELECT * FROM media';
     const params: string[] = [];

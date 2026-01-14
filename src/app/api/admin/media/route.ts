@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
+
+// Dynamic import for Cloudflare context (only works in Cloudflare environment)
+async function getCloudflareEnv(): Promise<{ DB: unknown; R2: unknown } | null> {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+    return null;
+  }
+  try {
+    // Use Function constructor to avoid webpack bundling
+    const importFn = new Function('specifier', 'return import(specifier)');
+    const mod = await importFn('@opennextjs/cloudflare');
+    return (await mod.getCloudflareContext()).env;
+  } catch {
+    return null;
+  }
+}
 
 interface MediaRecord {
   id: string;
@@ -16,7 +30,10 @@ interface MediaRecord {
 // GET - List all media or filter by category/type
 export async function GET(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext();
+    const env = await getCloudflareEnv();
+    if (!env) {
+      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+    }
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const type = searchParams.get('type'); // 'image' | 'video' | null
@@ -60,7 +77,10 @@ export async function GET(request: NextRequest) {
 // POST - Upload new media files
 export async function POST(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext();
+    const env = await getCloudflareEnv();
+    if (!env) {
+      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+    }
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const category = formData.get('category') as string || 'aussen';
@@ -139,7 +159,10 @@ export async function POST(request: NextRequest) {
 // PUT - Update media metadata
 export async function PUT(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext();
+    const env = await getCloudflareEnv();
+    if (!env) {
+      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+    }
     const body = await request.json();
     const { id, alt_text, title, category, display_order } = body;
 
@@ -198,7 +221,10 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete media
 export async function DELETE(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext();
+    const env = await getCloudflareEnv();
+    if (!env) {
+      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

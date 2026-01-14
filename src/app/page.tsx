@@ -1,10 +1,12 @@
 import {
   Hero,
+  Reviews,
   Features,
-  HeidiAlm,
   Ferienhaus,
-  Galerie,
+  Location,
+  HeidiAlm,
   Umgebung,
+  Galerie,
   Buchung,
   Bewertungen,
 } from '@/components/sections';
@@ -13,11 +15,13 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Reviews />
       <Features />
       <Ferienhaus />
-      <Galerie />
-      <Umgebung />
+      <Location />
       <HeidiAlm />
+      <Umgebung />
+      <Galerie />
       <Buchung />
       <Bewertungen />
     </>
