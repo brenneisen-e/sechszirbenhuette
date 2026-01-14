@@ -26,11 +26,11 @@ export function PineBackground() {
     <div
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-700"
       style={{
-        backgroundImage: 'url(/images/decorations/zirben.png)',
+        backgroundImage: 'url(/images/1768424083695.jpg)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: '600px auto',
-        opacity: 0.04,
+        backgroundSize: '500px auto',
+        opacity: 0.06,
       }}
     />
   );
