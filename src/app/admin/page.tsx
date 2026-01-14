@@ -143,9 +143,10 @@ export default function AdminPage() {
     }
 
     const categoryConfig = CATEGORIES.find(c => c.value === selectedCategory);
+    const fileArray = Array.from(files);
 
     // Check file types
-    for (const file of Array.from(files)) {
+    for (const file of fileArray) {
       const isVideo = file.type.startsWith('video/');
       if (isVideo && categoryConfig && !categoryConfig.supportsVideo) {
         setError(`Die Kategorie "${categoryConfig.label}" unterstützt keine Videos`);
@@ -157,36 +158,47 @@ export default function AdminPage() {
     setUploadProgress(0);
     setError('');
 
-    const formData = new FormData();
-    Array.from(files).forEach((file) => {
+    let successCount = 0;
+    let failCount = 0;
+
+    // Upload files one by one to avoid 413 Payload Too Large
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      const formData = new FormData();
       formData.append('files', file);
-    });
-    formData.append('category', selectedCategory);
+      formData.append('category', selectedCategory);
 
-    try {
-      const response = await fetch('/api/admin/media', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const response = await fetch('/api/admin/media', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Upload fehlgeschlagen');
+        if (response.ok) {
+          successCount++;
+        } else {
+          failCount++;
+          console.error(`Failed to upload ${file.name}`);
+        }
+      } catch (err) {
+        failCount++;
+        console.error(`Error uploading ${file.name}:`, err);
       }
 
-      setSuccess(`${result.media?.length || 0} Datei(en) erfolgreich hochgeladen`);
-      await loadMedia(selectedCategory || undefined);
-      setUploadProgress(100);
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError(err instanceof Error ? err.message : 'Fehler beim Hochladen');
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      // Clear file input
-      e.target.value = '';
+      // Update progress
+      setUploadProgress(Math.round(((i + 1) / fileArray.length) * 100));
     }
+
+    if (successCount > 0) {
+      setSuccess(`${successCount} Datei(en) erfolgreich hochgeladen${failCount > 0 ? `, ${failCount} fehlgeschlagen` : ''}`);
+      await loadMedia(selectedCategory || undefined);
+    } else {
+      setError('Keine Dateien konnten hochgeladen werden');
+    }
+
+    setIsUploading(false);
+    setUploadProgress(0);
+    e.target.value = '';
   };
 
   const handleDelete = async (mediaId: string) => {
@@ -423,9 +435,17 @@ export default function AdminPage() {
           )}
 
           {isUploading && (
-            <div className="flex items-center gap-3">
-              <Loader2 className="w-5 h-5 animate-spin text-wood-600" />
-              <span className="text-gray-600">Wird hochgeladen...</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-wood-600" />
+                <span className="text-gray-600">Wird hochgeladen... {uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-wood-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
             </div>
           )}
         </div>
