@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 // Cloudflare types
 interface R2Object {
@@ -30,16 +31,11 @@ interface CloudflareEnv {
   R2: R2Bucket;
 }
 
-// Dynamic import for Cloudflare context (only works in Cloudflare environment)
+// Get Cloudflare environment
 async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
-  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
-    return null;
-  }
   try {
-    // Use Function constructor to avoid webpack bundling
-    const importFn = new Function('specifier', 'return import(specifier)');
-    const mod = await importFn('@opennextjs/cloudflare');
-    return (await mod.getCloudflareContext()).env as CloudflareEnv;
+    const ctx = await getCloudflareContext();
+    return ctx.env as CloudflareEnv;
   } catch {
     return null;
   }
