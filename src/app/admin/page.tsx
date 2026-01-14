@@ -20,6 +20,15 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  Sofa,
+  UtensilsCrossed,
+  Bed,
+  Flame,
+  Bath,
+  TreePine,
+  Wifi,
+  MapPin,
+  Plus,
 } from 'lucide-react';
 
 interface MediaRecord {
@@ -94,6 +103,26 @@ const CATEGORIES = [
   },
 ];
 
+// Amenity cards configuration
+const AMENITY_CARDS = [
+  { key: 'living', label: 'Wohnbereich', icon: Sofa },
+  { key: 'kitchen', label: 'Küche', icon: UtensilsCrossed },
+  { key: 'rooms', label: 'Schlafzimmer', icon: Bed },
+  { key: 'sauna', label: 'Sauna & Wellness', icon: Flame },
+  { key: 'bathroom', label: 'Badezimmer', icon: Bath },
+  { key: 'outdoor', label: 'Außenbereich', icon: TreePine },
+  { key: 'equipment', label: 'Ausstattung', icon: Wifi },
+  { key: 'location', label: 'Lage', icon: MapPin },
+];
+
+interface AmenityCardImage {
+  id: number;
+  card_key: string;
+  media_id: string;
+  url?: string;
+  title?: string;
+}
+
 export default function AdminPage() {
   const [media, setMedia] = useState<MediaRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,8 +137,13 @@ export default function AdminPage() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [previewMedia, setPreviewMedia] = useState<MediaRecord | null>(null);
 
+  // Amenity card images state
+  const [amenityCardImages, setAmenityCardImages] = useState<Record<string, AmenityCardImage[]>>({});
+  const [selectingForCard, setSelectingForCard] = useState<string | null>(null);
+
   useEffect(() => {
     loadMedia();
+    loadAmenityCardImages();
   }, []);
 
   const loadMedia = async (category?: string) => {
@@ -125,6 +159,47 @@ export default function AdminPage() {
       setError('Fehler beim Laden der Medien');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAmenityCardImages = async () => {
+    try {
+      const response = await fetch('/api/admin/amenity-images');
+      const data = await response.json();
+      setAmenityCardImages(data.byCard || {});
+    } catch (err) {
+      console.error('Error loading amenity card images:', err);
+    }
+  };
+
+  const handleAddImageToCard = async (cardKey: string, mediaId: string) => {
+    try {
+      const response = await fetch('/api/admin/amenity-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ card_key: cardKey, media_id: mediaId }),
+      });
+      if (!response.ok) throw new Error('Failed to add image');
+      setSuccess('Bild zur Kachel hinzugefügt');
+      await loadAmenityCardImages();
+      setSelectingForCard(null);
+    } catch (err) {
+      console.error('Error adding image to card:', err);
+      setError('Fehler beim Hinzufügen des Bildes');
+    }
+  };
+
+  const handleRemoveImageFromCard = async (imageId: number) => {
+    try {
+      const response = await fetch(`/api/admin/amenity-images?id=${imageId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to remove image');
+      setSuccess('Bild von Kachel entfernt');
+      await loadAmenityCardImages();
+    } catch (err) {
+      console.error('Error removing image from card:', err);
+      setError('Fehler beim Entfernen des Bildes');
     }
   };
 
@@ -692,6 +767,120 @@ export default function AdminPage() {
                     <p className="text-gray-900">{getCategoryConfig(previewMedia.category)?.location}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Amenity Card Images Section */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <ImageIcon className="w-6 h-6" />
+            Ausstattung & Komfort - Kachel-Bilder
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Wählen Sie für jede Kachel im Bereich &quot;Ausstattung & Komfort&quot; ein Bild aus der Galerie aus.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {AMENITY_CARDS.map((card) => {
+              const Icon = card.icon;
+              const cardImages = amenityCardImages[card.key] || [];
+              const firstImage = cardImages[0];
+
+              return (
+                <div key={card.key} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-wood-100 flex items-center justify-center text-wood-700">
+                      <Icon size={16} />
+                    </div>
+                    <span className="font-medium text-sm">{card.label}</span>
+                  </div>
+
+                  {firstImage?.url ? (
+                    <div className="relative aspect-video bg-gray-200 rounded-lg overflow-hidden mb-2 group">
+                      <Image
+                        src={firstImage.url}
+                        alt={firstImage.title || card.label}
+                        fill
+                        className="object-cover"
+                        sizes="200px"
+                      />
+                      <button
+                        onClick={() => handleRemoveImageFromCard(firstImage.id)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Bild entfernen"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => setSelectingForCard(card.key)}
+                    className="w-full px-3 py-1.5 text-xs bg-wood-600 text-white rounded hover:bg-wood-700 transition flex items-center justify-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    {firstImage ? 'Bild ändern' : 'Bild auswählen'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Image Selection Modal */}
+        {selectingForCard && (
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectingForCard(null)}
+          >
+            <div
+              className="bg-white rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-4 border-b flex items-center justify-between">
+                <h3 className="font-bold text-gray-900">
+                  Bild auswählen für: {AMENITY_CARDS.find(c => c.key === selectingForCard)?.label}
+                </h3>
+                <button
+                  onClick={() => setSelectingForCard(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-4 overflow-y-auto max-h-[60vh]">
+                {media.filter(m => m.media_type === 'image').length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Keine Bilder verfügbar. Laden Sie zuerst Bilder hoch.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {media.filter(m => m.media_type === 'image').map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleAddImageToCard(selectingForCard, item.id)}
+                        className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-wood-500 transition group"
+                      >
+                        <Image
+                          src={item.url}
+                          alt={item.alt_text || 'Bild'}
+                          fill
+                          className="object-cover"
+                          sizes="150px"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
+                          <Check className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

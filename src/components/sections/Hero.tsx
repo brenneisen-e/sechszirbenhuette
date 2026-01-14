@@ -42,7 +42,7 @@ export function Hero() {
   };
 
   const features = [
-    { icon: Mountain, label: '1.800 m Höhe', onClick: () => scrollToSection('#heidiAlm') },
+    { icon: Mountain, label: '1.700 m Höhe', onClick: () => scrollToSection('#heidiAlm') },
     { icon: TreePine, label: 'Alleinlage', onClick: () => scrollToGalleryCategory('aussen') },
     { icon: Flame, label: 'Sauna & Wellness', onClick: () => scrollToGalleryCategory('bad') },
     { icon: Users, label: 'Bis zu 5 Personen', onClick: () => scrollToGalleryCategory('schlafen') },
@@ -88,7 +88,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-2 text-white drop-shadow-lg"
-              style={{ fontFamily: 'BrittanySignature, cursive' }}
+              style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte!
             </motion.p>
@@ -98,7 +98,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white drop-shadow-lg"
-              style={{ fontFamily: 'BrittanySignature, cursive' }}
+              style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Ihr Hüttenurlaub am Falkert
             </motion.p>
@@ -123,7 +123,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.7 }}
               className="text-lg md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md whitespace-nowrap"
             >
-              Premium-Hüttenurlaub auf 1.800 m in den Kärntner Nockbergen
+              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
             </motion.p>
 
             {/* Description */}

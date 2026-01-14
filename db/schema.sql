@@ -115,6 +115,18 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Ausstattung-Kacheln Bilderzuordnung
+CREATE TABLE IF NOT EXISTS amenity_card_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_key TEXT NOT NULL,             -- living, kitchen, rooms, sauna, bathroom, outdoor, equipment, location
+    media_id TEXT NOT NULL,             -- Referenz auf media.id
+    display_order INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+    UNIQUE(card_key, media_id)
+);
+
 -- Indizes für Performance
 CREATE INDEX IF NOT EXISTS idx_bookings_anreise ON bookings(anreise);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
@@ -122,3 +134,4 @@ CREATE INDEX IF NOT EXISTS idx_availability_datum ON availability(datum);
 CREATE INDEX IF NOT EXISTS idx_reviews_sichtbar ON reviews(sichtbar);
 CREATE INDEX IF NOT EXISTS idx_media_category ON media(category);
 CREATE INDEX IF NOT EXISTS idx_media_order ON media(category, display_order);
+CREATE INDEX IF NOT EXISTS idx_amenity_card_images_key ON amenity_card_images(card_key);
