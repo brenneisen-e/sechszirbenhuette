@@ -335,16 +335,16 @@ export function Umgebung() {
           {/* Featured: Heidi-Alm */}
           {t.umgebung.kidsTrips.featured && (
             <div className="mb-8">
-              <div className="bg-gradient-to-r from-wood-50 to-green-50 rounded-2xl p-6 md:p-8 shadow-md border-2 border-wood-200">
+              <div className="bg-logo-green/10 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/20">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold">
+                  <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
                     1
                   </span>
                   <div>
-                    <h4 className="text-xl md:text-2xl font-bold text-gray-900">
+                    <h4 className="text-xl md:text-2xl font-bold text-logo-green">
                       {t.umgebung.kidsTrips.featured.title}
                     </h4>
-                    <p className="text-sm text-wood-600 font-medium">
+                    <p className="text-sm text-gray-500 font-medium">
                       <Car className="inline w-4 h-4 mr-1" />
                       {t.umgebung.kidsTrips.featured.distance} | {t.umgebung.kidsTrips.featured.age}
                     </p>
@@ -362,18 +362,18 @@ export function Umgebung() {
             {kidsTrips.map((trip, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="bg-logo-green/10 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
               >
                 <button
                   onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
                   className="w-full p-4 md:p-5 flex items-center justify-between text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                    <span className="w-8 h-8 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold text-sm flex-shrink-0">
                       {index + 2}
                     </span>
                     <div>
-                      <h4 className="font-bold text-gray-900 text-sm md:text-base">{trip.title}</h4>
+                      <h4 className="font-bold text-logo-green text-sm md:text-base">{trip.title}</h4>
                       <p className="text-xs text-gray-500">
                         <Car className="inline w-3 h-3 mr-1" />
                         {trip.distance} | {trip.age}
@@ -383,7 +383,7 @@ export function Umgebung() {
                   {expandedKidsTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedKidsTrip === index && (
-                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-gray-100">
+                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-logo-green/20">
                     <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
                   </div>
                 )}
