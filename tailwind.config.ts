@@ -7,6 +7,20 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      // Extra small devices (very small phones)
+      'xs': '360px',
+      // Small devices (phones)
+      'sm': '640px',
+      // Medium devices (tablets)
+      'md': '768px',
+      // Large devices (laptops/desktops)
+      'lg': '1024px',
+      // Extra large devices (large desktops)
+      'xl': '1280px',
+      // 2XL devices (extra large screens)
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         primary: {
@@ -39,6 +53,24 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Georgia', 'serif'],
+      },
+      // Fluid spacing scale
+      spacing: {
+        'safe-top': 'var(--safe-area-inset-top)',
+        'safe-bottom': 'var(--safe-area-inset-bottom)',
+        'safe-left': 'var(--safe-area-inset-left)',
+        'safe-right': 'var(--safe-area-inset-right)',
+      },
+      // Dynamic viewport height utilities
+      minHeight: {
+        'screen-dvh': '100dvh',
+        'screen-svh': '100svh',
+        'screen-lvh': '100lvh',
+      },
+      height: {
+        'screen-dvh': '100dvh',
+        'screen-svh': '100svh',
+        'screen-lvh': '100lvh',
       },
     },
   },

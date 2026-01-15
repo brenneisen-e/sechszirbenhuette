@@ -49,6 +49,25 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /* Safe area insets for modern devices (notches, rounded corners) */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  }
+
+  /* Support for all viewport height units */
+  @supports (height: 100dvh) {
+    :root {
+      --vh: 1dvh;
+    }
+  }
+
+  @supports not (height: 100dvh) {
+    :root {
+      --vh: 1vh;
+    }
   }
 
   * {
@@ -58,16 +77,55 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    /* Prevent horizontal overflow on all devices */
+    overflow-x: hidden;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   html {
     scroll-behavior: smooth;
+    /* Prevent horizontal overflow */
+    overflow-x: hidden;
+    /* Better touch scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Responsive images by default */
+  img, video {
+    max-width: 100%;
+    height: auto;
   }
 }
 
 @layer components {
   .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8;
+    /* Respect safe areas on modern devices */
+    padding-left: max(0.75rem, var(--safe-area-inset-left));
+    padding-right: max(0.75rem, var(--safe-area-inset-right));
+  }
+
+  @screen sm {
+    .container {
+      padding-left: max(1rem, var(--safe-area-inset-left));
+      padding-right: max(1rem, var(--safe-area-inset-right));
+    }
+  }
+
+  @screen md {
+    .container {
+      padding-left: max(1.5rem, var(--safe-area-inset-left));
+      padding-right: max(1.5rem, var(--safe-area-inset-right));
+    }
+  }
+
+  @screen lg {
+    .container {
+      padding-left: max(2rem, var(--safe-area-inset-left));
+      padding-right: max(2rem, var(--safe-area-inset-right));
+    }
   }
 
   .btn {
@@ -75,27 +133,27 @@
   }
 
   .btn-primary {
-    @apply btn bg-wood-700 text-white hover:bg-wood-800 px-6 py-3;
+    @apply btn bg-wood-700 text-white hover:bg-wood-800 px-4 py-2 sm:px-6 sm:py-3;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-wood-700 border border-wood-700 hover:bg-wood-50 px-6 py-3;
+    @apply btn bg-white text-wood-700 border border-wood-700 hover:bg-wood-50 px-4 py-2 sm:px-6 sm:py-3;
   }
 
   .btn-outline {
-    @apply btn border border-white text-white hover:bg-white/10 px-6 py-3;
+    @apply btn border border-white text-white hover:bg-white/10 px-4 py-2 sm:px-6 sm:py-3;
   }
 
   .section {
-    @apply py-16 md:py-24;
+    @apply py-12 sm:py-16 md:py-24;
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-gray-900 mb-4;
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4;
   }
 
   .section-subtitle {
-    @apply text-lg text-gray-600 max-w-3xl;
+    @apply text-base sm:text-lg text-gray-600 max-w-3xl;
   }
 }
 
