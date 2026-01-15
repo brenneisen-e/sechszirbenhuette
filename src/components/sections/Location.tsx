@@ -21,7 +21,7 @@ export function Location() {
             <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green mb-4"
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
