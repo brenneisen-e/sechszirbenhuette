@@ -77,8 +77,6 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    /* Use RetroSignature as default font */
-    font-family: 'RetroSignature', cursive;
     /* Prevent horizontal overflow on all devices */
     overflow-x: hidden;
     /* Prevent text size adjustment on orientation change */
