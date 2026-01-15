@@ -30,7 +30,7 @@ export function HeidiAlm() {
             <Mountain size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green mb-6"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.heidiAlm.title}
@@ -52,7 +52,7 @@ export function HeidiAlm() {
               <Snowflake size={32} strokeWidth={1.5} />
             </div>
             <h2
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green mb-4"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.winter.title}
