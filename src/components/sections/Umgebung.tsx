@@ -101,7 +101,7 @@ export function Umgebung() {
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-logo-green mb-4"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.umgebung.title}
@@ -205,7 +205,7 @@ export function Umgebung() {
               <Dog size={32} />
             </div>
             <h3
-              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.dogTrips.title}
@@ -325,7 +325,7 @@ export function Umgebung() {
               <Baby size={32} />
             </div>
             <h3
-              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.kidsTrips.title}
@@ -404,7 +404,7 @@ export function Umgebung() {
               <MapPin size={32} />
             </div>
             <h3
-              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.directions.title}
