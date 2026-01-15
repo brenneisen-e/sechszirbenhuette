@@ -122,7 +122,7 @@ export function Location() {
             </div>
 
             {/* Contact */}
-            <div className="bg-wood-700 text-white rounded-xl p-6">
+            <div className="bg-logo-green text-white rounded-xl p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Mail className="w-6 h-6 text-white" strokeWidth={1.5} />
@@ -134,13 +134,13 @@ export function Location() {
                   <div className="space-y-2">
                     <p className="flex items-center gap-2">
                       <Mail className="w-4 h-4" strokeWidth={1.5} />
-                      <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-wood-200 transition">
+                      <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-white/80 transition">
                         {SITE_CONFIG.email}
                       </a>
                     </p>
                     <p className="flex items-center gap-2">
                       <Phone className="w-4 h-4" strokeWidth={1.5} />
-                      <a href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`} className="hover:text-wood-200 transition">
+                      <a href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`} className="hover:text-white/80 transition">
                         {SITE_CONFIG.phone}
                       </a>
                     </p>
