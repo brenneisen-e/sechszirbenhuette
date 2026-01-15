@@ -106,7 +106,7 @@ export function Umgebung() {
           >
             {t.umgebung.title}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-wood-600 font-medium mb-4">
+          <p className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4">
             {t.umgebung.subtitle}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-gray-600">
