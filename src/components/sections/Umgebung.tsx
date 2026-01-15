@@ -399,11 +399,14 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-              <MapPin size={24} />
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
+              <MapPin size={32} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h3
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.umgebung.directions.title}
             </h3>
           </div>
