@@ -320,11 +320,14 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="mb-20"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-              <Baby size={24} />
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
+              <Baby size={32} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h3
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.umgebung.kidsTrips.title}
             </h3>
           </div>
