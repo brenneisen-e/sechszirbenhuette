@@ -11,15 +11,30 @@ const LOGO_GREEN = '#1e5631';
 
 export function Hero() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [posterImage, setPosterImage] = useState<string | null>(null);
   const { getText, getStyle } = useTextCustomization();
   const { language } = useLanguage();
 
   useEffect(() => {
+    // Load hero video
     fetch('/api/media?category=hero&type=video')
       .then((res) => res.json())
       .then((data) => {
         if (data.media?.[0]) {
           setVideoUrl(data.media[0].url);
+        }
+      })
+      .catch(() => {
+        // Use fallback
+      });
+
+    // Load poster image as fallback/placeholder
+    fetch('/api/media?category=hero&type=image')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.media?.[0]) {
+          setPosterImage(data.media[0].url);
         }
       })
       .catch(() => {
@@ -61,18 +76,38 @@ export function Hero() {
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
-        {videoUrl ? (
+        {/* Poster Image - shown while video loads */}
+        {posterImage && (
+          <div
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+              videoReady ? 'opacity-0' : 'opacity-100'
+            }`}
+            style={{ backgroundImage: `url(${posterImage})` }}
+          />
+        )}
+
+        {/* Fallback gradient if no poster */}
+        {!posterImage && !videoUrl && (
+          <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
+        )}
+
+        {/* Video - loads in background */}
+        {videoUrl && (
           <video
             autoPlay
             muted
             loop
             playsInline
-            className="h-full w-full object-cover"
+            preload="auto"
+            onLoadedData={() => setVideoReady(true)}
+            onCanPlayThrough={() => setVideoReady(true)}
+            className={`h-full w-full object-cover transition-opacity duration-1000 ${
+              videoReady ? 'opacity-100' : 'opacity-0'
+            }`}
+            poster={posterImage || undefined}
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}
       </div>
 

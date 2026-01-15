@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Save, Trash2, Plus, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Save, Trash2, Plus, RefreshCw, ArrowLeft, Database } from 'lucide-react';
 
 interface TextCustomization {
   id?: number;
@@ -53,6 +53,8 @@ export default function TextCustomizationsAdmin() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationMessage, setMigrationMessage] = useState<string | null>(null);
 
   // Load customizations from API
   const loadCustomizations = async () => {
@@ -125,6 +127,38 @@ export default function TextCustomizationsAdmin() {
     }
   };
 
+  // Run migration
+  const runMigration = async () => {
+    if (!confirm('Möchten Sie die Datenbank-Migration ausführen? Dies erstellt die Tabelle für Textanpassungen.')) {
+      return;
+    }
+
+    setMigrating(true);
+    setMigrationMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/migrate', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMigrationMessage(data.message);
+        await loadCustomizations(); // Reload customizations
+        alert('Migration erfolgreich! Die Tabelle wurde erstellt.');
+      } else {
+        setMigrationMessage('Fehler: ' + data.error);
+        alert('Migration fehlgeschlagen: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error running migration:', error);
+      setMigrationMessage('Fehler beim Ausführen der Migration');
+      alert('Fehler beim Ausführen der Migration');
+    } finally {
+      setMigrating(false);
+    }
+  };
+
   // Get customization for a section key
   const getCustomization = (sectionKey: string): TextCustomization | null => {
     return customizations.find(c => c.section_key === sectionKey) || null;
@@ -183,14 +217,31 @@ export default function TextCustomizationsAdmin() {
                 Passen Sie die Texte auf der Homepage an. Änderungen werden sofort auf der Website sichtbar.
               </p>
             </div>
-            <button
-              onClick={loadCustomizations}
-              className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Neu laden
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={runMigration}
+                disabled={migrating}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Database className="w-4 h-4" />
+                {migrating ? 'Migration läuft...' : 'Migration ausführen'}
+              </button>
+              <button
+                onClick={loadCustomizations}
+                className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Neu laden
+              </button>
+            </div>
           </div>
+
+          {/* Migration Message */}
+          {migrationMessage && (
+            <div className={`mb-6 p-4 rounded-lg ${migrationMessage.includes('Fehler') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+              {migrationMessage}
+            </div>
+          )}
 
           {/* Section Selector */}
           <div className="mb-8">
