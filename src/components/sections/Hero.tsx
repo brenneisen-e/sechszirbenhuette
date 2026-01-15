@@ -54,7 +54,7 @@ export function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden">
+    <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
@@ -76,7 +76,7 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh] text-white text-center px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8">
 
         {/* Upper Third - Single Line Headline */}
         <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
@@ -90,7 +90,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[clamp(1.25rem,4.5vw,4rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
+              className="text-[clamp(1.75rem,5.5vw,5rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte
@@ -114,7 +114,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-[clamp(1rem,3vw,2.25rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
+              className="text-[clamp(1.5rem,4vw,3rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen

@@ -104,7 +104,7 @@ export function Reviews() {
               className="inline-flex items-center gap-3 bg-white rounded-2xl px-6 py-4 shadow-lg border border-wood-100 hover:border-wood-300 hover:shadow-xl transition-all"
             >
               <div className="flex flex-col items-center">
-                <div className="text-4xl md:text-5xl font-bold text-wood-700">5,0</div>
+                <div className="text-4xl md:text-5xl font-bold text-logo-green">5,0</div>
                 <div className="flex gap-0.5 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={`google-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -124,7 +124,7 @@ export function Reviews() {
             {/* FeWo-direkt Rating */}
             <div className="inline-flex items-center gap-3 bg-white rounded-2xl px-6 py-4 shadow-lg border border-wood-100">
               <div className="flex flex-col items-center">
-                <div className="text-4xl md:text-5xl font-bold text-wood-700">9,8</div>
+                <div className="text-4xl md:text-5xl font-bold text-logo-green">9,8</div>
                 <div className="flex gap-0.5 mt-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={`fewo-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />

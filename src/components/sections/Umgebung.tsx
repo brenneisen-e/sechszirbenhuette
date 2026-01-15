@@ -97,11 +97,11 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-16"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.umgebung.title}
@@ -157,7 +157,7 @@ export function Umgebung() {
                 className="bg-white rounded-xl p-6 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
+                  <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
                     <Icon size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">
@@ -173,7 +173,7 @@ export function Umgebung() {
                       href="https://www.kaerntencard.at"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-wood-600 hover:text-wood-700 flex items-center gap-1"
+                      className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
                     >
                       Kärnten Card <ExternalLink size={14} />
                     </a>
@@ -181,7 +181,7 @@ export function Umgebung() {
                       href="https://www.heidialm.at"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-wood-600 hover:text-wood-700 flex items-center gap-1"
+                      className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
                     >
                       Heidialm <ExternalLink size={14} />
                     </a>
@@ -201,7 +201,7 @@ export function Umgebung() {
           className="mb-20 scroll-mt-24"
         >
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
+            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
               <Dog size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -318,7 +318,7 @@ export function Umgebung() {
           className="mb-20"
         >
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
+            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
               <Baby size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -394,7 +394,7 @@ export function Umgebung() {
           className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
+            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
               <MapPin size={24} />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">

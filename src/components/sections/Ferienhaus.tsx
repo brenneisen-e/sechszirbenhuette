@@ -181,11 +181,11 @@ export function Ferienhaus() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-12"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
             <Home size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             Ausstattung & Komfort
@@ -232,13 +232,13 @@ export function Ferienhaus() {
 
                 <div className="p-6">
                   {/* Icon */}
-                  <div className="w-12 h-12 rounded-xl bg-wood-100 flex items-center justify-center text-wood-700 mb-4
+                  <div className="w-12 h-12 rounded-xl bg-logo-green/10 flex items-center justify-center text-logo-green mb-4
                     group-hover:bg-wood-200 group-hover:scale-110 transition-all duration-300">
                     <Icon size={24} />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-wood-700 transition-colors">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-logo-green transition-colors">
                     {title}
                   </h3>
 
@@ -256,7 +256,7 @@ export function Ferienhaus() {
                   {card.hint && (
                     <div className="mt-4 p-3 bg-wood-50 rounded-lg border border-wood-100">
                       <p className="text-xs text-gray-600">
-                        <span className="font-semibold text-wood-700">Hinweis:</span> {card.hint}
+                        <span className="font-semibold text-logo-green">Hinweis:</span> {card.hint}
                       </p>
                     </div>
                   )}

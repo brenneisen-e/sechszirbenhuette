@@ -168,11 +168,11 @@ export function Galerie() {
     <section id="galerie" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-wood-100 rounded-full mb-4">
-            <Images className="w-8 h-8 text-wood-700" strokeWidth={1.5} />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">
+            <Images className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
           </div>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {language === 'de' ? 'Galerie' : 'Gallery'}

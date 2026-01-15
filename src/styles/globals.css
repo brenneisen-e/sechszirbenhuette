@@ -149,11 +149,11 @@
   }
 
   .section-title {
-    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4;
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-logo-green mb-4;
   }
 
   .section-subtitle {
-    @apply text-base sm:text-lg text-gray-600 max-w-3xl;
+    @apply text-base sm:text-lg text-logo-green/80 max-w-3xl;
   }
 }
 
