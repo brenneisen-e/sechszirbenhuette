@@ -273,8 +273,8 @@ export function Umgebung() {
 
                         {/* Text Content */}
                         <div className="p-5">
-                          <h4 className="text-lg font-bold text-gray-900 mb-1">{trip.title}</h4>
-                          <p className="text-sm text-wood-600 font-medium mb-3">{trip.difficulty}</p>
+                          <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
+                          <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>
                           <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
                           <div className="flex flex-wrap gap-3 text-sm">
                             {trip.duration && (
@@ -304,8 +304,8 @@ export function Umgebung() {
                   onClick={() => setCurrentDogTrip(index)}
                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                     currentDogTrip === index
-                      ? 'bg-wood-600 w-6'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                      ? 'bg-logo-green w-6'
+                      : 'bg-logo-green/30 hover:bg-logo-green/50'
                   }`}
                 />
               ))}
