@@ -185,7 +185,7 @@ export function Ferienhaus() {
             <Home size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             Ausstattung & Komfort

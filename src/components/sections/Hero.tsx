@@ -87,7 +87,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl mb-0 text-white drop-shadow-lg"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-0 text-white drop-shadow-lg"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Herzlich Willkommen
@@ -97,7 +97,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white drop-shadow-lg"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white drop-shadow-lg"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               in der Sechszirbenhütte
@@ -121,7 +121,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-lg md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md whitespace-nowrap"
+              className="text-base sm:text-lg md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
             >
               Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
             </motion.p>
@@ -131,7 +131,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
-              className="text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-8"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-8"
             >
               Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
             </motion.p>

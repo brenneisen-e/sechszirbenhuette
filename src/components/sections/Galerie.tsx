@@ -172,12 +172,12 @@ export function Galerie() {
             <Images className="w-8 h-8 text-wood-700" strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {language === 'de' ? 'Galerie' : 'Gallery'}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             {language === 'de'
               ? 'Entdecken Sie die Sechszirbenhütte in Bildern'
               : 'Discover the Sechszirbenhütte in pictures'}

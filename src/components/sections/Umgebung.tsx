@@ -101,15 +101,15 @@ export function Umgebung() {
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl md:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.umgebung.title}
           </h2>
-          <p className="text-xl text-wood-600 font-medium mb-4">
+          <p className="text-base sm:text-lg md:text-xl text-wood-600 font-medium mb-4">
             {t.umgebung.subtitle}
           </p>
-          <p className="text-lg text-gray-600">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600">
             {t.umgebung.intro}
           </p>
         </motion.div>
