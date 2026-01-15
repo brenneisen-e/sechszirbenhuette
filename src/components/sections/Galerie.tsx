@@ -264,10 +264,10 @@ export function Galerie() {
                 e.stopPropagation();
                 setSelectedImage((selectedImage - 1 + images.length) % images.length);
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 rounded-full hover:bg-white/10 transition z-10"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 rounded-full bg-white/20 hover:bg-white/40 transition z-20"
               aria-label="Vorheriges Bild"
             >
-              <ChevronLeft className="w-10 h-10" />
+              <ChevronLeft className="w-8 h-8" />
             </button>
 
             {/* Next Button */}
@@ -276,10 +276,10 @@ export function Galerie() {
                 e.stopPropagation();
                 setSelectedImage((selectedImage + 1) % images.length);
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 rounded-full hover:bg-white/10 transition z-10"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 rounded-full bg-white/20 hover:bg-white/40 transition z-20"
               aria-label="Nächstes Bild"
             >
-              <ChevronRight className="w-10 h-10" />
+              <ChevronRight className="w-8 h-8" />
             </button>
 
             <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
