@@ -335,7 +335,7 @@ export function Umgebung() {
           {/* Featured: Heidi-Alm */}
           {t.umgebung.kidsTrips.featured && (
             <div className="mb-8">
-              <div className="bg-logo-green/10 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/20">
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/20">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
                     1
@@ -362,7 +362,7 @@ export function Umgebung() {
             {kidsTrips.map((trip, index) => (
               <div
                 key={index}
-                className="bg-logo-green/10 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
               >
                 <button
                   onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
