@@ -6,6 +6,7 @@
     "/images/*",
     "/fonts/*",
     "/favicon.ico",
+    "/favicon.svg",
     "/robots.txt",
     "/sitemap.xml"
   ]
