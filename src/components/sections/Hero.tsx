@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 
+// Logo green color (matches the logo)
+const LOGO_GREEN = '#1e5631';
+
 export function Hero() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -51,7 +54,7 @@ export function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative h-screen w-full overflow-hidden">
+    <section id="hero" className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
@@ -73,55 +76,46 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col h-full text-white text-center px-4">
+      <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh] text-white text-center px-3 sm:px-4 md:px-6 lg:px-8">
 
-        {/* Upper Third - Brittany Signature Headlines */}
-        <div className="flex-1 flex items-center justify-center pt-8">
+        {/* Upper Third - Single Line Headline */}
+        <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="max-w-6xl -mt-8"
+            className="w-full"
           >
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-0 text-white drop-shadow-lg"
+              className="text-[clamp(1.25rem,4.5vw,4rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
-              Herzlich Willkommen
-            </motion.p>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white drop-shadow-lg"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
-            >
-              in der Sechszirbenhütte
+              Herzlich Willkommen in der Sechszirbenhütte
             </motion.p>
           </motion.div>
         </div>
 
-        {/* Middle Third - Empty space */}
-        <div className="flex-1" />
+        {/* Middle Third - Flexible space */}
+        <div className="flex-[0.5] sm:flex-1" />
 
         {/* Lower Third - Text and Icons */}
-        <div className="flex-1 flex flex-col items-center justify-center pb-16">
+        <div className="flex-1 flex flex-col items-center justify-center pb-20 sm:pb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="max-w-5xl"
+            className="w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-5xl"
           >
             {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-base sm:text-lg md:text-2xl lg:text-3xl mb-4 text-white drop-shadow-md"
+              className="text-[clamp(1rem,3vw,2.25rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
             </motion.p>
@@ -131,17 +125,17 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
-              className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-8"
+              className="text-[clamp(0.75rem,2vw,1.25rem)] leading-relaxed text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-6 sm:mb-8 px-2"
             >
               Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
             </motion.p>
 
-            {/* 6 Icons Row */}
+            {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.1 }}
-              className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6"
+              className="grid grid-cols-2 min-[400px]:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 px-2"
             >
               {features.map((feature, index) => (
                 <button
@@ -149,10 +143,13 @@ export function Hero() {
                   onClick={feature.onClick}
                   className="flex flex-col items-center group cursor-pointer hover:scale-105 transition-transform"
                 >
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2 group-hover:bg-white/30 transition-colors">
-                    <feature.icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                  <div
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2 transition-all group-hover:scale-110"
+                    style={{ backgroundColor: LOGO_GREEN }}
+                  >
+                    <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <span className="text-xs md:text-sm font-semibold text-white drop-shadow-sm">
+                  <span className="text-[clamp(0.625rem,1.5vw,0.875rem)] font-semibold text-white drop-shadow-sm leading-tight">
                     {feature.label}
                   </span>
                 </button>
@@ -168,10 +165,10 @@ export function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
         onClick={() => scrollToSection('#reviews')}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white animate-bounce"
+        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white animate-bounce"
         aria-label="Scroll down"
       >
-        <ChevronDown size={40} />
+        <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10" />
       </motion.button>
     </section>
   );
