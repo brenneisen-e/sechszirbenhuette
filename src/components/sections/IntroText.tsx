@@ -14,7 +14,7 @@ export function IntroText() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-logo-green mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             Wandern, Skifahren & Erholung in den Nockbergen, Kärnten
           </h2>
           <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -30,7 +30,7 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-center mb-12"
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-logo-green mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             Heidi Alm Bergresort: Dem Himmel nahe, dem Alltag fern
           </h2>
           <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
@@ -46,7 +46,7 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-center"
         >
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-logo-green mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             Winterurlaub in der Heidi-Alm: Familiäres Skigebiet & vielfältige Aktivitäten
           </h2>
           <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
