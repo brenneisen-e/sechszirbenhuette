@@ -165,7 +165,7 @@ export function Galerie() {
     : images.filter(img => img.category === selectedCategory);
 
   return (
-    <section id="galerie" className="py-20 bg-white">
+    <section id="galerie" className="py-20 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">
@@ -193,7 +193,7 @@ export function Galerie() {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-wood-600 text-white shadow-md'
+                  ? 'bg-logo-green text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

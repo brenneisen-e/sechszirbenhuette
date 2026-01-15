@@ -88,7 +88,7 @@ export function Umgebung() {
   const kidsTrips = t.umgebung.kidsTrips.trips;
 
   return (
-    <section id="umgebung" className="py-20 bg-gray-50">
+    <section id="umgebung" className="py-20 bg-transparent">
       <div className="container">
         {/* Header */}
         <motion.div
@@ -335,16 +335,16 @@ export function Umgebung() {
           {/* Featured: Heidi-Alm */}
           {t.umgebung.kidsTrips.featured && (
             <div className="mb-8">
-              <div className="bg-gradient-to-r from-wood-50 to-green-50 rounded-2xl p-6 md:p-8 shadow-md border-2 border-wood-200">
+              <div className="bg-logo-green/10 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/20">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold">
+                  <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
                     1
                   </span>
                   <div>
-                    <h4 className="text-xl md:text-2xl font-bold text-gray-900">
+                    <h4 className="text-xl md:text-2xl font-bold text-logo-green">
                       {t.umgebung.kidsTrips.featured.title}
                     </h4>
-                    <p className="text-sm text-wood-600 font-medium">
+                    <p className="text-sm text-gray-500 font-medium">
                       <Car className="inline w-4 h-4 mr-1" />
                       {t.umgebung.kidsTrips.featured.distance} | {t.umgebung.kidsTrips.featured.age}
                     </p>
@@ -362,18 +362,18 @@ export function Umgebung() {
             {kidsTrips.map((trip, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="bg-logo-green/10 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
               >
                 <button
                   onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
                   className="w-full p-4 md:p-5 flex items-center justify-between text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                    <span className="w-8 h-8 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold text-sm flex-shrink-0">
                       {index + 2}
                     </span>
                     <div>
-                      <h4 className="font-bold text-gray-900 text-sm md:text-base">{trip.title}</h4>
+                      <h4 className="font-bold text-logo-green text-sm md:text-base">{trip.title}</h4>
                       <p className="text-xs text-gray-500">
                         <Car className="inline w-3 h-3 mr-1" />
                         {trip.distance} | {trip.age}
@@ -383,7 +383,7 @@ export function Umgebung() {
                   {expandedKidsTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {expandedKidsTrip === index && (
-                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-gray-100">
+                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-logo-green/20">
                     <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
                   </div>
                 )}
@@ -399,11 +399,14 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-              <MapPin size={24} />
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
+              <MapPin size={32} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h3
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.umgebung.directions.title}
             </h3>
           </div>

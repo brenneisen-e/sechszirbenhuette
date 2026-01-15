@@ -8,7 +8,6 @@ import {
   Umgebung,
   Galerie,
   Buchung,
-  Bewertungen,
 } from '@/components/sections';
 
 export default function HomePage() {
@@ -23,7 +22,6 @@ export default function HomePage() {
       <Umgebung />
       <Galerie />
       <Buchung />
-      <Bewertungen />
     </>
   );
 }
