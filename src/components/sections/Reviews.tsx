@@ -141,16 +141,6 @@ export function Reviews() {
               </div>
             </div>
           </div>
-
-          {/* Commission-free direct booking sticker */}
-          <div className="mt-6">
-            <a
-              href="#buchung"
-              className="inline-flex items-center gap-2 bg-wood-600 hover:bg-wood-700 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              {t.reviews?.commissionFree || 'Provisionsfrei hier direkt anfragen!'}
-            </a>
-          </div>
         </div>
 
         {/* Review Carousel */}
@@ -178,7 +168,7 @@ export function Reviews() {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              <Quote className="absolute top-4 left-4 w-8 h-8 text-wood-200" />
+              <Quote className="absolute top-4 left-4 w-8 h-8 text-logo-green/30" />
 
               <div className="relative z-10">
                 {reviews.map((review, index) => (
@@ -225,8 +215,8 @@ export function Reviews() {
                 onClick={() => handleDotClick(index)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? 'bg-wood-600 w-6'
-                    : 'bg-gray-300 hover:bg-gray-400'
+                    ? 'bg-logo-green w-6'
+                    : 'bg-logo-green/30 hover:bg-logo-green/50'
                 }`}
                 aria-label={`${t.reviews?.goToReview || 'Zur Bewertung'} ${index + 1}`}
               />
