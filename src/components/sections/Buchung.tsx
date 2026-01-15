@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTextCustomization } from '@/contexts/TextCustomizationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarCheck, Check, Phone, Mail, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { SITE_CONFIG, DESKLINE_CONFIG } from '@/lib/constants';
@@ -15,6 +16,7 @@ declare global {
 
 export function Buchung() {
   const { t, language } = useLanguage();
+  const { getText, getStyle } = useTextCustomization();
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptLoadedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -198,9 +200,12 @@ export function Buchung() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{
+              fontFamily: 'RetroSignature, cursive',
+              ...getStyle('buchung.title')
+            }}
           >
-            {t.buchung.title}
+            {getText('buchung.title', language, t.buchung.title)}
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600">
             {t.buchung.subtitle}

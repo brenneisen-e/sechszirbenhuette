@@ -127,6 +127,20 @@ CREATE TABLE IF NOT EXISTS amenity_card_images (
     UNIQUE(card_key, media_id)
 );
 
+-- Textanpassungen für Homepage
+CREATE TABLE IF NOT EXISTS text_customizations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    section_key TEXT NOT NULL UNIQUE,      -- z.B. "hero.title", "ferienhaus.intro", etc.
+    text_de TEXT,                          -- Deutscher Text
+    text_en TEXT,                          -- Englischer Text
+    font_size TEXT,                        -- CSS font-size (z.B. "text-4xl", "48px", "3rem")
+    font_color TEXT,                       -- Farbe (z.B. "#1e5631", "rgb(30, 86, 49)")
+    font_family TEXT,                      -- Schriftart (z.B. "Inter", "Serif", "Playfair Display")
+    font_weight TEXT,                      -- Schriftstärke (z.B. "400", "600", "bold")
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indizes für Performance
 CREATE INDEX IF NOT EXISTS idx_bookings_anreise ON bookings(anreise);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
@@ -135,3 +149,4 @@ CREATE INDEX IF NOT EXISTS idx_reviews_sichtbar ON reviews(sichtbar);
 CREATE INDEX IF NOT EXISTS idx_media_category ON media(category);
 CREATE INDEX IF NOT EXISTS idx_media_order ON media(category, display_order);
 CREATE INDEX IF NOT EXISTS idx_amenity_card_images_key ON amenity_card_images(card_key);
+CREATE INDEX IF NOT EXISTS idx_text_customizations_section ON text_customizations(section_key);

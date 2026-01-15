@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { TextCustomizationProvider } from '@/contexts/TextCustomizationContext';
 import { Header, Footer } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
 import '@/styles/globals.css';
@@ -72,10 +73,12 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased overflow-x-hidden">
         <LanguageProvider>
-          <PineBackground />
-          <Header />
-          <main className="relative z-10">{children}</main>
-          <Footer />
+          <TextCustomizationProvider>
+            <PineBackground />
+            <Header />
+            <main className="relative z-10">{children}</main>
+            <Footer />
+          </TextCustomizationProvider>
         </LanguageProvider>
       </body>
     </html>

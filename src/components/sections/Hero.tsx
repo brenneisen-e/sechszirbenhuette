@@ -3,12 +3,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
+import { useTextCustomization } from '@/contexts/TextCustomizationContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
 
 export function Hero() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const { getText, getStyle } = useTextCustomization();
+  const { language } = useLanguage();
 
   useEffect(() => {
     fetch('/api/media?category=hero&type=video')
@@ -91,9 +95,12 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-[clamp(1.75rem,5.5vw,5rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{
+                fontFamily: 'RetroSignature, cursive',
+                ...getStyle('hero.title')
+              }}
             >
-              Herzlich Willkommen in der Sechszirbenhütte
+              {getText('hero.title', language, 'Herzlich Willkommen in der Sechszirbenhütte')}
             </motion.p>
           </motion.div>
         </div>
@@ -115,9 +122,12 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
               className="text-[clamp(1.5rem,4vw,3rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{
+                fontFamily: 'RetroSignature, cursive',
+                ...getStyle('hero.subtitle')
+              }}
             >
-              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
+              {getText('hero.subtitle', language, 'Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen')}
             </motion.p>
 
             {/* Description */}
@@ -126,8 +136,9 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
               className="text-[clamp(0.75rem,2vw,1.25rem)] leading-relaxed text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-6 sm:mb-8 px-2"
+              style={getStyle('hero.description')}
             >
-              Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
+              {getText('hero.description', language, 'Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.')}
             </motion.p>
 
             {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}

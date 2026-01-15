@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTextCustomization } from '@/contexts/TextCustomizationContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -108,6 +109,7 @@ interface CardImage {
 
 export function Ferienhaus() {
   const { t, language } = useLanguage();
+  const { getText, getStyle } = useTextCustomization();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [cardImages, setCardImages] = useState<Record<string, CardImage[]>>({});
@@ -186,12 +188,15 @@ export function Ferienhaus() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{
+              fontFamily: 'RetroSignature, cursive',
+              ...getStyle('ferienhaus.title')
+            }}
           >
-            Ausstattung & Komfort
+            {getText('ferienhaus.title', language, 'Ausstattung & Komfort')}
           </h2>
-          <p className="text-lg text-gray-600">
-            Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.
+          <p className="text-lg text-gray-600" style={getStyle('ferienhaus.intro')}>
+            {getText('ferienhaus.intro', language, 'Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.')}
           </p>
         </motion.div>
 
