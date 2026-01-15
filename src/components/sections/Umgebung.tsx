@@ -101,7 +101,7 @@ export function Umgebung() {
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green mb-4"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.umgebung.title}
@@ -160,7 +160,7 @@ export function Umgebung() {
                   <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
                     <Icon size={20} />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="text-lg font-bold text-logo-green">
                     {feature.title}
                   </h3>
                 </div>
@@ -205,7 +205,7 @@ export function Umgebung() {
               <Dog size={32} />
             </div>
             <h3
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.dogTrips.title}
@@ -325,7 +325,7 @@ export function Umgebung() {
               <Baby size={32} />
             </div>
             <h3
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.kidsTrips.title}
@@ -404,7 +404,7 @@ export function Umgebung() {
               <MapPin size={32} />
             </div>
             <h3
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               {t.umgebung.directions.title}

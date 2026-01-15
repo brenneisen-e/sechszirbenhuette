@@ -26,7 +26,7 @@ export function PineBackground() {
     <div
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-700"
       style={{
-        backgroundImage: 'url(/images/1768424083695.jpg)',
+        backgroundImage: 'url(/images/Gemini_Generated_Image_zd78wazd78wazd78.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
         backgroundSize: '50%',
