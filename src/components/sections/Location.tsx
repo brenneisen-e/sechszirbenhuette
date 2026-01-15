@@ -14,7 +14,7 @@ export function Location() {
   const lng = SITE_CONFIG.coordinates.lng;
 
   return (
-    <section id="lage" className="py-20 bg-white">
+    <section id="lage" className="py-20 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">

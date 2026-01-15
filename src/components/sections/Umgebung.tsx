@@ -88,7 +88,7 @@ export function Umgebung() {
   const kidsTrips = t.umgebung.kidsTrips.trips;
 
   return (
-    <section id="umgebung" className="py-20 bg-gray-50">
+    <section id="umgebung" className="py-20 bg-transparent">
       <div className="container">
         {/* Header */}
         <motion.div

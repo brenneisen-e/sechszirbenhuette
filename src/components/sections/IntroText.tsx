@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export function IntroText() {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-transparent">
       <div className="container max-w-4xl mx-auto px-4">
         {/* Section 1: Wandern, Skifahren & Erholung */}
         <motion.div

@@ -184,7 +184,7 @@ export function Buchung() {
   }, [shouldLoadWidget, language]);
 
   return (
-    <section id="buchung" className="py-20 bg-white">
+    <section id="buchung" className="py-20 bg-transparent">
       <div className="container">
         {/* Header */}
         <motion.div

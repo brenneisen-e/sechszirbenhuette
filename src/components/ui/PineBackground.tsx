@@ -29,8 +29,8 @@ export function PineBackground() {
         backgroundImage: 'url(/images/1768424083695.jpg)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: '500px auto',
-        opacity: 0.06,
+        backgroundSize: 'cover',
+        opacity: 0.15,
       }}
     />
   );
