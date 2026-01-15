@@ -160,7 +160,7 @@ export function Umgebung() {
                   <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
                     <Icon size={20} />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="text-lg font-bold text-logo-green">
                     {feature.title}
                   </h3>
                 </div>
