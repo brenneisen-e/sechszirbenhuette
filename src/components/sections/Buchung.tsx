@@ -310,8 +310,8 @@ export function Buchung() {
               {!isExpanded && (
                 <div className="p-6 md:p-8 text-center">
                   <div className="max-w-md mx-auto">
-                    <CalendarCheck className="w-12 h-12 text-wood-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <CalendarCheck className="w-12 h-12 text-logo-green mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-logo-green mb-2">
                       {t.buchung.form.title}
                     </h3>
                     <p className="text-gray-600 mb-6">
@@ -321,7 +321,7 @@ export function Buchung() {
                     </p>
                     <button
                       onClick={expandWidget}
-                      className="bg-wood-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-wood-700 transition shadow-lg flex items-center justify-center gap-2 mx-auto group"
+                      className="bg-logo-green text-white px-8 py-4 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-lg flex items-center justify-center gap-2 mx-auto group"
                     >
                       <span>{language === 'de' ? 'Verfügbarkeit prüfen' : 'Check availability'}</span>
                       <ChevronDown className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
@@ -345,7 +345,7 @@ export function Buchung() {
                       className="w-full px-4 md:px-6 py-4 bg-gray-200 hover:bg-gray-300 transition flex items-center justify-between text-left"
                     >
                       <div className="flex items-center gap-3">
-                        <CalendarCheck className="w-5 h-5 text-wood-600" />
+                        <CalendarCheck className="w-5 h-5 text-logo-green" />
                         <span className="font-semibold text-gray-900">
                           {t.buchung.form.title}
                         </span>
