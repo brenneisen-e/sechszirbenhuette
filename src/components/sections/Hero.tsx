@@ -54,7 +54,7 @@ export function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden">
+    <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
@@ -76,7 +76,7 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col min-h-screen min-h-[100dvh] text-white text-center px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8">
 
         {/* Upper Third - Single Line Headline */}
         <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
