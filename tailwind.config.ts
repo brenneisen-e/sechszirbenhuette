@@ -23,6 +23,8 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // Logo green - the main brand color
+        'logo-green': '#1e5631',
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',

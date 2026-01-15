@@ -34,7 +34,7 @@ export function Features() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="text-center p-6"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-4">
                   <Icon size={32} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">

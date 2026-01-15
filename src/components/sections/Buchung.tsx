@@ -193,11 +193,11 @@ export function Buchung() {
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-16"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-wood-100 text-wood-700 mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
             <CalendarCheck size={32} strokeWidth={1.5} />
           </div>
           <h2
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-wood-700 mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
             style={{ fontFamily: 'RetroSignature, cursive' }}
           >
             {t.buchung.title}

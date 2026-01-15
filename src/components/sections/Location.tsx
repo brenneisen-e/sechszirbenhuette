@@ -17,8 +17,8 @@ export function Location() {
     <section id="lage" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-wood-100 rounded-full mb-4">
-            <MapPin className="w-8 h-8 text-wood-700" strokeWidth={1.5} />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">
+            <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
@@ -78,8 +78,8 @@ export function Location() {
             {/* Address */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-wood-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-wood-700" strokeWidth={1.5} />
+                <div className="w-12 h-12 bg-logo-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-6 h-6 text-logo-green" strokeWidth={1.5} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">
@@ -97,8 +97,8 @@ export function Location() {
             {/* Directions */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-wood-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Navigation className="w-6 h-6 text-wood-700" strokeWidth={1.5} />
+                <div className="w-12 h-12 bg-logo-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Navigation className="w-6 h-6 text-logo-green" strokeWidth={1.5} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">
