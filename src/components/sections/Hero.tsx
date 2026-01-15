@@ -90,7 +90,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[clamp(1.25rem,4.5vw,4rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
+              className="text-[clamp(1.75rem,5.5vw,5rem)] leading-tight text-white drop-shadow-lg whitespace-nowrap"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte
@@ -114,7 +114,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-[clamp(1rem,3vw,2.25rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
+              className="text-[clamp(1.5rem,4vw,3rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
               style={{ fontFamily: 'RetroSignature, cursive' }}
             >
               Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
