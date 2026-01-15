@@ -275,21 +275,21 @@ export function Buchung() {
             </div>
 
             {/* Contact */}
-            <div className="bg-wood-700 text-white rounded-xl p-6">
+            <div className="bg-logo-green text-white rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4">
                 {language === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
               </h3>
               <div className="space-y-3">
                 <a
                   href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
-                  className="flex items-center gap-3 hover:text-wood-200 transition"
+                  className="flex items-center gap-3 hover:text-white/80 transition"
                 >
                   <Phone size={18} />
                   <span>{SITE_CONFIG.phone}</span>
                 </a>
                 <a
                   href={`mailto:${SITE_CONFIG.email}`}
-                  className="flex items-center gap-3 hover:text-wood-200 transition"
+                  className="flex items-center gap-3 hover:text-white/80 transition"
                 >
                   <Mail size={18} />
                   <span>{SITE_CONFIG.email}</span>
