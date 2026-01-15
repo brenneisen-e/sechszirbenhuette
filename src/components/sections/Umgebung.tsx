@@ -106,7 +106,7 @@ export function Umgebung() {
           >
             {t.umgebung.title}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-wood-600 font-medium mb-4">
+          <p className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4">
             {t.umgebung.subtitle}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-gray-600">
@@ -200,11 +200,14 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="mb-20 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-              <Dog size={24} />
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
+              <Dog size={32} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h3
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.umgebung.dogTrips.title}
             </h3>
           </div>
@@ -270,8 +273,8 @@ export function Umgebung() {
 
                         {/* Text Content */}
                         <div className="p-5">
-                          <h4 className="text-lg font-bold text-gray-900 mb-1">{trip.title}</h4>
-                          <p className="text-sm text-wood-600 font-medium mb-3">{trip.difficulty}</p>
+                          <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
+                          <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>
                           <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
                           <div className="flex flex-wrap gap-3 text-sm">
                             {trip.duration && (
@@ -301,8 +304,8 @@ export function Umgebung() {
                   onClick={() => setCurrentDogTrip(index)}
                   className={`w-2.5 h-2.5 rounded-full transition-all ${
                     currentDogTrip === index
-                      ? 'bg-wood-600 w-6'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                      ? 'bg-logo-green w-6'
+                      : 'bg-logo-green/30 hover:bg-logo-green/50'
                   }`}
                 />
               ))}
@@ -317,11 +320,14 @@ export function Umgebung() {
           viewport={{ once: true }}
           className="mb-20"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-              <Baby size={24} />
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
+              <Baby size={32} />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h3
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
               {t.umgebung.kidsTrips.title}
             </h3>
           </div>

@@ -20,7 +20,10 @@ export function Location() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">
             <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
             {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6">
@@ -32,7 +35,7 @@ export function Location() {
             href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-wood-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-wood-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 bg-logo-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-sm"
           >
             <Navigation className="w-5 h-5" strokeWidth={1.5} />
             {language === 'de' ? 'In Google Maps öffnen' : 'Open in Google Maps'}
@@ -119,7 +122,7 @@ export function Location() {
             </div>
 
             {/* Contact */}
-            <div className="bg-wood-700 text-white rounded-xl p-6">
+            <div className="bg-logo-green text-white rounded-xl p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Mail className="w-6 h-6 text-white" strokeWidth={1.5} />
@@ -131,13 +134,13 @@ export function Location() {
                   <div className="space-y-2">
                     <p className="flex items-center gap-2">
                       <Mail className="w-4 h-4" strokeWidth={1.5} />
-                      <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-wood-200 transition">
+                      <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-white/80 transition">
                         {SITE_CONFIG.email}
                       </a>
                     </p>
                     <p className="flex items-center gap-2">
                       <Phone className="w-4 h-4" strokeWidth={1.5} />
-                      <a href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`} className="hover:text-wood-200 transition">
+                      <a href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`} className="hover:text-white/80 transition">
                         {SITE_CONFIG.phone}
                       </a>
                     </p>
