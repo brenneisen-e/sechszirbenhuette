@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
-import { X, Images } from 'lucide-react';
+import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryImage {
   src: string;
@@ -258,7 +258,31 @@ export function Galerie() {
             className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
             onClick={() => setSelectedImage(null)}
           >
-            <div className="relative max-w-6xl w-full">
+            {/* Previous Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage((selectedImage - 1 + images.length) % images.length);
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 rounded-full hover:bg-white/10 transition z-10"
+              aria-label="Vorheriges Bild"
+            >
+              <ChevronLeft className="w-10 h-10" />
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage((selectedImage + 1) % images.length);
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 rounded-full hover:bg-white/10 transition z-10"
+              aria-label="Nächstes Bild"
+            >
+              <ChevronRight className="w-10 h-10" />
+            </button>
+
+            <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setSelectedImage(null)}
                 className="absolute -top-12 right-0 text-white hover:text-gray-300 transition p-2 rounded-full hover:bg-white/10"
@@ -281,6 +305,9 @@ export function Galerie() {
                 {images[selectedImage].description && (
                   <p className="text-lg opacity-90">{images[selectedImage].description}</p>
                 )}
+                <p className="text-sm text-gray-400 mt-2">
+                  {selectedImage + 1} / {images.length}
+                </p>
               </div>
             </div>
           </div>
