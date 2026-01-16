@@ -11,10 +11,12 @@ import {
   Buchung,
 } from '@/components/sections';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 export default function HomePage() {
   return (
     <>
+      <LoadingScreen minDisplayTime={1500} />
       <Hero />
       <Reviews />
       <IntroText />

@@ -90,8 +90,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { settings } = body as { settings: Record<string, string> };
+    const body = await request.json() as { settings?: Record<string, string> };
+    const { settings } = body;
 
     if (!settings || typeof settings !== 'object') {
       return NextResponse.json(

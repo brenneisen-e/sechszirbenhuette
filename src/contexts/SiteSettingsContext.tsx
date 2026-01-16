@@ -45,7 +45,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     async function fetchSettings() {
       try {
         const response = await fetch('/api/site-settings');
-        const data = await response.json();
+        const data = await response.json() as { settings?: Record<string, string> };
         if (data.settings) {
           setSettings({
             ...defaultSettings,

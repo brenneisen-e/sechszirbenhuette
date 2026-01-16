@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         }, { status: 500 });
       }
 
-      const env = (ctx as { env: Env }).env;
+      const env = (ctx as unknown as { env: Env }).env;
 
       if (!env) {
         return NextResponse.json({
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
   try {
 
     const ctx = await getCloudflareContext();
-    const env = (ctx as { env: Env }).env;
+    const env = (ctx as unknown as { env: Env }).env;
 
     if (!env.DB) {
       return NextResponse.json({
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 // POST - Upload new image
 export async function POST(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
+    const { env } = await getCloudflareContext() as unknown as { env: Env };
 
     // Check admin password
     const adminPassword = request.headers.get('x-admin-password');
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update image metadata (category, alt_text, display_order)
 export async function PUT(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
+    const { env } = await getCloudflareContext() as unknown as { env: Env };
 
     // Check admin password
     const adminPassword = request.headers.get('x-admin-password');
@@ -308,7 +308,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete image
 export async function DELETE(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
+    const { env } = await getCloudflareContext() as unknown as { env: Env };
 
     // Check admin password
     const adminPassword = request.headers.get('x-admin-password');

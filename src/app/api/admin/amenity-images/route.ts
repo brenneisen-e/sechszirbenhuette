@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     // Ensure table exists
     await ensureTableExists(env.DB);
 
-    const body = await request.json();
+    const body = await request.json() as { card_key?: string; media_id?: number };
     const { card_key, media_id } = body;
 
     if (!card_key || !media_id) {
@@ -169,7 +169,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as { id?: number; display_order?: number };
     const { id, display_order } = body;
 
     if (!id || display_order === undefined) {

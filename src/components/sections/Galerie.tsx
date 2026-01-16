@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import Image from 'next/image';
 import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -74,6 +75,7 @@ function parseAltText(altText: string): { title: string; description: string } {
 
 export function Galerie() {
   const { t, language } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [images, setImages] = useState<GalleryImage[]>(fallbackImages);
@@ -226,14 +228,14 @@ export function Galerie() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('galerie_title') }}
           >
-            {language === 'de' ? 'Galerie' : 'Gallery'}
+            {getText('galerie_title') || (language === 'de' ? 'Galerie' : 'Gallery')}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-            {language === 'de'
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto" style={getTextStyle('galerie_subtitle')}>
+            {getText('galerie_subtitle') || (language === 'de'
               ? 'Entdecken Sie die Sechszirbenhütte in Bildern'
-              : 'Discover the Sechszirbenhütte in pictures'}
+              : 'Discover the Sechszirbenhütte in pictures')}
           </p>
         </div>
 

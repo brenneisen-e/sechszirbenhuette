@@ -24,7 +24,7 @@ interface CloudflareEnv {
 async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
   try {
     const ctx = await getCloudflareContext();
-    return ctx.env as CloudflareEnv;
+    return ctx.env as unknown as CloudflareEnv;
   } catch {
     return null;
   }
