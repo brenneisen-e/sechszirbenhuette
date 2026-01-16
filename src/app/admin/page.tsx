@@ -786,7 +786,9 @@ function AdminPageContent() {
                               fill
                               className="object-cover"
                               sizes="40px"
-                              quality={20}
+                              quality={5}
+                              loading="lazy"
+                              unoptimized
                             />
                           </div>
                         ) : (
@@ -924,8 +926,10 @@ function AdminPageContent() {
                               alt={item.alt_text || 'Bild'}
                               fill
                               className="object-cover"
-                              sizes="150px"
-                              quality={30}
+                              sizes="100px"
+                              quality={5}
+                              loading="lazy"
+                              unoptimized
                             />
                           )}
                           {item.media_type === 'video' && (
@@ -1036,8 +1040,10 @@ function AdminPageContent() {
                                   alt={cat.label}
                                   fill
                                   className="object-cover"
-                                  sizes="150px"
-                                  quality={20}
+                                  sizes="100px"
+                                  quality={5}
+                                  loading="lazy"
+                                  unoptimized
                                 />
                               ) : (
                                 <div className="absolute inset-0 flex items-center justify-center">
@@ -1499,8 +1505,10 @@ function AdminPageContent() {
                         alt={item.alt_text || 'Bild'}
                         fill
                         className="object-cover"
-                        sizes="150px"
-                        quality={30}
+                        sizes="100px"
+                        quality={5}
+                        loading="lazy"
+                        unoptimized
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
                         <Check className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition" />
