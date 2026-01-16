@@ -44,7 +44,7 @@ export function Location() {
 
         <div className="grid lg:grid-cols-2 gap-8 items-stretch">
           {/* Map */}
-          <div className="rounded-xl overflow-hidden shadow-lg border border-gray-100 h-[400px] lg:h-auto lg:min-h-[400px] relative">
+          <div className="rounded-xl overflow-hidden shadow-lg border border-gray-100 h-[400px] lg:h-auto lg:min-h-[500px] relative">
             <iframe
               src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05}%2C${lat - 0.05}%2C${lng + 0.05}%2C${lat + 0.05}&layer=mapnik&marker=${lat}%2C${lng}`}
               className={`w-full h-full ${mapInteractive ? 'pointer-events-auto' : 'pointer-events-none lg:pointer-events-auto'}`}
@@ -77,7 +77,7 @@ export function Location() {
           </div>
 
           {/* Info Cards */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 lg:gap-0 lg:justify-between">
             {/* Address */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
               <div className="flex items-start gap-4">

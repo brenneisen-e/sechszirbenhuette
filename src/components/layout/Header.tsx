@@ -166,17 +166,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Fixed Bottom Button (Mobile only) */}
-      <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-        <button
-          onClick={() => scrollToSection('#buchung')}
-          className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
-          style={{ backgroundColor: LOGO_GREEN }}
-        >
-          Buchung anfragen
-        </button>
-      </div>
-
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg">
@@ -204,5 +193,27 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+// Separate Mobile Booking Button Component - rendered outside Header
+export function MobileBookingButton() {
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-[60] pointer-events-none">
+      <button
+        onClick={() => scrollToSection('#buchung')}
+        className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
+        style={{ backgroundColor: LOGO_GREEN }}
+      >
+        Buchung anfragen
+      </button>
+    </div>
   );
 }

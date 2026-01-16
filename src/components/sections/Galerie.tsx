@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
 import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -80,12 +80,49 @@ export function Galerie() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
   const imagesPerPage = 4;
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Touch handlers for mobile swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((filteredLength: number) => {
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && mobileIndex < filteredLength - 1) {
+        // Swipe left - next image
+        setMobileIndex(prev => prev + 1);
+      } else if (diff < 0 && mobileIndex > 0) {
+        // Swipe right - previous image
+        setMobileIndex(prev => prev - 1);
+      }
+    }
+  }, [mobileIndex]);
 
   // Reset pagination when category changes
   useEffect(() => {
     setCurrentPage(0);
     setIsExpanded(false);
+    setMobileIndex(0);
   }, [selectedCategory]);
 
   // Fetch images from API on mount
@@ -229,7 +266,85 @@ export function Galerie() {
         {/* Image Grid */}
         {!isLoading && (
           <>
-            <div className="relative">
+            {/* Mobile Carousel */}
+            {isMobile && filteredImages.length > 0 && (
+              <div className="md:hidden">
+                <div
+                  className="relative overflow-hidden rounded-xl"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={() => handleTouchEnd(filteredImages.length)}
+                >
+                  {/* Current Image */}
+                  <div
+                    onClick={() => setSelectedImage(images.indexOf(filteredImages[mobileIndex]))}
+                    className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
+                  >
+                    <Image
+                      src={filteredImages[mobileIndex].src}
+                      alt={filteredImages[mobileIndex].title}
+                      fill
+                      className="object-cover"
+                      sizes="100vw"
+                      priority
+                    />
+                    {/* Title overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end">
+                      <div className="text-white p-4 w-full">
+                        <h3 className="font-bold text-lg">{filteredImages[mobileIndex].title}</h3>
+                        {filteredImages[mobileIndex].description && (
+                          <p className="text-sm opacity-90">{filteredImages[mobileIndex].description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation Arrows */}
+                  {mobileIndex > 0 && (
+                    <button
+                      onClick={() => setMobileIndex(prev => prev - 1)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                  )}
+                  {mobileIndex < filteredImages.length - 1 && (
+                    <button
+                      onClick={() => setMobileIndex(prev => prev + 1)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Dot indicators */}
+                <div className="flex justify-center gap-1.5 mt-4">
+                  {filteredImages.slice(0, Math.min(filteredImages.length, 10)).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setMobileIndex(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        mobileIndex === index
+                          ? 'bg-logo-green w-6'
+                          : 'bg-logo-green/30 w-2'
+                      }`}
+                    />
+                  ))}
+                  {filteredImages.length > 10 && (
+                    <span className="text-xs text-gray-500 ml-2">+{filteredImages.length - 10}</span>
+                  )}
+                </div>
+
+                {/* Image counter */}
+                <p className="text-center text-sm text-gray-500 mt-2">
+                  {mobileIndex + 1} / {filteredImages.length}
+                </p>
+              </div>
+            )}
+
+            {/* Desktop Grid */}
+            <div className="hidden md:block relative">
               {/* Previous Button (only when not expanded) */}
               {!isExpanded && filteredImages.length > imagesPerPage && (
                 <button
@@ -253,7 +368,7 @@ export function Galerie() {
               )}
 
               {/* Image Grid */}
-              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${!isExpanded ? 'mx-4 md:mx-8' : ''}`}>
+              <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 ${!isExpanded ? 'mx-8' : ''}`}>
                 {displayedImages.map((image, index) => (
                   <div
                     key={`${currentPage}-${index}`}
@@ -265,7 +380,7 @@ export function Galerie() {
                       alt={image.title}
                       fill
                       className="object-cover transition-transform group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      sizes="(max-width: 1200px) 50vw, 25vw"
                     />
 
                     {/* Overlay on hover */}
@@ -282,9 +397,9 @@ export function Galerie() {
               </div>
             </div>
 
-            {/* Pagination indicator and Expand Button */}
-            {filteredImages.length > imagesPerPage && (
-              <div className="flex items-center justify-between mt-6">
+            {/* Pagination indicator and Expand Button (Desktop only) */}
+            {!isMobile && filteredImages.length > imagesPerPage && (
+              <div className="hidden md:flex items-center justify-between mt-6">
                 {/* Page indicator (left side - only when not expanded) */}
                 {!isExpanded ? (
                   <div className="flex gap-2">
