@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Mountain, Sun, Snowflake } from 'lucide-react';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 
 export function IntroText() {
@@ -34,6 +35,9 @@ export function IntroText() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-logo-green/10 rounded-full mb-5">
+            <Mountain className="w-7 h-7 text-logo-green" strokeWidth={1.5} />
+          </div>
           <h2 data-text-key="introtext_heading_1" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_1')}>
             {getText('introtext_heading_1')}
           </h2>
@@ -50,6 +54,9 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-center mb-12"
         >
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-logo-green/10 rounded-full mb-5">
+            <Sun className="w-7 h-7 text-logo-green" strokeWidth={1.5} />
+          </div>
           <h2 data-text-key="introtext_heading_2" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_2')}>
             {getText('introtext_heading_2')}
           </h2>
@@ -66,6 +73,9 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-center"
         >
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-logo-green/10 rounded-full mb-5">
+            <Snowflake className="w-7 h-7 text-logo-green" strokeWidth={1.5} />
+          </div>
           <h2 data-text-key="introtext_heading_3" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_3')}>
             {getText('introtext_heading_3')}
           </h2>

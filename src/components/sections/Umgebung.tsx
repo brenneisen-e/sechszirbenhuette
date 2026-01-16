@@ -63,7 +63,7 @@ export function Umgebung() {
 
   useEffect(() => {
     fetch('/api/media?category=aussen&type=image')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ media?: MediaItem[] }>)
       .then((data) => {
         if (data.media) {
           setImages(data.media);
@@ -73,12 +73,12 @@ export function Umgebung() {
 
     // Load dog trip images
     fetch('/api/media')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ media?: (MediaItem & { category: string })[] }>)
       .then((data) => {
         if (data.media) {
           const grouped: Record<string, MediaItem[]> = {};
           DOG_TRIP_CATEGORIES.forEach(cat => {
-            grouped[cat] = data.media.filter((m: MediaItem & { category: string }) => m.category === cat);
+            grouped[cat] = data.media!.filter((m) => m.category === cat);
           });
           setDogTripImages(grouped);
         }

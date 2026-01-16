@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
@@ -12,23 +12,47 @@ const LOGO_GREEN = '#1e5631';
 
 // Navigation links - split for left and right of logo
 const leftNavItems = [
-  { key: 'ferienhaus', href: '#ferienhaus' },
-  { key: 'umgebung', href: '#umgebung' },
+  { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus' },
+  { key: 'umgebung', href: '#umgebung', sectionId: 'umgebung' },
 ] as const;
 
 const rightNavItems = [
-  { key: 'galerie', href: '#galerie' },
-  { key: 'anfrage', href: '#buchung' },
-  { key: 'bewertungen', href: '#bewertungen' },
+  { key: 'galerie', href: '#galerie', sectionId: 'galerie' },
+  { key: 'anfrage', href: '#buchung', sectionId: 'buchung' },
+  { key: 'bewertungen', href: '#bewertungen', sectionId: 'bewertungen' },
 ] as const;
 
 const allNavItems = [...leftNavItems, ...rightNavItems];
+
+// All sections to track for scroll-spy (in order they appear on page)
+const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
 
 export function Header() {
   const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  // Scroll-spy: determine which section is currently in view
+  const updateActiveSection = useCallback(() => {
+    const scrollPosition = window.scrollY + 150; // Offset for header height
+
+    let currentSection: string | null = null;
+
+    for (const sectionId of SCROLL_SPY_SECTIONS) {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const { offsetTop, offsetHeight } = element;
+        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+          currentSection = sectionId;
+          break;
+        }
+      }
+    }
+
+    setActiveSection(currentSection);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,11 +63,26 @@ export function Header() {
         const heroBottom = heroSection.getBoundingClientRect().bottom;
         setIsPastHero(heroBottom < 0);
       }
+      // Update active section for scroll-spy
+      updateActiveSection();
     };
 
     window.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [updateActiveSection]);
+
+  // Check if a nav item is active
+  const isNavItemActive = (sectionId: string) => {
+    // Map nav item sections to actual section IDs
+    if (sectionId === 'buchung' && activeSection === 'buchung') return true;
+    if (sectionId === 'bewertungen' && activeSection === 'bewertungen') return true;
+    if (sectionId === 'ferienhaus' && activeSection === 'ferienhaus') return true;
+    if (sectionId === 'galerie' && activeSection === 'galerie') return true;
+    if (sectionId === 'umgebung' && (activeSection === 'umgebung' || activeSection === 'lage')) return true;
+    return false;
+  };
 
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
@@ -67,20 +106,34 @@ export function Header() {
         <div className="hidden md:flex items-center justify-center">
           {/* Left Navigation - justify-end to push items towards center */}
           <nav className="flex items-center gap-8 justify-end" style={{ minWidth: '280px' }}>
-            {leftNavItems.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => scrollToSection(item.href)}
-                className={cn(
-                  'font-medium transition-colors uppercase tracking-wide text-sm',
-                  isScrolled
-                    ? 'text-gray-700 hover:text-wood-600'
-                    : 'text-white hover:text-white/80'
-                )}
-              >
-                {t.navigation[item.key]}
-              </button>
-            ))}
+            {leftNavItems.map((item) => {
+              const isActive = isNavItemActive(item.sectionId);
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => scrollToSection(item.href)}
+                  className={cn(
+                    'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
+                    isScrolled
+                      ? 'text-gray-700 hover:text-logo-green'
+                      : 'text-white hover:text-white/80',
+                    isActive && 'font-bold'
+                  )}
+                  style={isActive ? {
+                    color: isScrolled ? LOGO_GREEN : 'white',
+                  } : undefined}
+                >
+                  {t.navigation[item.key]}
+                  {/* Active indicator line */}
+                  {isActive && (
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
+                      style={{ backgroundColor: isScrolled ? LOGO_GREEN : 'white' }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Centered Logo */}
@@ -104,25 +157,31 @@ export function Header() {
           {/* Right Navigation - justify-start to push items towards center */}
           <nav className="flex items-center gap-8 justify-start" style={{ minWidth: '280px' }}>
             {rightNavItems.map((item) => {
-              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero;
+              const isActive = isNavItemActive(item.sectionId);
+              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
               return (
                 <button
                   key={item.key}
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
-                    'font-medium transition-all uppercase tracking-wide text-sm',
+                    'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
                     isScrolled
-                      ? 'text-gray-700 hover:text-wood-600'
+                      ? 'text-gray-700 hover:text-logo-green'
                       : 'text-white hover:text-white/80',
-                    isAnfrageHighlighted && 'font-bold'
+                    (isActive || isAnfrageHighlighted) && 'font-bold'
                   )}
-                  style={isAnfrageHighlighted ? {
-                    borderBottom: `3px solid ${LOGO_GREEN}`,
-                    paddingBottom: '2px',
+                  style={(isActive || isAnfrageHighlighted) ? {
                     color: isScrolled ? LOGO_GREEN : 'white'
                   } : undefined}
                 >
                   {t.navigation[item.key]}
+                  {/* Active indicator line */}
+                  {(isActive || isAnfrageHighlighted) && (
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
+                      style={{ backgroundColor: isScrolled ? LOGO_GREEN : 'white' }}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -169,19 +228,19 @@ export function Header() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg">
-          <nav className="container py-4 flex flex-col gap-2">
+          <nav className="container py-4 flex flex-col gap-1">
             {allNavItems.map((item) => {
-              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero;
+              const isActive = isNavItemActive(item.sectionId);
+              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
               return (
                 <button
                   key={item.key}
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
-                    'py-2 text-gray-700 hover:text-wood-600 text-left uppercase tracking-wide',
-                    isAnfrageHighlighted && 'font-bold'
+                    'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
+                    (isActive || isAnfrageHighlighted) && 'font-bold bg-logo-green/10'
                   )}
-                  style={isAnfrageHighlighted ? {
-                    borderBottom: `3px solid ${LOGO_GREEN}`,
+                  style={(isActive || isAnfrageHighlighted) ? {
                     color: LOGO_GREEN
                   } : undefined}
                 >

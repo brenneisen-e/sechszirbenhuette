@@ -189,7 +189,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      text_key?: string;
+      content?: string;
+      font_family?: string | null;
+      font_size?: string | null;
+      color?: string | null;
+      padding?: string | null;
+      section?: string;
+      text_type?: string;
+    };
     const { text_key, content, font_family, font_size, color, padding, section, text_type } = body;
 
     if (!text_key || !content) {

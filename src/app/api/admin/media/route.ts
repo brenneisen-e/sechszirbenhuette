@@ -35,7 +35,7 @@ interface CloudflareEnv {
 async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
   try {
     const ctx = await getCloudflareContext();
-    return ctx.env as CloudflareEnv;
+    return ctx.env as unknown as CloudflareEnv;
   } catch {
     return null;
   }
@@ -189,7 +189,13 @@ export async function PUT(request: NextRequest) {
     if (!env) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
-    const body = await request.json();
+    const body = await request.json() as {
+      id?: number;
+      alt_text?: string;
+      title?: string;
+      category?: string;
+      display_order?: number;
+    };
     const { id, alt_text, title, category, display_order } = body;
 
     if (!id) {

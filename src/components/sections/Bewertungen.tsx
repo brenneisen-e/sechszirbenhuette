@@ -23,7 +23,7 @@ export function Bewertungen() {
 
   useEffect(() => {
     fetch('/api/reviews')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ reviews?: Review[] }>)
       .then((data) => {
         if (data.reviews) {
           setReviews(data.reviews);

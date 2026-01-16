@@ -16,7 +16,7 @@ export function Hero() {
 
   useEffect(() => {
     fetch('/api/media?category=hero&type=video')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]) {
           setVideoUrl(data.media[0].url);
@@ -63,10 +63,12 @@ export function Hero() {
       <div className="absolute inset-0 bg-gray-900">
         {videoUrl ? (
           <video
+            id="hero-video"
             autoPlay
             muted
             loop
             playsInline
+            preload="auto"
             className="h-full w-full object-cover"
           >
             <source src={videoUrl} type="video/mp4" />

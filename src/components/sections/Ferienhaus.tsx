@@ -118,7 +118,7 @@ export function Ferienhaus() {
   useEffect(() => {
     // Fetch gallery images
     fetch('/api/media?category=innen&type=image')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ media?: MediaItem[] }>)
       .then((data) => {
         if (data.media) {
           setImages(data.media);
@@ -128,7 +128,7 @@ export function Ferienhaus() {
 
     // Fetch amenity card images
     fetch('/api/amenity-images')
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ byCard?: Record<string, CardImage> }>)
       .then((data) => {
         if (data.byCard) {
           setCardImages(data.byCard);

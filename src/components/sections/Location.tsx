@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { MapPin, Navigation, Mail, Phone, Hand } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { SITE_CONFIG } from '@/lib/constants';
 
 export function Location() {
   const { t, language } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [mapInteractive, setMapInteractive] = useState(false);
 
   // Sechszirbenhütte coordinates
@@ -22,14 +24,14 @@ export function Location() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('location_title') }}
           >
-            {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
+            {getText('location_title') || (language === 'de' ? 'So finden Sie uns' : 'How to Find Us')}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-            {language === 'de'
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6" style={getTextStyle('location_subtitle')}>
+            {getText('location_subtitle') || (language === 'de'
               ? 'Die Sechszirbenhütte liegt auf 1.700 m direkt am Nationalpark Nockberge'
-              : 'The Sechszirbenhütte is located at 1,700m right at the Nockberge National Park'}
+              : 'The Sechszirbenhütte is located at 1,700m right at the Nockberge National Park')}
           </p>
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
