@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -108,7 +109,8 @@ interface CardImage {
 }
 
 export function Ferienhaus() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
@@ -188,12 +190,12 @@ export function Ferienhaus() {
           <h2
             data-text-key="ferienhaus_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('ferienhaus_title') }}
           >
-            Ausstattung & Komfort
+            {getText('ferienhaus_title')}
           </h2>
-          <p data-text-key="ferienhaus_subtitle" className="text-lg text-gray-600">
-            Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.
+          <p data-text-key="ferienhaus_subtitle" className="text-lg text-gray-600" style={getTextStyle('ferienhaus_subtitle')}>
+            {getText('ferienhaus_subtitle')}
           </p>
         </motion.div>
 
