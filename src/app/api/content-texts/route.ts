@@ -32,6 +32,7 @@ interface ContentText {
   font_family: string | null;
   font_size: string | null;
   color: string | null;
+  padding: string | null;
   section: string;
   text_type: string;
   updated_at: string;
@@ -85,6 +86,7 @@ export async function GET() {
         font_family: null,
         font_size: null,
         color: null,
+        padding: null,
         section: value.section,
         text_type: value.text_type,
         updated_at: '',
@@ -173,7 +175,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text_key, content, font_family, font_size, color, section, text_type } = body;
+    const { text_key, content, font_family, font_size, color, padding, section, text_type } = body;
 
     if (!text_key || !content) {
       return NextResponse.json(
@@ -184,13 +186,14 @@ export async function POST(request: NextRequest) {
 
     // Use INSERT OR REPLACE to handle both new and existing entries
     await env.DB.prepare(`
-      INSERT INTO content_texts (text_key, content, font_family, font_size, color, section, text_type, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO content_texts (text_key, content, font_family, font_size, color, padding, section, text_type, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(text_key) DO UPDATE SET
         content = excluded.content,
         font_family = excluded.font_family,
         font_size = excluded.font_size,
         color = excluded.color,
+        padding = excluded.padding,
         section = excluded.section,
         text_type = excluded.text_type,
         updated_at = datetime('now')
@@ -200,6 +203,7 @@ export async function POST(request: NextRequest) {
       font_family || null,
       font_size || null,
       color || null,
+      padding || null,
       section || defaultTexts[text_key]?.section || 'other',
       text_type || defaultTexts[text_key]?.text_type || 'body'
     ).run();

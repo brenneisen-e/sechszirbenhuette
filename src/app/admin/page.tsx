@@ -62,6 +62,7 @@ interface ContentText {
   font_family: string | null;
   font_size: string | null;
   color: string | null;
+  padding: string | null;
   section: string;
   text_type: string;
   updated_at: string;
@@ -248,7 +249,8 @@ function AdminPageContent() {
     font_family: string;
     font_size: string;
     color: string;
-  }>({ content: '', font_family: '', font_size: '', color: '' });
+    padding: string;
+  }>({ content: '', font_family: '', font_size: '', color: '', padding: '' });
   const [isSavingText, setIsSavingText] = useState(false);
   const [expandedTextSection, setExpandedTextSection] = useState<string | null>(null);
   const [selectedWebsiteSection, setSelectedWebsiteSection] = useState<string>('hero');
@@ -324,7 +326,7 @@ function AdminPageContent() {
   };
 
   // Update live preview in iframe when editing text
-  const updateLivePreview = useCallback((textKey: string, content: string, fontFamily?: string, fontSize?: string, color?: string) => {
+  const updateLivePreview = useCallback((textKey: string, content: string, fontFamily?: string, fontSize?: string, color?: string, padding?: string) => {
     const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
     if (!iframe || !iframe.contentDocument) return;
 
@@ -336,7 +338,8 @@ function AdminPageContent() {
         content,
         fontFamily,
         fontSize,
-        color
+        color,
+        padding
       }, '*');
     } catch (e) {
       console.log('Could not post message to iframe', e);
@@ -352,6 +355,7 @@ function AdminPageContent() {
         if (fontFamily) (element as HTMLElement).style.fontFamily = fontFamily;
         if (fontSize) (element as HTMLElement).style.fontSize = fontSize + 'px';
         if (color) (element as HTMLElement).style.color = color;
+        if (padding) (element as HTMLElement).style.padding = padding + 'px';
       }
     } catch (e) {
       // Cross-origin restriction may apply
@@ -366,7 +370,8 @@ function AdminPageContent() {
         editingTextValues.content,
         editingTextValues.font_family,
         editingTextValues.font_size,
-        editingTextValues.color
+        editingTextValues.color,
+        editingTextValues.padding
       );
     }
   }, [editingTextKey, editingTextValues, updateLivePreview]);
@@ -384,6 +389,7 @@ function AdminPageContent() {
             font_family: text.font_family || '',
             font_size: text.font_size || '',
             color: text.color || '',
+            padding: text.padding || '',
           });
           // Find section and expand it
           const section = text.section;
@@ -601,6 +607,7 @@ function AdminPageContent() {
       font_family: text.font_family || '',
       font_size: text.font_size || '',
       color: text.color || '',
+      padding: text.padding || '',
     });
   };
 
@@ -619,6 +626,7 @@ function AdminPageContent() {
           font_family: editingTextValues.font_family || null,
           font_size: editingTextValues.font_size || null,
           color: editingTextValues.color || null,
+          padding: editingTextValues.padding || null,
           section: text.section,
           text_type: text.text_type,
         }),
@@ -1340,7 +1348,7 @@ function AdminPageContent() {
                               </div>
 
                               {/* Style Options */}
-                              <div className="grid grid-cols-3 gap-3">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
                                   <label className="block text-xs text-slate-500 mb-1">Schriftart</label>
                                   <select
@@ -1387,6 +1395,25 @@ function AdminPageContent() {
                                     />
                                   </div>
                                 </div>
+
+                                <div>
+                                  <label className="block text-xs text-slate-500 mb-1">Padding (px)</label>
+                                  <select
+                                    value={editingTextValues.padding}
+                                    onChange={(e) => setEditingTextValues(v => ({ ...v, padding: e.target.value }))}
+                                    className="w-full px-2 py-1.5 border rounded text-sm"
+                                  >
+                                    <option value="">Standard</option>
+                                    <option value="0">0px</option>
+                                    <option value="4">4px</option>
+                                    <option value="8">8px</option>
+                                    <option value="12">12px</option>
+                                    <option value="16">16px</option>
+                                    <option value="24">24px</option>
+                                    <option value="32">32px</option>
+                                    <option value="48">48px</option>
+                                  </select>
+                                </div>
                               </div>
 
                               {/* Preview */}
@@ -1399,7 +1426,10 @@ function AdminPageContent() {
                                       : undefined,
                                     fontSize: editingTextValues.font_size ? editingTextValues.font_size + 'px' : undefined,
                                     color: editingTextValues.color || undefined,
+                                    padding: editingTextValues.padding ? editingTextValues.padding + 'px' : undefined,
                                     lineHeight: text.text_type === 'heading' ? 1.2 : 1.5,
+                                    backgroundColor: editingTextValues.padding ? 'rgba(30, 86, 49, 0.1)' : undefined,
+                                    borderRadius: editingTextValues.padding ? '4px' : undefined,
                                   }}
                                   className={text.text_type === 'heading' ? 'text-xl' : 'text-sm'}
                                 >
@@ -1439,11 +1469,12 @@ function AdminPageContent() {
                                     : undefined,
                                   fontSize: text.font_size ? text.font_size + 'px' : undefined,
                                   color: text.color || undefined,
+                                  padding: text.padding ? text.padding + 'px' : undefined,
                                 }}
                               >
                                 {text.content}
                               </p>
-                              {(text.font_family || text.font_size || text.color) && (
+                              {(text.font_family || text.font_size || text.color || text.padding) && (
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                   {text.font_family && (
                                     <span className="bg-slate-100 px-2 py-0.5 rounded">
@@ -1459,6 +1490,11 @@ function AdminPageContent() {
                                     <span className="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
                                       <span className="w-3 h-3 rounded-full" style={{ backgroundColor: text.color }} />
                                       {text.color}
+                                    </span>
+                                  )}
+                                  {text.padding && (
+                                    <span className="bg-slate-100 px-2 py-0.5 rounded">
+                                      Padding: {text.padding}px
                                     </span>
                                   )}
                                 </div>
@@ -1634,6 +1670,25 @@ function AdminPageContent() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Padding (px)</label>
+                    <select
+                      value={editingTextValues.padding}
+                      onChange={(e) => setEditingTextValues(prev => ({ ...prev, padding: e.target.value }))}
+                      className="w-full border border-slate-300 rounded-lg p-2 text-sm"
+                    >
+                      <option value="">Standard</option>
+                      <option value="0">0px (kein Padding)</option>
+                      <option value="4">4px</option>
+                      <option value="8">8px</option>
+                      <option value="12">12px</option>
+                      <option value="16">16px</option>
+                      <option value="24">24px</option>
+                      <option value="32">32px</option>
+                      <option value="48">48px</option>
+                    </select>
+                  </div>
+
                   <div className="flex gap-2 pt-4 border-t">
                     <button
                       onClick={async () => {
@@ -1650,6 +1705,7 @@ function AdminPageContent() {
                               font_family: editingTextValues.font_family || null,
                               font_size: editingTextValues.font_size || null,
                               color: editingTextValues.color || null,
+                              padding: editingTextValues.padding || null,
                               section: text?.section,
                               text_type: text?.text_type,
                             }),
@@ -1678,7 +1734,7 @@ function AdminPageContent() {
                     <button
                       onClick={() => {
                         setEditingTextKey(null);
-                        setEditingTextValues({ content: '', font_family: '', font_size: '', color: '' });
+                        setEditingTextValues({ content: '', font_family: '', font_size: '', color: '', padding: '' });
                       }}
                       className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
                     >

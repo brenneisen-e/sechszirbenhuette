@@ -38,6 +38,7 @@ interface AdminTextUpdate {
   fontFamily?: string;
   fontSize?: string;
   color?: string;
+  padding?: string;
 }
 
 export function AdminPreviewListener() {
@@ -54,7 +55,7 @@ export function AdminPreviewListener() {
       // Verify message is from admin
       if (event.data?.type !== 'ADMIN_TEXT_UPDATE') return;
 
-      const { textKey, content, fontFamily, fontSize, color } = event.data as AdminTextUpdate;
+      const { textKey, content, fontFamily, fontSize, color, padding } = event.data as AdminTextUpdate;
       const selector = TEXT_KEY_SELECTORS[textKey];
 
       if (selector) {
@@ -64,6 +65,7 @@ export function AdminPreviewListener() {
           if (fontFamily) element.style.fontFamily = fontFamily + ', cursive, sans-serif';
           if (fontSize) element.style.fontSize = fontSize + 'px';
           if (color) element.style.color = color;
+          if (padding) element.style.padding = padding + 'px';
         }
       }
     };
