@@ -51,6 +51,9 @@ const DOG_TRIP_CATEGORIES = [
   'hund-millstaetter',
 ];
 
+type MainTab = 'nockberge' | 'kaernten';
+type KaerntenSubTab = 'hunde' | 'kinder';
+
 export function Umgebung() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
@@ -59,6 +62,10 @@ export function Umgebung() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [dogTripImages, setDogTripImages] = useState<Record<string, MediaItem[]>>({});
   const [currentDogTrip, setCurrentDogTrip] = useState(0);
+
+  // Tab state
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>('nockberge');
+  const [activeKaerntenSubTab, setActiveKaerntenSubTab] = useState<KaerntenSubTab>('hunde');
 
   useEffect(() => {
     fetch('/api/media?category=aussen&type=image')
@@ -96,7 +103,7 @@ export function Umgebung() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-4xl mx-auto mb-16"
+          className="text-center max-w-4xl mx-auto mb-12"
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
             <Map size={32} strokeWidth={1.5} />
@@ -116,283 +123,349 @@ export function Umgebung() {
           </p>
         </motion.div>
 
-        {/* Outdoor Images Gallery */}
-        {images.length > 0 && (
+        {/* Main Tabs */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-gray-100 rounded-xl p-1.5">
+            <button
+              onClick={() => setActiveMainTab('nockberge')}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition-all ${
+                activeMainTab === 'nockberge'
+                  ? 'bg-logo-green text-white shadow-md'
+                  : 'text-gray-600 hover:text-logo-green'
+              }`}
+            >
+              <Mountain className="inline w-5 h-5 mr-2" />
+              Nockberge
+            </button>
+            <button
+              onClick={() => setActiveMainTab('kaernten')}
+              className={`px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition-all ${
+                activeMainTab === 'kaernten'
+                  ? 'bg-logo-green text-white shadow-md'
+                  : 'text-gray-600 hover:text-logo-green'
+              }`}
+            >
+              <Globe className="inline w-5 h-5 mr-2" />
+              Kärnten
+            </button>
+          </div>
+        </div>
+
+        {/* Nockberge Tab Content */}
+        {activeMainTab === 'nockberge' && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {images.slice(0, 4).map((img, index) => (
-                <button
-                  key={img.id}
-                  onClick={() => setSelectedImage(index)}
-                  className="relative aspect-[4/3] overflow-hidden rounded-xl hover:opacity-90 transition group"
-                >
-                  <Image
-                    src={img.url}
-                    alt={img.alt_text || 'Umgebung Sechszirbenhütte'}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </button>
-              ))}
+            {/* Outdoor Images Gallery */}
+            {images.length > 0 && (
+              <div className="mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {images.slice(0, 4).map((img, index) => (
+                    <button
+                      key={img.id}
+                      onClick={() => setSelectedImage(index)}
+                      className="relative aspect-[4/3] overflow-hidden rounded-xl hover:opacity-90 transition group"
+                    >
+                      <Image
+                        src={img.url}
+                        alt={img.alt_text || 'Umgebung Sechszirbenhütte'}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Feature Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featureKeys.map((key, index) => {
+                const Icon = featureIcons[key];
+                const feature = t.umgebung.features[key];
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white rounded-xl p-6 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
+                        <Icon size={20} />
+                      </div>
+                      <h3 className="text-lg font-bold text-logo-green">
+                        {feature.title}
+                      </h3>
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                    {key === 'kaerntenCard' && (
+                      <div className="mt-4 flex gap-3">
+                        <a
+                          href="https://www.kaerntencard.at"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                        >
+                          Kärnten Card <ExternalLink size={14} />
+                        </a>
+                        <a
+                          href="https://www.heidialm.at"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                        >
+                          Heidialm <ExternalLink size={14} />
+                        </a>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         )}
 
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {featureKeys.map((key, index) => {
-            const Icon = featureIcons[key];
-            const feature = t.umgebung.features[key];
-            return (
+        {/* Kärnten Tab Content */}
+        {activeMainTab === 'kaernten' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Sub-Tabs for Kärnten */}
+            <div className="flex justify-center mb-10">
+              <div className="inline-flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
+                <button
+                  onClick={() => setActiveKaerntenSubTab('hunde')}
+                  className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
+                    activeKaerntenSubTab === 'hunde'
+                      ? 'bg-logo-green/10 text-logo-green'
+                      : 'text-gray-500 hover:text-logo-green'
+                  }`}
+                >
+                  <Dog size={18} />
+                  Mit Hunden
+                </button>
+                <button
+                  onClick={() => setActiveKaerntenSubTab('kinder')}
+                  className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
+                    activeKaerntenSubTab === 'kinder'
+                      ? 'bg-logo-green/10 text-logo-green'
+                      : 'text-gray-500 hover:text-logo-green'
+                  }`}
+                >
+                  <Baby size={18} />
+                  Mit Kindern
+                </button>
+              </div>
+            </div>
+
+            {/* Dog Trips Content */}
+            {activeKaerntenSubTab === 'hunde' && (
               <motion.div
-                key={key}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                id="dog-trips"
+                className="scroll-mt-24"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-                    <Icon size={20} />
-                  </div>
-                  <h3 className="text-lg font-bold text-logo-green">
-                    {feature.title}
+                <div className="flex flex-col items-center text-center mb-8">
+                  <h3
+                    className="text-4xl sm:text-5xl md:text-6xl text-logo-green"
+                    style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                  >
+                    {t.umgebung.dogTrips.title}
                   </h3>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-                {key === 'kaerntenCard' && (
-                  <div className="mt-4 flex gap-3">
-                    <a
-                      href="https://www.kaerntencard.at"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                    >
-                      Kärnten Card <ExternalLink size={14} />
-                    </a>
-                    <a
-                      href="https://www.heidialm.at"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                    >
-                      Heidialm <ExternalLink size={14} />
-                    </a>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
 
-        {/* Dog Trips - Swipeable Carousel */}
-        <motion.div
-          id="dog-trips"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20 scroll-mt-24"
-        >
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
-              <Dog size={32} />
-            </div>
-            <h3
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
-            >
-              {t.umgebung.dogTrips.title}
-            </h3>
-          </div>
+                {/* Carousel Container */}
+                <div className="relative">
+                  {/* Navigation Buttons */}
+                  <button
+                    onClick={() => setCurrentDogTrip(prev => Math.max(0, prev - 1))}
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentDogTrip === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                    disabled={currentDogTrip === 0}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button
+                    onClick={() => setCurrentDogTrip(prev => Math.min(dogTrips.length - 1, prev + 1))}
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentDogTrip === dogTrips.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                    disabled={currentDogTrip === dogTrips.length - 1}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
 
-          {/* Carousel Container */}
-          <div className="relative">
-            {/* Navigation Buttons */}
-            <button
-              onClick={() => setCurrentDogTrip(prev => Math.max(0, prev - 1))}
-              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentDogTrip === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-              disabled={currentDogTrip === 0}
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              onClick={() => setCurrentDogTrip(prev => Math.min(dogTrips.length - 1, prev + 1))}
-              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentDogTrip === dogTrips.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-              disabled={currentDogTrip === dogTrips.length - 1}
-            >
-              <ChevronRight size={24} />
-            </button>
-
-            {/* Carousel Track */}
-            <div className="overflow-hidden mx-4 md:mx-8">
-              <div
-                className="flex transition-transform duration-300 ease-out"
-                style={{ transform: `translateX(-${currentDogTrip * 100}%)` }}
-              >
-                {dogTrips.map((trip, index) => {
-                  const categoryKey = DOG_TRIP_CATEGORIES[index];
-                  const tripImages = dogTripImages[categoryKey] || [];
-                  const firstImage = tripImages[0];
-
-                  return (
+                  {/* Carousel Track */}
+                  <div className="overflow-hidden mx-4 md:mx-8">
                     <div
-                      key={index}
-                      className="w-full flex-shrink-0 px-2"
+                      className="flex transition-transform duration-300 ease-out"
+                      style={{ transform: `translateX(-${currentDogTrip * 100}%)` }}
                     >
-                      <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md mx-auto">
-                        {/* Portrait Image */}
-                        <div className="relative aspect-[3/4] bg-gray-100">
-                          {firstImage ? (
-                            <Image
-                              src={firstImage.url}
-                              alt={firstImage.alt_text || trip.title}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 400px"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
-                              <div className="text-center text-wood-600">
-                                <Dog size={48} className="mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">Bild im Admin hinzufügen</p>
+                      {dogTrips.map((trip, index) => {
+                        const categoryKey = DOG_TRIP_CATEGORIES[index];
+                        const tripImages = dogTripImages[categoryKey] || [];
+                        const firstImage = tripImages[0];
+
+                        return (
+                          <div
+                            key={index}
+                            className="w-full flex-shrink-0 px-2"
+                          >
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md mx-auto">
+                              {/* Portrait Image */}
+                              <div className="relative aspect-[3/4] bg-gray-100">
+                                {firstImage ? (
+                                  <Image
+                                    src={firstImage.url}
+                                    alt={firstImage.alt_text || trip.title}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 400px"
+                                  />
+                                ) : (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
+                                    <div className="text-center text-wood-600">
+                                      <Dog size={48} className="mx-auto mb-2 opacity-50" />
+                                      <p className="text-sm">Bild im Admin hinzufügen</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {/* Number Badge */}
+                                <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                  {index + 1}
+                                </div>
+                              </div>
+
+                              {/* Text Content */}
+                              <div className="p-5">
+                                <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
+                                <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>
+                                <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
+                                <div className="flex flex-wrap gap-3 text-sm">
+                                  {trip.duration && (
+                                    <span className="flex items-center gap-1 text-gray-500">
+                                      <Clock size={14} /> {trip.duration}
+                                    </span>
+                                  )}
+                                  {trip.tip && (
+                                    <span className="text-wood-600 font-medium">
+                                      Tipp: {trip.tip}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          )}
-                          {/* Number Badge */}
-                          <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold shadow-lg">
-                            {index + 1}
                           </div>
-                        </div>
-
-                        {/* Text Content */}
-                        <div className="p-5">
-                          <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
-                          <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>
-                          <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
-                          <div className="flex flex-wrap gap-3 text-sm">
-                            {trip.duration && (
-                              <span className="flex items-center gap-1 text-gray-500">
-                                <Clock size={14} /> {trip.duration}
-                              </span>
-                            )}
-                            {trip.tip && (
-                              <span className="text-wood-600 font-medium">
-                                Tipp: {trip.tip}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  </div>
 
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 mt-6">
-              {dogTrips.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentDogTrip(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${
-                    currentDogTrip === index
-                      ? 'bg-logo-green w-6'
-                      : 'bg-logo-green/30 hover:bg-logo-green/50'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Kids Trips */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
-              <Baby size={32} />
-            </div>
-            <h3
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
-            >
-              {t.umgebung.kidsTrips.title}
-            </h3>
-          </div>
-
-          {/* Featured: Heidi-Alm */}
-          {t.umgebung.kidsTrips.featured && (
-            <div className="mb-8">
-              <div className="bg-logo-green/15 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/30">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
-                    1
-                  </span>
-                  <div>
-                    <h4 className="text-xl md:text-2xl font-bold text-logo-green">
-                      {t.umgebung.kidsTrips.featured.title}
-                    </h4>
-                    <p className="text-sm text-gray-500 font-medium">
-                      <Car className="inline w-4 h-4 mr-1" />
-                      {t.umgebung.kidsTrips.featured.distance} | {t.umgebung.kidsTrips.featured.age}
-                    </p>
+                  {/* Dots Indicator */}
+                  <div className="flex justify-center gap-2 mt-6">
+                    {dogTrips.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentDogTrip(index)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          currentDogTrip === index
+                            ? 'bg-logo-green w-6'
+                            : 'bg-logo-green/30 hover:bg-logo-green/50'
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
-                  {t.umgebung.kidsTrips.featured.description}
-                </p>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
 
-          {/* Grid: 6 weitere Ausflugsziele (2x3) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {kidsTrips.map((trip, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
+            {/* Kids Trips Content */}
+            {activeKaerntenSubTab === 'kinder' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
               >
-                <button
-                  onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
-                  className="w-full p-4 md:p-5 flex items-center justify-between text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold text-sm flex-shrink-0">
-                      {index + 2}
-                    </span>
-                    <div>
-                      <h4 className="font-bold text-logo-green text-sm md:text-base">{trip.title}</h4>
-                      <p className="text-xs text-gray-500">
-                        <Car className="inline w-3 h-3 mr-1" />
-                        {trip.distance} | {trip.age}
+                <div className="flex flex-col items-center text-center mb-8">
+                  <h3
+                    className="text-4xl sm:text-5xl md:text-6xl text-logo-green"
+                    style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                  >
+                    {t.umgebung.kidsTrips.title}
+                  </h3>
+                </div>
+
+                {/* Featured: Heidi-Alm */}
+                {t.umgebung.kidsTrips.featured && (
+                  <div className="mb-8">
+                    <div className="bg-logo-green/15 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/30">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
+                          1
+                        </span>
+                        <div>
+                          <h4 className="text-xl md:text-2xl font-bold text-logo-green">
+                            {t.umgebung.kidsTrips.featured.title}
+                          </h4>
+                          <p className="text-sm text-gray-500 font-medium">
+                            <Car className="inline w-4 h-4 mr-1" />
+                            {t.umgebung.kidsTrips.featured.distance} | {t.umgebung.kidsTrips.featured.age}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">
+                        {t.umgebung.kidsTrips.featured.description}
                       </p>
                     </div>
                   </div>
-                  {expandedKidsTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {expandedKidsTrip === index && (
-                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-logo-green/20">
-                    <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
-                  </div>
                 )}
-              </div>
-            ))}
-          </div>
-        </motion.div>
+
+                {/* Grid: 6 weitere Ausflugsziele (2x3) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {kidsTrips.map((trip, index) => (
+                    <div
+                      key={index}
+                      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
+                    >
+                      <button
+                        onClick={() => setExpandedKidsTrip(expandedKidsTrip === index ? null : index)}
+                        className="w-full p-4 md:p-5 flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold text-sm flex-shrink-0">
+                            {index + 2}
+                          </span>
+                          <div>
+                            <h4 className="font-bold text-logo-green text-sm md:text-base">{trip.title}</h4>
+                            <p className="text-xs text-gray-500">
+                              <Car className="inline w-3 h-3 mr-1" />
+                              {trip.distance} | {trip.age}
+                            </p>
+                          </div>
+                        </div>
+                        {expandedKidsTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      </button>
+                      {expandedKidsTrip === index && (
+                        <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-logo-green/20">
+                          <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
       </div>
 
       {/* Lightbox */}
