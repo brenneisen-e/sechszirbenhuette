@@ -5,6 +5,7 @@ import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
 import { Header, Footer, MobileBookingButton } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
 import { MobileScrollProgress } from '@/components/ui/MobileScrollProgress';
+import { InlineEditOverlay } from '@/components/admin/InlineEditOverlay';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -81,6 +82,7 @@ export default function RootLayout({
               <MobileScrollProgress />
               <Header />
               <MobileBookingButton />
+              <InlineEditOverlay />
               <main className="relative z-10">{children}</main>
               <Footer />
             </LanguageProvider>
