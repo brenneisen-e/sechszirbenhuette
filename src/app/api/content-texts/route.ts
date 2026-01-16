@@ -167,6 +167,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Ensure admin_sessions table exists
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT NOT NULL UNIQUE,
+          expires_at DATETIME NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (tableError) {
+      console.error('Error creating admin_sessions table:', tableError);
+    }
+
     const session = await env.DB.prepare(
       'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")'
     ).bind(sessionId).first();
@@ -183,6 +197,26 @@ export async function POST(request: NextRequest) {
         { error: 'text_key and content are required' },
         { status: 400 }
       );
+    }
+
+    // Ensure content_texts table exists
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS content_texts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          text_key TEXT NOT NULL UNIQUE,
+          content TEXT NOT NULL,
+          font_family TEXT,
+          font_size TEXT,
+          color TEXT,
+          padding TEXT,
+          section TEXT NOT NULL,
+          text_type TEXT DEFAULT 'body',
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (tableError) {
+      console.error('Error creating content_texts table:', tableError);
     }
 
     // Use INSERT OR REPLACE to handle both new and existing entries
