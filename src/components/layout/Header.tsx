@@ -19,13 +19,12 @@ const leftNavItems = [
 const rightNavItems = [
   { key: 'galerie', href: '#galerie', sectionId: 'galerie' },
   { key: 'anfrage', href: '#buchung', sectionId: 'buchung' },
-  { key: 'bewertungen', href: '#bewertungen', sectionId: 'bewertungen' },
 ] as const;
 
 const allNavItems = [...leftNavItems, ...rightNavItems];
 
 // All sections to track for scroll-spy (in order they appear on page)
-const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
+const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'introtext', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
 
 export function Header() {
   const { t } = useLanguage();
@@ -77,8 +76,7 @@ export function Header() {
   const isNavItemActive = (sectionId: string) => {
     // Map nav item sections to actual section IDs
     if (sectionId === 'buchung' && activeSection === 'buchung') return true;
-    if (sectionId === 'bewertungen' && activeSection === 'bewertungen') return true;
-    if (sectionId === 'ferienhaus' && activeSection === 'ferienhaus') return true;
+    if (sectionId === 'ferienhaus' && (activeSection === 'ferienhaus' || activeSection === 'introtext')) return true;
     if (sectionId === 'galerie' && activeSection === 'galerie') return true;
     if (sectionId === 'umgebung' && (activeSection === 'umgebung' || activeSection === 'lage')) return true;
     return false;

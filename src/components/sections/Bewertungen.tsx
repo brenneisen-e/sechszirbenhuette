@@ -50,14 +50,6 @@ export function Bewertungen() {
       text: 'Endlich mal richtig abschalten können. Die Hütte ist liebevoll eingerichtet, sehr sauber und die Umgebung ist einfach wunderschön. Ein Highlight war die private Sauna!',
       quelle: 'Booking.com',
     },
-    {
-      id: 3,
-      gast_name: 'Hundefamilie K.',
-      bewertung: 5,
-      titel: 'Perfekt mit Hund',
-      text: 'Endlich eine Unterkunft, in der unser Hund wirklich willkommen ist! Die Wandermöglichkeiten direkt vor der Tür sind fantastisch. Die Hütte ist gemütlich und hat alles was man braucht.',
-      quelle: 'FeWo-direkt',
-    },
   ];
 
   const displayReviews = reviews.length > 0 ? reviews : fallbackReviews;
