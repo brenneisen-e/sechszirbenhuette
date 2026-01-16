@@ -29,8 +29,8 @@ export function PineBackground() {
         backgroundImage: 'url(/images/Zeichnung%20Hütte%202.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: 'contain',
-        opacity: 0.08,
+        backgroundSize: 'cover',
+        opacity: 0.15,
       }}
     />
   );
