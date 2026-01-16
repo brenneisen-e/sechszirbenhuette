@@ -300,6 +300,10 @@ const defaultSiteSettings: SiteSettings = {
 
 const FONT_OPTIONS = [
   { value: 'FeelingPassionate', label: 'FeelingPassionate (Handschrift)' },
+  { value: 'Autography', label: 'Autography (Signatur)' },
+  { value: 'BrittanySignature', label: 'Brittany Signature' },
+  { value: 'RetroSignature', label: 'Retro Signature' },
+  { value: 'AdleryPro', label: 'Adlery Pro' },
   { value: 'system-ui', label: 'System (Standard)' },
   { value: 'Inter', label: 'Inter (Modern)' },
   { value: 'Georgia', label: 'Georgia (Serif)' },
