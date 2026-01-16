@@ -14,6 +14,9 @@ import {
   AlertCircle,
   RefreshCw,
   Tags,
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -260,6 +263,66 @@ export default function MediaManager() {
     setDraggedItem(null);
   };
 
+  // Move item up in its category
+  const handleMoveUp = async (item: MediaRecord) => {
+    const categoryMedia = media
+      .filter(m => m.category === item.category)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    const currentIndex = categoryMedia.findIndex(m => m.id === item.id);
+    if (currentIndex <= 0) return; // Already at the top
+
+    const prevItem = categoryMedia[currentIndex - 1];
+
+    try {
+      // Swap display orders
+      await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, display_order: prevItem.display_order }),
+      });
+      await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: prevItem.id, display_order: item.display_order }),
+      });
+      setSuccess('Position geändert');
+      await loadMedia();
+    } catch {
+      setError('Fehler beim Ändern der Position');
+    }
+  };
+
+  // Move item down in its category
+  const handleMoveDown = async (item: MediaRecord) => {
+    const categoryMedia = media
+      .filter(m => m.category === item.category)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    const currentIndex = categoryMedia.findIndex(m => m.id === item.id);
+    if (currentIndex >= categoryMedia.length - 1) return; // Already at the bottom
+
+    const nextItem = categoryMedia[currentIndex + 1];
+
+    try {
+      // Swap display orders
+      await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, display_order: nextItem.display_order }),
+      });
+      await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: nextItem.id, display_order: item.display_order }),
+      });
+      setSuccess('Position geändert');
+      await loadMedia();
+    } catch {
+      setError('Fehler beim Ändern der Position');
+    }
+  };
+
   const getMediaByCategory = useCallback((category: string) => {
     return media
       .filter(m => m.category === category)
@@ -450,6 +513,24 @@ export default function MediaManager() {
                           />
                         )}
 
+                        {/* Move buttons - top right */}
+                        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition flex flex-col gap-1">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveUp(item); }}
+                            className="p-1 bg-white/90 rounded hover:bg-white transition"
+                            title="Nach oben"
+                          >
+                            <ChevronUp className="w-4 h-4 text-gray-700" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleMoveDown(item); }}
+                            className="p-1 bg-white/90 rounded hover:bg-white transition"
+                            title="Nach unten"
+                          >
+                            <ChevronDown className="w-4 h-4 text-gray-700" />
+                          </button>
+                        </div>
+
                         {/* Overlay with actions */}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                           <button
@@ -459,6 +540,16 @@ export default function MediaManager() {
                           >
                             <Edit2 className="w-4 h-4 text-gray-700" />
                           </button>
+                          {/* Show category button only for gallery categories */}
+                          {GALLERY_CATEGORIES.includes(item.category) && (
+                            <button
+                              onClick={() => handleEditCategories(item)}
+                              className="p-2 bg-white rounded-full hover:bg-blue-100 transition"
+                              title="Kategorien"
+                            >
+                              <Tags className="w-4 h-4 text-blue-600" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDelete(item.id)}
                             className="p-2 bg-white rounded-full hover:bg-red-100 transition"
@@ -519,6 +610,69 @@ export default function MediaManager() {
           </div>
         )}
       </div>
+
+      {/* Category Edit Modal */}
+      {editingCategoriesId && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Tags className="w-5 h-5 text-logo-green" />
+                Galerie-Kategorien
+              </h3>
+              <button
+                onClick={() => setEditingCategoriesId(null)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Wählen Sie alle Kategorien, in denen dieses Bild erscheinen soll:
+            </p>
+
+            <div className="space-y-2 mb-6">
+              {GALLERY_CATEGORIES.map(cat => {
+                const catConfig = CATEGORIES.find(c => c.value === cat);
+                const isSelected = editingCategories.includes(cat);
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => toggleCategory(cat)}
+                    className={`w-full text-left px-4 py-3 rounded-lg border-2 transition flex items-center justify-between ${
+                      isSelected
+                        ? 'border-logo-green bg-logo-green/10'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className={isSelected ? 'font-medium text-logo-green' : 'text-gray-700'}>
+                      {catConfig?.label || cat}
+                    </span>
+                    {isSelected && <Check className="w-5 h-5 text-logo-green" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingCategoriesId(null)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSaveCategories}
+                disabled={editingCategories.length === 0}
+                className="flex-1 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50"
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
