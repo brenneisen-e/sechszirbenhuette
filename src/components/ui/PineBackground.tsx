@@ -26,11 +26,11 @@ export function PineBackground() {
     <div
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-700"
       style={{
-        backgroundImage: 'url(/images/Gemini_Generated_Image_zd78wazd78wazd78.png)',
+        backgroundImage: 'url(/images/Zeichnung%20Hütte%202.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: '50%',
-        opacity: 0.15,
+        backgroundSize: 'cover',
+        opacity: 0.08,
       }}
     />
   );
