@@ -163,24 +163,24 @@ export function Reviews() {
             </button>
 
             <div
-              className="relative bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100 min-h-[180px] touch-pan-y"
+              className="relative bg-white rounded-2xl p-6 md:p-8 shadow-md border border-gray-100 h-[200px] md:h-[180px] touch-pan-y overflow-hidden"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
               <Quote className="absolute top-4 left-4 w-8 h-8 text-logo-green/30" />
 
-              <div className="relative z-10">
+              <div className="relative z-10 h-full">
                 {reviews.map((review, index) => (
                   <div
                     key={index}
-                    className={`transition-all duration-500 ${
+                    className={`absolute inset-0 transition-all duration-500 flex flex-col justify-center ${
                       index === currentIndex
                         ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-4 absolute inset-0 pointer-events-none'
+                        : 'opacity-0 translate-y-4 pointer-events-none'
                     }`}
                   >
-                    <blockquote className="text-lg md:text-xl text-gray-700 italic text-center px-4 md:px-8 pt-4">
+                    <blockquote className="text-lg md:text-xl text-gray-700 italic text-center px-4 md:px-8">
                       &ldquo;{review.quote}&rdquo;
                     </blockquote>
                     <div className="mt-4 text-center">
