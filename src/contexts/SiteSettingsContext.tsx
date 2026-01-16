@@ -7,8 +7,8 @@ export interface SiteSettings {
   accentColor: string;
   headingFont: string;
   bodyFont: string;
-  headingSize: 'small' | 'normal' | 'large';
-  bodySize: 'small' | 'normal' | 'large';
+  headingSize: string; // e.g., "48", "56", "64", "72"
+  bodySize: string;    // e.g., "14", "16", "18", "20"
   sectionSpacing: 'compact' | 'normal' | 'spacious';
 }
 
@@ -17,8 +17,8 @@ const defaultSettings: SiteSettings = {
   accentColor: '#8B7355',
   headingFont: 'FeelingPassionate',
   bodyFont: 'system-ui',
-  headingSize: 'normal',
-  bodySize: 'normal',
+  headingSize: '64',
+  bodySize: '16',
   sectionSpacing: 'normal',
 };
 
@@ -30,20 +30,7 @@ type SiteSettingsContextType = {
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
 
-// CSS variable mappings
-const headingSizeMap = {
-  small: '0.85',
-  normal: '1',
-  large: '1.15',
-};
-
-const bodySizeMap = {
-  small: '14px',
-  normal: '16px',
-  large: '18px',
-};
-
-const sectionSpacingMap = {
+const sectionSpacingMap: Record<string, string> = {
   compact: '3rem',
   normal: '5rem',
   spacious: '7rem',
@@ -87,10 +74,10 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--font-heading', settings.headingFont + ', cursive');
     root.style.setProperty('--font-body', settings.bodyFont + ', sans-serif');
 
-    // Sizes
-    root.style.setProperty('--heading-scale', headingSizeMap[settings.headingSize]);
-    root.style.setProperty('--body-size', bodySizeMap[settings.bodySize]);
-    root.style.setProperty('--section-spacing', sectionSpacingMap[settings.sectionSpacing]);
+    // Sizes (in pixels)
+    root.style.setProperty('--heading-size', settings.headingSize + 'px');
+    root.style.setProperty('--body-size', settings.bodySize + 'px');
+    root.style.setProperty('--section-spacing', sectionSpacingMap[settings.sectionSpacing] || '5rem');
   }, [settings]);
 
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {

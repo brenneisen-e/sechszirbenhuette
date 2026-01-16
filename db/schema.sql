@@ -141,8 +141,8 @@ INSERT OR IGNORE INTO site_settings (setting_key, setting_value) VALUES
     ('accentColor', '#8B7355'),
     ('headingFont', 'FeelingPassionate'),
     ('bodyFont', 'system-ui'),
-    ('headingSize', 'normal'),
-    ('bodySize', 'normal'),
+    ('headingSize', '64'),
+    ('bodySize', '16'),
     ('sectionSpacing', 'normal');
 
 -- Indizes für Performance

@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
       ['accentColor', '#8B7355'],
       ['headingFont', 'FeelingPassionate'],
       ['bodyFont', 'system-ui'],
-      ['headingSize', 'normal'],
-      ['bodySize', 'normal'],
+      ['headingSize', '64'],
+      ['bodySize', '16'],
       ['sectionSpacing', 'normal'],
     ];
 

@@ -239,8 +239,8 @@ interface SiteSettings {
   accentColor: string;
   headingFont: string;
   bodyFont: string;
-  headingSize: 'small' | 'normal' | 'large';
-  bodySize: 'small' | 'normal' | 'large';
+  headingSize: string;
+  bodySize: string;
   sectionSpacing: 'compact' | 'normal' | 'spacious';
 }
 
@@ -249,8 +249,8 @@ const defaultSiteSettings: SiteSettings = {
   accentColor: '#8B7355',
   headingFont: 'FeelingPassionate',
   bodyFont: 'system-ui',
-  headingSize: 'normal',
-  bodySize: 'normal',
+  headingSize: '64',
+  bodySize: '16',
   sectionSpacing: 'normal',
 };
 
@@ -260,6 +260,28 @@ const FONT_OPTIONS = [
   { value: 'Inter', label: 'Inter (Modern)' },
   { value: 'Georgia', label: 'Georgia (Serif)' },
   { value: 'Arial', label: 'Arial (Sans-Serif)' },
+];
+
+// Word-like font sizes
+const HEADING_SIZE_OPTIONS = [
+  { value: '36', label: '36' },
+  { value: '42', label: '42' },
+  { value: '48', label: '48' },
+  { value: '56', label: '56' },
+  { value: '64', label: '64' },
+  { value: '72', label: '72' },
+  { value: '80', label: '80' },
+  { value: '96', label: '96' },
+];
+
+const BODY_SIZE_OPTIONS = [
+  { value: '12', label: '12' },
+  { value: '14', label: '14' },
+  { value: '16', label: '16' },
+  { value: '18', label: '18' },
+  { value: '20', label: '20' },
+  { value: '22', label: '22' },
+  { value: '24', label: '24' },
 ];
 
 export default function AdminPage() {
@@ -1221,7 +1243,7 @@ export default function AdminPage() {
 
             {/* Sizes */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-800">Schriftgrößen</h3>
+              <h3 className="font-semibold text-gray-800">Schriftgrößen (px)</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1229,12 +1251,12 @@ export default function AdminPage() {
                 </label>
                 <select
                   value={siteSettings.headingSize}
-                  onChange={(e) => setSiteSettings(s => ({ ...s, headingSize: e.target.value as SiteSettings['headingSize'] }))}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, headingSize: e.target.value }))}
                   className="w-full px-3 py-2 border rounded-lg text-sm"
                 >
-                  <option value="small">Klein</option>
-                  <option value="normal">Normal</option>
-                  <option value="large">Groß</option>
+                  {HEADING_SIZE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label} px</option>
+                  ))}
                 </select>
               </div>
 
@@ -1244,12 +1266,12 @@ export default function AdminPage() {
                 </label>
                 <select
                   value={siteSettings.bodySize}
-                  onChange={(e) => setSiteSettings(s => ({ ...s, bodySize: e.target.value as SiteSettings['bodySize'] }))}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, bodySize: e.target.value }))}
                   className="w-full px-3 py-2 border rounded-lg text-sm"
                 >
-                  <option value="small">Klein (14px)</option>
-                  <option value="normal">Normal (16px)</option>
-                  <option value="large">Groß (18px)</option>
+                  {BODY_SIZE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label} px</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -1278,12 +1300,13 @@ export default function AdminPage() {
           {/* Preview */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
             <h4 className="font-medium text-gray-700 mb-3">Vorschau</h4>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p
-                className="text-2xl"
                 style={{
                   fontFamily: siteSettings.headingFont + ', cursive',
+                  fontSize: siteSettings.headingSize + 'px',
                   color: siteSettings.primaryColor,
+                  lineHeight: 1.2,
                 }}
               >
                 Überschrift Beispiel
@@ -1291,10 +1314,11 @@ export default function AdminPage() {
               <p
                 style={{
                   fontFamily: siteSettings.bodyFont + ', sans-serif',
+                  fontSize: siteSettings.bodySize + 'px',
                   color: siteSettings.accentColor,
                 }}
               >
-                Dies ist ein Beispieltext in der gewählten Fließtext-Schriftart.
+                Dies ist ein Beispieltext in der gewählten Fließtext-Schriftart und Größe ({siteSettings.bodySize}px).
               </p>
             </div>
           </div>
