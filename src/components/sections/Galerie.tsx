@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import Image from 'next/image';
+import { AdaptiveImage } from '@/components/ui/AdaptiveImage';
 import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryImage {
@@ -282,23 +283,14 @@ export function Galerie() {
                     onClick={() => setSelectedImage(images.indexOf(filteredImages[mobileIndex]))}
                     className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
                   >
-                    <Image
+                    <AdaptiveImage
                       src={filteredImages[mobileIndex].src}
-                      alt={filteredImages[mobileIndex].title}
+                      alt={filteredImages[mobileIndex].title || 'Galeriebild'}
                       fill
                       className="object-cover"
                       sizes="100vw"
                       priority
                     />
-                    {/* Title overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end">
-                      <div className="text-white p-4 w-full">
-                        <h3 className="font-bold text-lg">{filteredImages[mobileIndex].title}</h3>
-                        {filteredImages[mobileIndex].description && (
-                          <p className="text-sm opacity-90">{filteredImages[mobileIndex].description}</p>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   {/* Navigation Arrows */}
@@ -377,23 +369,13 @@ export function Galerie() {
                     onClick={() => setSelectedImage(images.indexOf(image))}
                     className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group"
                   >
-                    <Image
+                    <AdaptiveImage
                       src={image.src}
-                      alt={image.title}
+                      alt={image.title || 'Galeriebild'}
                       fill
                       className="object-cover transition-transform group-hover:scale-110"
                       sizes="(max-width: 1200px) 50vw, 25vw"
                     />
-
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                      <div className="text-white p-4 w-full">
-                        <h3 className="font-bold text-lg mb-1">{image.title}</h3>
-                        {image.description && (
-                          <p className="text-sm opacity-90">{image.description}</p>
-                        )}
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -495,11 +477,7 @@ export function Galerie() {
                 />
               </div>
               <div className="mt-4 text-white text-center">
-                <h3 className="text-2xl font-bold mb-2">{images[selectedImage].title}</h3>
-                {images[selectedImage].description && (
-                  <p className="text-lg opacity-90">{images[selectedImage].description}</p>
-                )}
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-gray-400">
                   {selectedImage + 1} / {images.length}
                 </p>
               </div>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
-import { Star, MessageSquare, Quote } from 'lucide-react';
+import { Star, MessageSquare, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Review {
   id: number;
@@ -20,6 +20,10 @@ export function Bewertungen() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch('/api/reviews')
@@ -54,6 +58,38 @@ export function Bewertungen() {
 
   const displayReviews = reviews.length > 0 ? reviews : fallbackReviews;
 
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % displayReviews.length);
+  }, [displayReviews.length]);
+
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + displayReviews.length) % displayReviews.length);
+  }, [displayReviews.length]);
+
+  // Swipe handling
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      goToNext();
+    } else if (isRightSwipe) {
+      goToPrev();
+    }
+  };
+
   return (
     <section id="bewertungen" className="py-20 bg-gray-50">
       <div className="container">
@@ -62,7 +98,7 @@ export function Bewertungen() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-4xl mx-auto mb-16"
+          className="text-center max-w-4xl mx-auto mb-12"
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
             <MessageSquare size={32} strokeWidth={1.5} />
@@ -93,52 +129,101 @@ export function Bewertungen() {
           </div>
         </motion.div>
 
-        {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {displayReviews.map((review, index) => (
+        {/* Reviews Carousel */}
+        <div className="relative">
+          {/* Navigation Arrows - Desktop */}
+          <button
+            onClick={goToPrev}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
+            aria-label="Vorherige Bewertung"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={goToNext}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
+            aria-label="Nächste Bewertung"
+          >
+            <ChevronRight size={24} />
+          </button>
+
+          {/* Carousel Container */}
+          <div
+            ref={carouselRef}
+            className="overflow-hidden"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             <motion.div
-              key={review.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl p-6 shadow-sm h-[280px] flex flex-col"
+              className="flex"
+              animate={{ x: `-${currentIndex * 100}%` }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
-              <Quote size={24} className="text-wood-300 mb-4 flex-shrink-0" />
+              {displayReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="w-full flex-shrink-0 px-4 md:px-16"
+                >
+                  <div className="bg-white rounded-xl p-6 md:p-8 shadow-sm max-w-2xl mx-auto">
+                    <Quote size={32} className="text-logo-green/30 mb-4" />
 
-              {review.titel && (
-                <h4 className="font-bold text-gray-900 mb-2 flex-shrink-0">{review.titel}</h4>
-              )}
+                    {review.titel && (
+                      <h4 className="font-bold text-gray-900 text-lg md:text-xl mb-3">{review.titel}</h4>
+                    )}
 
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed flex-1 overflow-hidden line-clamp-4">
-                {review.text}
-              </p>
+                    <p className="text-gray-600 text-base md:text-lg mb-6 leading-relaxed">
+                      {review.text}
+                    </p>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100 flex-shrink-0 mt-auto">
-                <div>
-                  <p className="font-semibold text-gray-900">{review.gast_name}</p>
-                  {review.quelle && (
-                    <p className="text-xs text-gray-500">{review.quelle}</p>
-                  )}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div>
+                        <p className="font-semibold text-gray-900">{review.gast_name}</p>
+                        {review.quelle && (
+                          <p className="text-xs text-gray-500">{review.quelle}</p>
+                        )}
+                      </div>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            size={18}
+                            className={
+                              star <= review.bewertung
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-gray-300'
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={16}
-                      className={
-                        star <= review.bewertung
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-gray-300'
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
+              ))}
             </motion.div>
-          ))}
-        </div>
+          </div>
 
+          {/* Dots Indicator */}
+          <div className="flex justify-center gap-2 mt-8">
+            {displayReviews.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
+                  index === currentIndex
+                    ? 'bg-logo-green w-8'
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+                aria-label={`Bewertung ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Swipe Hint - Mobile Only */}
+          <p className="md:hidden text-center text-xs text-gray-400 mt-4">
+            ← Wischen zum Blättern →
+          </p>
+        </div>
       </div>
     </section>
   );

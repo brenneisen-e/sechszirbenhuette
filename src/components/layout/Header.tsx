@@ -32,6 +32,7 @@ export function Header() {
   const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [isSubpage, setIsSubpage] = useState(false);
 
   // Scroll-spy: determine which section is currently in view
   const updateActiveSection = useCallback(() => {
@@ -54,10 +55,13 @@ export function Header() {
   }, []);
 
   useEffect(() => {
+    // Check if we're on a subpage (no hero section)
+    const heroSection = document.querySelector('#hero');
+    setIsSubpage(!heroSection);
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
       // Check if scrolled past hero section
-      const heroSection = document.querySelector('#hero');
       if (heroSection) {
         const heroBottom = heroSection.getBoundingClientRect().bottom;
         setIsPastHero(heroBottom < 0);
@@ -94,7 +98,7 @@ export function Header() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible',
-        isScrolled
+        (isScrolled || isSubpage)
           ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
           : 'bg-transparent py-3'
       )}
@@ -112,13 +116,13 @@ export function Header() {
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
                     'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    isScrolled
+                    (isScrolled || isSubpage)
                       ? 'text-gray-700 hover:text-logo-green'
                       : 'text-white hover:text-white/80',
                     isActive && 'font-bold'
                   )}
                   style={isActive ? {
-                    color: isScrolled ? LOGO_GREEN : 'white',
+                    color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white',
                   } : undefined}
                 >
                   {t.navigation[item.key]}
@@ -126,7 +130,7 @@ export function Header() {
                   {isActive && (
                     <span
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: isScrolled ? LOGO_GREEN : 'white' }}
+                      style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
                     />
                   )}
                 </button>
@@ -163,13 +167,13 @@ export function Header() {
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
                     'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    isScrolled
+                    (isScrolled || isSubpage)
                       ? 'text-gray-700 hover:text-logo-green'
                       : 'text-white hover:text-white/80',
                     (isActive || isAnfrageHighlighted) && 'font-bold'
                   )}
                   style={(isActive || isAnfrageHighlighted) ? {
-                    color: isScrolled ? LOGO_GREEN : 'white'
+                    color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white'
                   } : undefined}
                 >
                   {t.navigation[item.key]}
@@ -177,13 +181,13 @@ export function Header() {
                   {(isActive || isAnfrageHighlighted) && (
                     <span
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: isScrolled ? LOGO_GREEN : 'white' }}
+                      style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
                     />
                   )}
                 </button>
               );
             })}
-            <LanguageSwitcher isScrolled={isScrolled} />
+            <LanguageSwitcher isScrolled={isScrolled || isSubpage} />
           </nav>
         </div>
 
@@ -194,7 +198,7 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={cn(
               'p-2 rounded-lg transition-colors',
-              isScrolled ? 'text-gray-700' : 'text-white'
+              (isScrolled || isSubpage) ? 'text-gray-700' : 'text-white'
             )}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -219,7 +223,7 @@ export function Header() {
           </button>
 
           {/* Language Switcher (Mobile) */}
-          <LanguageSwitcher isScrolled={isScrolled} />
+          <LanguageSwitcher isScrolled={isScrolled || isSubpage} />
         </div>
       </div>
 

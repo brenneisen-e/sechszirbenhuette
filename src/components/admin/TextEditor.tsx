@@ -13,6 +13,9 @@ import {
   Database,
   Smartphone,
   Monitor,
+  Eye,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 
 // ============================================================================
@@ -196,6 +199,8 @@ export default function TextEditor() {
   const [isSavingText, setIsSavingText] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
   // Detect device type
   const [isMobile, setIsMobile] = useState(false);
@@ -338,6 +343,17 @@ export default function TextEditor() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">Texte & Schriftarten</h2>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setPreviewKey(k => k + 1);
+                setShowPreview(true);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition"
+              title="Live-Vorschau"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="hidden sm:inline">Live-Vorschau</span>
+            </button>
             <button
               onClick={loadContentTexts}
               className="p-2 text-gray-500 hover:text-logo-green transition"
@@ -662,6 +678,63 @@ export default function TextEditor() {
           </div>
         )}
       </div>
+
+      {/* Live Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center gap-3">
+                <Eye className="w-5 h-5 text-logo-green" />
+                <h3 className="font-semibold text-gray-900">Live-Vorschau der Homepage</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPreviewKey(k => k + 1)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
+                  title="Vorschau aktualisieren"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Aktualisieren</span>
+                </button>
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>In neuem Tab</span>
+                </a>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* iframe Container */}
+            <div className="flex-1 relative bg-gray-100">
+              <iframe
+                key={previewKey}
+                src="/?preview=true"
+                className="absolute inset-0 w-full h-full border-0"
+                title="Homepage Vorschau"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+              <p className="text-xs text-gray-500 text-center">
+                Änderungen werden nach dem Speichern in der Vorschau angezeigt. Klicken Sie auf &quot;Aktualisieren&quot; um die neuesten Änderungen zu sehen.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
