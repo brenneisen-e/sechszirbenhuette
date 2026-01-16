@@ -130,6 +130,7 @@ export async function GET() {
         font_family: null,
         font_size: null,
         color: null,
+        padding: null,
         section: value.section,
         text_type: value.text_type,
         updated_at: '',
