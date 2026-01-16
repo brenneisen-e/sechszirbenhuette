@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import Image from 'next/image';
+import { AdaptiveImage } from '@/components/ui/AdaptiveImage';
 import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryImage {
@@ -282,7 +283,7 @@ export function Galerie() {
                     onClick={() => setSelectedImage(images.indexOf(filteredImages[mobileIndex]))}
                     className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
                   >
-                    <Image
+                    <AdaptiveImage
                       src={filteredImages[mobileIndex].src}
                       alt={filteredImages[mobileIndex].title || 'Galeriebild'}
                       fill
@@ -368,7 +369,7 @@ export function Galerie() {
                     onClick={() => setSelectedImage(images.indexOf(image))}
                     className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group"
                   >
-                    <Image
+                    <AdaptiveImage
                       src={image.src}
                       alt={image.title || 'Galeriebild'}
                       fill
