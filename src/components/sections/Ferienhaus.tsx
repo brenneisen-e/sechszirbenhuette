@@ -110,7 +110,7 @@ export function Ferienhaus() {
   const { t, language } = useLanguage();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [cardImages, setCardImages] = useState<Record<string, CardImage[]>>({});
+  const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
 
   useEffect(() => {
     // Fetch gallery images
@@ -186,7 +186,7 @@ export function Ferienhaus() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             Ausstattung & Komfort
           </h2>
@@ -200,8 +200,7 @@ export function Ferienhaus() {
           {amenityCards.map((card, index) => {
             const Icon = card.icon;
             const title = cardTitles[card.key][language as 'de' | 'en'];
-            const cardImageArray = cardImages[card.key];
-            const cardImage = cardImageArray && cardImageArray[0];
+            const cardImage = cardImages[card.key];
 
             return (
               <motion.button

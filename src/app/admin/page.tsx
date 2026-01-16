@@ -21,6 +21,9 @@ import {
   ImageIcon,
   GripVertical,
   Plus,
+  Palette,
+  Type,
+  Save,
 } from 'lucide-react';
 
 interface MediaRecord {
@@ -232,6 +235,34 @@ interface AmenityCardImage {
   title?: string;
 }
 
+interface SiteSettings {
+  primaryColor: string;
+  accentColor: string;
+  headingFont: string;
+  bodyFont: string;
+  headingSize: 'small' | 'normal' | 'large';
+  bodySize: 'small' | 'normal' | 'large';
+  sectionSpacing: 'compact' | 'normal' | 'spacious';
+}
+
+const defaultSiteSettings: SiteSettings = {
+  primaryColor: '#1e5631',
+  accentColor: '#8B7355',
+  headingFont: 'FeelingPassionate',
+  bodyFont: 'system-ui',
+  headingSize: 'normal',
+  bodySize: 'normal',
+  sectionSpacing: 'normal',
+};
+
+const FONT_OPTIONS = [
+  { value: 'FeelingPassionate', label: 'FeelingPassionate (Handschrift)' },
+  { value: 'system-ui', label: 'System (Standard)' },
+  { value: 'Inter', label: 'Inter (Modern)' },
+  { value: 'Georgia', label: 'Georgia (Serif)' },
+  { value: 'Arial', label: 'Arial (Sans-Serif)' },
+];
+
 export default function AdminPage() {
   const [media, setMedia] = useState<MediaRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -250,9 +281,15 @@ export default function AdminPage() {
   const [amenityCardImages, setAmenityCardImages] = useState<Record<string, AmenityCardImage[]>>({});
   const [selectingForCard, setSelectingForCard] = useState<string | null>(null);
 
+  // Site settings state
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(defaultSiteSettings);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+
   useEffect(() => {
     loadMedia();
     loadAmenityCardImages();
+    loadSiteSettings();
   }, []);
 
   const loadMedia = async (category?: string) => {
@@ -278,6 +315,58 @@ export default function AdminPage() {
       setAmenityCardImages(data.byCard || {});
     } catch (err) {
       console.error('Error loading amenity card images:', err);
+    }
+  };
+
+  const loadSiteSettings = async () => {
+    try {
+      const response = await fetch('/api/site-settings');
+      const data = await response.json();
+      if (data.settings) {
+        setSiteSettings({ ...defaultSiteSettings, ...data.settings });
+      }
+    } catch (err) {
+      console.error('Error loading site settings:', err);
+    }
+  };
+
+  const saveSiteSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      const response = await fetch('/api/site-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: siteSettings }),
+      });
+      if (response.ok) {
+        setSuccess('Einstellungen gespeichert');
+      } else {
+        throw new Error('Save failed');
+      }
+    } catch (err) {
+      console.error('Error saving site settings:', err);
+      setError('Fehler beim Speichern der Einstellungen');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const runMigration = async () => {
+    if (!confirm('Datenbank-Migration durchführen? Dies erstellt fehlende Tabellen.')) return;
+    setIsMigrating(true);
+    try {
+      const response = await fetch('/api/admin/migrate', { method: 'POST' });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccess(data.message || 'Migration erfolgreich');
+      } else {
+        throw new Error(data.error || 'Migration fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Migration error:', err);
+      setError('Fehler bei der Migration');
+    } finally {
+      setIsMigrating(false);
     }
   };
 
@@ -1002,6 +1091,211 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Website Styling Settings */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Palette className="w-6 h-6" />
+              Website-Einstellungen
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={runMigration}
+                disabled={isMigrating}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center gap-2"
+              >
+                {isMigrating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                Migration
+              </button>
+              <button
+                onClick={saveSiteSettings}
+                disabled={isSavingSettings}
+                className="px-4 py-2 text-sm bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition flex items-center gap-2"
+              >
+                {isSavingSettings ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Speichern
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Colors */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                Farben
+              </h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Primärfarbe (Logo-Grün)
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={siteSettings.primaryColor}
+                    onChange={(e) => setSiteSettings(s => ({ ...s, primaryColor: e.target.value }))}
+                    className="w-12 h-10 rounded border cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.primaryColor}
+                    onChange={(e) => setSiteSettings(s => ({ ...s, primaryColor: e.target.value }))}
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                    placeholder="#1e5631"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Akzentfarbe (Holz)
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={siteSettings.accentColor}
+                    onChange={(e) => setSiteSettings(s => ({ ...s, accentColor: e.target.value }))}
+                    className="w-12 h-10 rounded border cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={siteSettings.accentColor}
+                    onChange={(e) => setSiteSettings(s => ({ ...s, accentColor: e.target.value }))}
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                    placeholder="#8B7355"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Fonts */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                <Type className="w-4 h-4" />
+                Schriftarten
+              </h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Überschriften
+                </label>
+                <select
+                  value={siteSettings.headingFont}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, headingFont: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  {FONT_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fließtext
+                </label>
+                <select
+                  value={siteSettings.bodyFont}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, bodyFont: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  {FONT_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-800">Schriftgrößen</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Überschriften-Größe
+                </label>
+                <select
+                  value={siteSettings.headingSize}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, headingSize: e.target.value as SiteSettings['headingSize'] }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  <option value="small">Klein</option>
+                  <option value="normal">Normal</option>
+                  <option value="large">Groß</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Text-Größe
+                </label>
+                <select
+                  value={siteSettings.bodySize}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, bodySize: e.target.value as SiteSettings['bodySize'] }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  <option value="small">Klein (14px)</option>
+                  <option value="normal">Normal (16px)</option>
+                  <option value="large">Groß (18px)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Spacing */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-800">Abstände</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sektions-Abstände
+                </label>
+                <select
+                  value={siteSettings.sectionSpacing}
+                  onChange={(e) => setSiteSettings(s => ({ ...s, sectionSpacing: e.target.value as SiteSettings['sectionSpacing'] }))}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                >
+                  <option value="compact">Kompakt</option>
+                  <option value="normal">Normal</option>
+                  <option value="spacious">Großzügig</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+            <h4 className="font-medium text-gray-700 mb-3">Vorschau</h4>
+            <div className="space-y-2">
+              <p
+                className="text-2xl"
+                style={{
+                  fontFamily: siteSettings.headingFont + ', cursive',
+                  color: siteSettings.primaryColor,
+                }}
+              >
+                Überschrift Beispiel
+              </p>
+              <p
+                style={{
+                  fontFamily: siteSettings.bodyFont + ', sans-serif',
+                  color: siteSettings.accentColor,
+                }}
+              >
+                Dies ist ein Beispieltext in der gewählten Fließtext-Schriftart.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Usage Info */}
         <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6">
           <h3 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
@@ -1013,6 +1307,7 @@ export default function AdminPage() {
             <li><strong>Bearbeiten:</strong> Hover über ein Bild und auf das Stift-Symbol klicken</li>
             <li><strong>Vorschau:</strong> Hover und auf das Augen-Symbol klicken</li>
             <li><strong>Videos:</strong> MP4, WebM und andere Videoformate werden unterstützt</li>
+            <li><strong>Migration:</strong> Führt fehlende Datenbank-Tabellen nach (z.B. für neue Features)</li>
           </ul>
         </div>
       </div>

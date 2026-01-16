@@ -16,7 +16,7 @@ export function IntroText() {
         >
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             Uriges Ferienhaus am Falkert - mit Sauna und Ruheraum
           </h2>

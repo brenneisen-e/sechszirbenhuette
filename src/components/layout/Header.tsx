@@ -161,15 +161,20 @@ export function Header() {
             />
           </button>
 
-          {/* Anfrage Button (Mobile) */}
-          <button
-            onClick={() => scrollToSection('#buchung')}
-            className="px-4 py-2 rounded-lg font-semibold text-sm text-white transition-all"
-            style={{ backgroundColor: LOGO_GREEN }}
-          >
-            {t.navigation.anfrage}
-          </button>
+          {/* Language Switcher (Mobile) */}
+          <LanguageSwitcher isScrolled={isScrolled} />
         </div>
+      </div>
+
+      {/* Fixed Bottom Button (Mobile only) */}
+      <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+        <button
+          onClick={() => scrollToSection('#buchung')}
+          className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
+          style={{ backgroundColor: LOGO_GREEN }}
+        >
+          Buchung anfragen
+        </button>
       </div>
 
       {/* Mobile Menu */}

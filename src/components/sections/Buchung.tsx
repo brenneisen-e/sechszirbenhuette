@@ -198,7 +198,7 @@ export function Buchung() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             {t.buchung.title}
           </h2>

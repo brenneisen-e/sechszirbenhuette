@@ -75,7 +75,7 @@ export function Bewertungen() {
           </div>
           <h2
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             {t.bewertungen.title}
           </h2>
