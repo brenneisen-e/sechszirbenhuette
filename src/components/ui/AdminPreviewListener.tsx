@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 // Text key to CSS selector mapping for live preview updates
@@ -38,12 +38,16 @@ interface AdminTextUpdate {
   fontFamily?: string;
   fontSize?: string;
   color?: string;
+  padding?: string;
 }
 
 export function AdminPreviewListener() {
   const searchParams = useSearchParams();
   const isPreview = searchParams.get('preview') === '1';
+  const isInteractive = searchParams.get('interactive') === '1';
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
+  // Handle live text updates from admin
   useEffect(() => {
     if (!isPreview) return;
 
@@ -51,7 +55,7 @@ export function AdminPreviewListener() {
       // Verify message is from admin
       if (event.data?.type !== 'ADMIN_TEXT_UPDATE') return;
 
-      const { textKey, content, fontFamily, fontSize, color } = event.data as AdminTextUpdate;
+      const { textKey, content, fontFamily, fontSize, color, padding } = event.data as AdminTextUpdate;
       const selector = TEXT_KEY_SELECTORS[textKey];
 
       if (selector) {
@@ -61,6 +65,7 @@ export function AdminPreviewListener() {
           if (fontFamily) element.style.fontFamily = fontFamily + ', cursive, sans-serif';
           if (fontSize) element.style.fontSize = fontSize + 'px';
           if (color) element.style.color = color;
+          if (padding) element.style.padding = padding + 'px';
         }
       }
     };
@@ -69,12 +74,105 @@ export function AdminPreviewListener() {
     return () => window.removeEventListener('message', handleMessage);
   }, [isPreview]);
 
-  // Add visual indicator that this is a preview
+  // Interactive mode: make text elements clickable
+  useEffect(() => {
+    if (!isInteractive) return;
+
+    // Add styles for interactive mode
+    const style = document.createElement('style');
+    style.id = 'admin-interactive-styles';
+    style.textContent = `
+      [data-text-key] {
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        position: relative !important;
+      }
+      [data-text-key]:hover {
+        outline: 3px dashed #1e5631 !important;
+        outline-offset: 4px !important;
+        background-color: rgba(30, 86, 49, 0.1) !important;
+      }
+      [data-text-key].admin-selected {
+        outline: 3px solid #1e5631 !important;
+        outline-offset: 4px !important;
+        background-color: rgba(30, 86, 49, 0.2) !important;
+      }
+      [data-text-key]::after {
+        content: 'Klicken zum Bearbeiten';
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e5631;
+        color: white;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        font-family: system-ui, sans-serif !important;
+        z-index: 9999;
+      }
+      [data-text-key]:hover::after {
+        opacity: 1;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add click handlers to all text elements
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const textElement = target.closest('[data-text-key]') as HTMLElement;
+
+      if (textElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const textKey = textElement.getAttribute('data-text-key');
+        if (textKey) {
+          // Remove previous selection
+          document.querySelectorAll('.admin-selected').forEach(el => {
+            el.classList.remove('admin-selected');
+          });
+
+          // Mark as selected
+          textElement.classList.add('admin-selected');
+          setSelectedKey(textKey);
+
+          // Send message to parent (admin)
+          window.parent.postMessage({
+            type: 'ADMIN_TEXT_SELECTED',
+            textKey,
+          }, '*');
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      const styleEl = document.getElementById('admin-interactive-styles');
+      if (styleEl) styleEl.remove();
+    };
+  }, [isInteractive]);
+
+  // Don't render anything if not in preview mode
   if (!isPreview) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-amber-500 text-white text-xs px-3 py-1.5 rounded-full z-[9999] shadow-lg">
-      Admin-Vorschau
+    <div className={`fixed bottom-4 right-4 text-white text-xs px-3 py-1.5 rounded-full z-[9999] shadow-lg ${
+      isInteractive ? 'bg-logo-green' : 'bg-amber-500'
+    }`}>
+      {isInteractive ? (
+        <span>
+          {selectedKey ? `Ausgewählt: ${selectedKey.replace(/_/g, ' ')}` : 'Klicke auf einen Text'}
+        </span>
+      ) : (
+        'Admin-Vorschau'
+      )}
     </div>
   );
 }

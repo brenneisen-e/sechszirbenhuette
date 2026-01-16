@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
           font_family TEXT,
           font_size TEXT,
           color TEXT,
+          padding TEXT,
           section TEXT NOT NULL,
           text_type TEXT DEFAULT 'body',
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -120,6 +121,22 @@ export async function POST(request: NextRequest) {
       migrations.push('content_texts table created/verified');
     } catch (err) {
       console.error('Migration content_texts error:', err);
+    }
+
+    // Migration 4b: Add padding column to existing content_texts table
+    try {
+      await env.DB.prepare(`
+        ALTER TABLE content_texts ADD COLUMN padding TEXT
+      `).run();
+      migrations.push('padding column added to content_texts');
+    } catch (err) {
+      // Column likely already exists, which is fine
+      const errorMessage = String(err);
+      if (errorMessage.includes('duplicate column name')) {
+        migrations.push('padding column already exists');
+      } else {
+        console.error('Migration padding column error:', err);
+      }
     }
 
     // Migration 5: Indexes for content_texts

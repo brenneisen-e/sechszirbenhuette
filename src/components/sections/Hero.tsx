@@ -89,6 +89,7 @@ export function Hero() {
             className="w-full"
           >
             <motion.p
+              data-text-key="hero_title"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -98,6 +99,7 @@ export function Hero() {
               {t.hero.welcome} {t.hero.title}
             </motion.p>
             <motion.p
+              data-text-key="hero_subtitle"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
@@ -122,6 +124,7 @@ export function Hero() {
           >
             {/* Description */}
             <motion.p
+              data-text-key="hero_description"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
