@@ -279,7 +279,7 @@ export function Umgebung() {
               >
                 <div className="flex flex-col items-center text-center mb-8">
                   <h3
-                    className="text-4xl sm:text-5xl md:text-6xl text-logo-green"
+                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
                     style={{ fontFamily: 'FeelingPassionate, cursive' }}
                   >
                     {t.umgebung.dogTrips.title}
@@ -397,7 +397,7 @@ export function Umgebung() {
               >
                 <div className="flex flex-col items-center text-center mb-8">
                   <h3
-                    className="text-4xl sm:text-5xl md:text-6xl text-logo-green"
+                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
                     style={{ fontFamily: 'FeelingPassionate, cursive' }}
                   >
                     {t.umgebung.kidsTrips.title}
