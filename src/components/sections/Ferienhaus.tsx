@@ -17,6 +17,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Maximize2,
 } from 'lucide-react';
 
 interface MediaItem {
@@ -273,6 +274,60 @@ export function Ferienhaus() {
             );
           })}
         </div>
+
+        {/* Floor Plan Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="mt-16"
+        >
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
+              {/* Text Content */}
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-logo-green/10 text-logo-green mb-4">
+                  <Maximize2 size={24} strokeWidth={1.5} />
+                </div>
+                <h3
+                  className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
+                  style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                >
+                  {language === 'de' ? 'Grundriss' : 'Floor Plan'}
+                </h3>
+                <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4">
+                  {language === 'de'
+                    ? 'Unsere Hütte bietet auf ca. 100 m² Wohnfläche Platz für bis zu 8 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die drei Schlafzimmer mit insgesamt 4 Betten und 2 Stockbetten.'
+                    : 'Our cabin offers approx. 100 m² of living space for up to 8 people. The ground floor features the kitchen, cozy living area with wood stove, and wellness area with sauna and relaxation room. The upper floor has three bedrooms with a total of 4 beds and 2 bunk beds.'}
+                </p>
+                <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
+                  <span className="inline-flex items-center gap-1.5 text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-logo-green"></span>
+                    {language === 'de' ? 'ca. 100 m² Wohnfläche' : 'approx. 100 m² living space'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-gray-600">
+                    <span className="w-2 h-2 rounded-full bg-logo-green"></span>
+                    {language === 'de' ? '2 Etagen' : '2 floors'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Floor Plan Image */}
+              <div className="w-full md:w-1/2 lg:w-2/5">
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                  <Image
+                    src="/images/grundriss.jpg"
+                    alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
+                    fill
+                    className="object-contain p-2"
+                    sizes="(max-width: 768px) 100vw, 40vw"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Lightbox */}
