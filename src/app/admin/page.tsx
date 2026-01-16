@@ -327,38 +327,27 @@ function AdminPageContent() {
 
   // Update live preview in iframe when editing text
   const updateLivePreview = useCallback((textKey: string, content: string, fontFamily?: string, fontSize?: string, color?: string, padding?: string) => {
-    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
-    if (!iframe || !iframe.contentDocument) return;
+    // Send to all preview iframes (small preview and fullscreen)
+    const iframeIds = ['preview-iframe-text', 'preview-iframe-fullscreen'];
 
-    // Send message to iframe for live preview update
-    try {
-      iframe.contentWindow?.postMessage({
-        type: 'ADMIN_TEXT_UPDATE',
-        textKey,
-        content,
-        fontFamily,
-        fontSize,
-        color,
-        padding
-      }, '*');
-    } catch (e) {
-      console.log('Could not post message to iframe', e);
-    }
+    for (const iframeId of iframeIds) {
+      const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+      if (!iframe) continue;
 
-    // Also try direct DOM manipulation as fallback
-    try {
-      const doc = iframe.contentDocument;
-      // Find elements with data-text-key attribute
-      const element = doc.querySelector(`[data-text-key="${textKey}"]`);
-      if (element) {
-        element.textContent = content;
-        if (fontFamily) (element as HTMLElement).style.fontFamily = fontFamily;
-        if (fontSize) (element as HTMLElement).style.fontSize = fontSize + 'px';
-        if (color) (element as HTMLElement).style.color = color;
-        if (padding) (element as HTMLElement).style.padding = padding + 'px';
+      // Send message to iframe for live preview update
+      try {
+        iframe.contentWindow?.postMessage({
+          type: 'ADMIN_TEXT_UPDATE',
+          textKey,
+          content,
+          fontFamily,
+          fontSize,
+          color,
+          padding
+        }, '*');
+      } catch (e) {
+        console.log('Could not post message to iframe', e);
       }
-    } catch (e) {
-      // Cross-origin restriction may apply
     }
   }, []);
 
@@ -404,26 +393,17 @@ function AdminPageContent() {
   }, [contentTexts]);
 
   // Scroll preview to section and highlight
-  const scrollPreviewToSection = (category: string, containerId: string) => {
+  const scrollPreviewToSection = (category: string, iframeId: string) => {
     const sectionId = CATEGORY_TO_SECTION[category] || category;
-    const container = document.getElementById(containerId);
-    if (!container) return;
 
-    // Approximate scroll positions for each section (at 0.3 scale, original height)
-    // These are rough estimates - the actual homepage sections
-    const sectionScrollPositions: Record<string, number> = {
-      hero: 0,
-      reviews: 200,
-      introtext: 400,
-      ferienhaus: 700,
-      location: 1000,
-      umgebung: 1300,
-      galerie: 1600,
-      buchung: 1900,
-    };
-
-    const scrollTo = sectionScrollPositions[sectionId] || 0;
-    container.scrollTo({ top: scrollTo, behavior: 'smooth' });
+    // Send message to iframe to scroll to section
+    const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'ADMIN_SCROLL_TO_SECTION',
+        sectionId
+      }, '*');
+    }
   };
 
   // Media handlers
@@ -843,7 +823,7 @@ function AdminPageContent() {
                           onClick={() => {
                             setSelectedWebsiteSection(cat.value);
                             setSelectedCategory(cat.value);
-                            scrollPreviewToSection(cat.value, 'preview-scroll-bilder');
+                            scrollPreviewToSection(cat.value, 'preview-iframe-bilder');
                           }}
                           className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition text-sm ${
                             selectedWebsiteSection === cat.value
@@ -1254,7 +1234,7 @@ function AdminPageContent() {
                       onClick={() => {
                         setExpandedTextSection(expandedTextSection === key ? null : key);
                         if (expandedTextSection !== key) {
-                          scrollPreviewToSection(key, 'preview-scroll-text');
+                          scrollPreviewToSection(key, 'preview-iframe-text');
                         }
                       }}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition text-sm ${

@@ -52,20 +52,50 @@ export function AdminPreviewListener() {
     if (!isPreview) return;
 
     const handleMessage = (event: MessageEvent) => {
-      // Verify message is from admin
-      if (event.data?.type !== 'ADMIN_TEXT_UPDATE') return;
+      // Handle text updates
+      if (event.data?.type === 'ADMIN_TEXT_UPDATE') {
+        const { textKey, content, fontFamily, fontSize, color, padding } = event.data as AdminTextUpdate;
+        const selector = TEXT_KEY_SELECTORS[textKey];
 
-      const { textKey, content, fontFamily, fontSize, color, padding } = event.data as AdminTextUpdate;
-      const selector = TEXT_KEY_SELECTORS[textKey];
+        if (selector) {
+          const element = document.querySelector(selector) as HTMLElement;
+          if (element) {
+            element.textContent = content;
+            if (fontFamily) element.style.fontFamily = fontFamily + ', cursive, sans-serif';
+            if (fontSize) element.style.fontSize = fontSize + 'px';
+            if (color) element.style.color = color;
+            if (padding) element.style.padding = padding + 'px';
+          }
+        }
+      }
 
-      if (selector) {
-        const element = document.querySelector(selector) as HTMLElement;
-        if (element) {
-          element.textContent = content;
-          if (fontFamily) element.style.fontFamily = fontFamily + ', cursive, sans-serif';
-          if (fontSize) element.style.fontSize = fontSize + 'px';
-          if (color) element.style.color = color;
-          if (padding) element.style.padding = padding + 'px';
+      // Handle scroll to section
+      if (event.data?.type === 'ADMIN_SCROLL_TO_SECTION') {
+        const { sectionId } = event.data;
+
+        // Map section IDs to actual element IDs/selectors on the page
+        const sectionSelectors: Record<string, string> = {
+          hero: '#hero, [data-section="hero"], .hero-section, section:first-of-type',
+          reviews: '#reviews, [data-section="reviews"], #bewertungen, [data-section="bewertungen"]',
+          introtext: '#introtext, [data-section="introtext"], #intro',
+          ferienhaus: '#ferienhaus, [data-section="ferienhaus"], #ausstattung',
+          location: '#location, [data-section="location"], #lage, #kontakt',
+          umgebung: '#umgebung, [data-section="umgebung"], #aktivitaeten',
+          galerie: '#galerie, [data-section="galerie"], #gallery',
+          buchung: '#buchung, [data-section="buchung"], #booking, #preise',
+        };
+
+        const selector = sectionSelectors[sectionId];
+        if (selector) {
+          // Try each selector until we find an element
+          const selectors = selector.split(', ');
+          for (const sel of selectors) {
+            const element = document.querySelector(sel);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              break;
+            }
+          }
         }
       }
     };
