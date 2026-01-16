@@ -523,23 +523,26 @@ export function Ferienhaus() {
       {/* Floor Plan Lightbox */}
       {showFloorPlan && (
         <div
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowFloorPlan(false)}
         >
           <button
             onClick={() => setShowFloorPlan(false)}
-            className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full z-10"
+            className="absolute top-4 right-4 bg-white/90 text-gray-800 p-2 hover:bg-white rounded-full z-10 shadow-lg"
           >
-            <X size={32} />
+            <X size={28} />
           </button>
 
-          <div className="relative w-full max-w-5xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Image
               src="/images/grundriss.jpg"
               alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
               width={1600}
               height={1200}
-              className="w-full h-auto max-h-[90vh] object-contain"
+              className="w-full h-auto max-h-[85vh] object-contain p-4"
             />
           </div>
         </div>
