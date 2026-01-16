@@ -84,11 +84,13 @@ interface GalleryCategory {
 const CATEGORIES = [
   { value: 'hero', label: 'Hero (Startseite)', description: 'Hauptvideo/Bild auf der Startseite', location: 'Startseite - ganz oben', supportsVideo: true, maxItems: 1, group: 'Haupt' },
   { value: 'header', label: 'Header Hintergrund', description: 'Hintergrundbild im Header-Bereich', location: 'Navigation/Header', supportsVideo: false, maxItems: 1, group: 'Haupt' },
-  { value: 'innen', label: 'Innenbereich', description: 'Bilder der Innenräume', location: 'Galerie - Innenräume', supportsVideo: true, maxItems: null, group: 'Galerie' },
   { value: 'aussen', label: 'Außenbereich', description: 'Bilder der Außenansichten', location: 'Galerie - Außenansicht', supportsVideo: true, maxItems: null, group: 'Galerie' },
-  { value: 'umgebung', label: 'Umgebung', description: 'Bilder der Landschaft', location: 'Sektion Umgebung', supportsVideo: true, maxItems: null, group: 'Galerie' },
-  { value: 'winter', label: 'Winter', description: 'Winterbilder', location: 'Saisonale Galerie', supportsVideo: true, maxItems: null, group: 'Galerie' },
-  { value: 'sommer', label: 'Sommer', description: 'Sommerbilder', location: 'Saisonale Galerie', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'wohnen', label: 'Wohnbereich', description: 'Wohnzimmer, Essbereich', location: 'Galerie - Wohnbereich', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'schlafen', label: 'Schlafzimmer', description: 'Schlafräume und Betten', location: 'Galerie - Schlafzimmer', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'kueche', label: 'Küche', description: 'Küchenbilder', location: 'Galerie - Küche', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'bad', label: 'Bad & Sauna', description: 'Badezimmer, Sauna, Wellness', location: 'Galerie - Bad & Sauna', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'umgebung', label: 'Umgebung', description: 'Bilder der Landschaft', location: 'Galerie - Umgebung', supportsVideo: true, maxItems: null, group: 'Galerie' },
+  { value: 'extras', label: 'Extras', description: 'Sonstige Ausstattung', location: 'Galerie - Extras', supportsVideo: true, maxItems: null, group: 'Galerie' },
   { value: 'heidi-alm', label: 'Heidi-Alm', description: 'Heidi-Alm Bilder', location: 'Kinderausflüge', supportsVideo: true, maxItems: null, group: 'Kinder' },
   { value: 'turracher-hoehe', label: 'Turracher Höhe', description: 'Skigebiet Bilder', location: 'Kinderausflüge', supportsVideo: true, maxItems: null, group: 'Kinder' },
   { value: 'ossiacher-see', label: 'Ossiacher See', description: 'See und Kletterwald', location: 'Kinderausflüge', supportsVideo: true, maxItems: null, group: 'Kinder' },
@@ -199,11 +201,13 @@ const WEBSITE_SECTIONS = [
 const CATEGORY_TO_SECTION: Record<string, string> = {
   hero: 'hero',
   header: 'hero',
-  innen: 'galerie',
   aussen: 'galerie',
-  umgebung: 'umgebung',
-  winter: 'galerie',
-  sommer: 'galerie',
+  wohnen: 'galerie',
+  schlafen: 'galerie',
+  kueche: 'galerie',
+  bad: 'galerie',
+  umgebung: 'galerie',
+  extras: 'galerie',
   'heidi-alm': 'umgebung',
   'turracher-hoehe': 'umgebung',
   'ossiacher-see': 'umgebung',
@@ -547,6 +551,21 @@ function AdminPageContent() {
   const handleEdit = (item: MediaRecord) => {
     setEditingId(item.id);
     setEditValues({ alt_text: item.alt_text, title: item.title });
+  };
+
+  const handleChangeCategory = async (mediaId: string, newCategory: string) => {
+    try {
+      const response = await fetch('/api/media', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: mediaId, category: newCategory }),
+      });
+      if (!response.ok) throw new Error('Kategorie ändern fehlgeschlagen');
+      setSuccess('Kategorie geändert');
+      await loadMedia();
+    } catch {
+      setError('Fehler beim Ändern der Kategorie');
+    }
   };
 
   const handleSaveEdit = async (id: string) => {
@@ -1202,7 +1221,19 @@ function AdminPageContent() {
                               </div>
                             </div>
                           ) : (
-                            <p className="text-xs text-slate-600 truncate">{item.title || 'Ohne Titel'}</p>
+                            <div className="space-y-1">
+                              <p className="text-xs text-slate-600 truncate">{item.title || 'Ohne Titel'}</p>
+                              <select
+                                value={item.category}
+                                onChange={(e) => handleChangeCategory(item.id, e.target.value)}
+                                className="w-full px-1 py-0.5 text-xs border border-slate-200 rounded bg-white text-slate-600 cursor-pointer hover:border-logo-green"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {CATEGORIES.filter(c => c.group === 'Galerie').map(cat => (
+                                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                ))}
+                              </select>
+                            </div>
                           )}
                         </div>
 
@@ -1926,7 +1957,9 @@ function AdminPageContent() {
                   alt={previewMedia.alt_text || 'Vorschau'}
                   fill
                   className="object-contain"
-                  sizes="100vw"
+                  sizes="800px"
+                  quality={20}
+                  unoptimized
                 />
               )}
             </div>
