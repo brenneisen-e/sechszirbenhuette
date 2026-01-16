@@ -149,10 +149,8 @@ export function Galerie() {
     'hund-millstaetter': { de: 'Millstätter See', en: 'Millstätter See' },
   };
 
-  // Build categories dynamically - only show categories that have images (except 'all')
-  const categoryIds = ['all', 'aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras',
-    'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg', 'tierpark', 'gerlitzen', 'nockalm',
-    'hund-falkert', 'hund-rodresnock', 'hund-drei-seen', 'hund-hochrindl', 'hund-millstaetter'];
+  // Build categories dynamically - only show main gallery categories
+  const categoryIds = ['all', 'aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras'];
 
   const categories = categoryIds.map(id => ({
     id,
