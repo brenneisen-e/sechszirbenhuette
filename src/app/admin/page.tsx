@@ -177,7 +177,7 @@ const DEFAULT_GALLERY_CATEGORIES: GalleryCategory[] = [
   { id: 'umgebung', label: 'Umgebung', visible: true },
 ];
 
-// Website sections for the preview
+// Website sections for the preview with approximate scroll positions (in pixels, at scale 0.3)
 const WEBSITE_SECTIONS = [
   { id: 'hero', label: 'Hero', icon: ImageIcon },
   { id: 'reviews', label: 'Bewertungen', icon: FileText },
@@ -188,6 +188,29 @@ const WEBSITE_SECTIONS = [
   { id: 'galerie', label: 'Galerie', icon: Images },
   { id: 'buchung', label: 'Buchung', icon: FileText },
 ];
+
+// Mapping from category to section ID on homepage (for scrolling)
+const CATEGORY_TO_SECTION: Record<string, string> = {
+  hero: 'hero',
+  header: 'hero',
+  innen: 'galerie',
+  aussen: 'galerie',
+  umgebung: 'umgebung',
+  winter: 'galerie',
+  sommer: 'galerie',
+  'heidi-alm': 'umgebung',
+  'turracher-hoehe': 'umgebung',
+  'ossiacher-see': 'umgebung',
+  'panoramaweg': 'umgebung',
+  'tierpark': 'umgebung',
+  'gerlitzen': 'umgebung',
+  'nockalm': 'umgebung',
+  'hund-falkert': 'umgebung',
+  'hund-rodresnock': 'umgebung',
+  'hund-drei-seen': 'umgebung',
+  'hund-hochrindl': 'umgebung',
+  'hund-millstaetter': 'umgebung',
+};
 
 // ============================================================================
 // ADMIN PAGE CONTENT COMPONENT (with useSearchParams)
@@ -294,6 +317,29 @@ function AdminPageContent() {
     } finally {
       setIsMigrating(false);
     }
+  };
+
+  // Scroll preview to section and highlight
+  const scrollPreviewToSection = (category: string, containerId: string) => {
+    const sectionId = CATEGORY_TO_SECTION[category] || category;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Approximate scroll positions for each section (at 0.3 scale, original height)
+    // These are rough estimates - the actual homepage sections
+    const sectionScrollPositions: Record<string, number> = {
+      hero: 0,
+      reviews: 200,
+      introtext: 400,
+      ferienhaus: 700,
+      location: 1000,
+      umgebung: 1300,
+      galerie: 1600,
+      buchung: 1900,
+    };
+
+    const scrollTo = sectionScrollPositions[sectionId] || 0;
+    container.scrollTo({ top: scrollTo, behavior: 'smooth' });
   };
 
   // Media handlers
@@ -654,7 +700,7 @@ function AdminPageContent() {
                 </button>
               </div>
               <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
-                <div className="absolute inset-0 overflow-auto">
+                <div id="preview-scroll-bilder" className="absolute inset-0 overflow-auto">
                   <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
                     <iframe
                       id="preview-iframe-bilder"
@@ -665,9 +711,16 @@ function AdminPageContent() {
                     />
                   </div>
                 </div>
+                {/* Section highlight overlay */}
+                {selectedWebsiteSection && (
+                  <div className="absolute top-0 left-0 right-0 bg-logo-green/90 text-white text-xs p-2 flex items-center gap-2 z-10">
+                    <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
+                    <span>Zeige: {CATEGORIES.find(c => c.value === selectedWebsiteSection)?.label || selectedWebsiteSection}</span>
+                  </div>
+                )}
                 {/* Overlay hint */}
                 <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
-                  Scrolle um die Website zu sehen. Rechts kannst du die Bilder bearbeiten.
+                  Wähle eine Kategorie um zur Sektion zu springen
                 </div>
               </div>
             </div>
@@ -689,6 +742,7 @@ function AdminPageContent() {
                           onClick={() => {
                             setSelectedWebsiteSection(cat.value);
                             setSelectedCategory(cat.value);
+                            scrollPreviewToSection(cat.value, 'preview-scroll-bilder');
                           }}
                           className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition text-sm ${
                             selectedWebsiteSection === cat.value
@@ -1029,7 +1083,7 @@ function AdminPageContent() {
                 </button>
               </div>
               <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
-                <div className="absolute inset-0 overflow-auto">
+                <div id="preview-scroll-text" className="absolute inset-0 overflow-auto">
                   <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
                     <iframe
                       id="preview-iframe-text"
@@ -1040,9 +1094,16 @@ function AdminPageContent() {
                     />
                   </div>
                 </div>
+                {/* Section highlight overlay */}
+                {expandedTextSection && (
+                  <div className="absolute top-0 left-0 right-0 bg-logo-green/90 text-white text-xs p-2 flex items-center gap-2 z-10">
+                    <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
+                    <span>Zeige: {SECTION_LABELS[expandedTextSection]}</span>
+                  </div>
+                )}
                 {/* Overlay hint */}
                 <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
-                  Scrolle um die Website zu sehen. Rechts kannst du die Texte bearbeiten.
+                  Wähle eine Sektion um zur Position zu springen
                 </div>
               </div>
             </div>
@@ -1058,7 +1119,12 @@ function AdminPageContent() {
                   return (
                     <button
                       key={key}
-                      onClick={() => setExpandedTextSection(expandedTextSection === key ? null : key)}
+                      onClick={() => {
+                        setExpandedTextSection(expandedTextSection === key ? null : key);
+                        if (expandedTextSection !== key) {
+                          scrollPreviewToSection(key, 'preview-scroll-text');
+                        }
+                      }}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition text-sm ${
                         expandedTextSection === key
                           ? 'bg-logo-green text-white'
