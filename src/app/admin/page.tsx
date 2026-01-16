@@ -25,6 +25,7 @@ import {
   FileText,
   Layers,
   Settings,
+  Database,
 } from 'lucide-react';
 
 // ============================================================================
@@ -226,6 +227,7 @@ function AdminPageContent() {
   const [expandedTextSection, setExpandedTextSection] = useState<string | null>(null);
   const [selectedWebsiteSection, setSelectedWebsiteSection] = useState<string>('hero');
   const [galleryCategories, setGalleryCategories] = useState<GalleryCategory[]>(DEFAULT_GALLERY_CATEGORIES);
+  const [isMigrating, setIsMigrating] = useState(false);
 
   // Tab change handler
   const setActiveTab = (tab: string) => {
@@ -271,6 +273,26 @@ function AdminPageContent() {
       if (data.bySection) setContentTextsBySection(data.bySection);
     } catch (err) {
       console.error('Error loading content texts:', err);
+    }
+  };
+
+  const runMigration = async () => {
+    if (!confirm('Datenbank-Migration durchführen? Dies erstellt fehlende Tabellen und fügt Standard-Texte ein.')) return;
+    setIsMigrating(true);
+    try {
+      const response = await fetch('/api/admin/migrate', { method: 'POST' });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccess(data.message || 'Migration erfolgreich');
+        await loadContentTexts();
+      } else {
+        throw new Error(data.error || 'Migration fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Migration error:', err);
+      setError('Fehler bei der Migration');
+    } finally {
+      setIsMigrating(false);
     }
   };
 
@@ -1001,6 +1023,21 @@ function AdminPageContent() {
                     </button>
                   );
                 })}
+                {/* Migration Button */}
+                <div className="border-t border-slate-200 mt-2 pt-2">
+                  <button
+                    onClick={runMigration}
+                    disabled={isMigrating}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition disabled:opacity-50"
+                  >
+                    {isMigrating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Database className="w-4 h-4" />
+                    )}
+                    <span>Texte initialisieren</span>
+                  </button>
+                </div>
               </div>
             </div>
 
