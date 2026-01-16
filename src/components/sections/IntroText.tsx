@@ -6,6 +6,22 @@ export function IntroText() {
   return (
     <section className="py-16 bg-transparent">
       <div className="container max-w-4xl mx-auto px-4">
+        {/* Retro Headline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
+            style={{ fontFamily: 'RetroSignature, cursive' }}
+          >
+            Uriges Ferienhaus am Falkert - mit Sauna und Ruheraum
+          </h2>
+        </motion.div>
+
         {/* Section 1: Wandern, Skifahren & Erholung */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
