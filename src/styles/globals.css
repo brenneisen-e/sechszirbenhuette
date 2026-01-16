@@ -4,6 +4,14 @@
 
 /* Custom Fonts */
 @font-face {
+  font-family: 'FeelingPassionate';
+  src: url('/fonts/Feeling Passionate Personal Use Only.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'RetroSignature';
   src: url('/fonts/RetroSignature.otf') format('opentype');
   font-weight: normal;

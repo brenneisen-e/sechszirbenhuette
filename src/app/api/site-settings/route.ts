@@ -34,7 +34,7 @@ interface SiteSetting {
 const defaultSettings: Record<string, string> = {
   primaryColor: '#1e5631',
   accentColor: '#8B7355',
-  headingFont: 'RetroSignature',
+  headingFont: 'FeelingPassionate',
   bodyFont: 'system-ui',
   headingSize: 'normal',
   bodySize: 'normal',

@@ -91,7 +91,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
               Herzlich Willkommen in der Sechszirbenhütte
             </motion.p>
@@ -100,7 +100,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-[clamp(1.75rem,5vw,3rem)] leading-snug mt-2 text-white drop-shadow-md px-2"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
               Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
             </motion.p>

@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
 INSERT OR IGNORE INTO site_settings (setting_key, setting_value) VALUES
     ('primaryColor', '#1e5631'),
     ('accentColor', '#8B7355'),
-    ('headingFont', 'RetroSignature'),
+    ('headingFont', 'FeelingPassionate'),
     ('bodyFont', 'system-ui'),
     ('headingSize', 'normal'),
     ('bodySize', 'normal'),

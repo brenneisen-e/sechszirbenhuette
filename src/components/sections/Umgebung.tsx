@@ -102,7 +102,7 @@ export function Umgebung() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'RetroSignature, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             {t.umgebung.title}
           </h2>
@@ -206,7 +206,7 @@ export function Umgebung() {
             </div>
             <h3
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
               {t.umgebung.dogTrips.title}
             </h3>
@@ -326,7 +326,7 @@ export function Umgebung() {
             </div>
             <h3
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
               {t.umgebung.kidsTrips.title}
             </h3>
@@ -405,7 +405,7 @@ export function Umgebung() {
             </div>
             <h3
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
               {t.umgebung.directions.title}
             </h3>

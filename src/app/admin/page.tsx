@@ -248,7 +248,7 @@ interface SiteSettings {
 const defaultSiteSettings: SiteSettings = {
   primaryColor: '#1e5631',
   accentColor: '#8B7355',
-  headingFont: 'RetroSignature',
+  headingFont: 'FeelingPassionate',
   bodyFont: 'system-ui',
   headingSize: 'normal',
   bodySize: 'normal',
@@ -256,7 +256,7 @@ const defaultSiteSettings: SiteSettings = {
 };
 
 const FONT_OPTIONS = [
-  { value: 'RetroSignature', label: 'RetroSignature (Handschrift)' },
+  { value: 'FeelingPassionate', label: 'FeelingPassionate (Handschrift)' },
   { value: 'system-ui', label: 'System (Standard)' },
   { value: 'Inter', label: 'Inter (Modern)' },
   { value: 'Georgia', label: 'Georgia (Serif)' },
