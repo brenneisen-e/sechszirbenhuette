@@ -3,12 +3,16 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
+import it from '@/locales/it.json';
+import sl from '@/locales/sl.json';
 
-export type Language = 'de' | 'en';
+export type Language = 'de' | 'en' | 'it' | 'sl';
 
 const translations = {
   de,
-  en
+  en,
+  it,
+  sl
 };
 
 type TranslationType = typeof de;

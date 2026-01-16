@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "title": "Sechszirbenhütte al Falkert | Rifugio Premium nelle Nockberge",
+    "description": "Storico rifugio di montagna con sauna in posizione isolata a 1.700m. Escursioni, sci e relax in Carinzia. Famiglie e cani benvenuti. Prenota ora!"
+  },
+  "navigation": {
+    "home": "Home",
+    "ferienhaus": "Casa Vacanze",
+    "umgebung": "Dintorni",
+    "galerie": "Galleria",
+    "anfrage": "Richiesta",
+    "buchung": "Prenota",
+    "bewertungen": "Recensioni",
+    "impressum": "Impronta",
+    "datenschutz": "Privacy",
+    "agb": "Condizioni"
+  },
+  "hero": {
+    "welcome": "Benvenuti",
+    "title": "alla Sechszirbenhütte",
+    "subtitle": "Rifugio premium a 1.700m nelle Nockberge della Carinzia",
+    "description": "Vivi giorni di vacanza indimenticabili nel nostro rifugio di montagna di oltre 250 anni – amorevolmente restaurato, con annesso sauna e in completa solitudine tra pini cembri e larici al Falkert.",
+    "cta_book": "Prenota Ora",
+    "cta_explore": "Scopri il Rifugio"
+  },
+  "features": {
+    "altitude": {
+      "title": "1.700m di Altitudine",
+      "description": "Panorama alpino con vista sulle Caravanche"
+    },
+    "secluded": {
+      "title": "Posizione Isolata",
+      "description": "Tranquillità assoluta tra pini cembri e larici"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "description": "Annesso sauna privato con sala relax e doccia a pioggia"
+    },
+    "guests": {
+      "title": "Fino a 5 Ospiti",
+      "description": "Ideale per famiglie e piccoli gruppi"
+    },
+    "dogs": {
+      "title": "Cani Benvenuti",
+      "description": "I vostri amici a quattro zampe sono benvenuti"
+    },
+    "rating": {
+      "title": "Recensioni 5 Stelle",
+      "description": "I nostri ospiti amano la Sechszirbenhütte"
+    }
+  },
+  "introText": {
+    "mainHeadline": "Rustica Casa Vacanze al Falkert - con Sauna e Sala Relax",
+    "section1Title": "Escursioni, Sci e Relax nelle Nockberge, Carinzia",
+    "section1Text": "Scopri la Sechszirbenhütte, il tuo alloggio da sogno a 1.700m di altitudine nel cuore delle Nockberge in Carinzia, Austria.",
+    "section2Title": "Heidi Alm Mountain Resort: Vicino al Cielo, Lontano dal Quotidiano",
+    "section2Text": "Vivi una vacanza indimenticabile all'Heidi Alm Mountain Resort, circondato da aria salubre, acqua di montagna cristallina e natura colorata.",
+    "section3Title": "Vacanza Invernale alla Heidi-Alm: Comprensorio Sciistico Familiare",
+    "section3Text": "Il comprensorio sciistico familiare Heidi-Alm offre tre impianti di risalita, un tapis roulant magico e piste varie per principianti e avanzati."
+  },
+  "heidiAlm": {
+    "title": "Heidi Alm Mountain Resort: Vicino al Cielo, Lontano dal Quotidiano",
+    "description": "Vivi una vacanza indimenticabile all'Heidi Alm Mountain Resort, circondato da aria di montagna salubre, acqua cristallina e natura alpina colorata."
+  },
+  "winter": {
+    "title": "Vacanza Invernale alla Heidi-Alm",
+    "description": "Il comprensorio sciistico familiare offre tre impianti di risalita, un tapis roulant magico e piste varie.",
+    "activities": {
+      "skiing": "Sci rilassato senza code",
+      "crossCountry": "Sci di fondo su piste preparate",
+      "skating": "Pattinaggio sul Falkertsee",
+      "snowshoe": "Escursioni con racchette da neve guidate",
+      "skiSchool": "Scuola sci di Peter per bambini e adulti",
+      "tours": "Sci alpinismo e fiaccolate"
+    }
+  },
+  "ferienhaus": {
+    "title": "La Sechszirbenhütte – Romanticismo Rustico con Comfort Moderno",
+    "intro": "Concediti una vacanza indimenticabile nel nostro rifugio di montagna di oltre 250 anni in posizione isolata – direttamente al Parco Nazionale Nockberge.",
+    "details": {
+      "grundstueck": "1.200 m² di terreno alpino",
+      "wohnflaeche": "80 m²",
+      "hoehe": "1.700m sul livello del mare",
+      "personen": "2–5 persone"
+    },
+    "rooms": {
+      "title": "Camere da Letto",
+      "bedroom1": "Camera 1: Letto matrimoniale",
+      "bedroom2": "Camera 2: Letto matrimoniale",
+      "living": "Zona giorno con possibilità di dormire"
+    },
+    "kitchen": {
+      "title": "Cucina",
+      "items": ["Cucina completamente attrezzata", "Lavastoviglie", "Frigorifero con congelatore", "Macchina del caffè", "Bollitore", "Tostapane"]
+    },
+    "bathroom": {
+      "title": "Bagno",
+      "items": ["Doccia con WC", "Riscaldamento a pavimento"]
+    },
+    "sauna": {
+      "title": "Sauna",
+      "items": ["Annesso sauna privato", "Sauna finlandese", "Sala relax con lettini", "Doccia a pioggia", "Terrazza privata", "Riscaldamento a pavimento"]
+    },
+    "living": {
+      "title": "Zona Giorno",
+      "items": ["Accogliente area salotto", "Tavolo da pranzo", "Moderna stufa a pellet", "TV satellitare", "WiFi"]
+    },
+    "outdoor": {
+      "title": "Area Esterna",
+      "items": ["Balcone panoramico", "Mobili da giardino", "Parcheggio privato", "Cantina per sci e slittini"]
+    }
+  },
+  "umgebung": {
+    "title": "Destinazione Vacanze per Tutta la Famiglia",
+    "subtitle": "Austria Meridionale: Sci e Vacanze nella Natura in Clima Perfetto",
+    "intro": "Scopri l'idilliaco villaggio sciistico di Falkertsee nell'Austria meridionale.",
+    "features": {
+      "central": {
+        "title": "Sechszirbenhütte: Alloggio Centrale per Tutte le Attività",
+        "description": "La Sechszirbenhütte è l'alloggio ideale per la tua vacanza a Falkertsee."
+      },
+      "nationalpark": {
+        "title": "Parco Nazionale Nockberge e Comprensori Sciistici Adiacenti",
+        "description": "Esplora l'impressionante Parco Nazionale Nockberge nelle immediate vicinanze."
+      },
+      "dreilaendereck": {
+        "title": "Triangolo dei Tre Paesi: Italia, Slovenia e Austria",
+        "description": "La posizione centrale permette di esplorare comodamente il triangolo dei tre paesi."
+      },
+      "activities": {
+        "title": "Attività per Tutta la Famiglia",
+        "description": "Indipendentemente dalla stagione, ci sono numerose attività per tutta la famiglia."
+      },
+      "heidiAlm": {
+        "title": "Heidi-Alm, Golf, Escursioni e Altro",
+        "description": "Esplora il variegato mondo montano intorno alla Sechszirbenhütte."
+      },
+      "kaerntenCard": {
+        "title": "Risparmia con la Kärnten Card",
+        "description": "Informati sulla conveniente Kärnten Card per risparmiare durante il soggiorno."
+      }
+    },
+    "dogTrips": {
+      "title": "Le 5 Escursioni Più Belle con Cani in Carinzia",
+      "trips": []
+    },
+    "kidsTrips": {
+      "title": "Le 7 Escursioni Più Belle con Bambini in Carinzia",
+      "featured": {
+        "title": "Heidi-Alm al Falkert",
+        "description": "L'Heidi-Alm al Falkert è proprio dietro l'angolo e offre una passeggiata fiabesca.",
+        "distance": "5 minuti a piedi",
+        "age": "Tutte le età"
+      },
+      "trips": []
+    },
+    "directions": {
+      "title": "Come Raggiungerci",
+      "description": "Dall'autostrada del Tauern A10, prendere l'uscita Spittal/Millstätter See.",
+      "note": "Per l'accesso in auto da novembre ad aprile, si consiglia di avere le catene da neve."
+    }
+  },
+  "buchung": {
+    "title": "Invia una Richiesta Non Vincolante",
+    "subtitle": "Prenota la Tua Vacanza da Sogno alla Sechszirbenhütte",
+    "prices": {
+      "title": "Panoramica Prezzi",
+      "base": "Prezzo affitto per notte (fino a 4 persone)",
+      "lowSeason": "Bassa Stagione",
+      "highSeason": "Alta Stagione",
+      "minStay": "Soggiorno minimo: 3 notti (Alta stagione: 7 notti)"
+    },
+    "extras": {
+      "title": "Servizi Aggiuntivi",
+      "person5": "5ª Persona",
+      "dog": "Cane",
+      "laundry": "Pacchetto Biancheria"
+    },
+    "included": {
+      "title": "Incluso",
+      "items": ["Elettricità (20 kWh/notte)", "Riscaldamento", "Acqua", "Smaltimento rifiuti", "Pulizia finale (senza cane)", "WiFi", "Tassa di soggiorno (adulti)", "Uso sauna"]
+    },
+    "form": {
+      "title": "Richiesta di Prenotazione",
+      "salutation": "Titolo",
+      "mr": "Sig.",
+      "mrs": "Sig.ra",
+      "diverse": "Altro",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "street": "Via e Numero",
+      "zip": "CAP",
+      "city": "Città",
+      "country": "Paese",
+      "arrival": "Arrivo",
+      "departure": "Partenza",
+      "adults": "Adulti",
+      "children": "Bambini",
+      "childrenAge": "Età dei Bambini",
+      "dogs": "Cani",
+      "laundryPackage": "Pacchetto Biancheria",
+      "laundryCount": "Numero Pacchetti Biancheria",
+      "message": "Messaggio",
+      "agb": "Accetto le Condizioni Generali",
+      "datenschutz": "Accetto la Privacy Policy",
+      "submit": "Invia Richiesta",
+      "success": "Grazie! La tua richiesta è stata inviata con successo.",
+      "error": "Si è verificato un errore. Riprova più tardi."
+    }
+  },
+  "bewertungen": {
+    "title": "Recensioni degli Ospiti",
+    "subtitle": "Cosa Dicono i Nostri Ospiti",
+    "intro": "Ti è piaciuto il soggiorno alla Sechszirbenhütte? Aiutaci a migliorare!",
+    "cta": "Scrivi una Recensione su Google",
+    "thankYou": "Apprezziamo lodi, critiche e suggerimenti! Grazie per il tuo supporto!"
+  },
+  "reviews": {
+    "source": "Valutazione su",
+    "basedOn": "basato sulle recensioni degli ospiti",
+    "alsoBookableOn": "Prenotabile anche su",
+    "and": "e",
+    "commissionFree": "Prenota direttamente qui senza commissioni!",
+    "swipe": "scorri",
+    "goToReview": "Vai alla recensione",
+    "quotes": []
+  },
+  "footer": {
+    "contact": "Contatto",
+    "legal": "Legale",
+    "followUs": "Seguici",
+    "phone": "Telefono",
+    "email": "Email",
+    "address": "Indirizzo",
+    "copyright": "© {year} Sechszirbenhütte. Tutti i diritti riservati."
+  },
+  "common": {
+    "learnMore": "Scopri di Più",
+    "bookNow": "Prenota Ora",
+    "contactUs": "Contatto",
+    "back": "Indietro",
+    "close": "Chiudi",
+    "loading": "Caricamento...",
+    "persons": "Persone",
+    "nights": "Notti",
+    "perNight": "per notte"
+  }
+}

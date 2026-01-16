@@ -1,0 +1,250 @@
+{
+  "metadata": {
+    "title": "Sechszirbenhütte na Falkertu | Premium Gorska Koča v Nockbergah",
+    "description": "Zgodovinska gorska koča s savno na samotni lokaciji na 1.700m. Pohodništvo, smučanje in sprostitev na Koroškem. Družine in psi dobrodošli. Rezervirajte zdaj!"
+  },
+  "navigation": {
+    "home": "Domov",
+    "ferienhaus": "Počitniška Hiša",
+    "umgebung": "Okolica",
+    "galerie": "Galerija",
+    "anfrage": "Povpraševanje",
+    "buchung": "Rezervacija",
+    "bewertungen": "Ocene",
+    "impressum": "Impresum",
+    "datenschutz": "Zasebnost",
+    "agb": "Pogoji"
+  },
+  "hero": {
+    "welcome": "Dobrodošli",
+    "title": "v Sechszirbenhütte",
+    "subtitle": "Premium gorska koča na 1.700m v koroških Nockbergah",
+    "description": "Doživite nepozabne počitniške dni v naši več kot 250 let stari gorski koči – z ljubeznijo obnovljeni, s savna prizidkom in v popolni samoti med cirmovimi borovci in macesni na Falkertu.",
+    "cta_book": "Rezervirajte Zdaj",
+    "cta_explore": "Raziskujte Kočo"
+  },
+  "features": {
+    "altitude": {
+      "title": "1.700m Nadmorske Višine",
+      "description": "Alpska panorama z razgledom na Karavanke"
+    },
+    "secluded": {
+      "title": "Samotna Lokacija",
+      "description": "Popoln mir med cirmovimi borovci in macesni"
+    },
+    "sauna": {
+      "title": "Savna & Wellness",
+      "description": "Zasebni savna prizidek s prostorom za sprostitev in dežno prho"
+    },
+    "guests": {
+      "title": "Do 5 Gostov",
+      "description": "Idealno za družine in manjše skupine"
+    },
+    "dogs": {
+      "title": "Psi Dobrodošli",
+      "description": "Vaši štirinožni prijatelji so dobrodošli"
+    },
+    "rating": {
+      "title": "5-Zvezdične Ocene",
+      "description": "Naši gostje ljubijo Sechszirbenhütte"
+    }
+  },
+  "introText": {
+    "mainHeadline": "Rustikalna Počitniška Hiša na Falkertu - s Savno in Prostorom za Sprostitev",
+    "section1Title": "Pohodništvo, Smučanje in Sprostitev v Nockbergah, Koroška",
+    "section1Text": "Odkrijte Sechszirbenhütte, vašo sanjsko nastanitev na 1.700m nadmorske višine v srcu Nockbergov na Koroškem, Avstrija.",
+    "section2Title": "Heidi Alm Mountain Resort: Blizu Nebes, Daleč od Vsakdanjika",
+    "section2Text": "Doživite nepozabne počitnice v Heidi Alm Mountain Resortu, obkroženi z zdravim gorskim zrakom, kristalno čisto vodo in pisano naravo.",
+    "section3Title": "Zimske Počitnice na Heidi-Alm: Družinsko Smučišče",
+    "section3Text": "Družinam prijazno smučišče Heidi-Alm ponuja tri vlečnice, čarobno preprogo in raznolike proge za začetnike in napredne."
+  },
+  "heidiAlm": {
+    "title": "Heidi Alm Mountain Resort: Blizu Nebes, Daleč od Vsakdanjika",
+    "description": "Doživite nepozabne počitnice v Heidi Alm Mountain Resortu, obkroženi z zdravim gorskim zrakom, kristalno čisto gorsko vodo in pisano alpsko naravo."
+  },
+  "winter": {
+    "title": "Zimske Počitnice na Heidi-Alm",
+    "description": "Družinam prijazno smučišče ponuja tri vlečnice, čarobno preprogo in raznolike proge.",
+    "activities": {
+      "skiing": "Sproščeno smučanje brez čakalnih vrst",
+      "crossCountry": "Tek na smučeh na urejenih progah",
+      "skating": "Drsanje na Falkertsee",
+      "snowshoe": "Vodeni pohodi s krpljami",
+      "skiSchool": "Petrova smučarska šola za otroke in odrasle",
+      "tours": "Smučarski izleti in pohodi z baklami"
+    }
+  },
+  "ferienhaus": {
+    "title": "Sechszirbenhütte – Rustikalna Romantika z Modernim Udobjem",
+    "intro": "Privoščite si nepozabne počitnice v naši več kot 250 let stari gorski koči na samotni lokaciji – neposredno ob Narodnem parku Nockberge.",
+    "details": {
+      "grundstueck": "1.200 m² alpskega zemljišča",
+      "wohnflaeche": "80 m²",
+      "hoehe": "1.700m nadmorske višine",
+      "personen": "2–5 oseb"
+    },
+    "rooms": {
+      "title": "Spalnice",
+      "bedroom1": "Spalnica 1: Zakonska postelja",
+      "bedroom2": "Spalnica 2: Zakonska postelja",
+      "living": "Dnevni prostor z možnostjo spanja"
+    },
+    "kitchen": {
+      "title": "Kuhinja",
+      "items": ["Popolnoma opremljena kuhinja", "Pomivalni stroj", "Hladilnik z zamrzovalnikom", "Kavni aparat", "Kuhalnik vode", "Opekač kruha"]
+    },
+    "bathroom": {
+      "title": "Kopalnica",
+      "items": ["Tuš z WC", "Talno ogrevanje"]
+    },
+    "sauna": {
+      "title": "Savna",
+      "items": ["Zasebni savna prizidek", "Finska savna", "Prostor za sprostitev z ležalniki", "Dežna prha", "Zasebna terasa", "Talno ogrevanje"]
+    },
+    "living": {
+      "title": "Dnevni Prostor",
+      "items": ["Prijetna sedežna garnitura", "Jedilna miza", "Moderna peč na pelete", "Satelitska TV", "WiFi"]
+    },
+    "outdoor": {
+      "title": "Zunanjost",
+      "items": ["Panoramski balkon", "Vrtno pohištvo", "Zasebno parkirišče", "Klet za smuči in sanke"]
+    }
+  },
+  "umgebung": {
+    "title": "Celoletna Počitniška Destinacija za Celo Družino",
+    "subtitle": "Južna Avstrija: Smučanje in Počitnice v Naravi v Popolnem Podnebju",
+    "intro": "Odkrijte idiličko smučarsko vas Falkertsee v južni Avstriji.",
+    "features": {
+      "central": {
+        "title": "Sechszirbenhütte: Centralna Nastanitev za Vse Aktivnosti",
+        "description": "Sechszirbenhütte je idealna nastanitev za vaše počitnice v Falkertsee."
+      },
+      "nationalpark": {
+        "title": "Narodni Park Nockberge in Sosednja Smučišča",
+        "description": "Raziskujte impresiven Narodni park Nockberge v neposredni bližini."
+      },
+      "dreilaendereck": {
+        "title": "Tromeja: Italija, Slovenija in Avstrija",
+        "description": "Centralna lokacija omogoča udobno raziskovanje tromeje."
+      },
+      "activities": {
+        "title": "Aktivnosti za Celo Družino",
+        "description": "Ne glede na letni čas je na voljo veliko aktivnosti za celo družino."
+      },
+      "heidiAlm": {
+        "title": "Heidi-Alm, Golf, Pohodništvo in Več",
+        "description": "Raziskujte raznolik gorski svet okoli Sechszirbenhütte."
+      },
+      "kaerntenCard": {
+        "title": "Prihranite s Kärnten Card",
+        "description": "Pozanimajte se o ugodni Kärnten Card za prihranke med bivanjem."
+      }
+    },
+    "dogTrips": {
+      "title": "5 Najlepših Izletov s Psi na Koroškem",
+      "trips": []
+    },
+    "kidsTrips": {
+      "title": "7 Najlepših Izletov z Otroki na Koroškem",
+      "featured": {
+        "title": "Heidi-Alm na Falkertu",
+        "description": "Heidi-Alm na Falkertu je tik za vogalom in ponuja pravljično sprehajališče.",
+        "distance": "5 minut hoje",
+        "age": "Vse starosti"
+      },
+      "trips": []
+    },
+    "directions": {
+      "title": "Kako do Nas",
+      "description": "Z avtoceste Tauern A10 uporabite izvoz Spittal/Millstätter See.",
+      "note": "Za dostop z avtomobilom od novembra do aprila priporočamo snežne verige."
+    }
+  },
+  "buchung": {
+    "title": "Pošljite Nezavezujoče Povpraševanje",
+    "subtitle": "Rezervirajte Svoje Sanjske Počitnice v Sechszirbenhütte",
+    "prices": {
+      "title": "Pregled Cen",
+      "base": "Cena najema na noč (do 4 osebe)",
+      "lowSeason": "Nizka Sezona",
+      "highSeason": "Visoka Sezona",
+      "minStay": "Minimalno bivanje: 3 noči (Visoka sezona: 7 noči)"
+    },
+    "extras": {
+      "title": "Dodatne Storitve",
+      "person5": "5. Oseba",
+      "dog": "Pes",
+      "laundry": "Paket Perila"
+    },
+    "included": {
+      "title": "Vključeno",
+      "items": ["Elektrika (20 kWh/noč)", "Ogrevanje", "Voda", "Odvoz odpadkov", "Končno čiščenje (brez psa)", "WiFi", "Turistična taksa (odrasli)", "Uporaba savne"]
+    },
+    "form": {
+      "title": "Povpraševanje za Rezervacijo",
+      "salutation": "Nagovor",
+      "mr": "G.",
+      "mrs": "Ga.",
+      "diverse": "Drugo",
+      "firstName": "Ime",
+      "lastName": "Priimek",
+      "email": "E-pošta",
+      "phone": "Telefon",
+      "street": "Ulica in Hišna Številka",
+      "zip": "Poštna Številka",
+      "city": "Mesto",
+      "country": "Država",
+      "arrival": "Prihod",
+      "departure": "Odhod",
+      "adults": "Odrasli",
+      "children": "Otroci",
+      "childrenAge": "Starost Otrok",
+      "dogs": "Psi",
+      "laundryPackage": "Paket Perila",
+      "laundryCount": "Število Paketov Perila",
+      "message": "Sporočilo",
+      "agb": "Sprejemam Splošne Pogoje",
+      "datenschutz": "Sprejemam Politiko Zasebnosti",
+      "submit": "Pošlji Povpraševanje",
+      "success": "Hvala! Vaše povpraševanje je bilo uspešno oddano.",
+      "error": "Prišlo je do napake. Prosimo, poskusite znova pozneje."
+    }
+  },
+  "bewertungen": {
+    "title": "Ocene Gostov",
+    "subtitle": "Kaj Pravijo Naši Gostje",
+    "intro": "Vam je bilo všeč bivanje v Sechszirbenhütte? Pomagajte nam, da postanemo še boljši!",
+    "cta": "Napišite Oceno na Google",
+    "thankYou": "Cenimo pohvale, kritike in predloge! Hvala za vašo podporo!"
+  },
+  "reviews": {
+    "source": "Ocena na",
+    "basedOn": "na podlagi ocen gostov",
+    "alsoBookableOn": "Rezervirajte tudi na",
+    "and": "in",
+    "commissionFree": "Rezervirajte neposredno tukaj brez provizije!",
+    "swipe": "podrsajte",
+    "goToReview": "Pojdi na oceno",
+    "quotes": []
+  },
+  "footer": {
+    "contact": "Kontakt",
+    "legal": "Pravne Informacije",
+    "followUs": "Sledite Nam",
+    "phone": "Telefon",
+    "email": "E-pošta",
+    "address": "Naslov",
+    "copyright": "© {year} Sechszirbenhütte. Vse pravice pridržane."
+  },
+  "common": {
+    "learnMore": "Več Informacij",
+    "bookNow": "Rezervirajte Zdaj",
+    "contactUs": "Kontakt",
+    "back": "Nazaj",
+    "close": "Zapri",
+    "loading": "Nalaganje...",
+    "persons": "Osebe",
+    "nights": "Noči",
+    "perNight": "na noč"
+  }
+}
