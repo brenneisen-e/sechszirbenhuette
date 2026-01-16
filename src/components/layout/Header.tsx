@@ -266,6 +266,13 @@ export function Header() {
 
 // Separate Mobile Booking Button Component - rendered outside Header
 export function MobileBookingButton() {
+  const pathname = usePathname();
+
+  // Don't render on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
