@@ -161,8 +161,8 @@ export function Header() {
             />
           </button>
 
-          {/* Spacer for alignment */}
-          <div className="w-10" />
+          {/* Language Switcher (Mobile) */}
+          <LanguageSwitcher isScrolled={isScrolled} />
         </div>
       </div>
 
