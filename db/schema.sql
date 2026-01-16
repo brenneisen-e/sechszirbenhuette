@@ -163,6 +163,7 @@ CREATE TABLE IF NOT EXISTS content_texts (
     font_family TEXT,                     -- Optional: Schriftart für diesen Text
     font_size TEXT,                       -- Optional: Schriftgröße (z.B. "48", "72")
     color TEXT,                           -- Optional: Farbe für diesen Text
+    padding TEXT,                         -- Optional: Padding für diesen Text (z.B. "8", "16")
     section TEXT NOT NULL,                -- Sektion: hero, reviews, introtext, ferienhaus, etc.
     text_type TEXT DEFAULT 'body',        -- heading oder body
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

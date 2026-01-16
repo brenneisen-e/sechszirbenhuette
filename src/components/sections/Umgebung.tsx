@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -53,6 +54,7 @@ const DOG_TRIP_CATEGORIES = [
 
 export function Umgebung() {
   const { t } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [images, setImages] = useState<MediaItem[]>([]);
   const [expandedKidsTrip, setExpandedKidsTrip] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
@@ -101,13 +103,14 @@ export function Umgebung() {
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
+            data-text-key="umgebung_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('umgebung_title') }}
           >
-            {t.umgebung.title}
+            {getText('umgebung_title')}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4">
-            {t.umgebung.subtitle}
+          <p data-text-key="umgebung_subtitle" className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4" style={getTextStyle('umgebung_subtitle')}>
+            {getText('umgebung_subtitle')}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-gray-600">
             {t.umgebung.intro}

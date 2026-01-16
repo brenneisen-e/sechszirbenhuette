@@ -32,6 +32,7 @@ interface ContentText {
   font_family: string | null;
   font_size: string | null;
   color: string | null;
+  padding: string | null;
   section: string;
   text_type: string;
   updated_at: string;
@@ -85,6 +86,7 @@ export async function GET() {
         font_family: null,
         font_size: null,
         color: null,
+        padding: null,
         section: value.section,
         text_type: value.text_type,
         updated_at: '',
@@ -128,12 +130,23 @@ export async function GET() {
         font_family: null,
         font_size: null,
         color: null,
+        padding: null,
         section: value.section,
         text_type: value.text_type,
         updated_at: '',
       };
     }
-    return NextResponse.json({ texts, bySection: {}, success: true });
+
+    // Group by section even on error
+    const bySection: Record<string, ContentText[]> = {};
+    for (const text of Object.values(texts)) {
+      if (!bySection[text.section]) {
+        bySection[text.section] = [];
+      }
+      bySection[text.section].push(text);
+    }
+
+    return NextResponse.json({ texts, bySection, success: true });
   }
 }
 
@@ -154,6 +167,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Ensure admin_sessions table exists
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT NOT NULL UNIQUE,
+          expires_at DATETIME NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (tableError) {
+      console.error('Error creating admin_sessions table:', tableError);
+    }
+
     const session = await env.DB.prepare(
       'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")'
     ).bind(sessionId).first();
@@ -163,7 +190,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text_key, content, font_family, font_size, color, section, text_type } = body;
+    const { text_key, content, font_family, font_size, color, padding, section, text_type } = body;
 
     if (!text_key || !content) {
       return NextResponse.json(
@@ -172,15 +199,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Ensure content_texts table exists
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS content_texts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          text_key TEXT NOT NULL UNIQUE,
+          content TEXT NOT NULL,
+          font_family TEXT,
+          font_size TEXT,
+          color TEXT,
+          padding TEXT,
+          section TEXT NOT NULL,
+          text_type TEXT DEFAULT 'body',
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (tableError) {
+      console.error('Error creating content_texts table:', tableError);
+    }
+
     // Use INSERT OR REPLACE to handle both new and existing entries
     await env.DB.prepare(`
-      INSERT INTO content_texts (text_key, content, font_family, font_size, color, section, text_type, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      INSERT INTO content_texts (text_key, content, font_family, font_size, color, padding, section, text_type, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(text_key) DO UPDATE SET
         content = excluded.content,
         font_family = excluded.font_family,
         font_size = excluded.font_size,
         color = excluded.color,
+        padding = excluded.padding,
         section = excluded.section,
         text_type = excluded.text_type,
         updated_at = datetime('now')
@@ -190,6 +238,7 @@ export async function POST(request: NextRequest) {
       font_family || null,
       font_size || null,
       color || null,
+      padding || null,
       section || defaultTexts[text_key]?.section || 'other',
       text_type || defaultTexts[text_key]?.text_type || 'body'
     ).run();

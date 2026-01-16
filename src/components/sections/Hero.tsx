@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 
@@ -9,7 +10,8 @@ import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide
 const LOGO_GREEN = '#1e5631';
 
 export function Hero() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -89,22 +91,24 @@ export function Hero() {
             className="w-full"
           >
             <motion.p
+              data-text-key="hero_title"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
             >
-              {t.hero.welcome} {t.hero.title}
+              {getText('hero_title')}
             </motion.p>
             <motion.p
+              data-text-key="hero_subtitle"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-[clamp(1.75rem,5vw,3rem)] leading-snug mt-2 text-white drop-shadow-md px-2"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_subtitle') }}
             >
-              {t.hero.subtitle}
+              {getText('hero_subtitle')}
             </motion.p>
           </motion.div>
         </div>
@@ -122,12 +126,14 @@ export function Hero() {
           >
             {/* Description */}
             <motion.p
+              data-text-key="hero_description"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.9 }}
               className="text-[clamp(0.75rem,2vw,1.25rem)] leading-relaxed text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-6 sm:mb-8 px-2"
+              style={getTextStyle('hero_description')}
             >
-              {t.hero.description}
+              {getText('hero_description')}
             </motion.p>
 
             {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}

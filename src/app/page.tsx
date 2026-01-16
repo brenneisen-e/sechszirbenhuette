@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   Hero,
   Reviews,
@@ -9,6 +10,7 @@ import {
   Galerie,
   Buchung,
 } from '@/components/sections';
+import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
 
 export default function HomePage() {
   return (
@@ -22,6 +24,9 @@ export default function HomePage() {
       <HeidiAlm />
       <Umgebung />
       <Buchung />
+      <Suspense fallback={null}>
+        <AdminPreviewListener />
+      </Suspense>
     </>
   );
 }

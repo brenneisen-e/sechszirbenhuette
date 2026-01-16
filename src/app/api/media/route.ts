@@ -114,6 +114,78 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Update media record (category, alt_text, title, display_order)
+export async function PATCH(request: NextRequest) {
+  try {
+    const env = await getCloudflareEnv();
+
+    if (!env || !env.DB) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+
+    // Check authentication
+    const sessionToken = request.cookies.get('admin_session')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify session
+    const session = await env.DB.prepare(
+      'SELECT * FROM admin_sessions WHERE token = ? AND expires_at > datetime(\'now\')'
+    ).bind(sessionToken).first();
+
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
+    const body = await request.json() as {
+      id: string;
+      category?: string;
+      alt_text?: string;
+      title?: string;
+      display_order?: number;
+    };
+
+    if (!body.id) {
+      return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    }
+
+    const updates: string[] = [];
+    const params: (string | number)[] = [];
+
+    if (body.category !== undefined) {
+      updates.push('category = ?');
+      params.push(body.category);
+    }
+    if (body.alt_text !== undefined) {
+      updates.push('alt_text = ?');
+      params.push(body.alt_text);
+    }
+    if (body.title !== undefined) {
+      updates.push('title = ?');
+      params.push(body.title);
+    }
+    if (body.display_order !== undefined) {
+      updates.push('display_order = ?');
+      params.push(body.display_order);
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+    }
+
+    params.push(body.id);
+    const query = `UPDATE media SET ${updates.join(', ')} WHERE id = ?`;
+
+    await env.DB.prepare(query).bind(...params).run();
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating media:', error);
+    return NextResponse.json({ error: 'Failed to update media' }, { status: 500 });
+  }
+}
+
 function getPlaceholderResponse(category: string | null, type: string | null) {
   let media: Array<{
     id: string;
