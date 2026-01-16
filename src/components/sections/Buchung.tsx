@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck, Check, Phone, Mail, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
-import { SITE_CONFIG, DESKLINE_CONFIG } from '@/lib/constants';
+import { CalendarCheck, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { DESKLINE_CONFIG } from '@/lib/constants';
 
 // Extend Window interface for Deskline widget
 declare global {
@@ -290,8 +290,8 @@ export function Buchung() {
             </div>
         </motion.div>
 
-        {/* Info Cards - 4 columns on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Info Cards - 3 columns on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Price Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -367,35 +367,6 @@ export function Buchung() {
                 </li>
               ))}
             </ul>
-          </motion.div>
-
-          {/* Contact */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-            className="bg-logo-green text-white rounded-xl p-5"
-          >
-            <h3 className="text-base font-bold mb-3">
-              {language === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
-            </h3>
-            <div className="space-y-2">
-              <a
-                href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
-                className="flex items-center gap-2 hover:text-white/80 transition text-sm"
-              >
-                <Phone size={16} />
-                <span>{SITE_CONFIG.phone}</span>
-              </a>
-              <a
-                href={`mailto:${SITE_CONFIG.email}`}
-                className="flex items-center gap-2 hover:text-white/80 transition text-sm"
-              >
-                <Mail size={16} />
-                <span>{SITE_CONFIG.email}</span>
-              </a>
-            </div>
           </motion.div>
         </div>
       </div>
