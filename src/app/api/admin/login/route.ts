@@ -68,6 +68,20 @@ export async function POST(request: NextRequest) {
     const sessionId = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+    // Ensure admin_sessions table exists
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          session_id TEXT NOT NULL UNIQUE,
+          expires_at DATETIME NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+    } catch (tableError) {
+      console.error('Error creating admin_sessions table:', tableError);
+    }
+
     // Store session in database
     await env.DB.prepare(`
       INSERT INTO admin_sessions (session_id, expires_at)
