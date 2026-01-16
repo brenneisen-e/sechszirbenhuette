@@ -401,3 +401,21 @@ CREATE TABLE IF NOT EXISTS content_texts (
 
 CREATE INDEX IF NOT EXISTS idx_content_texts_key ON content_texts(text_key);
 CREATE INDEX IF NOT EXISTS idx_content_texts_section ON content_texts(section);
+
+-- =============================================
+-- MEDIA KATEGORIEN (Mehrfachzuordnung)
+-- =============================================
+
+-- Junction-Tabelle für Mehrfachkategorien bei Medien
+CREATE TABLE IF NOT EXISTS media_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    media_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    display_order INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+    UNIQUE(media_id, category)
+);
+
+CREATE INDEX IF NOT EXISTS idx_media_categories_media_id ON media_categories(media_id);
+CREATE INDEX IF NOT EXISTS idx_media_categories_category ON media_categories(category);

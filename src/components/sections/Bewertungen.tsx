@@ -91,7 +91,7 @@ export function Bewertungen() {
   };
 
   return (
-    <section id="bewertungen" className="py-20 bg-transparent">
+    <section id="bewertungen" className="pt-20 pb-10 bg-transparent">
       <div className="container">
         {/* Header */}
         <motion.div

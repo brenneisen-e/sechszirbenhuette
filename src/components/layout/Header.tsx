@@ -168,6 +168,21 @@ export function Header() {
             {rightNavItems.map((item) => {
               const isActive = isNavItemActive(item.sectionId);
               const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
+              const isAnfrage = item.key === 'anfrage';
+
+              // Special styling for Anfragen button - always green bg with white text
+              if (isAnfrage) {
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => scrollToSection(item.href)}
+                    className="font-medium transition-all uppercase tracking-wide text-sm px-4 py-2 rounded-lg bg-logo-green text-white hover:bg-logo-green/90"
+                  >
+                    {t.navigation[item.key]}
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.key}
@@ -241,6 +256,21 @@ export function Header() {
             {allNavItems.map((item) => {
               const isActive = isNavItemActive(item.sectionId);
               const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
+              const isAnfrage = item.key === 'anfrage';
+
+              // Special styling for Anfragen button - green bg with white text
+              if (isAnfrage) {
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => scrollToSection(item.href)}
+                    className="py-3 px-4 text-white text-left uppercase tracking-wide rounded-lg transition-all font-medium bg-logo-green hover:bg-logo-green/90 mt-2"
+                  >
+                    {t.navigation[item.key]}
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.key}

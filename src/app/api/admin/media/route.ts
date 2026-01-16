@@ -48,9 +48,15 @@ interface MediaRecord {
   alt_text: string;
   title: string;
   category: string;
+  categories?: string[]; // Additional categories from junction table
   media_type: 'image' | 'video';
   display_order: number;
   created_at: string;
+}
+
+interface MediaCategoryRecord {
+  media_id: string;
+  category: string;
 }
 
 // GET - List all media or filter by category/type
@@ -64,31 +70,57 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const type = searchParams.get('type'); // 'image' | 'video' | null
 
-    let query = 'SELECT * FROM media';
+    let query: string;
     const params: string[] = [];
-    const conditions: string[] = [];
 
     if (category) {
-      conditions.push('category = ?');
-      params.push(category);
+      // When filtering by category, include media that has this category
+      // either as primary category or in media_categories junction table
+      query = `
+        SELECT DISTINCT m.* FROM media m
+        LEFT JOIN media_categories mc ON m.id = mc.media_id
+        WHERE (m.category = ? OR mc.category = ?)
+        ${type ? ' AND m.media_type = ?' : ''}
+        ORDER BY m.display_order ASC, m.created_at DESC
+      `;
+      params.push(category, category);
+      if (type) params.push(type);
+    } else {
+      query = 'SELECT * FROM media';
+      if (type) {
+        query += ' WHERE media_type = ?';
+        params.push(type);
+      }
+      query += ' ORDER BY display_order ASC, created_at DESC';
     }
-
-    if (type) {
-      conditions.push('media_type = ?');
-      params.push(type);
-    }
-
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    query += ' ORDER BY display_order ASC, created_at DESC';
 
     const stmt = env.DB.prepare(query);
     const result = await (params.length > 0 ? stmt.bind(...params) : stmt).all<MediaRecord>();
+    const mediaList = result.results || [];
+
+    // Fetch all additional categories for the media items
+    if (mediaList.length > 0) {
+      const mediaIds = mediaList.map(m => m.id);
+      const placeholders = mediaIds.map(() => '?').join(',');
+      const catResult = await env.DB.prepare(
+        `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`
+      ).bind(...mediaIds).all<MediaCategoryRecord>();
+
+      // Group categories by media_id
+      const categoriesMap: Record<string, string[]> = {};
+      (catResult.results || []).forEach(row => {
+        if (!categoriesMap[row.media_id]) categoriesMap[row.media_id] = [];
+        categoriesMap[row.media_id].push(row.category);
+      });
+
+      // Attach categories to each media item
+      mediaList.forEach(m => {
+        m.categories = categoriesMap[m.id] || [];
+      });
+    }
 
     return NextResponse.json({
-      media: result.results || [],
+      media: mediaList,
       success: true
     });
   } catch (error) {
@@ -190,13 +222,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
     const body = await request.json() as {
-      id?: number;
+      id?: string;
       alt_text?: string;
       title?: string;
       category?: string;
+      categories?: string[]; // Additional categories for the junction table
       display_order?: number;
     };
-    const { id, alt_text, title, category, display_order } = body;
+    const { id, alt_text, title, category, categories, display_order } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -225,17 +258,26 @@ export async function PUT(request: NextRequest) {
       params.push(display_order);
     }
 
-    if (updates.length === 0) {
-      return NextResponse.json(
-        { error: 'No updates provided', success: false },
-        { status: 400 }
-      );
+    // Update main media table if there are changes
+    if (updates.length > 0) {
+      params.push(id);
+      await env.DB.prepare(
+        `UPDATE media SET ${updates.join(', ')} WHERE id = ?`
+      ).bind(...params).run();
     }
 
-    params.push(id);
-    await env.DB.prepare(
-      `UPDATE media SET ${updates.join(', ')} WHERE id = ?`
-    ).bind(...params).run();
+    // Handle additional categories (junction table)
+    if (categories !== undefined) {
+      // Delete existing categories for this media
+      await env.DB.prepare('DELETE FROM media_categories WHERE media_id = ?').bind(id).run();
+
+      // Insert new categories
+      for (const cat of categories) {
+        await env.DB.prepare(
+          'INSERT INTO media_categories (media_id, category) VALUES (?, ?)'
+        ).bind(id, cat).run();
+      }
+    }
 
     return NextResponse.json({
       success: true,
