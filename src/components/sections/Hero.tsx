@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Dog, Mountain, TreePine, Flame } from 'lucide-react';
+import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
@@ -54,6 +54,7 @@ export function Hero() {
     { icon: Flame, label: t.features.sauna.title, onClick: () => scrollToGalleryCategory('bad') },
     { icon: Users, label: t.features.guests.title, onClick: () => scrollToGalleryCategory('schlafen') },
     { icon: Dog, label: t.features.dogs.title, onClick: () => scrollToSection('#dog-trips') },
+    { icon: Star, label: t.features.rating.title, onClick: () => scrollToSection('#bewertungen') },
   ];
 
   return (
@@ -171,7 +172,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        onClick={() => scrollToSection('#introtext')}
+        onClick={() => scrollToSection('#bewertungen')}
         className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white animate-bounce"
         aria-label="Scroll down"
       >

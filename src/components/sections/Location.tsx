@@ -1,15 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Navigation, Mail, Phone, Hand } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { SITE_CONFIG } from '@/lib/constants';
 
+interface MediaItem {
+  id: number;
+  url: string;
+  alt_text: string;
+}
+
 export function Location() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
   const [mapInteractive, setMapInteractive] = useState(false);
+  const [markerImage, setMarkerImage] = useState('/images/huette-marker.jpg');
+
+  // Fetch exterior image for map marker
+  useEffect(() => {
+    async function fetchMarkerImage() {
+      try {
+        const response = await fetch('/api/media?category=aussen&type=image');
+        const data = await response.json() as { media?: MediaItem[] };
+        if (data.media && data.media.length > 0) {
+          setMarkerImage(data.media[0].url);
+        }
+      } catch {
+        // Use fallback image
+      }
+    }
+    fetchMarkerImage();
+  }, []);
 
   // Sechszirbenhütte coordinates
   const lat = SITE_CONFIG.coordinates.lat;
@@ -76,6 +99,23 @@ export function Location() {
                 {language === 'de' ? 'Karte sperren' : 'Lock map'}
               </button>
             )}
+            {/* Custom Marker with Image */}
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none z-10"
+              style={{ marginTop: '-20px' }}
+            >
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+                  <img
+                    src={markerImage}
+                    alt="Sechszirbenhütte"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Triangle pointer */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
+              </div>
+            </div>
           </div>
 
           {/* Info Cards */}

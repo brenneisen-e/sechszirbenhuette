@@ -24,7 +24,7 @@ const rightNavItems = [
 const allNavItems = [...leftNavItems, ...rightNavItems];
 
 // All sections to track for scroll-spy (in order they appear on page)
-const SCROLL_SPY_SECTIONS = ['hero', 'introtext', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
+const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'introtext', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
 
 export function Header() {
   const { t } = useLanguage();
