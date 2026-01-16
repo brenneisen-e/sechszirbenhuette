@@ -15,7 +15,6 @@ import {
   CreditCard,
   Dog,
   Baby,
-  MapPin,
   Car,
   Clock,
   ExternalLink,
@@ -392,45 +391,6 @@ export function Umgebung() {
                 )}
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Directions */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
-        >
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green mb-4">
-              <MapPin size={32} />
-            </div>
-            <h3
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
-            >
-              {t.umgebung.directions.title}
-            </h3>
-          </div>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            {t.umgebung.directions.description}
-          </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
-            <p className="text-amber-800 font-medium">
-              {t.umgebung.directions.note}
-            </p>
-          </div>
-          <div className="rounded-xl overflow-hidden">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2734.1234567890!2d13.8461029!3d46.8567077!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSechszirbenh%C3%BCtte!5e0!3m2!1sde!2sat!4v1234567890"
-              width="100%"
-              height="400"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
           </div>
         </motion.div>
       </div>

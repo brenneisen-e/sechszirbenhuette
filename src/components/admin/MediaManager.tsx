@@ -87,6 +87,9 @@ export default function MediaManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{ alt_text: string; title: string }>({ alt_text: '', title: '' });
   const [draggedItem, setDraggedItem] = useState<MediaRecord | null>(null);
+  // Category editing state
+  const [editingCategoriesId, setEditingCategoriesId] = useState<string | null>(null);
+  const [editingCategories, setEditingCategories] = useState<string[]>([]);
 
   // Load media on mount
   useEffect(() => {
@@ -264,6 +267,55 @@ export default function MediaManager() {
   }, [media]);
 
   const getCategoryConfig = (value: string) => CATEGORIES.find(c => c.value === value);
+
+  // Open category editing modal
+  const handleEditCategories = (item: MediaRecord) => {
+    setEditingCategoriesId(item.id);
+    // Combine primary category with additional categories
+    const allCategories = [item.category, ...(item.categories || [])];
+    // Only include gallery categories
+    setEditingCategories(allCategories.filter(c => GALLERY_CATEGORIES.includes(c)));
+  };
+
+  // Toggle a category in the editing list
+  const toggleCategory = (category: string) => {
+    setEditingCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  // Save category changes
+  const handleSaveCategories = async () => {
+    if (!editingCategoriesId) return;
+
+    const item = media.find(m => m.id === editingCategoriesId);
+    if (!item) return;
+
+    try {
+      // The first selected category becomes the primary, rest go to junction table
+      const primaryCategory = editingCategories[0] || item.category;
+      const additionalCategories = editingCategories.slice(1);
+
+      const response = await fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingCategoriesId,
+          category: primaryCategory,
+          categories: additionalCategories
+        }),
+      });
+
+      if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+      setEditingCategoriesId(null);
+      setSuccess('Kategorien gespeichert');
+      await loadMedia();
+    } catch {
+      setError('Fehler beim Speichern der Kategorien');
+    }
+  };
 
   if (loading) {
     return (
