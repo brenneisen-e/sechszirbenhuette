@@ -26,9 +26,31 @@ const FlagEN = () => (
   </svg>
 );
 
+const FlagIT = () => (
+  <svg viewBox="0 0 3 2" className="w-6 h-4 rounded-sm shadow-sm">
+    <rect width="1" height="2" x="0" fill="#009246" />
+    <rect width="1" height="2" x="1" fill="#fff" />
+    <rect width="1" height="2" x="2" fill="#CE2B37" />
+  </svg>
+);
+
+const FlagSL = () => (
+  <svg viewBox="0 0 1200 600" className="w-6 h-4 rounded-sm shadow-sm">
+    <rect width="1200" height="600" fill="#fff"/>
+    <rect width="1200" height="200" y="0" fill="#fff"/>
+    <rect width="1200" height="200" y="200" fill="#003da5"/>
+    <rect width="1200" height="200" y="400" fill="#d50000"/>
+    <path d="M170,90 L170,200 C170,280 240,330 300,330 C360,330 430,280 430,200 L430,90 Z" fill="#003da5" stroke="#ffcd00" strokeWidth="6"/>
+    <path d="M220,160 L300,200 L380,160 L300,250 Z" fill="#fff"/>
+    <path d="M270,120 L300,150 L330,120" fill="none" stroke="#ffcd00" strokeWidth="8"/>
+  </svg>
+);
+
 const languages: { code: Language; flag: React.ReactNode; label: string }[] = [
   { code: 'de', flag: <FlagDE />, label: 'Deutsch' },
   { code: 'en', flag: <FlagEN />, label: 'English' },
+  { code: 'it', flag: <FlagIT />, label: 'Italiano' },
+  { code: 'sl', flag: <FlagSL />, label: 'Slovenščina' },
 ];
 
 interface LanguageSwitcherProps {

@@ -157,6 +157,12 @@ const FONT_OPTIONS = [
 ];
 
 const HEADING_SIZE_OPTIONS = [
+  { value: '18', label: '18px' },
+  { value: '20', label: '20px' },
+  { value: '22', label: '22px' },
+  { value: '24', label: '24px' },
+  { value: '28', label: '28px' },
+  { value: '32', label: '32px' },
   { value: '36', label: '36px' },
   { value: '42', label: '42px' },
   { value: '48', label: '48px' },
