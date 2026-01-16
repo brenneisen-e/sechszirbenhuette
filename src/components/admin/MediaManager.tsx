@@ -13,6 +13,7 @@ import {
   GripVertical,
   AlertCircle,
   RefreshCw,
+  Tags,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -27,10 +28,14 @@ interface MediaRecord {
   alt_text: string;
   title: string;
   category: string;
+  categories?: string[]; // Additional categories from junction table
   media_type: 'image' | 'video';
   display_order: number;
   created_at: string;
 }
+
+// Gallery categories that support multiple selection
+const GALLERY_CATEGORIES = ['aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras'];
 
 // ============================================================================
 // CONSTANTS
