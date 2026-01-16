@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import { Star, MessageSquare, Quote } from 'lucide-react';
 
@@ -17,6 +18,7 @@ interface Review {
 
 export function Bewertungen() {
   const { t } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
@@ -74,13 +76,14 @@ export function Bewertungen() {
             <MessageSquare size={32} strokeWidth={1.5} />
           </div>
           <h2
+            data-text-key="bewertungen_title"
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('bewertungen_title') }}
           >
-            {t.bewertungen.title}
+            {getText('bewertungen_title')}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-2">
-            {t.bewertungen.subtitle}
+          <p data-text-key="bewertungen_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600 mb-2" style={getTextStyle('bewertungen_subtitle')}>
+            {getText('bewertungen_subtitle')}
           </p>
 
           {/* Rating Summary */}

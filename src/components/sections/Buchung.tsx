@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarCheck, Check, Phone, Mail, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { SITE_CONFIG, DESKLINE_CONFIG } from '@/lib/constants';
@@ -15,6 +16,7 @@ declare global {
 
 export function Buchung() {
   const { t, language } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptLoadedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -196,12 +198,12 @@ export function Buchung() {
           <h2
             data-text-key="buchung_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('buchung_title') }}
           >
-            {t.buchung.title}
+            {getText('buchung_title')}
           </h2>
-          <p data-text-key="buchung_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600">
-            {t.buchung.subtitle}
+          <p data-text-key="buchung_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600" style={getTextStyle('buchung_subtitle')}>
+            {getText('buchung_subtitle')}
           </p>
         </motion.div>
 

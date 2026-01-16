@@ -1,10 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useContentTexts } from '@/contexts/ContentTextsContext';
 
 export function IntroText() {
-  const { t } = useLanguage();
+  const { getText, getTextStyle } = useContentTexts();
 
   return (
     <section id="introtext" className="py-16 bg-transparent">
@@ -20,9 +20,9 @@ export function IntroText() {
           <h2
             data-text-key="introtext_main_heading"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('introtext_main_heading') }}
           >
-            {t.introText.mainHeadline}
+            {getText('introtext_main_heading')}
           </h2>
         </motion.div>
 
@@ -34,11 +34,11 @@ export function IntroText() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 data-text-key="introtext_heading_1" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
-            {t.introText.section1Title}
+          <h2 data-text-key="introtext_heading_1" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_1')}>
+            {getText('introtext_heading_1')}
           </h2>
-          <p data-text-key="introtext_text_1" className="text-sm sm:text-base text-gray-700 leading-relaxed">
-            {t.introText.section1Text}
+          <p data-text-key="introtext_text_1" className="text-sm sm:text-base text-gray-700 leading-relaxed" style={getTextStyle('introtext_text_1')}>
+            {getText('introtext_text_1')}
           </p>
         </motion.div>
 
@@ -50,11 +50,11 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-center mb-12"
         >
-          <h2 data-text-key="introtext_heading_2" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
-            {t.introText.section2Title}
+          <h2 data-text-key="introtext_heading_2" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_2')}>
+            {getText('introtext_heading_2')}
           </h2>
-          <p data-text-key="introtext_text_2" className="text-sm sm:text-base text-gray-700 leading-relaxed">
-            {t.introText.section2Text}
+          <p data-text-key="introtext_text_2" className="text-sm sm:text-base text-gray-700 leading-relaxed" style={getTextStyle('introtext_text_2')}>
+            {getText('introtext_text_2')}
           </p>
         </motion.div>
 
@@ -66,11 +66,11 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-center"
         >
-          <h2 data-text-key="introtext_heading_3" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
-            {t.introText.section3Title}
+          <h2 data-text-key="introtext_heading_3" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4" style={getTextStyle('introtext_heading_3')}>
+            {getText('introtext_heading_3')}
           </h2>
-          <p data-text-key="introtext_text_3" className="text-sm sm:text-base text-gray-700 leading-relaxed">
-            {t.introText.section3Text}
+          <p data-text-key="introtext_text_3" className="text-sm sm:text-base text-gray-700 leading-relaxed" style={getTextStyle('introtext_text_3')}>
+            {getText('introtext_text_3')}
           </p>
         </motion.div>
       </div>
