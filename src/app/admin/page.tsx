@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import {
   Upload,
@@ -599,20 +598,25 @@ export default function AdminPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
+              <a
                 href="/"
                 className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-wood-700 hover:bg-wood-50 rounded-lg transition"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span className="text-sm font-medium">Zur Homepage</span>
-              </Link>
+              </a>
               <div className="border-l pl-4">
                 <h1 className="text-xl font-bold text-gray-900">Admin-Panel</h1>
                 <p className="text-sm text-gray-500">Medien verwalten</p>
               </div>
             </div>
             <button
-              onClick={() => loadMedia(selectedCategory || undefined)}
+              type="button"
+              onClick={() => {
+                loadMedia(selectedCategory || undefined);
+                loadAmenityCardImages();
+                loadSiteSettings();
+              }}
               className="p-2 text-gray-500 hover:text-wood-700 hover:bg-wood-50 rounded-lg"
               title="Aktualisieren"
             >
