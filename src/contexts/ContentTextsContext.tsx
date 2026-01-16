@@ -175,7 +175,25 @@ export function ContentTextsProvider({ children }: { children: ReactNode }) {
     }
 
     if (text.font_size) {
-      style.fontSize = text.font_size + 'px';
+      // Parse responsive font sizes (can be JSON with mobile/desktop)
+      try {
+        const parsed = JSON.parse(text.font_size);
+        if (parsed.mobile && parsed.desktop) {
+          // Use CSS clamp for responsive sizing
+          // clamp(mobile, viewport-based-value, desktop)
+          const mobileSize = parseInt(parsed.mobile);
+          const desktopSize = parseInt(parsed.desktop);
+          // Calculate a preferred value that transitions between mobile and desktop
+          // Using viewport width: at 320px use mobile, at 1200px use desktop
+          const preferredCalc = `calc(${mobileSize}px + (${desktopSize} - ${mobileSize}) * ((100vw - 320px) / (1200 - 320)))`;
+          style.fontSize = `clamp(${mobileSize}px, ${preferredCalc}, ${desktopSize}px)`;
+        } else {
+          style.fontSize = text.font_size + 'px';
+        }
+      } catch {
+        // Not JSON, use as plain pixel value
+        style.fontSize = text.font_size + 'px';
+      }
     }
 
     if (text.color) {

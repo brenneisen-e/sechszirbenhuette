@@ -11,23 +11,50 @@ import {
   ChevronUp,
   RefreshCw,
   Database,
+  Smartphone,
+  Monitor,
 } from 'lucide-react';
 
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
 
+interface FontSizeResponsive {
+  mobile: string;
+  desktop: string;
+}
+
 interface ContentText {
   id: number;
   text_key: string;
   content: string;
   font_family: string | null;
-  font_size: string | null;
+  font_size: string | null; // Can be JSON string for responsive sizes
   color: string | null;
   padding: string | null;
   section: string;
   text_type: string;
   updated_at: string;
+}
+
+// Helper to parse font_size (can be plain number or JSON with mobile/desktop)
+function parseFontSize(fontSizeStr: string | null): FontSizeResponsive | null {
+  if (!fontSizeStr) return null;
+  try {
+    const parsed = JSON.parse(fontSizeStr);
+    if (parsed.mobile && parsed.desktop) {
+      return parsed as FontSizeResponsive;
+    }
+  } catch {
+    // Not JSON, treat as single value for both
+    return { mobile: fontSizeStr, desktop: fontSizeStr };
+  }
+  return { mobile: fontSizeStr, desktop: fontSizeStr };
+}
+
+// Helper to serialize font_size
+function serializeFontSize(sizes: FontSizeResponsive): string {
+  return JSON.stringify(sizes);
 }
 
 // ============================================================================
@@ -161,16 +188,29 @@ export default function TextEditor() {
     content: string;
     font_family: string;
     font_size: string;
+    font_size_mobile: string;
+    font_size_desktop: string;
     color: string;
     padding: string;
-  }>({ content: '', font_family: '', font_size: '', color: '', padding: '' });
+  }>({ content: '', font_family: '', font_size: '', font_size_mobile: '', font_size_desktop: '', color: '', padding: '' });
   const [isSavingText, setIsSavingText] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
 
+  // Detect device type
+  const [isMobile, setIsMobile] = useState(false);
+
   // Load content texts on mount
   useEffect(() => {
     loadContentTexts();
+  }, []);
+
+  // Detect mobile/desktop
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Clear messages after 3 seconds
@@ -221,10 +261,13 @@ export default function TextEditor() {
 
   const startEditingText = (text: ContentText) => {
     setEditingTextKey(text.text_key);
+    const responsiveSizes = parseFontSize(text.font_size);
     setEditingTextValues({
       content: text.content,
       font_family: text.font_family || '',
       font_size: text.font_size || '',
+      font_size_mobile: responsiveSizes?.mobile || '',
+      font_size_desktop: responsiveSizes?.desktop || '',
       color: text.color || '',
       padding: text.padding || '',
     });
@@ -236,6 +279,15 @@ export default function TextEditor() {
 
     setIsSavingText(true);
     try {
+      // Build responsive font_size JSON if either mobile or desktop is set
+      let fontSizeValue: string | null = null;
+      if (editingTextValues.font_size_mobile || editingTextValues.font_size_desktop) {
+        fontSizeValue = serializeFontSize({
+          mobile: editingTextValues.font_size_mobile || editingTextValues.font_size_desktop || '',
+          desktop: editingTextValues.font_size_desktop || editingTextValues.font_size_mobile || '',
+        });
+      }
+
       const response = await fetch('/api/content-texts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +295,7 @@ export default function TextEditor() {
           text_key: textKey,
           content: editingTextValues.content,
           font_family: editingTextValues.font_family || null,
-          font_size: editingTextValues.font_size || null,
+          font_size: fontSizeValue,
           color: editingTextValues.color || null,
           padding: editingTextValues.padding || null,
           section: text.section,
@@ -267,7 +319,7 @@ export default function TextEditor() {
 
   const cancelEditing = () => {
     setEditingTextKey(null);
-    setEditingTextValues({ content: '', font_family: '', font_size: '', color: '', padding: '' });
+    setEditingTextValues({ content: '', font_family: '', font_size: '', font_size_mobile: '', font_size_desktop: '', color: '', padding: '' });
   };
 
   if (loading) {
@@ -422,18 +474,65 @@ export default function TextEditor() {
                                   </select>
                                 </div>
 
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">Schriftgröße</label>
-                                  <select
-                                    value={editingTextValues.font_size}
-                                    onChange={(e) => setEditingTextValues(v => ({ ...v, font_size: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                  >
-                                    <option value="">Standard</option>
-                                    {sizeOptions.map(size => (
-                                      <option key={size.value} value={size.value}>{size.label}</option>
-                                    ))}
-                                  </select>
+                                <div className="col-span-2">
+                                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Schriftgröße (Responsiv)
+                                  </label>
+                                  {/* Device indicator */}
+                                  <div className="flex items-center gap-2 mb-3 p-2 bg-gray-100 rounded-lg">
+                                    {isMobile ? (
+                                      <>
+                                        <Smartphone className="w-4 h-4 text-logo-green" />
+                                        <span className="text-sm text-gray-700">Du bearbeitest auf einem <strong className="text-logo-green">Mobilgerät</strong></span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Monitor className="w-4 h-4 text-logo-green" />
+                                        <span className="text-sm text-gray-700">Du bearbeitest auf einem <strong className="text-logo-green">Desktop</strong></span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    {/* Mobile Size */}
+                                    <div>
+                                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1">
+                                        <Smartphone className="w-3.5 h-3.5" />
+                                        Mobil
+                                        {isMobile && <span className="text-logo-green">(aktuell)</span>}
+                                      </label>
+                                      <select
+                                        value={editingTextValues.font_size_mobile}
+                                        onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_mobile: e.target.value }))}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green ${isMobile ? 'border-logo-green bg-logo-green/5' : 'border-gray-300'}`}
+                                      >
+                                        <option value="">Standard</option>
+                                        {sizeOptions.map(size => (
+                                          <option key={size.value} value={size.value}>{size.label}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    {/* Desktop Size */}
+                                    <div>
+                                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1">
+                                        <Monitor className="w-3.5 h-3.5" />
+                                        Desktop
+                                        {!isMobile && <span className="text-logo-green">(aktuell)</span>}
+                                      </label>
+                                      <select
+                                        value={editingTextValues.font_size_desktop}
+                                        onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_desktop: e.target.value }))}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green ${!isMobile ? 'border-logo-green bg-logo-green/5' : 'border-gray-300'}`}
+                                      >
+                                        <option value="">Standard</option>
+                                        {sizeOptions.map(size => (
+                                          <option key={size.value} value={size.value}>{size.label}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-2">
+                                    Die Größe wird je nach Bildschirmgröße automatisch angepasst
+                                  </p>
                                 </div>
                               </div>
 
@@ -472,12 +571,16 @@ export default function TextEditor() {
 
                               {/* Preview */}
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Vorschau</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Vorschau ({isMobile ? 'Mobil' : 'Desktop'})
+                                </label>
                                 <div
-                                  className="p-4 bg-gray-100 rounded-lg"
+                                  className="p-4 bg-gray-100 rounded-lg overflow-hidden"
                                   style={{
                                     fontFamily: editingTextValues.font_family || 'inherit',
-                                    fontSize: editingTextValues.font_size ? `${editingTextValues.font_size}px` : 'inherit',
+                                    fontSize: (isMobile ? editingTextValues.font_size_mobile : editingTextValues.font_size_desktop)
+                                      ? `${isMobile ? editingTextValues.font_size_mobile : editingTextValues.font_size_desktop}px`
+                                      : 'inherit',
                                     color: editingTextValues.color || 'inherit',
                                     padding: editingTextValues.padding ? `${editingTextValues.padding}px` : undefined,
                                   }}
