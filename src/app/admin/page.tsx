@@ -26,6 +26,9 @@ import {
   Layers,
   Settings,
   Database,
+  Maximize2,
+  Minimize2,
+  MousePointer2,
 } from 'lucide-react';
 
 // ============================================================================
@@ -251,6 +254,7 @@ function AdminPageContent() {
   const [selectedWebsiteSection, setSelectedWebsiteSection] = useState<string>('hero');
   const [galleryCategories, setGalleryCategories] = useState<GalleryCategory[]>(DEFAULT_GALLERY_CATEGORIES);
   const [isMigrating, setIsMigrating] = useState(false);
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
 
   // Tab change handler
   const setActiveTab = (tab: string) => {
@@ -366,6 +370,32 @@ function AdminPageContent() {
       );
     }
   }, [editingTextKey, editingTextValues, updateLivePreview]);
+
+  // Listen for text selection from fullscreen preview
+  useEffect(() => {
+    const handlePreviewMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'ADMIN_TEXT_SELECTED') {
+        const { textKey } = event.data;
+        if (textKey && contentTexts[textKey]) {
+          const text = contentTexts[textKey];
+          setEditingTextKey(textKey);
+          setEditingTextValues({
+            content: text.content,
+            font_family: text.font_family || '',
+            font_size: text.font_size || '',
+            color: text.color || '',
+          });
+          // Find section and expand it
+          const section = text.section;
+          if (section) {
+            setExpandedTextSection(section);
+          }
+        }
+      }
+    };
+    window.addEventListener('message', handlePreviewMessage);
+    return () => window.removeEventListener('message', handlePreviewMessage);
+  }, [contentTexts]);
 
   // Scroll preview to section and highlight
   const scrollPreviewToSection = (category: string, containerId: string) => {
@@ -1135,16 +1165,25 @@ function AdminPageContent() {
             <div className="w-96 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
               <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
                 <span>Live-Vorschau</span>
-                <button
-                  onClick={() => {
-                    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
-                    if (iframe) iframe.src = iframe.src;
-                  }}
-                  className="p-1 hover:bg-slate-600 rounded"
-                  title="Vorschau aktualisieren"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setIsFullscreenPreview(true)}
+                    className="p-1 hover:bg-slate-600 rounded"
+                    title="Vollbild-Vorschau mit Textauswahl"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
+                      if (iframe) iframe.src = iframe.src;
+                    }}
+                    className="p-1 hover:bg-slate-600 rounded"
+                    title="Vorschau aktualisieren"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
                 <div id="preview-scroll-text" className="absolute inset-0 overflow-auto">
@@ -1176,8 +1215,14 @@ function AdminPageContent() {
                   </div>
                 )}
                 {/* Overlay hint */}
-                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
-                  Wähle eine Sektion um zur Position zu springen
+                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded flex items-center justify-between">
+                  <span>Wähle eine Sektion um zur Position zu springen</span>
+                  <button
+                    onClick={() => setIsFullscreenPreview(true)}
+                    className="bg-logo-green hover:bg-logo-green/80 px-2 py-1 rounded text-xs font-medium"
+                  >
+                    Vollbild
+                  </button>
                 </div>
               </div>
             </div>
@@ -1470,6 +1515,184 @@ function AdminPageContent() {
                   })}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fullscreen Preview Modal */}
+        {isFullscreenPreview && (
+          <div className="fixed inset-0 bg-black/95 z-50 flex">
+            {/* Left: Large Preview */}
+            <div className="flex-1 overflow-auto p-4">
+              <div className="bg-white rounded-xl overflow-hidden shadow-2xl max-w-5xl mx-auto">
+                <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <MousePointer2 className="w-4 h-4" />
+                    Klicke auf einen Text um ihn zu bearbeiten
+                  </span>
+                  <button
+                    onClick={() => setIsFullscreenPreview(false)}
+                    className="p-1 hover:bg-slate-600 rounded"
+                  >
+                    <Minimize2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <iframe
+                  id="preview-iframe-fullscreen"
+                  src="/?preview=1&interactive=1"
+                  className="w-full border-0"
+                  style={{ height: 'calc(100vh - 150px)' }}
+                  title="Interaktive Website-Vorschau"
+                />
+              </div>
+            </div>
+
+            {/* Right: Edit Panel */}
+            <div className="w-96 bg-white shadow-2xl overflow-y-auto">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="font-bold text-lg">Text bearbeiten</h3>
+                <button
+                  onClick={() => setIsFullscreenPreview(false)}
+                  className="p-2 hover:bg-slate-100 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {editingTextKey ? (
+                <div className="p-4 space-y-4">
+                  <div className="bg-logo-green/10 border border-logo-green/30 rounded-lg p-3">
+                    <p className="text-sm font-medium text-logo-green">
+                      {contentTexts[editingTextKey]?.text_type === 'heading' ? 'Überschrift' : 'Text'}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Sektion: {SECTION_LABELS[contentTexts[editingTextKey]?.section || ''] || contentTexts[editingTextKey]?.section}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Inhalt</label>
+                    <textarea
+                      value={editingTextValues.content}
+                      onChange={(e) => setEditingTextValues(prev => ({ ...prev, content: e.target.value }))}
+                      className="w-full border border-slate-300 rounded-lg p-3 text-sm min-h-[120px] focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                      placeholder="Text eingeben..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Schriftart</label>
+                      <select
+                        value={editingTextValues.font_family}
+                        onChange={(e) => setEditingTextValues(prev => ({ ...prev, font_family: e.target.value }))}
+                        className="w-full border border-slate-300 rounded-lg p-2 text-sm"
+                      >
+                        <option value="">Standard</option>
+                        <option value="FeelingPassionate">Feeling Passionate</option>
+                        <option value="Inter">Inter (Modern)</option>
+                        <option value="Georgia">Georgia (Serif)</option>
+                        <option value="system-ui">System</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Größe (px)</label>
+                      <select
+                        value={editingTextValues.font_size}
+                        onChange={(e) => setEditingTextValues(prev => ({ ...prev, font_size: e.target.value }))}
+                        className="w-full border border-slate-300 rounded-lg p-2 text-sm"
+                      >
+                        <option value="">Standard</option>
+                        <option value="14">14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                        <option value="24">24px</option>
+                        <option value="32">32px</option>
+                        <option value="48">48px</option>
+                        <option value="64">64px</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Farbe</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={editingTextValues.color || '#000000'}
+                        onChange={(e) => setEditingTextValues(prev => ({ ...prev, color: e.target.value }))}
+                        className="w-10 h-10 rounded cursor-pointer border border-slate-300"
+                      />
+                      <input
+                        type="text"
+                        value={editingTextValues.color}
+                        onChange={(e) => setEditingTextValues(prev => ({ ...prev, color: e.target.value }))}
+                        placeholder="#000000"
+                        className="flex-1 border border-slate-300 rounded-lg p-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t">
+                    <button
+                      onClick={async () => {
+                        if (!editingTextKey) return;
+                        setIsSavingText(true);
+                        try {
+                          const text = contentTexts[editingTextKey];
+                          const response = await fetch('/api/content-texts', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              text_key: editingTextKey,
+                              content: editingTextValues.content,
+                              font_family: editingTextValues.font_family || null,
+                              font_size: editingTextValues.font_size || null,
+                              color: editingTextValues.color || null,
+                              section: text?.section,
+                              text_type: text?.text_type,
+                            }),
+                          });
+                          if (response.ok) {
+                            await loadContentTexts();
+                            setSuccess('Text gespeichert');
+                            // Refresh fullscreen iframe
+                            const iframe = document.getElementById('preview-iframe-fullscreen') as HTMLIFrameElement;
+                            if (iframe) iframe.src = iframe.src;
+                          } else {
+                            throw new Error('Fehler beim Speichern');
+                          }
+                        } catch (err) {
+                          setError('Fehler beim Speichern');
+                        } finally {
+                          setIsSavingText(false);
+                        }
+                      }}
+                      disabled={isSavingText}
+                      className="flex-1 bg-logo-green text-white py-2 px-4 rounded-lg font-medium hover:bg-logo-green/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isSavingText ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      Speichern
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingTextKey(null);
+                        setEditingTextValues({ content: '', font_family: '', font_size: '', color: '' });
+                      }}
+                      className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-500">
+                  <MousePointer2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                  <p className="font-medium mb-2">Kein Text ausgewählt</p>
+                  <p className="text-sm">Klicke in der Vorschau auf einen Text, um ihn zu bearbeiten.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
