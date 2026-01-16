@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import {
   Hero,
-  Reviews,
   IntroText,
   Ferienhaus,
   Location,
@@ -18,7 +17,6 @@ export default function HomePage() {
     <>
       <LoadingScreen minDisplayTime={1500} />
       <Hero />
-      <Reviews />
       <IntroText />
       <Ferienhaus />
       <Galerie />
