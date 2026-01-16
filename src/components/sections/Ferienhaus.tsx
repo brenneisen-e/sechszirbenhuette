@@ -228,8 +228,8 @@ export function Ferienhaus() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Icon size={48} className="text-logo-green/20 group-hover:text-logo-green/40 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center text-logo-green/20 group-hover:text-logo-green/40 transition-colors duration-300">
+                      <Icon size={48} />
                     </div>
                   )}
                   {/* Overlay gradient for better readability */}
