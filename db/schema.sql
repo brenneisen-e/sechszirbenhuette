@@ -127,6 +127,24 @@ CREATE TABLE IF NOT EXISTS amenity_card_images (
     UNIQUE(card_key, media_id)
 );
 
+-- Website-Einstellungen (Styling)
+CREATE TABLE IF NOT EXISTS site_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    setting_key TEXT NOT NULL UNIQUE,    -- z.B. "primaryColor", "headingFont", etc.
+    setting_value TEXT NOT NULL,         -- JSON oder String-Wert
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Standard-Einstellungen einfügen
+INSERT OR IGNORE INTO site_settings (setting_key, setting_value) VALUES
+    ('primaryColor', '#1e5631'),
+    ('accentColor', '#8B7355'),
+    ('headingFont', 'RetroSignature'),
+    ('bodyFont', 'system-ui'),
+    ('headingSize', 'normal'),
+    ('bodySize', 'normal'),
+    ('sectionSpacing', 'normal');
+
 -- Indizes für Performance
 CREATE INDEX IF NOT EXISTS idx_bookings_anreise ON bookings(anreise);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
@@ -135,3 +153,4 @@ CREATE INDEX IF NOT EXISTS idx_reviews_sichtbar ON reviews(sichtbar);
 CREATE INDEX IF NOT EXISTS idx_media_category ON media(category);
 CREATE INDEX IF NOT EXISTS idx_media_order ON media(category, display_order);
 CREATE INDEX IF NOT EXISTS idx_amenity_card_images_key ON amenity_card_images(card_key);
+CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(setting_key);
