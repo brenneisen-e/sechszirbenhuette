@@ -185,12 +185,13 @@ export function Ferienhaus() {
             <Home size={32} strokeWidth={1.5} />
           </div>
           <h2
+            data-text-key="ferienhaus_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
             style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             Ausstattung & Komfort
           </h2>
-          <p className="text-lg text-gray-600">
+          <p data-text-key="ferienhaus_subtitle" className="text-lg text-gray-600">
             Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.
           </p>
         </motion.div>

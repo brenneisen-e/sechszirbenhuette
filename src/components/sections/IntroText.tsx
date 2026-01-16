@@ -18,6 +18,7 @@ export function IntroText() {
           className="text-center mb-16"
         >
           <h2
+            data-text-key="introtext_main_heading"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
             style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
@@ -33,10 +34,10 @@ export function IntroText() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
+          <h2 data-text-key="introtext_heading_1" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             {t.introText.section1Title}
           </h2>
-          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+          <p data-text-key="introtext_text_1" className="text-sm sm:text-base text-gray-700 leading-relaxed">
             {t.introText.section1Text}
           </p>
         </motion.div>
@@ -49,10 +50,10 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
+          <h2 data-text-key="introtext_heading_2" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             {t.introText.section2Title}
           </h2>
-          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+          <p data-text-key="introtext_text_2" className="text-sm sm:text-base text-gray-700 leading-relaxed">
             {t.introText.section2Text}
           </p>
         </motion.div>
@@ -65,10 +66,10 @@ export function IntroText() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-center"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
+          <h2 data-text-key="introtext_heading_3" className="text-3xl sm:text-4xl md:text-5xl font-normal text-logo-green mb-4">
             {t.introText.section3Title}
           </h2>
-          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+          <p data-text-key="introtext_text_3" className="text-sm sm:text-base text-gray-700 leading-relaxed">
             {t.introText.section3Text}
           </p>
         </motion.div>

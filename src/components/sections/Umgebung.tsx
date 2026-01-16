@@ -101,12 +101,13 @@ export function Umgebung() {
             <Map size={32} strokeWidth={1.5} />
           </div>
           <h2
+            data-text-key="umgebung_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
             style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             {t.umgebung.title}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4">
+          <p data-text-key="umgebung_subtitle" className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4">
             {t.umgebung.subtitle}
           </p>
           <p className="text-sm sm:text-base md:text-lg text-gray-600">

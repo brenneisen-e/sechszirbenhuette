@@ -194,12 +194,13 @@ export function Buchung() {
           className="text-center max-w-4xl mx-auto mb-12"
         >
           <h2
+            data-text-key="buchung_title"
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
             style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
             {t.buchung.title}
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600">
+          <p data-text-key="buchung_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600">
             {t.buchung.subtitle}
           </p>
         </motion.div>

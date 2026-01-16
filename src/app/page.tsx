@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   Hero,
   Reviews,
@@ -11,6 +12,7 @@ import {
 } from '@/components/sections';
 import { Header, Footer } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
+import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
 
 export default function HomePage() {
   return (
@@ -29,6 +31,9 @@ export default function HomePage() {
         <Buchung />
       </main>
       <Footer />
+      <Suspense fallback={null}>
+        <AdminPreviewListener />
+      </Suspense>
     </>
   );
 }
