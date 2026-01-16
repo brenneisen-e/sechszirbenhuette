@@ -4,6 +4,7 @@ import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
 import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
 import { Header, Footer, MobileBookingButton } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
+import { MobileScrollProgress } from '@/components/ui/MobileScrollProgress';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -77,6 +78,7 @@ export default function RootLayout({
           <ContentTextsProvider>
             <LanguageProvider>
               <PineBackground />
+              <MobileScrollProgress />
               <Header />
               <MobileBookingButton />
               <main className="relative z-10">{children}</main>

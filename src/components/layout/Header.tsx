@@ -260,6 +260,8 @@ export function MobileBookingButton() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+    // Set hash to trigger widget expansion
+    window.location.hash = href;
   };
 
   return (
@@ -269,7 +271,7 @@ export function MobileBookingButton() {
         className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
         style={{ backgroundColor: LOGO_GREEN }}
       >
-        Buchung anfragen
+        Verfügbarkeit prüfen
       </button>
     </div>
   );
