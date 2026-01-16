@@ -161,8 +161,14 @@ export function Header() {
             />
           </button>
 
-          {/* Language Switcher (Mobile) */}
-          <LanguageSwitcher isScrolled={isScrolled} />
+          {/* Anfrage Button (Mobile) */}
+          <button
+            onClick={() => scrollToSection('#buchung')}
+            className="px-4 py-2 rounded-lg font-semibold text-sm text-white transition-all"
+            style={{ backgroundColor: LOGO_GREEN }}
+          >
+            {t.navigation.anfrage}
+          </button>
         </div>
       </div>
 
