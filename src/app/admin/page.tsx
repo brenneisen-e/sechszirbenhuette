@@ -811,7 +811,12 @@ function AdminPageContent() {
                 {selectedWebsiteSection && (
                   <div className="absolute top-0 left-0 right-0 bg-logo-green/90 text-white text-xs p-2 flex items-center gap-2 z-10">
                     <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
-                    <span>Zeige: {CATEGORIES.find(c => c.value === selectedWebsiteSection)?.label || selectedWebsiteSection}</span>
+                    <span>
+                      {CATEGORIES.find(c => c.value === selectedWebsiteSection)?.label || selectedWebsiteSection}
+                      {CATEGORY_TO_SECTION[selectedWebsiteSection] && CATEGORY_TO_SECTION[selectedWebsiteSection] !== selectedWebsiteSection && (
+                        <span className="opacity-70"> → {WEBSITE_SECTIONS.find(s => s.id === CATEGORY_TO_SECTION[selectedWebsiteSection])?.label || CATEGORY_TO_SECTION[selectedWebsiteSection]}</span>
+                      )}
+                    </span>
                   </div>
                 )}
                 {/* Overlay hint */}
