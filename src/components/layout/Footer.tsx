@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import Link from 'next/link';
@@ -7,8 +8,14 @@ import { Phone, Mail, MapPin, Instagram } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/constants';
 
 export function Footer() {
+  const pathname = usePathname();
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
+
+  // Don't render on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   const currentYear = new Date().getFullYear();
 

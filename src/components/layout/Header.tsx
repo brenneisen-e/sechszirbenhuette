@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
@@ -27,12 +28,18 @@ const allNavItems = [...leftNavItems, ...rightNavItems];
 const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'introtext', 'ferienhaus', 'galerie', 'lage', 'umgebung', 'buchung'];
 
 export function Header() {
+  const pathname = usePathname();
   const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isSubpage, setIsSubpage] = useState(false);
+
+  // Don't render on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   // Scroll-spy: determine which section is currently in view
   const updateActiveSection = useCallback(() => {
@@ -259,6 +266,13 @@ export function Header() {
 
 // Separate Mobile Booking Button Component - rendered outside Header
 export function MobileBookingButton() {
+  const pathname = usePathname();
+
+  // Don't render on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {

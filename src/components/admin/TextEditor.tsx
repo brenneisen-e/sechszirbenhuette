@@ -242,6 +242,25 @@ export default function TextEditor() {
     return () => window.removeEventListener('message', handleMessage);
   }, [contentTexts]);
 
+  // Send live updates to preview iframe when editing values change
+  useEffect(() => {
+    if (!editingTextKey || !showPreview || !isInteractivePreview) return;
+
+    // Get the iframe and send the update
+    const iframe = document.querySelector('iframe[title="Homepage Vorschau"]') as HTMLIFrameElement;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'ADMIN_TEXT_UPDATE',
+        textKey: editingTextKey,
+        content: editingTextValues.content,
+        fontFamily: editingTextValues.font_family,
+        fontSize: editingTextValues.font_size_desktop || editingTextValues.font_size_mobile,
+        color: editingTextValues.color,
+        padding: editingTextValues.padding,
+      }, '*');
+    }
+  }, [editingTextKey, editingTextValues, showPreview, isInteractivePreview]);
+
   // Clear messages after 3 seconds
   useEffect(() => {
     if (error || success) {
