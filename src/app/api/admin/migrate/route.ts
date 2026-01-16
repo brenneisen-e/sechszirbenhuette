@@ -102,6 +102,39 @@ export async function POST(request: NextRequest) {
       console.error('Migration index error:', err);
     }
 
+    // Migration 4: Content texts table
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS content_texts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          text_key TEXT NOT NULL UNIQUE,
+          content TEXT NOT NULL,
+          font_family TEXT,
+          font_size TEXT,
+          color TEXT,
+          section TEXT NOT NULL,
+          text_type TEXT DEFAULT 'body',
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+      migrations.push('content_texts table created/verified');
+    } catch (err) {
+      console.error('Migration content_texts error:', err);
+    }
+
+    // Migration 5: Indexes for content_texts
+    try {
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_content_texts_key ON content_texts(text_key)
+      `).run();
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_content_texts_section ON content_texts(section)
+      `).run();
+      migrations.push('content_texts indexes created');
+    } catch (err) {
+      console.error('Migration content_texts index error:', err);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Migration erfolgreich: ${migrations.length} Schritte ausgeführt`,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 
@@ -8,6 +9,7 @@ import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide
 const LOGO_GREEN = '#1e5631';
 
 export function Hero() {
+  const { t, language } = useLanguage();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,12 +47,12 @@ export function Hero() {
   };
 
   const features = [
-    { icon: Mountain, label: '1.700 m Höhe', onClick: () => scrollToSection('#heidiAlm') },
-    { icon: TreePine, label: 'Alleinlage', onClick: () => scrollToGalleryCategory('aussen') },
-    { icon: Flame, label: 'Sauna & Wellness', onClick: () => scrollToGalleryCategory('bad') },
-    { icon: Users, label: 'Bis zu 5 Personen', onClick: () => scrollToGalleryCategory('schlafen') },
-    { icon: Dog, label: 'Hundefreundlich', onClick: () => scrollToSection('#dog-trips') },
-    { icon: Star, label: '5-Sterne Bewertungen', onClick: () => scrollToSection('#reviews') },
+    { icon: Mountain, label: t.features.altitude.title, onClick: () => scrollToSection('#heidiAlm') },
+    { icon: TreePine, label: t.features.secluded.title, onClick: () => scrollToGalleryCategory('aussen') },
+    { icon: Flame, label: t.features.sauna.title, onClick: () => scrollToGalleryCategory('bad') },
+    { icon: Users, label: t.features.guests.title, onClick: () => scrollToGalleryCategory('schlafen') },
+    { icon: Dog, label: t.features.dogs.title, onClick: () => scrollToSection('#dog-trips') },
+    { icon: Star, label: t.features.rating.title, onClick: () => scrollToSection('#reviews') },
   ];
 
   return (
@@ -93,7 +95,7 @@ export function Hero() {
               className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
               style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
-              Herzlich Willkommen in der Sechszirbenhütte
+              {t.hero.welcome} {t.hero.title}
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -102,7 +104,7 @@ export function Hero() {
               className="text-[clamp(1.75rem,5vw,3rem)] leading-snug mt-2 text-white drop-shadow-md px-2"
               style={{ fontFamily: 'FeelingPassionate, cursive' }}
             >
-              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
+              {t.hero.subtitle}
             </motion.p>
           </motion.div>
         </div>
@@ -125,7 +127,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.9 }}
               className="text-[clamp(0.75rem,2vw,1.25rem)] leading-relaxed text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-6 sm:mb-8 px-2"
             >
-              Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.
+              {t.hero.description}
             </motion.p>
 
             {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}

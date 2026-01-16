@@ -244,6 +244,50 @@ interface SiteSettings {
   sectionSpacing: 'compact' | 'normal' | 'spacious';
 }
 
+interface ContentText {
+  id: number;
+  text_key: string;
+  content: string;
+  font_family: string | null;
+  font_size: string | null;
+  color: string | null;
+  section: string;
+  text_type: string;
+  updated_at: string;
+}
+
+// Section labels for the admin UI
+const SECTION_LABELS: Record<string, string> = {
+  hero: 'Hero (Startbereich)',
+  introtext: 'Einleitungstexte',
+  ferienhaus: 'Ausstattung & Komfort',
+  umgebung: 'Umgebung & Aktivitäten',
+  buchung: 'Buchung & Preise',
+  bewertungen: 'Bewertungen',
+};
+
+// Text key labels for easier understanding
+const TEXT_KEY_LABELS: Record<string, string> = {
+  hero_title: 'Hauptüberschrift',
+  hero_subtitle: 'Untertitel',
+  hero_description: 'Beschreibungstext',
+  introtext_main_heading: 'Hauptüberschrift (Retro)',
+  introtext_heading_1: 'Überschrift - Wandern & Skifahren',
+  introtext_text_1: 'Text - Wandern & Skifahren',
+  introtext_heading_2: 'Überschrift - Heidi Alm',
+  introtext_text_2: 'Text - Heidi Alm',
+  introtext_heading_3: 'Überschrift - Winterurlaub',
+  introtext_text_3: 'Text - Winterurlaub',
+  ferienhaus_title: 'Titel',
+  ferienhaus_subtitle: 'Untertitel',
+  umgebung_title: 'Titel',
+  umgebung_subtitle: 'Untertitel',
+  buchung_title: 'Titel',
+  buchung_subtitle: 'Untertitel',
+  bewertungen_title: 'Titel',
+  bewertungen_subtitle: 'Untertitel',
+};
+
 const defaultSiteSettings: SiteSettings = {
   primaryColor: '#1e5631',
   accentColor: '#8B7355',
@@ -307,10 +351,24 @@ export default function AdminPage() {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
 
+  // Content texts state
+  const [contentTexts, setContentTexts] = useState<Record<string, ContentText>>({});
+  const [contentTextsBySection, setContentTextsBySection] = useState<Record<string, ContentText[]>>({});
+  const [editingTextKey, setEditingTextKey] = useState<string | null>(null);
+  const [editingTextValues, setEditingTextValues] = useState<{
+    content: string;
+    font_family: string;
+    font_size: string;
+    color: string;
+  }>({ content: '', font_family: '', font_size: '', color: '' });
+  const [isSavingText, setIsSavingText] = useState(false);
+  const [expandedTextSection, setExpandedTextSection] = useState<string | null>(null);
+
   useEffect(() => {
     loadMedia();
     loadAmenityCardImages();
     loadSiteSettings();
+    loadContentTexts();
   }, []);
 
   const loadMedia = async (category?: string) => {
@@ -348,6 +406,66 @@ export default function AdminPage() {
       }
     } catch (err) {
       console.error('Error loading site settings:', err);
+    }
+  };
+
+  const loadContentTexts = async () => {
+    try {
+      const response = await fetch('/api/content-texts');
+      const data = await response.json();
+      if (data.texts) {
+        setContentTexts(data.texts);
+      }
+      if (data.bySection) {
+        setContentTextsBySection(data.bySection);
+      }
+    } catch (err) {
+      console.error('Error loading content texts:', err);
+    }
+  };
+
+  const startEditingText = (text: ContentText) => {
+    setEditingTextKey(text.text_key);
+    setEditingTextValues({
+      content: text.content,
+      font_family: text.font_family || '',
+      font_size: text.font_size || '',
+      color: text.color || '',
+    });
+  };
+
+  const saveContentText = async (textKey: string) => {
+    const text = contentTexts[textKey];
+    if (!text) return;
+
+    setIsSavingText(true);
+    try {
+      const response = await fetch('/api/content-texts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text_key: textKey,
+          content: editingTextValues.content,
+          font_family: editingTextValues.font_family || null,
+          font_size: editingTextValues.font_size || null,
+          color: editingTextValues.color || null,
+          section: text.section,
+          text_type: text.text_type,
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess('Text gespeichert');
+        setEditingTextKey(null);
+        await loadContentTexts();
+      } else {
+        throw new Error('Save failed');
+      }
+    } catch (err) {
+      console.error('Error saving content text:', err);
+      setError('Fehler beim Speichern des Textes');
+    } finally {
+      setIsSavingText(false);
     }
   };
 
@@ -638,6 +756,7 @@ export default function AdminPage() {
                 loadMedia(selectedCategory || undefined);
                 loadAmenityCardImages();
                 loadSiteSettings();
+                loadContentTexts();
               }}
               className="p-2 text-gray-500 hover:text-wood-700 hover:bg-wood-50 rounded-lg"
               title="Aktualisieren"
@@ -1324,6 +1443,234 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Content Texts Section */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Type className="w-6 h-6" />
+            Texte & Überschriften bearbeiten
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Hier können Sie jeden einzelnen Text und jede Überschrift der Website bearbeiten - inklusive Schriftart, Größe und Farbe.
+          </p>
+
+          <div className="space-y-4">
+            {Object.entries(SECTION_LABELS).map(([sectionKey, sectionLabel]) => {
+              const sectionTexts = contentTextsBySection[sectionKey] || [];
+              const isExpanded = expandedTextSection === sectionKey;
+
+              return (
+                <div key={sectionKey} className="border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setExpandedTextSection(isExpanded ? null : sectionKey)}
+                    className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Type className="w-4 h-4 text-gray-500" />
+                      <span className="font-semibold text-gray-800">{sectionLabel}</span>
+                      <span className="text-sm text-gray-500 bg-white px-2 py-0.5 rounded">
+                        {sectionTexts.length} Texte
+                      </span>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="p-4 space-y-4">
+                      {sectionTexts.length === 0 ? (
+                        <p className="text-gray-500 text-sm">Keine Texte in dieser Sektion.</p>
+                      ) : (
+                        sectionTexts.map((text) => (
+                          <div key={text.text_key} className="border rounded-lg p-4 bg-white">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <span className="font-medium text-gray-800">
+                                  {TEXT_KEY_LABELS[text.text_key] || text.text_key}
+                                </span>
+                                <span className={`ml-2 text-xs px-2 py-0.5 rounded ${
+                                  text.text_type === 'heading'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  {text.text_type === 'heading' ? 'Überschrift' : 'Fließtext'}
+                                </span>
+                              </div>
+                              {editingTextKey !== text.text_key && (
+                                <button
+                                  onClick={() => startEditingText(text)}
+                                  className="p-1.5 text-gray-500 hover:text-wood-700 hover:bg-wood-50 rounded transition"
+                                  title="Bearbeiten"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+
+                            {editingTextKey === text.text_key ? (
+                              <div className="space-y-3">
+                                {/* Content Edit */}
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Inhalt</label>
+                                  {text.text_type === 'heading' ? (
+                                    <input
+                                      type="text"
+                                      value={editingTextValues.content}
+                                      onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
+                                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                                    />
+                                  ) : (
+                                    <textarea
+                                      value={editingTextValues.content}
+                                      onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
+                                      rows={4}
+                                      className="w-full px-3 py-2 border rounded-lg text-sm resize-y"
+                                    />
+                                  )}
+                                </div>
+
+                                {/* Style Options */}
+                                <div className="grid grid-cols-3 gap-3">
+                                  <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Schriftart (optional)</label>
+                                    <select
+                                      value={editingTextValues.font_family}
+                                      onChange={(e) => setEditingTextValues(v => ({ ...v, font_family: e.target.value }))}
+                                      className="w-full px-2 py-1.5 border rounded text-sm"
+                                    >
+                                      <option value="">Standard</option>
+                                      {FONT_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Größe (optional)</label>
+                                    <select
+                                      value={editingTextValues.font_size}
+                                      onChange={(e) => setEditingTextValues(v => ({ ...v, font_size: e.target.value }))}
+                                      className="w-full px-2 py-1.5 border rounded text-sm"
+                                    >
+                                      <option value="">Standard</option>
+                                      {(text.text_type === 'heading' ? HEADING_SIZE_OPTIONS : BODY_SIZE_OPTIONS).map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label} px</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Farbe (optional)</label>
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="color"
+                                        value={editingTextValues.color || '#1e5631'}
+                                        onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
+                                        className="w-8 h-8 rounded border cursor-pointer"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={editingTextValues.color}
+                                        onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
+                                        className="flex-1 px-2 py-1.5 border rounded text-sm"
+                                        placeholder="Standard"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Preview */}
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                  <span className="text-xs text-gray-500 block mb-2">Vorschau:</span>
+                                  <p
+                                    style={{
+                                      fontFamily: editingTextValues.font_family
+                                        ? editingTextValues.font_family + (text.text_type === 'heading' ? ', cursive' : ', sans-serif')
+                                        : undefined,
+                                      fontSize: editingTextValues.font_size ? editingTextValues.font_size + 'px' : undefined,
+                                      color: editingTextValues.color || undefined,
+                                      lineHeight: text.text_type === 'heading' ? 1.2 : 1.5,
+                                    }}
+                                    className={text.text_type === 'heading' ? 'text-xl' : 'text-sm'}
+                                  >
+                                    {editingTextValues.content || '(Kein Inhalt)'}
+                                  </p>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-2 pt-2">
+                                  <button
+                                    onClick={() => saveContentText(text.text_key)}
+                                    disabled={isSavingText}
+                                    className="px-4 py-2 bg-logo-green text-white rounded-lg text-sm hover:bg-logo-green/90 transition flex items-center gap-2"
+                                  >
+                                    {isSavingText ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Save className="w-4 h-4" />
+                                    )}
+                                    Speichern
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingTextKey(null)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition"
+                                  >
+                                    Abbrechen
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                <p
+                                  className={`text-gray-700 ${text.text_type === 'heading' ? 'text-lg font-medium' : 'text-sm'}`}
+                                  style={{
+                                    fontFamily: text.font_family
+                                      ? text.font_family + (text.text_type === 'heading' ? ', cursive' : ', sans-serif')
+                                      : undefined,
+                                    fontSize: text.font_size ? text.font_size + 'px' : undefined,
+                                    color: text.color || undefined,
+                                  }}
+                                >
+                                  {text.content}
+                                </p>
+                                {(text.font_family || text.font_size || text.color) && (
+                                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                    {text.font_family && (
+                                      <span className="bg-gray-100 px-2 py-0.5 rounded">
+                                        Schrift: {text.font_family}
+                                      </span>
+                                    )}
+                                    {text.font_size && (
+                                      <span className="bg-gray-100 px-2 py-0.5 rounded">
+                                        Größe: {text.font_size}px
+                                      </span>
+                                    )}
+                                    {text.color && (
+                                      <span className="bg-gray-100 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <span
+                                          className="w-3 h-3 rounded-full"
+                                          style={{ backgroundColor: text.color }}
+                                        />
+                                        {text.color}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Usage Info */}
         <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6">
           <h3 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
@@ -1336,6 +1683,7 @@ export default function AdminPage() {
             <li><strong>Vorschau:</strong> Hover und auf das Augen-Symbol klicken</li>
             <li><strong>Videos:</strong> MP4, WebM und andere Videoformate werden unterstützt</li>
             <li><strong>Migration:</strong> Führt fehlende Datenbank-Tabellen nach (z.B. für neue Features)</li>
+            <li><strong>Texte bearbeiten:</strong> Klicken Sie auf den Stift neben einem Text, um ihn zu bearbeiten</li>
           </ul>
         </div>
       </div>

@@ -16,6 +16,7 @@
     "agb": "AGB"
   },
   "hero": {
+    "welcome": "Herzlich Willkommen",
     "title": "in der Sechszirbenhütte",
     "subtitle": "Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen",
     "description": "Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.",
@@ -47,6 +48,15 @@
       "title": "5-Sterne Bewertungen",
       "description": "Unsere Gäste lieben die Sechszirbenhütte"
     }
+  },
+  "introText": {
+    "mainHeadline": "Uriges Ferienhaus am Falkert - mit Sauna und Ruheraum",
+    "section1Title": "Wandern, Skifahren & Erholung in den Nockbergen, Kärnten",
+    "section1Text": "Entdecken Sie die Sechszirbenhütte, Ihre traumhafte Unterkunft auf 1.700 m Höhe im Herzen der Nockberge in Kärnten, Österreich. Gelegen an der malerischen Alpensüdseite in Falkertsee, bietet unsere Hütte ein ganzjähriges Urlaubsparadies für Familien und Naturliebhaber",
+    "section2Title": "Heidi Alm Bergresort: Dem Himmel nahe, dem Alltag fern",
+    "section2Text": "Erleben Sie einen unvergesslichen Urlaub im Heidi Alm Bergresort, umgeben von gesunder Luft, kristallklarem Gebirgswasser und einer farbenfrohen Natur. Genießen Sie die alpine Flora wie Enzian, Almrausch und Edelweiß und beobachten Sie mit etwas Glück Murmeltiere in ihrer natürlichen Umgebung.",
+    "section3Title": "Winterurlaub in der Heidi-Alm: Familiäres Skigebiet & vielfältige Aktivitäten",
+    "section3Text": "Das familiäre Skigebiet der Heidi-Alm bietet drei Lifte, einen Zauberteppich und abwechslungsreiche Pisten für Anfänger bis Fortgeschrittene. Freuen Sie sich auf entspanntes Skifahren ohne Warteschlangen an den Liften, Langlaufen, Eislaufen auf dem See oder geführte Schneeschuhwanderungen. In Peters Skischule werden Kinder und Erwachsene geduldig und spielerisch im Skifahren und Snowboarden unterrichtet. Zudem runden Ski-Touren und Fackelwanderungen das Winterprogramm ab. Erleben Sie die Sechszirbenhütte: Wandern, Skifahren & Erholung in Kärntens Nockbergen. Buchen Sie jetzt Ihren unvergesslichen Urlaub inmitten der atemberaubenden Naturkulisse."
   },
   "heidiAlm": {
     "title": "Heidi Alm Bergresort: Dem Himmel nahe, dem Alltag fern",

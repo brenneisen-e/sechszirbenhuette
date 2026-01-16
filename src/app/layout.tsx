@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
+import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
 import { Header, Footer } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
 import '@/styles/globals.css';
@@ -73,12 +74,14 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased overflow-x-hidden">
         <SiteSettingsProvider>
-          <LanguageProvider>
-            <PineBackground />
-            <Header />
-            <main className="relative z-10">{children}</main>
-            <Footer />
-          </LanguageProvider>
+          <ContentTextsProvider>
+            <LanguageProvider>
+              <PineBackground />
+              <Header />
+              <main className="relative z-10">{children}</main>
+              <Footer />
+            </LanguageProvider>
+          </ContentTextsProvider>
         </SiteSettingsProvider>
       </body>
     </html>

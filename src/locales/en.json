@@ -16,7 +16,8 @@
     "agb": "Terms"
   },
   "hero": {
-    "title": "at the Sechszirbenhütte",
+    "welcome": "Welcome",
+    "title": "to the Sechszirbenhütte",
     "subtitle": "Premium mountain retreat at 1,700m in the Carinthian Nockberge",
     "description": "Experience unforgettable vacation days in our over 250-year-old mountain cabin – lovingly restored, with a sauna annex and in complete seclusion amidst Swiss stone pine and larch forests at Falkert.",
     "cta_book": "Book Now",
@@ -47,6 +48,15 @@
       "title": "5-Star Reviews",
       "description": "Our guests love the Sechszirbenhütte"
     }
+  },
+  "introText": {
+    "mainHeadline": "Rustic Holiday Home at Falkert - with Sauna and Relaxation Room",
+    "section1Title": "Hiking, Skiing & Relaxation in the Nockberge, Carinthia",
+    "section1Text": "Discover the Sechszirbenhütte, your dream accommodation at 1,700m altitude in the heart of the Nockberge in Carinthia, Austria. Located on the picturesque southern side of the Alps at Falkertsee, our cabin offers a year-round vacation paradise for families and nature lovers.",
+    "section2Title": "Heidi Alm Mountain Resort: Close to Heaven, Far from Everyday Life",
+    "section2Text": "Experience an unforgettable vacation at the Heidi Alm Mountain Resort, surrounded by healthy air, crystal-clear mountain water, and colorful nature. Enjoy the alpine flora like gentian, alpine rose, and edelweiss, and with a bit of luck, observe marmots in their natural environment.",
+    "section3Title": "Winter Vacation at Heidi-Alm: Family Ski Resort & Diverse Activities",
+    "section3Text": "The family-friendly Heidi-Alm ski resort offers three lifts, a magic carpet, and varied slopes for beginners to advanced skiers. Look forward to relaxed skiing without queues at the lifts, cross-country skiing, ice skating on the lake, or guided snowshoe hikes. At Peter's Ski School, children and adults are patiently and playfully taught skiing and snowboarding. Ski tours and torchlight hikes round off the winter program. Experience the Sechszirbenhütte: Hiking, skiing & relaxation in Carinthia's Nockberge. Book your unforgettable vacation now amidst the breathtaking natural scenery."
   },
   "heidiAlm": {
     "title": "Heidi Alm Mountain Resort: Close to Heaven, Far from Everyday Life",

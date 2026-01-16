@@ -58,6 +58,15 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
 
+    /* Site Settings - Default values (overridden by SiteSettingsContext) */
+    --color-primary: #1e5631;
+    --color-accent: #8B7355;
+    --font-heading: 'FeelingPassionate', cursive;
+    --font-body: system-ui, sans-serif;
+    --heading-size: 64px;
+    --body-size: 16px;
+    --section-spacing: 5rem;
+
     /* Safe area insets for modern devices (notches, rounded corners) */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
     --safe-area-inset-right: env(safe-area-inset-right, 0px);
