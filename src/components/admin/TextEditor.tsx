@@ -281,8 +281,9 @@ export default function TextEditor() {
 
       {/* Content by Section */}
       <div className="p-6 space-y-4">
-        {Object.entries(SECTION_LABELS).map(([sectionKey, sectionLabel]) => {
-          const sectionTexts = contentTextsBySection[sectionKey] || [];
+        {/* Show ALL sections from database, not just predefined ones */}
+        {Object.entries(contentTextsBySection).map(([sectionKey, sectionTexts]) => {
+          const sectionLabel = SECTION_LABELS[sectionKey] || sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1).replace(/_/g, ' ');
           const isExpanded = expandedSection === sectionKey;
 
           return (
@@ -307,10 +308,7 @@ export default function TextEditor() {
               {/* Section Content */}
               {isExpanded && (
                 <div className="p-4 space-y-4">
-                  {sectionTexts.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">Keine Texte in diesem Bereich. Führen Sie die Migration aus.</p>
-                  ) : (
-                    sectionTexts.map((text) => {
+                  {sectionTexts.map((text) => {
                       const isEditing = editingTextKey === text.text_key;
                       const label = TEXT_KEY_LABELS[text.text_key] || text.text_key;
                       const isHeading = text.text_type === 'heading';
@@ -482,8 +480,7 @@ export default function TextEditor() {
                           )}
                         </div>
                       );
-                    })
-                  )}
+                    })}
                 </div>
               )}
             </div>
