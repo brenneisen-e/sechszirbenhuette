@@ -133,7 +133,17 @@ export async function GET() {
         updated_at: '',
       };
     }
-    return NextResponse.json({ texts, bySection: {}, success: true });
+
+    // Group by section even on error
+    const bySection: Record<string, ContentText[]> = {};
+    for (const text of Object.values(texts)) {
+      if (!bySection[text.section]) {
+        bySection[text.section] = [];
+      }
+      bySection[text.section].push(text);
+    }
+
+    return NextResponse.json({ texts, bySection, success: true });
   }
 }
 

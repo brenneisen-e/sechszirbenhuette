@@ -25,6 +25,7 @@ import {
   FileText,
   Layers,
   Settings,
+  Database,
 } from 'lucide-react';
 
 // ============================================================================
@@ -176,7 +177,7 @@ const DEFAULT_GALLERY_CATEGORIES: GalleryCategory[] = [
   { id: 'umgebung', label: 'Umgebung', visible: true },
 ];
 
-// Website sections for the preview
+// Website sections for the preview with approximate scroll positions (in pixels, at scale 0.3)
 const WEBSITE_SECTIONS = [
   { id: 'hero', label: 'Hero', icon: ImageIcon },
   { id: 'reviews', label: 'Bewertungen', icon: FileText },
@@ -187,6 +188,29 @@ const WEBSITE_SECTIONS = [
   { id: 'galerie', label: 'Galerie', icon: Images },
   { id: 'buchung', label: 'Buchung', icon: FileText },
 ];
+
+// Mapping from category to section ID on homepage (for scrolling)
+const CATEGORY_TO_SECTION: Record<string, string> = {
+  hero: 'hero',
+  header: 'hero',
+  innen: 'galerie',
+  aussen: 'galerie',
+  umgebung: 'umgebung',
+  winter: 'galerie',
+  sommer: 'galerie',
+  'heidi-alm': 'umgebung',
+  'turracher-hoehe': 'umgebung',
+  'ossiacher-see': 'umgebung',
+  'panoramaweg': 'umgebung',
+  'tierpark': 'umgebung',
+  'gerlitzen': 'umgebung',
+  'nockalm': 'umgebung',
+  'hund-falkert': 'umgebung',
+  'hund-rodresnock': 'umgebung',
+  'hund-drei-seen': 'umgebung',
+  'hund-hochrindl': 'umgebung',
+  'hund-millstaetter': 'umgebung',
+};
 
 // ============================================================================
 // ADMIN PAGE CONTENT COMPONENT (with useSearchParams)
@@ -226,6 +250,7 @@ function AdminPageContent() {
   const [expandedTextSection, setExpandedTextSection] = useState<string | null>(null);
   const [selectedWebsiteSection, setSelectedWebsiteSection] = useState<string>('hero');
   const [galleryCategories, setGalleryCategories] = useState<GalleryCategory[]>(DEFAULT_GALLERY_CATEGORIES);
+  const [isMigrating, setIsMigrating] = useState(false);
 
   // Tab change handler
   const setActiveTab = (tab: string) => {
@@ -272,6 +297,49 @@ function AdminPageContent() {
     } catch (err) {
       console.error('Error loading content texts:', err);
     }
+  };
+
+  const runMigration = async () => {
+    if (!confirm('Datenbank-Migration durchführen? Dies erstellt fehlende Tabellen und fügt Standard-Texte ein.')) return;
+    setIsMigrating(true);
+    try {
+      const response = await fetch('/api/admin/migrate', { method: 'POST' });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccess(data.message || 'Migration erfolgreich');
+        await loadContentTexts();
+      } else {
+        throw new Error(data.error || 'Migration fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Migration error:', err);
+      setError('Fehler bei der Migration');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  // Scroll preview to section and highlight
+  const scrollPreviewToSection = (category: string, containerId: string) => {
+    const sectionId = CATEGORY_TO_SECTION[category] || category;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Approximate scroll positions for each section (at 0.3 scale, original height)
+    // These are rough estimates - the actual homepage sections
+    const sectionScrollPositions: Record<string, number> = {
+      hero: 0,
+      reviews: 200,
+      introtext: 400,
+      ferienhaus: 700,
+      location: 1000,
+      umgebung: 1300,
+      galerie: 1600,
+      buchung: 1900,
+    };
+
+    const scrollTo = sectionScrollPositions[sectionId] || 0;
+    container.scrollTo({ top: scrollTo, behavior: 'smooth' });
   };
 
   // Media handlers
@@ -616,95 +684,123 @@ function AdminPageContent() {
         {/* ================================================================ */}
         {activeTab === 'bilder' && (
           <div className="flex gap-4 mt-4">
-            {/* Left: Website Preview */}
-            <div className="w-80 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
-              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
-                Website-Bereiche
+            {/* Left: Live Website Preview */}
+            <div className="w-96 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+                <span>Live-Vorschau</span>
+                <button
+                  onClick={() => {
+                    const iframe = document.getElementById('preview-iframe-bilder') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  className="p-1 hover:bg-slate-600 rounded"
+                  title="Vorschau aktualisieren"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
               </div>
-              <div className="p-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Website sections list */}
-                {WEBSITE_SECTIONS.map((section) => {
-                  const Icon = section.icon;
-                  const sectionMedia = getMediaByCategory(section.id);
-                  return (
-                    <button
-                      key={section.id}
-                      onClick={() => setSelectedWebsiteSection(section.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
-                        selectedWebsiteSection === section.id
-                          ? 'bg-logo-green text-white'
-                          : 'hover:bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium flex-1">{section.label}</span>
-                      {sectionMedia.length > 0 && (
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          selectedWebsiteSection === section.id
-                            ? 'bg-white/20'
-                            : 'bg-slate-200'
-                        }`}>
-                          {sectionMedia.length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-
-                <div className="border-t border-slate-200 my-2" />
-                <p className="px-3 py-1 text-xs text-slate-500 font-medium">Ausstattung-Kacheln</p>
-
-                {AMENITY_CARDS.map((card) => {
-                  const cardImage = amenityCardImages[card.key]?.[0];
-                  return (
-                    <button
-                      key={card.key}
-                      onClick={() => setSelectingForCard(card.key)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-slate-100 text-slate-700 transition"
-                    >
-                      {cardImage?.url ? (
-                        <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden relative shrink-0">
-                          <Image
-                            src={cardImage.url}
-                            alt={card.label}
-                            fill
-                            className="object-cover"
-                            sizes="32px"
-                            quality={20}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center shrink-0">
-                          <ImageIcon className="w-4 h-4 text-slate-400" />
-                        </div>
-                      )}
-                      <span className="text-sm flex-1">{card.label}</span>
-                      <Edit2 className="w-3 h-3 text-slate-400" />
-                    </button>
-                  );
-                })}
-
-                <div className="border-t border-slate-200 my-2" />
-                <p className="px-3 py-1 text-xs text-slate-500 font-medium">Galerie-Kategorien</p>
-
-                {galleryCategories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={cat.visible}
-                      onChange={() => {
-                        setGalleryCategories(cats =>
-                          cats.map(c => c.id === cat.id ? { ...c, visible: !c.visible } : c)
-                        );
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-logo-green focus:ring-logo-green"
+              <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
+                <div id="preview-scroll-bilder" className="absolute inset-0 overflow-auto">
+                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                    <iframe
+                      id="preview-iframe-bilder"
+                      src="/"
+                      className="border-0"
+                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      title="Website-Vorschau"
                     />
-                    <span className="text-sm text-slate-700">{cat.label}</span>
+                  </div>
+                </div>
+                {/* Section highlight overlay */}
+                {selectedWebsiteSection && (
+                  <div className="absolute top-0 left-0 right-0 bg-logo-green/90 text-white text-xs p-2 flex items-center gap-2 z-10">
+                    <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
+                    <span>Zeige: {CATEGORIES.find(c => c.value === selectedWebsiteSection)?.label || selectedWebsiteSection}</span>
+                  </div>
+                )}
+                {/* Overlay hint */}
+                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
+                  Wähle eine Kategorie um zur Sektion zu springen
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Category Selection */}
+            <div className="w-56 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
+                Kategorien
+              </div>
+              <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
+                {Object.entries(groupedCategories).map(([group, cats]) => (
+                  <div key={group} className="mb-2">
+                    <p className="text-xs text-slate-500 font-medium px-2 py-1 uppercase">{group}</p>
+                    {cats.map(cat => {
+                      const catMedia = getMediaByCategory(cat.value);
+                      return (
+                        <button
+                          key={cat.value}
+                          onClick={() => {
+                            setSelectedWebsiteSection(cat.value);
+                            setSelectedCategory(cat.value);
+                            scrollPreviewToSection(cat.value, 'preview-scroll-bilder');
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition text-sm ${
+                            selectedWebsiteSection === cat.value
+                              ? 'bg-logo-green text-white'
+                              : 'hover:bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          <ImageIcon className="w-3 h-3 shrink-0" />
+                          <span className="flex-1 truncate">{cat.label}</span>
+                          {catMedia.length > 0 && (
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              selectedWebsiteSection === cat.value ? 'bg-white/20' : 'bg-slate-200'
+                            }`}>
+                              {catMedia.length}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 ))}
+              </div>
+              {/* Amenity Cards */}
+              <div className="border-t border-slate-200 p-2">
+                <p className="text-xs text-slate-500 font-medium px-2 py-1">Ausstattung-Kacheln</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {AMENITY_CARDS.map((card) => {
+                    const cardImage = amenityCardImages[card.key]?.[0];
+                    return (
+                      <button
+                        key={card.key}
+                        onClick={() => setSelectingForCard(card.key)}
+                        className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 transition"
+                        title={card.label}
+                      >
+                        {cardImage?.url ? (
+                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden relative">
+                            <Image
+                              src={cardImage.url}
+                              alt={card.label}
+                              fill
+                              className="object-cover"
+                              sizes="40px"
+                              quality={5}
+                              loading="lazy"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded bg-slate-200 flex items-center justify-center">
+                            <ImageIcon className="w-4 h-4 text-slate-400" />
+                          </div>
+                        )}
+                        <span className="text-xs text-slate-600 truncate w-full text-center">{card.label.split(' ')[0]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -830,8 +926,10 @@ function AdminPageContent() {
                               alt={item.alt_text || 'Bild'}
                               fill
                               className="object-cover"
-                              sizes="150px"
-                              quality={30}
+                              sizes="100px"
+                              quality={5}
+                              loading="lazy"
+                              unoptimized
                             />
                           )}
                           {item.media_type === 'video' && (
@@ -942,8 +1040,10 @@ function AdminPageContent() {
                                   alt={cat.label}
                                   fill
                                   className="object-cover"
-                                  sizes="150px"
-                                  quality={20}
+                                  sizes="100px"
+                                  quality={5}
+                                  loading="lazy"
+                                  unoptimized
                                 />
                               ) : (
                                 <div className="absolute inset-0 flex items-center justify-center">
@@ -973,26 +1073,72 @@ function AdminPageContent() {
         {/* ================================================================ */}
         {activeTab === 'text' && (
           <div className="flex gap-4 mt-4">
-            {/* Left: Website Section Preview */}
-            <div className="w-80 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
-              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
-                Website-Sektionen
+            {/* Left: Live Website Preview */}
+            <div className="w-96 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+                <span>Live-Vorschau</span>
+                <button
+                  onClick={() => {
+                    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  className="p-1 hover:bg-slate-600 rounded"
+                  title="Vorschau aktualisieren"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
               </div>
-              <div className="p-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
+                <div id="preview-scroll-text" className="absolute inset-0 overflow-auto">
+                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                    <iframe
+                      id="preview-iframe-text"
+                      src="/"
+                      className="border-0"
+                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      title="Website-Vorschau"
+                    />
+                  </div>
+                </div>
+                {/* Section highlight overlay */}
+                {expandedTextSection && (
+                  <div className="absolute top-0 left-0 right-0 bg-logo-green/90 text-white text-xs p-2 flex items-center gap-2 z-10">
+                    <span className="animate-pulse w-2 h-2 bg-white rounded-full"></span>
+                    <span>Zeige: {SECTION_LABELS[expandedTextSection]}</span>
+                  </div>
+                )}
+                {/* Overlay hint */}
+                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
+                  Wähle eine Sektion um zur Position zu springen
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Section Selection */}
+            <div className="w-56 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
+                Sektionen
+              </div>
+              <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
                 {Object.entries(SECTION_LABELS).map(([key, label]) => {
                   const sectionTexts = contentTextsBySection[key] || [];
                   return (
                     <button
                       key={key}
-                      onClick={() => setExpandedTextSection(expandedTextSection === key ? null : key)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
+                      onClick={() => {
+                        setExpandedTextSection(expandedTextSection === key ? null : key);
+                        if (expandedTextSection !== key) {
+                          scrollPreviewToSection(key, 'preview-scroll-text');
+                        }
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition text-sm ${
                         expandedTextSection === key
                           ? 'bg-logo-green text-white'
                           : 'hover:bg-slate-100 text-slate-700'
                       }`}
                     >
-                      <Type className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium flex-1">{label}</span>
+                      <Type className="w-3 h-3 shrink-0" />
+                      <span className="font-medium flex-1 truncate">{label}</span>
                       <span className={`text-xs px-1.5 py-0.5 rounded ${
                         expandedTextSection === key ? 'bg-white/20' : 'bg-slate-200'
                       }`}>
@@ -1001,6 +1147,21 @@ function AdminPageContent() {
                     </button>
                   );
                 })}
+              </div>
+              {/* Migration Button */}
+              <div className="border-t border-slate-200 p-2">
+                <button
+                  onClick={runMigration}
+                  disabled={isMigrating}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition disabled:opacity-50"
+                >
+                  {isMigrating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Database className="w-4 h-4" />
+                  )}
+                  <span>Initialisieren</span>
+                </button>
               </div>
             </div>
 
@@ -1344,8 +1505,10 @@ function AdminPageContent() {
                         alt={item.alt_text || 'Bild'}
                         fill
                         className="object-cover"
-                        sizes="150px"
-                        quality={30}
+                        sizes="100px"
+                        quality={5}
+                        loading="lazy"
+                        unoptimized
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
                         <Check className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition" />
