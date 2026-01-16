@@ -78,6 +78,8 @@ export function Galerie() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [images, setImages] = useState<GalleryImage[]>(fallbackImages);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const imagesPerPage = 4;
 
   // Fetch images from API on mount
   useEffect(() => {
