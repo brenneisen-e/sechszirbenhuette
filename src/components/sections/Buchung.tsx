@@ -210,104 +210,13 @@ export function Buchung() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Price Info & Included */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-1 space-y-6"
-          >
-            {/* Price Info */}
-            <div className="bg-wood-50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t.buchung.prices.title}
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                {t.buchung.prices.base}
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t.buchung.prices.lowSeason}</span>
-                  <span className="font-semibold">auf Anfrage</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t.buchung.prices.highSeason}</span>
-                  <span className="font-semibold">auf Anfrage</span>
-                </div>
-              </div>
-              <p className="mt-4 text-xs text-gray-500">
-                {t.buchung.prices.minStay}
-              </p>
-            </div>
-
-            {/* Extras */}
-            <div id="extras" className="bg-gray-50 rounded-xl p-6 scroll-mt-24">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t.buchung.extras.title}
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t.buchung.extras.person5}</span>
-                  <span>50 € / Aufenthalt</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t.buchung.extras.dog}</span>
-                  <span>40 € / Tier</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t.buchung.extras.laundry}</span>
-                  <span>25 € / Person</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Included */}
-            <div className="bg-green-50 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {t.buchung.included.title}
-              </h3>
-              <ul className="space-y-2">
-                {includedItems.map((item: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2 text-sm text-gray-700">
-                    <Check size={16} className="text-green-600 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="bg-logo-green text-white rounded-xl p-6">
-              <h3 className="text-lg font-bold mb-4">
-                {language === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
-              </h3>
-              <div className="space-y-3">
-                <a
-                  href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
-                  className="flex items-center gap-3 hover:text-white/80 transition"
-                >
-                  <Phone size={18} />
-                  <span>{SITE_CONFIG.phone}</span>
-                </a>
-                <a
-                  href={`mailto:${SITE_CONFIG.email}`}
-                  className="flex items-center gap-3 hover:text-white/80 transition"
-                >
-                  <Mail size={18} />
-                  <span>{SITE_CONFIG.email}</span>
-                </a>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right: Booking Widget */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-2"
-          >
+        {/* Booking Widget - Full Width */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
             <div className="bg-gray-50 rounded-xl overflow-hidden">
               {/* Collapsed State - Show Button */}
               {!isExpanded && (
@@ -378,6 +287,114 @@ export function Buchung() {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+        </motion.div>
+
+        {/* Info Cards - 4 columns on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Price Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-wood-50 rounded-xl p-5"
+          >
+            <h3 className="text-base font-bold text-gray-900 mb-3">
+              {t.buchung.prices.title}
+            </h3>
+            <p className="text-xs text-gray-600 mb-3">
+              {t.buchung.prices.base}
+            </p>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t.buchung.prices.lowSeason}</span>
+                <span className="font-semibold">auf Anfrage</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t.buchung.prices.highSeason}</span>
+                <span className="font-semibold">auf Anfrage</span>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-gray-500">
+              {t.buchung.prices.minStay}
+            </p>
+          </motion.div>
+
+          {/* Extras */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.05 }}
+            id="extras"
+            className="bg-gray-50 rounded-xl p-5 scroll-mt-24"
+          >
+            <h3 className="text-base font-bold text-gray-900 mb-3">
+              {t.buchung.extras.title}
+            </h3>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t.buchung.extras.person5}</span>
+                <span>50 € / Aufenthalt</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t.buchung.extras.dog}</span>
+                <span>40 € / Tier</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t.buchung.extras.laundry}</span>
+                <span>25 € / Person</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Included */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="bg-green-50 rounded-xl p-5"
+          >
+            <h3 className="text-base font-bold text-gray-900 mb-3">
+              {t.buchung.included.title}
+            </h3>
+            <ul className="space-y-1.5">
+              {includedItems.map((item: string, index: number) => (
+                <li key={index} className="flex items-center gap-2 text-xs text-gray-700">
+                  <Check size={14} className="text-green-600 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Contact */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.15 }}
+            className="bg-logo-green text-white rounded-xl p-5"
+          >
+            <h3 className="text-base font-bold mb-3">
+              {language === 'de' ? 'Direkter Kontakt' : 'Direct Contact'}
+            </h3>
+            <div className="space-y-2">
+              <a
+                href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
+                className="flex items-center gap-2 hover:text-white/80 transition text-sm"
+              >
+                <Phone size={16} />
+                <span>{SITE_CONFIG.phone}</span>
+              </a>
+              <a
+                href={`mailto:${SITE_CONFIG.email}`}
+                className="flex items-center gap-2 hover:text-white/80 transition text-sm"
+              >
+                <Mail size={16} />
+                <span>{SITE_CONFIG.email}</span>
+              </a>
             </div>
           </motion.div>
         </div>

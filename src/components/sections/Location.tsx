@@ -47,9 +47,9 @@ export function Location() {
           </div>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('location_title') }}
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
           >
-            {getText('location_title') || (language === 'de' ? 'So finden Sie uns' : 'How to Find Us')}
+            {language === 'de' ? 'So finden Sie uns' : 'How to Find Us'}
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6" style={getTextStyle('location_subtitle')}>
             {getText('location_subtitle') || (language === 'de'

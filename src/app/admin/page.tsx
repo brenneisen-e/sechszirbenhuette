@@ -260,59 +260,66 @@ function AdminPageContent() {
         </div>
       </div>
 
-      {/* Desktop Header */}
-      <div className="hidden md:block py-8">
+      {/* Desktop Header - Logo only */}
+      <div className="hidden md:block fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-40">
         <div className="mx-auto px-4 lg:px-8 max-w-[1800px]">
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">Sechszirbenhütte</h1>
-                <p className="text-gray-600">Admin-Panel</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <a
-                  href="/"
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-logo-green transition"
-                >
-                  <Home className="w-5 h-5" />
-                  <span>Website</span>
-                </a>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 transition"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Abmelden</span>
-                </button>
-              </div>
-            </div>
+          <div className="flex items-center justify-between py-3">
+            {/* Left side - empty for balance */}
+            <div className="w-32"></div>
 
-            {/* Desktop Tab Navigation */}
-            <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'text-logo-green border-logo-green'
-                        : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {tab.label}
-                  </button>
-                );
-              })}
+            {/* Center - Logo */}
+            <a href="/" className="transition-transform hover:scale-105">
+              <img
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                className="h-14 w-auto"
+              />
+            </a>
+
+            {/* Right side - Actions */}
+            <div className="flex items-center gap-2 w-32 justify-end">
+              <a
+                href="/"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
+              >
+                <Home className="w-4 h-4" />
+                <span>Website</span>
+              </a>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-red-600 transition rounded-lg hover:bg-gray-100"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Abmelden</span>
+              </button>
             </div>
+          </div>
+
+          {/* Desktop Tab Navigation */}
+          <div className="flex gap-1 border-t border-gray-100 overflow-x-auto py-2">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors rounded-lg whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'text-logo-green bg-logo-green/10'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="pt-14 pb-20 md:pt-0 md:pb-8">
+      <div className="pt-14 pb-20 md:pt-28 md:pb-8">
         <div className="mx-auto px-2 md:px-4 lg:px-8 max-w-[1800px]">
           {(activeTab === 'guests' || activeTab === 'calendar') && <GuestDatabase adminPassword="" />}
 

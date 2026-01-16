@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
@@ -114,6 +114,32 @@ export function Ferienhaus() {
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
+  const [showFloorPlan, setShowFloorPlan] = useState(false);
+  const [mobileCardIndex, setMobileCardIndex] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  // Touch handlers for mobile swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && mobileCardIndex < amenityCards.length - 1) {
+        setMobileCardIndex(prev => prev + 1);
+      } else if (diff < 0 && mobileCardIndex > 0) {
+        setMobileCardIndex(prev => prev - 1);
+      }
+    }
+  }, [mobileCardIndex]);
 
   useEffect(() => {
     // Fetch gallery images
@@ -199,8 +225,117 @@ export function Ferienhaus() {
           </p>
         </motion.div>
 
-        {/* Amenity Cards - 4x2 Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Mobile Carousel - Single Card with Swipe */}
+        <div className="sm:hidden">
+          <div
+            className="relative overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <motion.div
+              className="flex"
+              animate={{ x: `-${mobileCardIndex * 100}%` }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              {amenityCards.map((card) => {
+                const Icon = card.icon;
+                const title = cardTitles[card.key][language as 'de' | 'en'];
+                const cardImage = cardImages[card.key];
+
+                return (
+                  <div
+                    key={card.key}
+                    className="w-full flex-shrink-0 px-2"
+                  >
+                    <div
+                      onClick={() => scrollToGalleryCategory(card.galleryCategory)}
+                      className="bg-white rounded-2xl overflow-hidden text-left group cursor-pointer shadow-sm border border-gray-100 flex flex-col"
+                    >
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-logo-green/5 to-wood-100/50">
+                        {cardImage?.url ? (
+                          <Image
+                            src={cardImage.url}
+                            alt={cardImage.alt_text || title}
+                            fill
+                            className="object-cover"
+                            sizes="100vw"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-logo-green/30">
+                            <Icon size={48} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center text-logo-green flex-shrink-0">
+                            <Icon size={20} />
+                          </div>
+                          <h3 className="text-base font-bold text-gray-900">{title}</h3>
+                        </div>
+                        <ul className="space-y-1.5 flex-1">
+                          {card.items.map((item, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                              <span className="w-1.5 h-1.5 rounded-full bg-logo-green mt-1.5 flex-shrink-0" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {card.hint && (
+                          <div className="mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-100">
+                            <p className="text-xs text-amber-800">
+                              <span className="font-semibold">Hinweis:</span> {card.hint}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+
+            {/* Navigation Arrows */}
+            {mobileCardIndex > 0 && (
+              <button
+                onClick={() => setMobileCardIndex(prev => prev - 1)}
+                className="absolute left-2 top-1/3 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-700 z-10"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+            {mobileCardIndex < amenityCards.length - 1 && (
+              <button
+                onClick={() => setMobileCardIndex(prev => prev + 1)}
+                className="absolute right-2 top-1/3 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-700 z-10"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
+          </div>
+
+          {/* Dot indicators */}
+          <div className="flex justify-center gap-1.5 mt-4">
+            {amenityCards.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setMobileCardIndex(index)}
+                className={`h-2 rounded-full transition-all ${
+                  mobileCardIndex === index
+                    ? 'bg-logo-green w-6'
+                    : 'bg-logo-green/30 w-2'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-2">
+            ← Wischen zum Blättern →
+          </p>
+        </div>
+
+        {/* Desktop Grid - 4x2 */}
+        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
           {amenityCards.map((card, index) => {
             const Icon = card.icon;
             const title = cardTitles[card.key][language as 'de' | 'en'];
@@ -229,7 +364,7 @@ export function Ferienhaus() {
                       alt={cardImage.alt_text || title}
                       fill
                       className="object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-logo-green/20 group-hover:text-logo-green/40 transition-colors duration-300">
@@ -289,9 +424,12 @@ export function Ferienhaus() {
             <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
               {/* Text Content */}
               <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-logo-green/10 text-logo-green mb-4">
+                <button
+                  onClick={() => setShowFloorPlan(true)}
+                  className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-logo-green/10 text-logo-green mb-4 hover:bg-logo-green hover:text-white transition-all cursor-pointer"
+                >
                   <Maximize2 size={24} strokeWidth={1.5} />
-                </div>
+                </button>
                 <h3
                   className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
                   style={{ fontFamily: 'FeelingPassionate, cursive' }}
@@ -317,14 +455,22 @@ export function Ferienhaus() {
 
               {/* Floor Plan Image */}
               <div className="w-full md:w-1/2 lg:w-2/5">
-                <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                <div
+                  onClick={() => setShowFloorPlan(true)}
+                  className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer group"
+                >
                   <Image
                     src="/images/grundriss.jpg"
                     alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
                     fill
-                    className="object-contain p-2"
+                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, 40vw"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                      <Maximize2 size={24} className="text-logo-green" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -370,6 +516,31 @@ export function Ferienhaus() {
 
           <div className="absolute bottom-4 text-white text-sm">
             {selectedImage + 1} / {images.length}
+          </div>
+        </div>
+      )}
+
+      {/* Floor Plan Lightbox */}
+      {showFloorPlan && (
+        <div
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowFloorPlan(false)}
+        >
+          <button
+            onClick={() => setShowFloorPlan(false)}
+            className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full z-10"
+          >
+            <X size={32} />
+          </button>
+
+          <div className="relative w-full max-w-5xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src="/images/grundriss.jpg"
+              alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
+              width={1600}
+              height={1200}
+              className="w-full h-auto max-h-[90vh] object-contain"
+            />
           </div>
         </div>
       )}

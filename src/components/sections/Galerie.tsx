@@ -284,21 +284,12 @@ export function Galerie() {
                   >
                     <Image
                       src={filteredImages[mobileIndex].src}
-                      alt={filteredImages[mobileIndex].title}
+                      alt={filteredImages[mobileIndex].title || 'Galeriebild'}
                       fill
                       className="object-cover"
                       sizes="100vw"
                       priority
                     />
-                    {/* Title overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end">
-                      <div className="text-white p-4 w-full">
-                        <h3 className="font-bold text-lg">{filteredImages[mobileIndex].title}</h3>
-                        {filteredImages[mobileIndex].description && (
-                          <p className="text-sm opacity-90">{filteredImages[mobileIndex].description}</p>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   {/* Navigation Arrows */}
@@ -379,21 +370,11 @@ export function Galerie() {
                   >
                     <Image
                       src={image.src}
-                      alt={image.title}
+                      alt={image.title || 'Galeriebild'}
                       fill
                       className="object-cover transition-transform group-hover:scale-110"
                       sizes="(max-width: 1200px) 50vw, 25vw"
                     />
-
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                      <div className="text-white p-4 w-full">
-                        <h3 className="font-bold text-lg mb-1">{image.title}</h3>
-                        {image.description && (
-                          <p className="text-sm opacity-90">{image.description}</p>
-                        )}
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -495,11 +476,7 @@ export function Galerie() {
                 />
               </div>
               <div className="mt-4 text-white text-center">
-                <h3 className="text-2xl font-bold mb-2">{images[selectedImage].title}</h3>
-                {images[selectedImage].description && (
-                  <p className="text-lg opacity-90">{images[selectedImage].description}</p>
-                )}
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-gray-400">
                   {selectedImage + 1} / {images.length}
                 </p>
               </div>
