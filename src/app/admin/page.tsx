@@ -638,95 +638,113 @@ function AdminPageContent() {
         {/* ================================================================ */}
         {activeTab === 'bilder' && (
           <div className="flex gap-4 mt-4">
-            {/* Left: Website Preview */}
-            <div className="w-80 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
-              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
-                Website-Bereiche
+            {/* Left: Live Website Preview */}
+            <div className="w-96 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+                <span>Live-Vorschau</span>
+                <button
+                  onClick={() => {
+                    const iframe = document.getElementById('preview-iframe-bilder') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  className="p-1 hover:bg-slate-600 rounded"
+                  title="Vorschau aktualisieren"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
               </div>
-              <div className="p-2 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Website sections list */}
-                {WEBSITE_SECTIONS.map((section) => {
-                  const Icon = section.icon;
-                  const sectionMedia = getMediaByCategory(section.id);
-                  return (
-                    <button
-                      key={section.id}
-                      onClick={() => setSelectedWebsiteSection(section.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
-                        selectedWebsiteSection === section.id
-                          ? 'bg-logo-green text-white'
-                          : 'hover:bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium flex-1">{section.label}</span>
-                      {sectionMedia.length > 0 && (
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          selectedWebsiteSection === section.id
-                            ? 'bg-white/20'
-                            : 'bg-slate-200'
-                        }`}>
-                          {sectionMedia.length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-
-                <div className="border-t border-slate-200 my-2" />
-                <p className="px-3 py-1 text-xs text-slate-500 font-medium">Ausstattung-Kacheln</p>
-
-                {AMENITY_CARDS.map((card) => {
-                  const cardImage = amenityCardImages[card.key]?.[0];
-                  return (
-                    <button
-                      key={card.key}
-                      onClick={() => setSelectingForCard(card.key)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-slate-100 text-slate-700 transition"
-                    >
-                      {cardImage?.url ? (
-                        <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden relative shrink-0">
-                          <Image
-                            src={cardImage.url}
-                            alt={card.label}
-                            fill
-                            className="object-cover"
-                            sizes="32px"
-                            quality={20}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center shrink-0">
-                          <ImageIcon className="w-4 h-4 text-slate-400" />
-                        </div>
-                      )}
-                      <span className="text-sm flex-1">{card.label}</span>
-                      <Edit2 className="w-3 h-3 text-slate-400" />
-                    </button>
-                  );
-                })}
-
-                <div className="border-t border-slate-200 my-2" />
-                <p className="px-3 py-1 text-xs text-slate-500 font-medium">Galerie-Kategorien</p>
-
-                {galleryCategories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={cat.visible}
-                      onChange={() => {
-                        setGalleryCategories(cats =>
-                          cats.map(c => c.id === cat.id ? { ...c, visible: !c.visible } : c)
-                        );
-                      }}
-                      className="w-4 h-4 rounded border-slate-300 text-logo-green focus:ring-logo-green"
+              <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
+                <div className="absolute inset-0 overflow-auto">
+                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                    <iframe
+                      id="preview-iframe-bilder"
+                      src="/"
+                      className="border-0"
+                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      title="Website-Vorschau"
                     />
-                    <span className="text-sm text-slate-700">{cat.label}</span>
+                  </div>
+                </div>
+                {/* Overlay hint */}
+                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
+                  Scrolle um die Website zu sehen. Rechts kannst du die Bilder bearbeiten.
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Category Selection */}
+            <div className="w-56 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
+                Kategorien
+              </div>
+              <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
+                {Object.entries(groupedCategories).map(([group, cats]) => (
+                  <div key={group} className="mb-2">
+                    <p className="text-xs text-slate-500 font-medium px-2 py-1 uppercase">{group}</p>
+                    {cats.map(cat => {
+                      const catMedia = getMediaByCategory(cat.value);
+                      return (
+                        <button
+                          key={cat.value}
+                          onClick={() => {
+                            setSelectedWebsiteSection(cat.value);
+                            setSelectedCategory(cat.value);
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition text-sm ${
+                            selectedWebsiteSection === cat.value
+                              ? 'bg-logo-green text-white'
+                              : 'hover:bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          <ImageIcon className="w-3 h-3 shrink-0" />
+                          <span className="flex-1 truncate">{cat.label}</span>
+                          {catMedia.length > 0 && (
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              selectedWebsiteSection === cat.value ? 'bg-white/20' : 'bg-slate-200'
+                            }`}>
+                              {catMedia.length}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 ))}
+              </div>
+              {/* Amenity Cards */}
+              <div className="border-t border-slate-200 p-2">
+                <p className="text-xs text-slate-500 font-medium px-2 py-1">Ausstattung-Kacheln</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {AMENITY_CARDS.map((card) => {
+                    const cardImage = amenityCardImages[card.key]?.[0];
+                    return (
+                      <button
+                        key={card.key}
+                        onClick={() => setSelectingForCard(card.key)}
+                        className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-slate-100 transition"
+                        title={card.label}
+                      >
+                        {cardImage?.url ? (
+                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden relative">
+                            <Image
+                              src={cardImage.url}
+                              alt={card.label}
+                              fill
+                              className="object-cover"
+                              sizes="40px"
+                              quality={20}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded bg-slate-200 flex items-center justify-center">
+                            <ImageIcon className="w-4 h-4 text-slate-400" />
+                          </div>
+                        )}
+                        <span className="text-xs text-slate-600 truncate w-full text-center">{card.label.split(' ')[0]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -995,26 +1013,60 @@ function AdminPageContent() {
         {/* ================================================================ */}
         {activeTab === 'text' && (
           <div className="flex gap-4 mt-4">
-            {/* Left: Website Section Preview */}
-            <div className="w-80 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
-              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
-                Website-Sektionen
+            {/* Left: Live Website Preview */}
+            <div className="w-96 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium flex items-center justify-between">
+                <span>Live-Vorschau</span>
+                <button
+                  onClick={() => {
+                    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  className="p-1 hover:bg-slate-600 rounded"
+                  title="Vorschau aktualisieren"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
               </div>
-              <div className="p-2 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
+                <div className="absolute inset-0 overflow-auto">
+                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                    <iframe
+                      id="preview-iframe-text"
+                      src="/"
+                      className="border-0"
+                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      title="Website-Vorschau"
+                    />
+                  </div>
+                </div>
+                {/* Overlay hint */}
+                <div className="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs p-2 rounded">
+                  Scrolle um die Website zu sehen. Rechts kannst du die Texte bearbeiten.
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Section Selection */}
+            <div className="w-56 shrink-0 bg-white rounded-xl shadow-sm overflow-hidden sticky top-32 self-start">
+              <div className="bg-slate-700 text-white px-4 py-2 text-sm font-medium">
+                Sektionen
+              </div>
+              <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
                 {Object.entries(SECTION_LABELS).map(([key, label]) => {
                   const sectionTexts = contentTextsBySection[key] || [];
                   return (
                     <button
                       key={key}
                       onClick={() => setExpandedTextSection(expandedTextSection === key ? null : key)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition ${
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition text-sm ${
                         expandedTextSection === key
                           ? 'bg-logo-green text-white'
                           : 'hover:bg-slate-100 text-slate-700'
                       }`}
                     >
-                      <Type className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium flex-1">{label}</span>
+                      <Type className="w-3 h-3 shrink-0" />
+                      <span className="font-medium flex-1 truncate">{label}</span>
                       <span className={`text-xs px-1.5 py-0.5 rounded ${
                         expandedTextSection === key ? 'bg-white/20' : 'bg-slate-200'
                       }`}>
@@ -1023,21 +1075,21 @@ function AdminPageContent() {
                     </button>
                   );
                 })}
-                {/* Migration Button */}
-                <div className="border-t border-slate-200 mt-2 pt-2">
-                  <button
-                    onClick={runMigration}
-                    disabled={isMigrating}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition disabled:opacity-50"
-                  >
-                    {isMigrating ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Database className="w-4 h-4" />
-                    )}
-                    <span>Texte initialisieren</span>
-                  </button>
-                </div>
+              </div>
+              {/* Migration Button */}
+              <div className="border-t border-slate-200 p-2">
+                <button
+                  onClick={runMigration}
+                  disabled={isMigrating}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition disabled:opacity-50"
+                >
+                  {isMigrating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Database className="w-4 h-4" />
+                  )}
+                  <span>Initialisieren</span>
+                </button>
               </div>
             </div>
 
