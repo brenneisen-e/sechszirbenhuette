@@ -5,7 +5,6 @@ import {
   IntroText,
   Ferienhaus,
   Location,
-  HeidiAlm,
   Umgebung,
   Galerie,
   Buchung,
@@ -23,7 +22,6 @@ export default function HomePage() {
       <Ferienhaus />
       <Galerie />
       <Location />
-      <HeidiAlm />
       <Umgebung />
       <Buchung />
       <Suspense fallback={null}>
