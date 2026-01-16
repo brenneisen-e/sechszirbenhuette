@@ -319,6 +319,54 @@ function AdminPageContent() {
     }
   };
 
+  // Update live preview in iframe when editing text
+  const updateLivePreview = useCallback((textKey: string, content: string, fontFamily?: string, fontSize?: string, color?: string) => {
+    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
+    if (!iframe || !iframe.contentDocument) return;
+
+    // Send message to iframe for live preview update
+    try {
+      iframe.contentWindow?.postMessage({
+        type: 'ADMIN_TEXT_UPDATE',
+        textKey,
+        content,
+        fontFamily,
+        fontSize,
+        color
+      }, '*');
+    } catch (e) {
+      console.log('Could not post message to iframe', e);
+    }
+
+    // Also try direct DOM manipulation as fallback
+    try {
+      const doc = iframe.contentDocument;
+      // Find elements with data-text-key attribute
+      const element = doc.querySelector(`[data-text-key="${textKey}"]`);
+      if (element) {
+        element.textContent = content;
+        if (fontFamily) (element as HTMLElement).style.fontFamily = fontFamily;
+        if (fontSize) (element as HTMLElement).style.fontSize = fontSize + 'px';
+        if (color) (element as HTMLElement).style.color = color;
+      }
+    } catch (e) {
+      // Cross-origin restriction may apply
+    }
+  }, []);
+
+  // Live preview effect - update iframe when editing text changes
+  useEffect(() => {
+    if (editingTextKey && editingTextValues.content) {
+      updateLivePreview(
+        editingTextKey,
+        editingTextValues.content,
+        editingTextValues.font_family,
+        editingTextValues.font_size,
+        editingTextValues.color
+      );
+    }
+  }, [editingTextKey, editingTextValues, updateLivePreview]);
+
   // Scroll preview to section and highlight
   const scrollPreviewToSection = (category: string, containerId: string) => {
     const sectionId = CATEGORY_TO_SECTION[category] || category;
@@ -701,12 +749,22 @@ function AdminPageContent() {
               </div>
               <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
                 <div id="preview-scroll-bilder" className="absolute inset-0 overflow-auto">
-                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                  {/* Wrapper needs explicit dimensions to enable scrolling since transform doesn't affect layout */}
+                  <div style={{ width: '360px', height: '1400px', position: 'relative' }}>
                     <iframe
                       id="preview-iframe-bilder"
                       src="/"
                       className="border-0"
-                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      style={{
+                        width: '1200px',
+                        height: '5000px',
+                        transform: 'scale(0.3)',
+                        transformOrigin: 'top left',
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                      }}
                       title="Website-Vorschau"
                     />
                   </div>
@@ -1090,12 +1148,22 @@ function AdminPageContent() {
               </div>
               <div className="relative bg-slate-200" style={{ height: 'calc(100vh - 220px)' }}>
                 <div id="preview-scroll-text" className="absolute inset-0 overflow-auto">
-                  <div style={{ width: '1200px', transform: 'scale(0.3)', transformOrigin: 'top left' }}>
+                  {/* Wrapper needs explicit dimensions to enable scrolling since transform doesn't affect layout */}
+                  <div style={{ width: '360px', height: '1400px', position: 'relative' }}>
                     <iframe
                       id="preview-iframe-text"
-                      src="/"
+                      src="/?preview=1"
                       className="border-0"
-                      style={{ width: '1200px', height: '4000px', pointerEvents: 'none' }}
+                      style={{
+                        width: '1200px',
+                        height: '5000px',
+                        transform: 'scale(0.3)',
+                        transformOrigin: 'top left',
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                      }}
                       title="Website-Vorschau"
                     />
                   </div>
