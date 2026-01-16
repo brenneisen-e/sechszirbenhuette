@@ -7,7 +7,7 @@ export function IntroText() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-16 bg-transparent">
+    <section id="introtext" className="py-16 bg-transparent">
       <div className="container max-w-4xl mx-auto px-4">
         {/* Retro Headline */}
         <motion.div

@@ -29,6 +29,8 @@ import {
   Maximize2,
   Minimize2,
   MousePointer2,
+  Lock,
+  LogOut,
 } from 'lucide-react';
 
 // ============================================================================
@@ -227,6 +229,12 @@ function AdminPageContent() {
   // Get active tab from URL, default to 'bilder'
   const activeTab = searchParams.get('tab') || 'bilder';
 
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   // State
   const [media, setMedia] = useState<MediaRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,12 +271,65 @@ function AdminPageContent() {
     router.push(`/admin?tab=${tab}`);
   };
 
-  // Load all data
+  // Check authentication on mount
   useEffect(() => {
-    loadMedia();
-    loadAmenityCardImages();
-    loadContentTexts();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/login');
+      const data = await response.json();
+      setIsAuthenticated(data.authenticated);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError('');
+
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: loginPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        setLoginPassword('');
+      } else {
+        setLoginError(data.error || 'Login fehlgeschlagen');
+      }
+    } catch {
+      setLoginError('Verbindungsfehler');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/login', { method: 'DELETE' });
+    } catch {
+      // Ignore errors
+    }
+    setIsAuthenticated(false);
+  };
+
+  // Load all data when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadMedia();
+      loadAmenityCardImages();
+      loadContentTexts();
+    }
+  }, [isAuthenticated]);
 
   const loadMedia = async () => {
     setLoading(true);
@@ -327,38 +388,27 @@ function AdminPageContent() {
 
   // Update live preview in iframe when editing text
   const updateLivePreview = useCallback((textKey: string, content: string, fontFamily?: string, fontSize?: string, color?: string, padding?: string) => {
-    const iframe = document.getElementById('preview-iframe-text') as HTMLIFrameElement;
-    if (!iframe || !iframe.contentDocument) return;
+    // Send to all preview iframes (small preview and fullscreen)
+    const iframeIds = ['preview-iframe-text', 'preview-iframe-fullscreen'];
 
-    // Send message to iframe for live preview update
-    try {
-      iframe.contentWindow?.postMessage({
-        type: 'ADMIN_TEXT_UPDATE',
-        textKey,
-        content,
-        fontFamily,
-        fontSize,
-        color,
-        padding
-      }, '*');
-    } catch (e) {
-      console.log('Could not post message to iframe', e);
-    }
+    for (const iframeId of iframeIds) {
+      const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+      if (!iframe) continue;
 
-    // Also try direct DOM manipulation as fallback
-    try {
-      const doc = iframe.contentDocument;
-      // Find elements with data-text-key attribute
-      const element = doc.querySelector(`[data-text-key="${textKey}"]`);
-      if (element) {
-        element.textContent = content;
-        if (fontFamily) (element as HTMLElement).style.fontFamily = fontFamily;
-        if (fontSize) (element as HTMLElement).style.fontSize = fontSize + 'px';
-        if (color) (element as HTMLElement).style.color = color;
-        if (padding) (element as HTMLElement).style.padding = padding + 'px';
+      // Send message to iframe for live preview update
+      try {
+        iframe.contentWindow?.postMessage({
+          type: 'ADMIN_TEXT_UPDATE',
+          textKey,
+          content,
+          fontFamily,
+          fontSize,
+          color,
+          padding
+        }, '*');
+      } catch (e) {
+        console.log('Could not post message to iframe', e);
       }
-    } catch (e) {
-      // Cross-origin restriction may apply
     }
   }, []);
 
@@ -404,26 +454,17 @@ function AdminPageContent() {
   }, [contentTexts]);
 
   // Scroll preview to section and highlight
-  const scrollPreviewToSection = (category: string, containerId: string) => {
+  const scrollPreviewToSection = (category: string, iframeId: string) => {
     const sectionId = CATEGORY_TO_SECTION[category] || category;
-    const container = document.getElementById(containerId);
-    if (!container) return;
 
-    // Approximate scroll positions for each section (at 0.3 scale, original height)
-    // These are rough estimates - the actual homepage sections
-    const sectionScrollPositions: Record<string, number> = {
-      hero: 0,
-      reviews: 200,
-      introtext: 400,
-      ferienhaus: 700,
-      location: 1000,
-      umgebung: 1300,
-      galerie: 1600,
-      buchung: 1900,
-    };
-
-    const scrollTo = sectionScrollPositions[sectionId] || 0;
-    container.scrollTo({ top: scrollTo, behavior: 'smooth' });
+    // Send message to iframe to scroll to section
+    const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'ADMIN_SCROLL_TO_SECTION',
+        sectionId
+      }, '*');
+    }
   };
 
   // Media handlers
@@ -678,6 +719,83 @@ function AdminPageContent() {
     }
   }, [error, success]);
 
+  // Show loading while checking auth
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 flex items-center gap-3 shadow-xl">
+          <Loader2 className="w-6 h-6 animate-spin text-logo-green" />
+          <span className="text-slate-700">Prüfe Authentifizierung...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-logo-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-logo-green" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-800">Admin-Center</h1>
+            <p className="text-slate-500 mt-2">Bitte melden Sie sich an</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+                Passwort
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                placeholder="Admin-Passwort eingeben"
+                autoFocus
+              />
+            </div>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span className="text-sm">{loginError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoggingIn || !loginPassword}
+              className="w-full bg-logo-green text-white py-3 px-4 rounded-lg font-medium hover:bg-logo-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Anmelden...
+                </>
+              ) : (
+                <>
+                  <Lock className="w-5 h-5" />
+                  Anmelden
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <Link href="/" className="text-sm text-slate-500 hover:text-logo-green transition">
+              Zurück zur Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
@@ -697,18 +815,28 @@ function AdminPageContent() {
                 <p className="text-xs text-slate-300">Inhalte verwalten</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                loadMedia();
-                loadAmenityCardImages();
-                loadContentTexts();
-              }}
-              className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition"
-              title="Aktualisieren"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  loadMedia();
+                  loadAmenityCardImages();
+                  loadContentTexts();
+                }}
+                className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition"
+                title="Aktualisieren"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="p-2 bg-red-600 hover:bg-red-500 rounded-lg transition"
+                title="Abmelden"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -843,7 +971,7 @@ function AdminPageContent() {
                           onClick={() => {
                             setSelectedWebsiteSection(cat.value);
                             setSelectedCategory(cat.value);
-                            scrollPreviewToSection(cat.value, 'preview-scroll-bilder');
+                            scrollPreviewToSection(cat.value, 'preview-iframe-bilder');
                           }}
                           className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left transition text-sm ${
                             selectedWebsiteSection === cat.value
@@ -1254,7 +1382,7 @@ function AdminPageContent() {
                       onClick={() => {
                         setExpandedTextSection(expandedTextSection === key ? null : key);
                         if (expandedTextSection !== key) {
-                          scrollPreviewToSection(key, 'preview-scroll-text');
+                          scrollPreviewToSection(key, 'preview-iframe-text');
                         }
                       }}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition text-sm ${
