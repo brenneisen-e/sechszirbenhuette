@@ -79,7 +79,14 @@ export function Galerie() {
   const [images, setImages] = useState<GalleryImage[]>(fallbackImages);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
   const imagesPerPage = 4;
+
+  // Reset pagination when category changes
+  useEffect(() => {
+    setCurrentPage(0);
+    setIsExpanded(false);
+  }, [selectedCategory]);
 
   // Fetch images from API on mount
   useEffect(() => {
@@ -164,6 +171,15 @@ export function Galerie() {
     ? images
     : images.filter(img => img.category === selectedCategory);
 
+  // Calculate paginated images
+  const totalPages = Math.ceil(filteredImages.length / imagesPerPage);
+  const displayedImages = isExpanded
+    ? filteredImages
+    : filteredImages.slice(currentPage * imagesPerPage, (currentPage + 1) * imagesPerPage);
+
+  const canGoPrev = currentPage > 0;
+  const canGoNext = currentPage < totalPages - 1;
+
   return (
     <section id="galerie" className="py-20 bg-transparent">
       <div className="container mx-auto px-4">
@@ -212,33 +228,94 @@ export function Galerie() {
 
         {/* Image Grid */}
         {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredImages.map((image, index) => (
-              <div
-                key={index}
-                onClick={() => setSelectedImage(images.indexOf(image))}
-                className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group"
-              >
-                <Image
-                  src={image.src}
-                  alt={image.title}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-110"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                />
+          <>
+            <div className="relative">
+              {/* Previous Button (only when not expanded) */}
+              {!isExpanded && filteredImages.length > imagesPerPage && (
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                  disabled={!canGoPrev}
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''}`}
+                >
+                  <ChevronLeft size={24} />
+                </button>
+              )}
 
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                  <div className="text-white p-4 w-full">
-                    <h3 className="font-bold text-lg mb-1">{image.title}</h3>
-                    {image.description && (
-                      <p className="text-sm opacity-90">{image.description}</p>
-                    )}
+              {/* Next Button (only when not expanded) */}
+              {!isExpanded && filteredImages.length > imagesPerPage && (
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                  disabled={!canGoNext}
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${!canGoNext ? 'opacity-30 cursor-not-allowed' : ''}`}
+                >
+                  <ChevronRight size={24} />
+                </button>
+              )}
+
+              {/* Image Grid */}
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${!isExpanded ? 'mx-4 md:mx-8' : ''}`}>
+                {displayedImages.map((image, index) => (
+                  <div
+                    key={`${currentPage}-${index}`}
+                    onClick={() => setSelectedImage(images.indexOf(image))}
+                    className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group"
+                  >
+                    <Image
+                      src={image.src}
+                      alt={image.title}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
+                      <div className="text-white p-4 w-full">
+                        <h3 className="font-bold text-lg mb-1">{image.title}</h3>
+                        {image.description && (
+                          <p className="text-sm opacity-90">{image.description}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Pagination indicator and Expand Button */}
+            {filteredImages.length > imagesPerPage && (
+              <div className="flex items-center justify-between mt-6">
+                {/* Page indicator (left side - only when not expanded) */}
+                {!isExpanded ? (
+                  <div className="flex gap-2">
+                    {Array.from({ length: totalPages }).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentPage(index)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          currentPage === index
+                            ? 'bg-logo-green w-6'
+                            : 'bg-logo-green/30 hover:bg-logo-green/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                {/* Expand/Collapse Button (right side) */}
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="px-4 py-2 rounded-lg font-medium text-sm bg-logo-green text-white hover:bg-logo-green/90 transition-all"
+                >
+                  {isExpanded
+                    ? (language === 'de' ? 'Galerie einklappen' : 'Collapse Gallery')
+                    : (language === 'de' ? 'Galerie ausklappen' : 'Expand Gallery')}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Empty State */}
