@@ -17,10 +17,10 @@ export default function HomePage() {
       <Reviews />
       <IntroText />
       <Ferienhaus />
+      <Galerie />
       <Location />
       <HeidiAlm />
       <Umgebung />
-      <Galerie />
       <Buchung />
     </>
   );

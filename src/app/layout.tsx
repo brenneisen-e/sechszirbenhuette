@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
 import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
-import { Header, Footer } from '@/components/layout';
+import { Header, Footer, MobileBookingButton } from '@/components/layout';
 import { PineBackground } from '@/components/ui/PineBackground';
 import '@/styles/globals.css';
 
@@ -78,6 +78,7 @@ export default function RootLayout({
             <LanguageProvider>
               <PineBackground />
               <Header />
+              <MobileBookingButton />
               <main className="relative z-10">{children}</main>
               <Footer />
             </LanguageProvider>
