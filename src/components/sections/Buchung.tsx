@@ -214,7 +214,7 @@ export function Buchung() {
           viewport={{ once: true }}
           className="mb-12"
         >
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-3xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-5xl mx-auto">
             {/* Collapsed State - Show Button */}
             {!isExpanded && (
               <div className="p-8 md:p-10 text-center">
