@@ -203,46 +203,54 @@ export function Ferienhaus() {
             const cardImage = cardImages[card.key];
 
             return (
-              <motion.button
+              <motion.div
                 key={card.key}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => scrollToGalleryCategory(card.galleryCategory)}
-                className="bg-gray-50 rounded-xl overflow-hidden text-left group cursor-pointer
-                  border-2 border-transparent
-                  hover:border-wood-300 hover:shadow-lg hover:bg-white
+                className="bg-white rounded-2xl overflow-hidden text-left group cursor-pointer
+                  shadow-sm border border-gray-100
+                  hover:shadow-xl hover:border-logo-green/30
                   transition-all duration-300 ease-out
-                  hover:-translate-y-1"
+                  hover:-translate-y-1
+                  flex flex-col"
               >
-                {/* Card Image (if assigned) */}
-                {cardImage?.url && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
+                {/* Card Image - Always shown, with placeholder if no image */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-logo-green/5 to-wood-100/50">
+                  {cardImage?.url ? (
                     <Image
                       src={cardImage.url}
                       alt={cardImage.alt_text || title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Icon size={48} className="text-logo-green/20 group-hover:text-logo-green/40 transition-colors duration-300" />
+                    </div>
+                  )}
+                  {/* Overlay gradient for better readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
 
-                <div className="p-6">
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-xl bg-logo-green/10 flex items-center justify-center text-logo-green mb-4
-                    group-hover:bg-wood-200 group-hover:scale-110 transition-all duration-300">
-                    <Icon size={24} />
+                {/* Card Content */}
+                <div className="p-5 flex-1 flex flex-col">
+                  {/* Icon and Title Row */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center text-logo-green flex-shrink-0
+                      group-hover:bg-logo-green group-hover:text-white transition-all duration-300">
+                      <Icon size={20} />
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900 group-hover:text-logo-green transition-colors">
+                      {title}
+                    </h3>
                   </div>
-
-                  {/* Title */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-logo-green transition-colors">
-                    {title}
-                  </h3>
 
                   {/* Items */}
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-1.5 flex-1">
                     {card.items.map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-logo-green mt-1.5 flex-shrink-0" />
@@ -253,14 +261,14 @@ export function Ferienhaus() {
 
                   {/* Hint if exists */}
                   {card.hint && (
-                    <div className="mt-4 p-3 bg-wood-50 rounded-lg border border-wood-100">
-                      <p className="text-xs text-gray-600">
-                        <span className="font-semibold text-logo-green">Hinweis:</span> {card.hint}
+                    <div className="mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-100">
+                      <p className="text-xs text-amber-800">
+                        <span className="font-semibold">Hinweis:</span> {card.hint}
                       </p>
                     </div>
                   )}
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>

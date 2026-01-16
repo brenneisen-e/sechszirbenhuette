@@ -141,8 +141,8 @@ INSERT OR IGNORE INTO site_settings (setting_key, setting_value) VALUES
     ('accentColor', '#8B7355'),
     ('headingFont', 'FeelingPassionate'),
     ('bodyFont', 'system-ui'),
-    ('headingSize', 'normal'),
-    ('bodySize', 'normal'),
+    ('headingSize', '64'),
+    ('bodySize', '16'),
     ('sectionSpacing', 'normal');
 
 -- Indizes für Performance
@@ -154,3 +154,19 @@ CREATE INDEX IF NOT EXISTS idx_media_category ON media(category);
 CREATE INDEX IF NOT EXISTS idx_media_order ON media(category, display_order);
 CREATE INDEX IF NOT EXISTS idx_amenity_card_images_key ON amenity_card_images(card_key);
 CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(setting_key);
+
+-- Individuelle Texte & Überschriften
+CREATE TABLE IF NOT EXISTS content_texts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text_key TEXT NOT NULL UNIQUE,       -- z.B. "hero_title", "ferienhaus_subtitle"
+    content TEXT NOT NULL,                -- Der eigentliche Text
+    font_family TEXT,                     -- Optional: Schriftart für diesen Text
+    font_size TEXT,                       -- Optional: Schriftgröße (z.B. "48", "72")
+    color TEXT,                           -- Optional: Farbe für diesen Text
+    section TEXT NOT NULL,                -- Sektion: hero, reviews, introtext, ferienhaus, etc.
+    text_type TEXT DEFAULT 'body',        -- heading oder body
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_texts_key ON content_texts(text_key);
+CREATE INDEX IF NOT EXISTS idx_content_texts_section ON content_texts(section);
