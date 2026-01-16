@@ -78,7 +78,7 @@ export function Hero() {
       {/* Content Container - Full height with flex column */}
       <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
 
-        {/* Upper Third - Single Line Headline */}
+        {/* Upper Third - Headline and Subtitle */}
         <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -95,6 +95,15 @@ export function Hero() {
             >
               Herzlich Willkommen in der Sechszirbenhütte
             </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-[clamp(1.5rem,4vw,3rem)] leading-snug mt-2 text-white drop-shadow-md px-2"
+              style={{ fontFamily: 'RetroSignature, cursive' }}
+            >
+              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
+            </motion.p>
           </motion.div>
         </div>
 
@@ -109,17 +118,6 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-5xl"
           >
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="text-[clamp(1.5rem,4vw,3rem)] leading-snug mb-3 sm:mb-4 text-white drop-shadow-md px-2"
-              style={{ fontFamily: 'RetroSignature, cursive' }}
-            >
-              Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen
-            </motion.p>
-
             {/* Description */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
