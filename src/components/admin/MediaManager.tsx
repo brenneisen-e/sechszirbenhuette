@@ -115,7 +115,15 @@ export default function MediaManager() {
     try {
       const response = await fetch('/api/admin/media');
       const data = await response.json() as { media?: MediaRecord[] };
-      setMedia(data.media || []);
+      // Deduplicate by ID to prevent any duplicate entries from appearing
+      const mediaList = data.media || [];
+      const seenIds = new Set<string>();
+      const deduplicatedMedia = mediaList.filter(m => {
+        if (seenIds.has(m.id)) return false;
+        seenIds.add(m.id);
+        return true;
+      });
+      setMedia(deduplicatedMedia);
     } catch (err) {
       console.error('Error loading media:', err);
       setError('Fehler beim Laden der Medien');
@@ -359,7 +367,8 @@ export default function MediaManager() {
     try {
       // The first selected category becomes the primary, rest go to junction table
       const primaryCategory = editingCategories[0] || item.category;
-      const additionalCategories = editingCategories.slice(1);
+      // Filter out the primary category from additional categories to avoid duplicates
+      const additionalCategories = editingCategories.slice(1).filter(c => c !== primaryCategory);
 
       const response = await fetch('/api/admin/media', {
         method: 'PUT',
