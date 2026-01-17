@@ -39,22 +39,30 @@ export function Location() {
   return (
     <section id="lage" className="py-20 bg-transparent">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-6">
-            <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
+        {/* White background container for better readability */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-10 shadow-sm">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-6">
+              <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
+            </div>
+            <h2
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-6"
+              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            >
+              {language === 'de' ? 'Anfahrt' : 'Directions'}
+            </h2>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-logo-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-sm"
+            >
+              <Navigation className="w-5 h-5" strokeWidth={1.5} />
+              {language === 'de' ? 'In Google Maps öffnen' : 'Open in Google Maps'}
+            </a>
           </div>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-logo-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-sm"
-          >
-            <Navigation className="w-5 h-5" strokeWidth={1.5} />
-            {language === 'de' ? 'In Google Maps öffnen' : 'Open in Google Maps'}
-          </a>
-        </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
           {/* Map */}
           <div className="rounded-xl overflow-hidden shadow-lg border border-gray-100 h-[400px] lg:h-auto lg:min-h-[500px] relative">
             <iframe
@@ -180,6 +188,7 @@ export function Location() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

@@ -125,7 +125,7 @@ export function Umgebung() {
         </motion.div>
 
         {/* Main Tabs */}
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-col items-center mb-8">
           <div className="inline-flex bg-gray-100 rounded-xl p-1.5">
             <button
               onClick={() => setActiveMainTab('nockberge')}
@@ -158,6 +158,12 @@ export function Umgebung() {
               </span>
             </button>
           </div>
+          {/* Subtitle hint for Kärnten sub-sections */}
+          {activeMainTab === 'kaernten' && (
+            <p className="text-sm text-gray-500 mt-3">
+              Unterbereiche: Mit Hunden • Mit Kindern
+            </p>
+          )}
         </div>
 
         {/* Nockberge Tab Content - Carousel like Dog/Kids */}
