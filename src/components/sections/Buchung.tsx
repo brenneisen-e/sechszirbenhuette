@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck, Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { CalendarCheck, Check, ChevronDown, ChevronUp, Loader2, Euro, PlusCircle, Gift } from 'lucide-react';
 import { DESKLINE_CONFIG } from '@/lib/constants';
 
 // Extend Window interface for Deskline widget
@@ -291,31 +291,36 @@ export function Buchung() {
         </motion.div>
 
         {/* Info Cards - 3 columns on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Price Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-wood-50 rounded-xl p-5"
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
           >
-            <h3 className="text-base font-bold text-gray-900 mb-3">
-              {t.buchung.prices.title}
-            </h3>
-            <p className="text-xs text-gray-600 mb-3">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
+                <Euro className="w-5 h-5 text-logo-green" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.buchung.prices.title}
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
               {t.buchung.prices.base}
             </p>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">{t.buchung.prices.lowSeason}</span>
-                <span className="font-semibold">auf Anfrage</span>
+                <span className="font-semibold text-gray-900">auf Anfrage</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">{t.buchung.prices.highSeason}</span>
-                <span className="font-semibold">auf Anfrage</span>
+                <span className="font-semibold text-gray-900">auf Anfrage</span>
               </div>
             </div>
-            <p className="mt-3 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-gray-400">
               {t.buchung.prices.minStay}
             </p>
           </motion.div>
@@ -327,23 +332,28 @@ export function Buchung() {
             viewport={{ once: true }}
             transition={{ delay: 0.05 }}
             id="extras"
-            className="bg-gray-50 rounded-xl p-5 scroll-mt-24"
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-24"
           >
-            <h3 className="text-base font-bold text-gray-900 mb-3">
-              {t.buchung.extras.title}
-            </h3>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.buchung.extras.title}
+              </h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">{t.buchung.extras.person5}</span>
-                <span>50 € / Aufenthalt</span>
+                <span className="font-medium text-gray-900">50 € <span className="text-gray-400 text-sm">/ Aufenthalt</span></span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">{t.buchung.extras.dog}</span>
-                <span>40 € / Tier</span>
+                <span className="font-medium text-gray-900">40 € <span className="text-gray-400 text-sm">/ Tier</span></span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">{t.buchung.extras.laundry}</span>
-                <span>25 € / Person</span>
+                <span className="font-medium text-gray-900">25 € <span className="text-gray-400 text-sm">/ Person</span></span>
               </div>
             </div>
           </motion.div>
@@ -354,15 +364,22 @@ export function Buchung() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="bg-green-50 rounded-xl p-5"
+            className="bg-white rounded-2xl p-6 shadow-sm border border-logo-green/20 hover:shadow-md transition-shadow"
           >
-            <h3 className="text-base font-bold text-gray-900 mb-3">
-              {t.buchung.included.title}
-            </h3>
-            <ul className="space-y-1.5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
+                <Gift className="w-5 h-5 text-logo-green" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.buchung.included.title}
+              </h3>
+            </div>
+            <ul className="space-y-2.5">
               {includedItems.map((item: string, index: number) => (
-                <li key={index} className="flex items-center gap-2 text-xs text-gray-700">
-                  <Check size={14} className="text-green-600 flex-shrink-0" />
+                <li key={index} className="flex items-center gap-3 text-sm text-gray-700">
+                  <div className="w-5 h-5 rounded-full bg-logo-green/10 flex items-center justify-center flex-shrink-0">
+                    <Check size={12} className="text-logo-green" />
+                  </div>
                   {item}
                 </li>
               ))}

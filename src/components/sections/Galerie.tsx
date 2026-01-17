@@ -60,17 +60,26 @@ const categoryMap: Record<string, string> = {
 const fallbackImages: GalleryImage[] = [
   // Wohnbereich
   { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Gemütliche Stube', description: 'Eckbank mit Holztisch', category: 'wohnen' },
+  { src: '/images/innen/Wohnzimmer_02_Galerie.jpg', title: 'Wohnzimmer', description: 'Blick von der Galerie', category: 'wohnen' },
   { src: '/images/innen/Stube.jpg', title: 'Wohnbereich', description: 'Bauernschrank und Treppe', category: 'wohnen' },
+  { src: '/images/innen/Stube_02.jpg', title: 'Stube', description: 'Gemütliche Atmosphäre', category: 'wohnen' },
+  { src: '/images/innen/Stube_03.jpg', title: 'Stube', description: 'Rustikales Ambiente', category: 'wohnen' },
+  { src: '/images/innen/Kamin.jpg', title: 'Kamin', description: 'Wohlige Wärme', category: 'wohnen' },
+  { src: '/images/innen/Treppenaufgang.jpg', title: 'Treppenaufgang', description: 'Zum Obergeschoss', category: 'wohnen' },
   // Küche
   { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Mit Bauernschrank', category: 'kueche' },
   { src: '/images/innen/Küche_02.jpg', title: 'Küchenzeile', description: 'Voll ausgestattet', category: 'kueche' },
+  { src: '/images/innen/Kaffeemaschinen.jpg', title: 'Kaffeemaschine', description: 'Für den perfekten Kaffee', category: 'kueche' },
   // Schlafzimmer
   { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Großes Schlafzimmer', description: 'Doppelbett und Einzelbett', category: 'schlafen' },
   { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Kleines Schlafzimmer', description: 'Gemütliches Doppelbett', category: 'schlafen' },
   // Bad & Sauna
   { src: '/images/innen/Sauna.jpg', title: 'Finnische Sauna', description: 'Eigene Sauna im Haus', category: 'bad' },
   { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Mit Dusche', category: 'bad' },
+  { src: '/images/innen/WC.jpg', title: 'WC', description: 'Separates WC', category: 'bad' },
   { src: '/images/innen/Ruheraum.jpg', title: 'Ruheraum', description: 'Entspannung nach der Sauna', category: 'bad' },
+  { src: '/images/innen/Ruheraum_02.jpg', title: 'Ruheraum', description: 'Wellness-Bereich', category: 'bad' },
+  { src: '/images/innen/Ruheraum Dusche.jpg', title: 'Dusche', description: 'Im Ruheraum', category: 'bad' },
   // Außenbereich
   { src: '/images/aussen/Sommerhütte.jpg', title: 'Sechszirbenhütte', description: 'Im Sommer mit Balkon', category: 'aussen' },
   { src: '/images/aussen/Herbst.jpg', title: 'Herbstansicht', description: 'Die Hütte im Herbst', category: 'aussen' },
