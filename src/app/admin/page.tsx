@@ -19,28 +19,48 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
-// Lazy load heavy components
-const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), {
-  loading: () => <LoadingSpinner text="Lade Gästedatenbank..." />,
-});
+// Lazy load heavy components with error handling
+const GuestDatabase = dynamic(
+  () => import('@/components/admin/GuestDatabase').catch(err => {
+    console.error('Failed to load GuestDatabase:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden der Gästedatenbank</div> };
+  }),
+  { loading: () => <LoadingSpinner text="Lade Gästedatenbank..." />, ssr: false }
+);
 
-const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), {
-  loading: () => <LoadingSpinner text="Lade Finanzen..." />,
-});
+const FinanceOverview = dynamic(
+  () => import('@/components/admin/FinanceOverview').catch(err => {
+    console.error('Failed to load FinanceOverview:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden der Finanzen</div> };
+  }),
+  { loading: () => <LoadingSpinner text="Lade Finanzen..." />, ssr: false }
+);
 
-const ExpensePanel = dynamic(() => import('@/components/admin/ExpensePanel'), {
-  loading: () => <LoadingSpinner text="Lade Ausgaben..." />,
-});
+const ExpensePanel = dynamic(
+  () => import('@/components/admin/ExpensePanel').catch(err => {
+    console.error('Failed to load ExpensePanel:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden der Ausgaben</div> };
+  }),
+  { loading: () => <LoadingSpinner text="Lade Ausgaben..." />, ssr: false }
+);
 
 // Image Manager Component (using existing media API)
-const MediaManager = dynamic(() => import('@/components/admin/MediaManager'), {
-  loading: () => <LoadingSpinner text="Lade Bilderverwaltung..." />,
-});
+const MediaManager = dynamic(
+  () => import('@/components/admin/MediaManager').catch(err => {
+    console.error('Failed to load MediaManager:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden der Bilderverwaltung</div> };
+  }),
+  { loading: () => <LoadingSpinner text="Lade Bilderverwaltung..." />, ssr: false }
+);
 
 // Text Editor Component
-const TextEditor = dynamic(() => import('@/components/admin/TextEditor'), {
-  loading: () => <LoadingSpinner text="Lade Texteditor..." />,
-});
+const TextEditor = dynamic(
+  () => import('@/components/admin/TextEditor').catch(err => {
+    console.error('Failed to load TextEditor:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden des Texteditors</div> };
+  }),
+  { loading: () => <LoadingSpinner text="Lade Texteditor..." />, ssr: false }
+);
 
 function LoadingSpinner({ text }: { text: string }) {
   return (
