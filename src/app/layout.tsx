@@ -75,16 +75,16 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased overflow-x-hidden">
         <SiteSettingsProvider>
-          <ContentTextsProvider>
-            <LanguageProvider>
+          <LanguageProvider>
+            <ContentTextsProvider>
               <PineBackground />
               <MobileScrollProgress />
               <Header />
               <MobileBookingButton />
               <main className="relative z-10">{children}</main>
               <Footer />
-            </LanguageProvider>
-          </ContentTextsProvider>
+            </ContentTextsProvider>
+          </LanguageProvider>
         </SiteSettingsProvider>
       </body>
     </html>
