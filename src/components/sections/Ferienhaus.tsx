@@ -431,7 +431,7 @@ export function Ferienhaus() {
                   <Maximize2 size={24} strokeWidth={1.5} />
                 </button>
                 <h3
-                  className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
                   style={{ fontFamily: 'FeelingPassionate, cursive' }}
                 >
                   {language === 'de' ? 'Grundriss' : 'Floor Plan'}

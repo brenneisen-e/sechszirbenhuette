@@ -133,7 +133,7 @@ export function Bewertungen() {
             </div>
             <h2
               data-text-key="bewertungen_title"
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
               style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('bewertungen_title') }}
             >
               {getText('bewertungen_title')}
