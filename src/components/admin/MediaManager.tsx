@@ -881,7 +881,9 @@ export default function MediaManager() {
                             alt={item.alt_text || 'Bild'}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                            sizes="(max-width: 640px) 25vw, (max-width: 1024px) 16vw, 10vw"
+                            quality={30}
+                            loading="lazy"
                           />
                         )}
 
