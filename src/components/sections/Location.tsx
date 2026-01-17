@@ -14,7 +14,7 @@ interface MediaItem {
 export function Location() {
   const { language } = useLanguage();
   const [mapInteractive, setMapInteractive] = useState(false);
-  const [markerImage, setMarkerImage] = useState('/images/huette-marker.jpg');
+  const [markerImage, setMarkerImage] = useState('/images/aussen/Aussen-Sommer.jpg');
 
   // Fetch exterior image for map marker
   useEffect(() => {
