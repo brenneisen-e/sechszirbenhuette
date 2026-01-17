@@ -94,6 +94,13 @@ export default function MediaManager() {
   // Category editing state
   const [editingCategoriesId, setEditingCategoriesId] = useState<string | null>(null);
   const [editingCategories, setEditingCategories] = useState<string[]>([]);
+  // Duplicate cleanup state
+  const [isCleaningDuplicates, setIsCleaningDuplicates] = useState(false);
+  // Bulk category assignment state
+  const [bulkAssignMode, setBulkAssignMode] = useState(false);
+  const [bulkCategory, setBulkCategory] = useState('');
+  const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
+  const [isSavingBulk, setIsSavingBulk] = useState(false);
   // GitHub import state
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<string[]>([]);
@@ -422,6 +429,173 @@ export default function MediaManager() {
     }
   };
 
+  // Remove duplicate entries based on file_key or title
+  const handleRemoveDuplicates = async () => {
+    if (!confirm('Duplikate wirklich entfernen? Es werden alle doppelten Einträge gelöscht (basierend auf Dateiname).')) return;
+
+    setIsCleaningDuplicates(true);
+    setError('');
+
+    try {
+      // Find duplicates by file_key
+      const seen = new Map<string, MediaRecord>();
+      const duplicates: string[] = [];
+
+      for (const item of media) {
+        // Use file_key as the unique identifier, or fall back to title
+        const key = item.file_key || item.title;
+        if (seen.has(key)) {
+          // This is a duplicate - mark for deletion
+          duplicates.push(item.id);
+        } else {
+          seen.set(key, item);
+        }
+      }
+
+      if (duplicates.length === 0) {
+        setSuccess('Keine Duplikate gefunden!');
+        setIsCleaningDuplicates(false);
+        return;
+      }
+
+      // Delete all duplicates
+      let deleted = 0;
+      for (const id of duplicates) {
+        try {
+          const response = await fetch(`/api/admin/media?id=${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            deleted++;
+          }
+        } catch {
+          console.error('Error deleting duplicate:', id);
+        }
+      }
+
+      setSuccess(`${deleted} Duplikat(e) gelöscht!`);
+      await loadMedia();
+    } catch (err) {
+      console.error('Error removing duplicates:', err);
+      setError('Fehler beim Entfernen der Duplikate');
+    } finally {
+      setIsCleaningDuplicates(false);
+    }
+  };
+
+  // Initialize bulk selection when entering bulk mode or changing category
+  const initBulkSelection = useCallback((category: string) => {
+    if (!category) {
+      setBulkSelectedIds(new Set());
+      return;
+    }
+    // Pre-select all media that already have this category
+    const selected = new Set<string>();
+    for (const item of media) {
+      const hasCategory = item.category === category || (item.categories || []).includes(category);
+      if (hasCategory) {
+        selected.add(item.id);
+      }
+    }
+    setBulkSelectedIds(selected);
+  }, [media]);
+
+  // Toggle bulk mode
+  const toggleBulkMode = () => {
+    if (bulkAssignMode) {
+      // Exit bulk mode
+      setBulkAssignMode(false);
+      setBulkCategory('');
+      setBulkSelectedIds(new Set());
+    } else {
+      // Enter bulk mode
+      setBulkAssignMode(true);
+    }
+  };
+
+  // Handle bulk category change
+  const handleBulkCategoryChange = (category: string) => {
+    setBulkCategory(category);
+    initBulkSelection(category);
+  };
+
+  // Toggle single item in bulk selection
+  const toggleBulkItem = (id: string) => {
+    const newSet = new Set(bulkSelectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setBulkSelectedIds(newSet);
+  };
+
+  // Select all visible media
+  const selectAllBulk = () => {
+    const newSet = new Set(media.map(m => m.id));
+    setBulkSelectedIds(newSet);
+  };
+
+  // Deselect all
+  const deselectAllBulk = () => {
+    setBulkSelectedIds(new Set());
+  };
+
+  // Save bulk category assignment
+  const saveBulkAssignment = async () => {
+    if (!bulkCategory) return;
+
+    setIsSavingBulk(true);
+    setError('');
+
+    try {
+      let updated = 0;
+
+      for (const item of media) {
+        const isSelected = bulkSelectedIds.has(item.id);
+        const hasCategory = item.category === bulkCategory || (item.categories || []).includes(bulkCategory);
+
+        // Only update if selection state differs from current state
+        if (isSelected !== hasCategory) {
+          // Get current categories
+          const currentCategories = [item.category, ...(item.categories || [])].filter(c => c !== bulkCategory);
+
+          if (isSelected) {
+            // Add category
+            currentCategories.push(bulkCategory);
+          }
+          // If not selected and had category, it's already removed by the filter
+
+          // First category becomes primary, rest are additional
+          const primaryCategory = currentCategories[0] || item.category;
+          const additionalCategories = currentCategories.slice(1);
+
+          const response = await fetch('/api/admin/media', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: item.id,
+              category: primaryCategory,
+              categories: additionalCategories
+            }),
+          });
+
+          if (response.ok) {
+            updated++;
+          }
+        }
+      }
+
+      setSuccess(`${updated} Bild(er) aktualisiert!`);
+      await loadMedia();
+      // Re-init selection with fresh data
+      setTimeout(() => initBulkSelection(bulkCategory), 100);
+    } catch (err) {
+      console.error('Error saving bulk assignment:', err);
+      setError('Fehler beim Speichern');
+    } finally {
+      setIsSavingBulk(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -439,8 +613,20 @@ export default function MediaManager() {
           <h2 className="text-xl font-bold text-gray-900">Bilderverwaltung</h2>
           <div className="flex items-center gap-2">
             <button
+              onClick={toggleBulkMode}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition ${
+                bulkAssignMode
+                  ? 'bg-logo-green text-white'
+                  : 'text-logo-green hover:bg-logo-green/10'
+              }`}
+              title="Kategorie zuweisen"
+            >
+              <Tags className="w-4 h-4" />
+              <span>{bulkAssignMode ? 'Beenden' : 'Kategorie zuweisen'}</span>
+            </button>
+            <button
               onClick={runGitHubImport}
-              disabled={isImporting}
+              disabled={isImporting || bulkAssignMode}
               className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
               title="Bilder aus GitHub importieren"
             >
@@ -452,6 +638,19 @@ export default function MediaManager() {
               <span className="text-sm">GitHub-Import</span>
             </button>
             <button
+              onClick={handleRemoveDuplicates}
+              disabled={isCleaningDuplicates || bulkAssignMode}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+              title="Duplikate entfernen"
+            >
+              {isCleaningDuplicates ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">Duplikate entfernen</span>
+            </button>
+            <button
               onClick={loadMedia}
               className="p-2 text-gray-500 hover:text-logo-green transition"
               title="Aktualisieren"
@@ -460,6 +659,69 @@ export default function MediaManager() {
             </button>
           </div>
         </div>
+
+        {/* Bulk Category Assignment Mode */}
+        {bulkAssignMode && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-sm font-medium text-blue-800 mb-1">Kategorie auswählen:</label>
+                <select
+                  value={bulkCategory}
+                  onChange={(e) => handleBulkCategoryChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green bg-white"
+                >
+                  <option value="">Kategorie wählen...</option>
+                  {Object.entries(groupedCategories).map(([group, cats]) => (
+                    <optgroup key={group} label={group}>
+                      {cats.map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+              {bulkCategory && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={selectAllBulk}
+                      className="px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-lg transition"
+                    >
+                      Alle auswählen
+                    </button>
+                    <button
+                      onClick={deselectAllBulk}
+                      className="px-3 py-2 text-sm text-blue-700 hover:bg-blue-100 rounded-lg transition"
+                    >
+                      Alle abwählen
+                    </button>
+                  </div>
+                  <div className="text-sm text-blue-700">
+                    {bulkSelectedIds.size} von {media.length} ausgewählt
+                  </div>
+                  <button
+                    onClick={saveBulkAssignment}
+                    disabled={isSavingBulk}
+                    className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50"
+                  >
+                    {isSavingBulk ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4" />
+                    )}
+                    Speichern
+                  </button>
+                </>
+              )}
+            </div>
+            {bulkCategory && (
+              <p className="mt-2 text-sm text-blue-600">
+                Klicken Sie auf die Bilder, um sie der Kategorie &quot;{CATEGORIES.find(c => c.value === bulkCategory)?.label}&quot; hinzuzufügen oder zu entfernen.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Import Results */}
         {importResults.length > 0 && (
@@ -551,21 +813,43 @@ export default function MediaManager() {
                   </h4>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {categoryMedia.map(item => (
+                    {categoryMedia.map(item => {
+                      const isSelectedForBulk = bulkAssignMode && bulkCategory && bulkSelectedIds.has(item.id);
+                      return (
                       <div
                         key={item.id}
-                        draggable
-                        onDragStart={() => handleDragStart(item)}
-                        onDragOver={handleDragOver}
-                        onDrop={() => handleDrop(item)}
+                        draggable={!bulkAssignMode}
+                        onDragStart={() => !bulkAssignMode && handleDragStart(item)}
+                        onDragOver={!bulkAssignMode ? handleDragOver : undefined}
+                        onDrop={() => !bulkAssignMode && handleDrop(item)}
+                        onClick={() => bulkAssignMode && bulkCategory && toggleBulkItem(item.id)}
                         className={`group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition ${
-                          draggedItem?.id === item.id ? 'border-logo-green opacity-50' : 'border-transparent hover:border-gray-300'
+                          bulkAssignMode && bulkCategory
+                            ? isSelectedForBulk
+                              ? 'border-logo-green ring-2 ring-logo-green ring-offset-2 cursor-pointer'
+                              : 'border-gray-200 hover:border-gray-400 cursor-pointer opacity-60 hover:opacity-100'
+                            : draggedItem?.id === item.id
+                              ? 'border-logo-green opacity-50'
+                              : 'border-transparent hover:border-gray-300'
                         }`}
                       >
-                        {/* Drag Handle */}
-                        <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition cursor-grab">
-                          <GripVertical className="w-5 h-5 text-white drop-shadow" />
-                        </div>
+                        {/* Bulk selection checkbox */}
+                        {bulkAssignMode && bulkCategory && (
+                          <div className="absolute top-2 left-2 z-20">
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
+                              isSelectedForBulk ? 'bg-logo-green' : 'bg-white/90 border-2 border-gray-300'
+                            }`}>
+                              {isSelectedForBulk && <Check className="w-4 h-4 text-white" />}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Drag Handle - hidden in bulk mode */}
+                        {!bulkAssignMode && (
+                          <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition cursor-grab">
+                            <GripVertical className="w-5 h-5 text-white drop-shadow" />
+                          </div>
+                        )}
 
                         {/* Media */}
                         {item.media_type === 'video' ? (
@@ -582,51 +866,55 @@ export default function MediaManager() {
                           />
                         )}
 
-                        {/* Move buttons - top right */}
-                        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition flex flex-col gap-1">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleMoveUp(item); }}
-                            className="p-1 bg-white/90 rounded hover:bg-white transition"
-                            title="Nach oben"
-                          >
-                            <ChevronUp className="w-4 h-4 text-gray-700" />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleMoveDown(item); }}
-                            className="p-1 bg-white/90 rounded hover:bg-white transition"
-                            title="Nach unten"
-                          >
-                            <ChevronDown className="w-4 h-4 text-gray-700" />
-                          </button>
-                        </div>
-
-                        {/* Overlay with actions */}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleEdit(item)}
-                            className="p-2 bg-white rounded-full hover:bg-gray-100 transition"
-                            title="Bearbeiten"
-                          >
-                            <Edit2 className="w-4 h-4 text-gray-700" />
-                          </button>
-                          {/* Show category button only for gallery categories */}
-                          {GALLERY_CATEGORIES.includes(item.category) && (
+                        {/* Move buttons - top right - hidden in bulk mode */}
+                        {!bulkAssignMode && (
+                          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition flex flex-col gap-1">
                             <button
-                              onClick={() => handleEditCategories(item)}
-                              className="p-2 bg-white rounded-full hover:bg-blue-100 transition"
-                              title="Kategorien"
+                              onClick={(e) => { e.stopPropagation(); handleMoveUp(item); }}
+                              className="p-1 bg-white/90 rounded hover:bg-white transition"
+                              title="Nach oben"
                             >
-                              <Tags className="w-4 h-4 text-blue-600" />
+                              <ChevronUp className="w-4 h-4 text-gray-700" />
                             </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="p-2 bg-white rounded-full hover:bg-red-100 transition"
-                            title="Löschen"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleMoveDown(item); }}
+                              className="p-1 bg-white/90 rounded hover:bg-white transition"
+                              title="Nach unten"
+                            >
+                              <ChevronDown className="w-4 h-4 text-gray-700" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Overlay with actions - hidden in bulk mode */}
+                        {!bulkAssignMode && (
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="p-2 bg-white rounded-full hover:bg-gray-100 transition"
+                              title="Bearbeiten"
+                            >
+                              <Edit2 className="w-4 h-4 text-gray-700" />
+                            </button>
+                            {/* Show category button only for gallery categories */}
+                            {GALLERY_CATEGORIES.includes(item.category) && (
+                              <button
+                                onClick={() => handleEditCategories(item)}
+                                className="p-2 bg-white rounded-full hover:bg-blue-100 transition"
+                                title="Kategorien"
+                              >
+                                <Tags className="w-4 h-4 text-blue-600" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="p-2 bg-white rounded-full hover:bg-red-100 transition"
+                              title="Löschen"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </button>
+                          </div>
+                        )}
 
                         {/* Edit Form */}
                         {editingId === item.id && (
@@ -662,7 +950,8 @@ export default function MediaManager() {
                           </div>
                         )}
                       </div>
-                    ))}
+                    );
+                  })}
                   </div>
                 </div>
               );
