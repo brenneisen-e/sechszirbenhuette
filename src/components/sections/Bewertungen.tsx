@@ -54,17 +54,37 @@ export function Bewertungen() {
       text: 'Endlich mal richtig abschalten können. Die Hütte ist liebevoll eingerichtet, sehr sauber und die Umgebung ist einfach wunderschön. Ein Highlight war die private Sauna!',
       quelle: 'Booking.com',
     },
+    {
+      id: 3,
+      gast_name: 'Familie Huber',
+      bewertung: 5,
+      titel: 'Wie im Paradies',
+      text: 'Die Ruhe, die Natur, der Ausblick - alles perfekt! Unsere Kinder haben den Schnee geliebt und wir Eltern die Sauna. Die Hütte ist sehr gepflegt und hat alles was man braucht.',
+      quelle: 'Airbnb',
+    },
+    {
+      id: 4,
+      gast_name: 'Thomas K.',
+      bewertung: 5,
+      titel: 'Genau das Richtige',
+      text: 'Wer Ruhe und Erholung sucht, ist hier genau richtig. Die Hütte liegt abgeschieden aber nicht zu weit vom Skigebiet. Wir kommen wieder!',
+      quelle: 'Google',
+    },
   ];
 
   const displayReviews = reviews.length > 0 ? reviews : fallbackReviews;
 
+  // For desktop: show 2 reviews at a time, so we need to calculate pages
+  const reviewsPerPage = 2;
+  const totalPages = Math.ceil(displayReviews.length / reviewsPerPage);
+
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % displayReviews.length);
-  }, [displayReviews.length]);
+    setCurrentIndex((prev) => (prev + 1) % totalPages);
+  }, [totalPages]);
 
   const goToPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + displayReviews.length) % displayReviews.length);
-  }, [displayReviews.length]);
+    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages);
+  }, [totalPages]);
 
   // Swipe handling
   const minSwipeDistance = 50;
@@ -90,6 +110,12 @@ export function Bewertungen() {
     }
   };
 
+  // Get current reviews for the page (desktop shows 2, mobile shows 1)
+  const getCurrentReviews = () => {
+    const startIdx = currentIndex * reviewsPerPage;
+    return displayReviews.slice(startIdx, startIdx + reviewsPerPage);
+  };
+
   return (
     <section id="bewertungen" className="pt-20 pb-10 bg-transparent">
       <div className="container">
@@ -107,7 +133,7 @@ export function Bewertungen() {
             </div>
             <h2
               data-text-key="bewertungen_title"
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
               style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('bewertungen_title') }}
             >
               {getText('bewertungen_title')}
@@ -131,28 +157,79 @@ export function Bewertungen() {
             </div>
           </motion.div>
 
-          {/* Reviews Carousel */}
+          {/* Reviews Grid/Carousel */}
           <div className="relative">
             {/* Navigation Arrows - Desktop */}
-            <button
-              onClick={goToPrev}
-              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
-              aria-label="Vorherige Bewertung"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              onClick={goToNext}
-              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
-              aria-label="Nächste Bewertung"
-            >
-              <ChevronRight size={24} />
-            </button>
+            {totalPages > 1 && (
+              <>
+                <button
+                  onClick={goToPrev}
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
+                  aria-label="Vorherige Bewertungen"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={goToNext}
+                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 z-10 w-12 h-12 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 text-logo-green hover:bg-logo-green hover:text-white transition-all"
+                  aria-label="Nächste Bewertungen"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
 
-            {/* Carousel Container */}
+            {/* Desktop: Two reviews side by side */}
+            <div className="hidden md:block">
+              <div className="grid grid-cols-2 gap-6">
+                {getCurrentReviews().map((review) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-gray-50 rounded-xl p-6 lg:p-8 shadow-sm border border-gray-100"
+                  >
+                    <Quote size={32} className="text-logo-green/30 mb-4" />
+
+                    {review.titel && (
+                      <h4 className="font-bold text-gray-900 text-lg lg:text-xl mb-3">{review.titel}</h4>
+                    )}
+
+                    <p className="text-gray-600 text-base lg:text-lg mb-6 leading-relaxed">
+                      {review.text}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div>
+                        <p className="font-semibold text-gray-900">{review.gast_name}</p>
+                        {review.quelle && (
+                          <p className="text-xs text-gray-500">{review.quelle}</p>
+                        )}
+                      </div>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            size={18}
+                            className={
+                              star <= review.bewertung
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-gray-300'
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile: Single review carousel */}
             <div
               ref={carouselRef}
-              className="overflow-hidden"
+              className="md:hidden overflow-hidden"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
@@ -165,22 +242,22 @@ export function Bewertungen() {
                 {displayReviews.map((review) => (
                   <div
                     key={review.id}
-                    className="w-full flex-shrink-0 px-4 md:px-16"
+                    className="w-full flex-shrink-0 px-2"
                   >
-                    <div className="bg-gray-50 rounded-xl p-6 md:p-8 shadow-sm max-w-2xl mx-auto border border-gray-100">
-                      <Quote size={32} className="text-logo-green/30 mb-4" />
+                    <div className="bg-gray-50 rounded-xl p-6 shadow-sm border border-gray-100">
+                      <Quote size={28} className="text-logo-green/30 mb-3" />
 
                       {review.titel && (
-                        <h4 className="font-bold text-gray-900 text-lg md:text-xl mb-3">{review.titel}</h4>
+                        <h4 className="font-bold text-gray-900 text-lg mb-2">{review.titel}</h4>
                       )}
 
-                      <p className="text-gray-600 text-base md:text-lg mb-6 leading-relaxed">
+                      <p className="text-gray-600 text-base mb-4 leading-relaxed">
                         {review.text}
                       </p>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                         <div>
-                          <p className="font-semibold text-gray-900">{review.gast_name}</p>
+                          <p className="font-semibold text-gray-900 text-sm">{review.gast_name}</p>
                           {review.quelle && (
                             <p className="text-xs text-gray-500">{review.quelle}</p>
                           )}
@@ -189,7 +266,7 @@ export function Bewertungen() {
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
-                              size={18}
+                              size={16}
                               className={
                                 star <= review.bewertung
                                   ? 'text-yellow-400 fill-yellow-400'
@@ -207,18 +284,39 @@ export function Bewertungen() {
 
             {/* Dots Indicator */}
             <div className="flex justify-center gap-2 mt-8">
-              {displayReviews.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${
-                    index === currentIndex
-                      ? 'bg-logo-green w-8'
-                      : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Bewertung ${index + 1}`}
-                />
-              ))}
+              {/* Desktop: page dots */}
+              <div className="hidden md:flex gap-2">
+                {Array.from({ length: totalPages }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      index === currentIndex
+                        ? 'bg-logo-green w-6'
+                        : 'bg-logo-green/30 hover:bg-logo-green/50'
+                    }`}
+                    aria-label={`Seite ${index + 1}`}
+                  />
+                ))}
+              </div>
+              {/* Mobile: individual review dots */}
+              <div className="md:hidden flex gap-1.5">
+                {displayReviews.slice(0, Math.min(displayReviews.length, 6)).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentIndex(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentIndex
+                        ? 'bg-logo-green w-6'
+                        : 'bg-logo-green/30 w-2'
+                    }`}
+                    aria-label={`Bewertung ${index + 1}`}
+                  />
+                ))}
+                {displayReviews.length > 6 && (
+                  <span className="text-xs text-gray-500 ml-2">+{displayReviews.length - 6}</span>
+                )}
+              </div>
             </div>
 
             {/* Swipe Hint - Mobile Only */}
