@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       params.push(category, category);
       if (type) params.push(type);
     } else {
-      query = 'SELECT * FROM media';
+      query = 'SELECT DISTINCT * FROM media';
       if (type) {
         query += ' WHERE media_type = ?';
         params.push(type);
@@ -96,7 +96,13 @@ export async function GET(request: NextRequest) {
 
     const stmt = env.DB.prepare(query);
     const result = await (params.length > 0 ? stmt.bind(...params) : stmt).all<MediaRecord>();
-    const mediaList = result.results || [];
+    // Deduplicate by ID to prevent any duplicate entries
+    const seenIds = new Set<string>();
+    const mediaList = (result.results || []).filter(m => {
+      if (seenIds.has(m.id)) return false;
+      seenIds.add(m.id);
+      return true;
+    });
 
     // Fetch all additional categories for the media items
     if (mediaList.length > 0) {
