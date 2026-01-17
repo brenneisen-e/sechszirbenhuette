@@ -93,6 +93,8 @@ export default function MediaManager() {
   // Category editing state
   const [editingCategoriesId, setEditingCategoriesId] = useState<string | null>(null);
   const [editingCategories, setEditingCategories] = useState<string[]>([]);
+  // Duplicate cleanup state
+  const [isCleaningDuplicates, setIsCleaningDuplicates] = useState(false);
 
   // Load media on mount
   useEffect(() => {
@@ -389,6 +391,58 @@ export default function MediaManager() {
     }
   };
 
+  // Remove duplicate entries based on file_key or title
+  const handleRemoveDuplicates = async () => {
+    if (!confirm('Duplikate wirklich entfernen? Es werden alle doppelten Einträge gelöscht (basierend auf Dateiname).')) return;
+
+    setIsCleaningDuplicates(true);
+    setError('');
+
+    try {
+      // Find duplicates by file_key
+      const seen = new Map<string, MediaRecord>();
+      const duplicates: string[] = [];
+
+      for (const item of media) {
+        // Use file_key as the unique identifier, or fall back to title
+        const key = item.file_key || item.title;
+        if (seen.has(key)) {
+          // This is a duplicate - mark for deletion
+          duplicates.push(item.id);
+        } else {
+          seen.set(key, item);
+        }
+      }
+
+      if (duplicates.length === 0) {
+        setSuccess('Keine Duplikate gefunden!');
+        setIsCleaningDuplicates(false);
+        return;
+      }
+
+      // Delete all duplicates
+      let deleted = 0;
+      for (const id of duplicates) {
+        try {
+          const response = await fetch(`/api/admin/media?id=${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            deleted++;
+          }
+        } catch {
+          console.error('Error deleting duplicate:', id);
+        }
+      }
+
+      setSuccess(`${deleted} Duplikat(e) gelöscht!`);
+      await loadMedia();
+    } catch (err) {
+      console.error('Error removing duplicates:', err);
+      setError('Fehler beim Entfernen der Duplikate');
+    } finally {
+      setIsCleaningDuplicates(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -404,13 +458,28 @@ export default function MediaManager() {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">Bilderverwaltung</h2>
-          <button
-            onClick={loadMedia}
-            className="p-2 text-gray-500 hover:text-logo-green transition"
-            title="Aktualisieren"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRemoveDuplicates}
+              disabled={isCleaningDuplicates}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+              title="Duplikate entfernen"
+            >
+              {isCleaningDuplicates ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              <span>Duplikate entfernen</span>
+            </button>
+            <button
+              onClick={loadMedia}
+              className="p-2 text-gray-500 hover:text-logo-green transition"
+              title="Aktualisieren"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
