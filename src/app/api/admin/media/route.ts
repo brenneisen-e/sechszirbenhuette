@@ -298,6 +298,82 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// PATCH - Maintenance operations (cleanup duplicates, etc.)
+export async function PATCH(request: NextRequest) {
+  try {
+    const env = await getCloudflareEnv();
+    if (!env) {
+      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+    }
+
+    const body = await request.json() as { action?: string };
+    const { action } = body;
+
+    if (action === 'cleanup_category_duplicates') {
+      // Remove entries from media_categories where the category matches the primary category of the media
+      // This cleans up the junction table by removing redundant entries
+      const result = await env.DB.prepare(`
+        DELETE FROM media_categories
+        WHERE media_id IN (
+          SELECT mc.media_id
+          FROM media_categories mc
+          INNER JOIN media m ON mc.media_id = m.id
+          WHERE mc.category = m.category
+        )
+        AND category IN (
+          SELECT m.category
+          FROM media m
+          WHERE m.id = media_categories.media_id
+        )
+      `).run();
+
+      // Also remove exact duplicate entries in the junction table (same media_id + category pair)
+      // Note: This requires a different approach since SQLite doesn't support DELETE with self-join easily
+      // We'll find duplicates and delete them individually
+      const duplicates = await env.DB.prepare(`
+        SELECT media_id, category, COUNT(*) as cnt
+        FROM media_categories
+        GROUP BY media_id, category
+        HAVING COUNT(*) > 1
+      `).all<{ media_id: string; category: string; cnt: number }>();
+
+      let deletedDuplicates = 0;
+      if (duplicates.results && duplicates.results.length > 0) {
+        for (const dup of duplicates.results) {
+          // Delete all but one entry for each duplicate pair
+          const toDelete = dup.cnt - 1;
+          // SQLite workaround: delete using ROWID
+          await env.DB.prepare(`
+            DELETE FROM media_categories
+            WHERE ROWID IN (
+              SELECT ROWID FROM media_categories
+              WHERE media_id = ? AND category = ?
+              LIMIT ?
+            )
+          `).bind(dup.media_id, dup.category, toDelete).run();
+          deletedDuplicates += toDelete;
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Category duplicates cleaned up. Removed ${deletedDuplicates} duplicate junction entries.`
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'Unknown action', success: false },
+      { status: 400 }
+    );
+  } catch (error) {
+    console.error('Error in PATCH operation:', error);
+    return NextResponse.json(
+      { error: 'Failed to perform operation', success: false },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE - Delete media
 export async function DELETE(request: NextRequest) {
   try {

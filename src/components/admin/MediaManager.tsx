@@ -384,8 +384,9 @@ export default function MediaManager() {
     setEditingCategoriesId(item.id);
     // Combine primary category with additional categories
     const allCategories = [item.category, ...(item.categories || [])];
-    // Only include gallery categories
-    setEditingCategories(allCategories.filter(c => GALLERY_CATEGORIES.includes(c)));
+    // Deduplicate and only include gallery categories
+    const uniqueCategories = [...new Set(allCategories)].filter(c => GALLERY_CATEGORIES.includes(c));
+    setEditingCategories(uniqueCategories);
   };
 
   // Toggle a category in the editing list
@@ -429,15 +430,15 @@ export default function MediaManager() {
     }
   };
 
-  // Remove duplicate entries based on file_key or title
+  // Remove duplicate entries based on file_key or title, and clean up junction table
   const handleRemoveDuplicates = async () => {
-    if (!confirm('Duplikate wirklich entfernen? Es werden alle doppelten Einträge gelöscht (basierend auf Dateiname).')) return;
+    if (!confirm('Duplikate wirklich entfernen? Es werden alle doppelten Einträge und Kategorie-Duplikate bereinigt.')) return;
 
     setIsCleaningDuplicates(true);
     setError('');
 
     try {
-      // Find duplicates by file_key
+      // Step 1: Find and delete duplicate media records by file_key
       const seen = new Map<string, MediaRecord>();
       const duplicates: string[] = [];
 
@@ -452,26 +453,44 @@ export default function MediaManager() {
         }
       }
 
-      if (duplicates.length === 0) {
-        setSuccess('Keine Duplikate gefunden!');
-        setIsCleaningDuplicates(false);
-        return;
-      }
-
-      // Delete all duplicates
-      let deleted = 0;
+      let deletedMedia = 0;
       for (const id of duplicates) {
         try {
           const response = await fetch(`/api/admin/media?id=${id}`, { method: 'DELETE' });
           if (response.ok) {
-            deleted++;
+            deletedMedia++;
           }
         } catch {
           console.error('Error deleting duplicate:', id);
         }
       }
 
-      setSuccess(`${deleted} Duplikat(e) gelöscht!`);
+      // Step 2: Clean up junction table duplicates (categories that match primary category)
+      let categoryCleanupMsg = '';
+      try {
+        const cleanupResponse = await fetch('/api/admin/media', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'cleanup_category_duplicates' })
+        });
+        const cleanupData = await cleanupResponse.json() as { success?: boolean; message?: string };
+        if (cleanupData.success && cleanupData.message) {
+          categoryCleanupMsg = cleanupData.message;
+        }
+      } catch {
+        console.error('Error cleaning up category duplicates');
+      }
+
+      // Show result
+      if (deletedMedia === 0 && !categoryCleanupMsg) {
+        setSuccess('Keine Duplikate gefunden!');
+      } else {
+        const messages = [];
+        if (deletedMedia > 0) messages.push(`${deletedMedia} Medien-Duplikat(e) gelöscht`);
+        if (categoryCleanupMsg) messages.push(categoryCleanupMsg);
+        setSuccess(messages.join('. '));
+      }
+
       await loadMedia();
     } catch (err) {
       console.error('Error removing duplicates:', err);
