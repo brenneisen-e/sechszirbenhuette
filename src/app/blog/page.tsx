@@ -67,6 +67,15 @@ export default function BlogPage() {
   const [currentNockbergeFeature, setCurrentNockbergeFeature] = useState(0);
   const [activeKaerntenSubTab, setActiveKaerntenSubTab] = useState<KaerntenSubTab>('hunde');
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check screen size for responsive carousel
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     fetch('/api/media?category=aussen&type=image')
@@ -164,41 +173,43 @@ export default function BlogPage() {
               </p>
 
               {/* Nockberge Carousel - 2 cards on desktop, 1 on mobile */}
-              <div className="relative">
-                {/* Navigation Buttons */}
-                <button
-                  onClick={() => setCurrentNockbergeFeature(prev => Math.max(0, prev - 1))}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentNockbergeFeature === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  disabled={currentNockbergeFeature === 0}
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                <button
-                  onClick={() => setCurrentNockbergeFeature(prev => Math.min(Math.ceil(featureKeys.length / 2) - 1, prev + 1))}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentNockbergeFeature >= Math.ceil(featureKeys.length / 2) - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  disabled={currentNockbergeFeature >= Math.ceil(featureKeys.length / 2) - 1}
-                >
-                  <ChevronRight size={24} />
-                </button>
+              {(() => {
+                const maxIndex = isMobile ? featureKeys.length - 1 : Math.ceil(featureKeys.length / 2) - 1;
+                const translateValue = isMobile ? currentNockbergeFeature * 100 : currentNockbergeFeature * 50;
+                const totalDots = isMobile ? featureKeys.length : Math.ceil(featureKeys.length / 2);
 
-                {/* Carousel Track - shows 2 cards on desktop */}
-                <div className="overflow-hidden mx-4 md:mx-8">
-                  <div
-                    className="flex transition-transform duration-300 ease-out"
-                    style={{ transform: `translateX(-${currentNockbergeFeature * 100}%)` }}
-                  >
-                    {/* Group features in pairs for desktop view */}
-                    {Array.from({ length: Math.ceil(featureKeys.length / 2) }).map((_, pairIndex) => (
-                      <div key={pairIndex} className="w-full flex-shrink-0 px-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          {featureKeys.slice(pairIndex * 2, pairIndex * 2 + 2).map((key, idx) => {
-                            const index = pairIndex * 2 + idx;
-                            const Icon = featureIcons[key];
-                            const feature = t.umgebung.features[key];
-                            const featureImage = images[index] || null;
+                return (
+                  <div className="relative">
+                    {/* Navigation Buttons */}
+                    <button
+                      onClick={() => setCurrentNockbergeFeature(prev => Math.max(0, prev - 1))}
+                      className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentNockbergeFeature === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                      disabled={currentNockbergeFeature === 0}
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentNockbergeFeature(prev => Math.min(maxIndex, prev + 1))}
+                      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentNockbergeFeature >= maxIndex ? 'opacity-30 cursor-not-allowed' : ''}`}
+                      disabled={currentNockbergeFeature >= maxIndex}
+                    >
+                      <ChevronRight size={24} />
+                    </button>
 
-                            return (
-                              <div key={key} className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                    {/* Carousel Track */}
+                    <div className="overflow-hidden mx-4 md:mx-8">
+                      <div
+                        className="flex transition-transform duration-300 ease-out"
+                        style={{ transform: `translateX(-${translateValue}%)` }}
+                      >
+                        {featureKeys.map((key, index) => {
+                          const Icon = featureIcons[key];
+                          const feature = t.umgebung.features[key];
+                          const featureImage = images[index] || null;
+
+                          return (
+                            <div key={key} className="w-full md:w-1/2 flex-shrink-0 px-2">
+                              <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
                                 {/* Portrait Image or Icon Placeholder */}
                                 <div className="relative aspect-[3/4] bg-gray-100">
                                   {featureImage ? (
@@ -255,29 +266,29 @@ export default function BlogPage() {
                                   )}
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Dots Indicator - 3 dots for 3 pairs */}
-                <div className="flex justify-center gap-2 mt-6">
-                  {Array.from({ length: Math.ceil(featureKeys.length / 2) }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentNockbergeFeature(index)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        currentNockbergeFeature === index
-                          ? 'bg-logo-green w-6'
-                          : 'bg-logo-green/30 hover:bg-logo-green/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+                    {/* Dots Indicator */}
+                    <div className="flex justify-center gap-2 mt-6">
+                      {Array.from({ length: totalDots }).map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentNockbergeFeature(index)}
+                          className={`w-2.5 h-2.5 rounded-full transition-all ${
+                            currentNockbergeFeature === index
+                              ? 'bg-logo-green w-6'
+                              : 'bg-logo-green/30 hover:bg-logo-green/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </motion.article>
 
@@ -357,41 +368,43 @@ export default function BlogPage() {
                   </div>
 
                   {/* Carousel Container */}
-                  <div className="relative">
-                    {/* Navigation Buttons */}
-                    <button
-                      onClick={() => setCurrentDogTrip(prev => Math.max(0, prev - 1))}
-                      className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentDogTrip === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                      disabled={currentDogTrip === 0}
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                    <button
-                      onClick={() => setCurrentDogTrip(prev => Math.min(Math.ceil(dogTrips.length / 2) - 1, prev + 1))}
-                      className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentDogTrip >= Math.ceil(dogTrips.length / 2) - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                      disabled={currentDogTrip >= Math.ceil(dogTrips.length / 2) - 1}
-                    >
-                      <ChevronRight size={24} />
-                    </button>
+                  {(() => {
+                    const maxDogIndex = isMobile ? dogTrips.length - 1 : Math.ceil(dogTrips.length / 2) - 1;
+                    const dogTranslateValue = isMobile ? currentDogTrip * 100 : currentDogTrip * 50;
+                    const totalDogDots = isMobile ? dogTrips.length : Math.ceil(dogTrips.length / 2);
 
-                    {/* Carousel Track - shows 2 cards on desktop */}
-                    <div className="overflow-hidden mx-4 md:mx-8">
-                      <div
-                        className="flex transition-transform duration-300 ease-out"
-                        style={{ transform: `translateX(-${currentDogTrip * 100}%)` }}
-                      >
-                        {/* Group trips in pairs for desktop view */}
-                        {Array.from({ length: Math.ceil(dogTrips.length / 2) }).map((_, pairIndex) => (
-                          <div key={pairIndex} className="w-full flex-shrink-0 px-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                              {dogTrips.slice(pairIndex * 2, pairIndex * 2 + 2).map((trip, idx) => {
-                                const index = pairIndex * 2 + idx;
-                                const categoryKey = DOG_TRIP_CATEGORIES[index];
-                                const tripImages = dogTripImages[categoryKey] || [];
-                                const firstImage = tripImages[0];
+                    return (
+                      <div className="relative">
+                        {/* Navigation Buttons */}
+                        <button
+                          onClick={() => setCurrentDogTrip(prev => Math.max(0, prev - 1))}
+                          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentDogTrip === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          disabled={currentDogTrip === 0}
+                        >
+                          <ChevronLeft size={24} />
+                        </button>
+                        <button
+                          onClick={() => setCurrentDogTrip(prev => Math.min(maxDogIndex, prev + 1))}
+                          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentDogTrip >= maxDogIndex ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          disabled={currentDogTrip >= maxDogIndex}
+                        >
+                          <ChevronRight size={24} />
+                        </button>
 
-                                return (
-                                  <div key={index} className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                        {/* Carousel Track */}
+                        <div className="overflow-hidden mx-4 md:mx-8">
+                          <div
+                            className="flex transition-transform duration-300 ease-out"
+                            style={{ transform: `translateX(-${dogTranslateValue}%)` }}
+                          >
+                            {dogTrips.map((trip, index) => {
+                              const categoryKey = DOG_TRIP_CATEGORIES[index];
+                              const tripImages = dogTripImages[categoryKey] || [];
+                              const firstImage = tripImages[0];
+
+                              return (
+                                <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
+                                  <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
                                     {/* Portrait Image */}
                                     <div className="relative aspect-[3/4] bg-gray-100">
                                       {firstImage ? (
@@ -435,29 +448,29 @@ export default function BlogPage() {
                                       </div>
                                     </div>
                                   </div>
-                                );
-                              })}
-                            </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    {/* Dots Indicator - for pairs */}
-                    <div className="flex justify-center gap-2 mt-6">
-                      {Array.from({ length: Math.ceil(dogTrips.length / 2) }).map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentDogTrip(index)}
-                          className={`w-2.5 h-2.5 rounded-full transition-all ${
-                            currentDogTrip === index
-                              ? 'bg-logo-green w-6'
-                              : 'bg-logo-green/30 hover:bg-logo-green/50'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                        {/* Dots Indicator */}
+                        <div className="flex justify-center gap-2 mt-6">
+                          {Array.from({ length: totalDogDots }).map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentDogTrip(index)}
+                              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                                currentDogTrip === index
+                                  ? 'bg-logo-green w-6'
+                                  : 'bg-logo-green/30 hover:bg-logo-green/50'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </motion.div>
               )}
 
