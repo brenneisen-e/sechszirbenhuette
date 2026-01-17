@@ -56,31 +56,45 @@ const categoryMap: Record<string, string> = {
   'hund-millstaetter': 'hund-millstaetter',
 };
 
-// Fallback static images - Interior images from repo
+// Fallback static images from local gallery
 const fallbackImages: GalleryImage[] = [
   // Wohnbereich
-  { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Wohnzimmer', description: 'Gemütlicher Wohnbereich', category: 'wohnen' },
+  { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Gemütliche Stube', description: 'Eckbank mit Holztisch', category: 'wohnen' },
   { src: '/images/innen/Wohnzimmer_02_Galerie.jpg', title: 'Wohnzimmer', description: 'Blick von der Galerie', category: 'wohnen' },
-  { src: '/images/innen/Stube.jpg', title: 'Stube', description: 'Traditionelle Holzstube', category: 'wohnen' },
+  { src: '/images/innen/Stube.jpg', title: 'Wohnbereich', description: 'Bauernschrank und Treppe', category: 'wohnen' },
   { src: '/images/innen/Stube_02.jpg', title: 'Stube', description: 'Gemütliche Atmosphäre', category: 'wohnen' },
   { src: '/images/innen/Stube_03.jpg', title: 'Stube', description: 'Rustikales Ambiente', category: 'wohnen' },
   { src: '/images/innen/Kamin.jpg', title: 'Kamin', description: 'Wohlige Wärme', category: 'wohnen' },
-  { src: '/images/innen/Lampe.jpg', title: 'Beleuchtung', description: 'Stimmungsvolles Licht', category: 'wohnen' },
   { src: '/images/innen/Treppenaufgang.jpg', title: 'Treppenaufgang', description: 'Zum Obergeschoss', category: 'wohnen' },
-  // Schlafzimmer
-  { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Schlafzimmer', description: 'Großes Schlafzimmer', category: 'schlafen' },
-  { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Schlafzimmer', description: 'Gemütliches Schlafzimmer', category: 'schlafen' },
   // Küche
-  { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Voll ausgestattet', category: 'kueche' },
-  { src: '/images/innen/Küche_02.jpg', title: 'Küche', description: 'Mit modernen Geräten', category: 'kueche' },
+  { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Mit Bauernschrank', category: 'kueche' },
+  { src: '/images/innen/Küche_02.jpg', title: 'Küchenzeile', description: 'Voll ausgestattet', category: 'kueche' },
   { src: '/images/innen/Kaffeemaschinen.jpg', title: 'Kaffeemaschine', description: 'Für den perfekten Kaffee', category: 'kueche' },
+  // Schlafzimmer
+  { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Großes Schlafzimmer', description: 'Doppelbett und Einzelbett', category: 'schlafen' },
+  { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Kleines Schlafzimmer', description: 'Gemütliches Doppelbett', category: 'schlafen' },
   // Bad & Sauna
-  { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Modernes Bad', category: 'bad' },
+  { src: '/images/innen/Sauna.jpg', title: 'Finnische Sauna', description: 'Eigene Sauna im Haus', category: 'bad' },
+  { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Mit Dusche', category: 'bad' },
   { src: '/images/innen/WC.jpg', title: 'WC', description: 'Separates WC', category: 'bad' },
-  { src: '/images/innen/Sauna.jpg', title: 'Sauna', description: 'Finnische Sauna', category: 'bad' },
   { src: '/images/innen/Ruheraum.jpg', title: 'Ruheraum', description: 'Entspannung nach der Sauna', category: 'bad' },
   { src: '/images/innen/Ruheraum_02.jpg', title: 'Ruheraum', description: 'Wellness-Bereich', category: 'bad' },
   { src: '/images/innen/Ruheraum Dusche.jpg', title: 'Dusche', description: 'Im Ruheraum', category: 'bad' },
+  // Außenbereich
+  { src: '/images/aussen/Sommerhütte.jpg', title: 'Sechszirbenhütte', description: 'Im Sommer mit Balkon', category: 'aussen' },
+  { src: '/images/aussen/Herbst.jpg', title: 'Herbstansicht', description: 'Die Hütte im Herbst', category: 'aussen' },
+  { src: '/images/aussen/Balkon.jpg', title: 'Verschneiter Balkon', description: 'Winterstimmung', category: 'aussen' },
+  // Umgebung
+  { src: '/images/aussen/Nockberge.jpg', title: 'Nockberge Panorama', description: 'Atemberaubende Berglandschaft', category: 'umgebung' },
+  { src: '/images/aussen/Falkertsee_Winter.png', title: 'Falkertsee', description: 'Mystische Winterstimmung', category: 'umgebung' },
+  { src: '/images/aussen/Kühe_Rodresnock.jpg', title: 'Almkühe', description: 'Am Rodresnock', category: 'umgebung' },
+  // Aktivitäten
+  { src: '/images/aussen/Snowboard.jpg', title: 'Snowboarden', description: 'Im Tiefschnee', category: 'extras' },
+  { src: '/images/aussen/Skigebiet.jpeg', title: 'Skigebiet Falkert', description: 'Familiäres Skigebiet', category: 'extras' },
+  { src: '/images/aussen/Gravel.jpg', title: 'Gravelbiken', description: 'In den Lärchenwäldern', category: 'extras' },
+  { src: '/images/aussen/Nockiflitzer.jpg', title: 'Nocki-Flitzer', description: 'Sommerrodelbahn', category: 'extras' },
+  { src: '/images/aussen/Pilze.jpg', title: 'Pilze sammeln', description: 'Im Wald', category: 'extras' },
+  { src: '/images/aussen/Angeln.jpg', title: 'Angeln', description: 'Am Bergsee', category: 'extras' },
 ];
 
 // Parse alt_text format "Title - Description" into title and description

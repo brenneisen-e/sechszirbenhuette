@@ -1,0 +1,143 @@
+{
+  "categories": {
+    "living": {
+      "label": "Wohnbereich",
+      "description": "Gemütliche Holzstube mit traditionellem Charme",
+      "images": [
+        { "src": "/images/innen/Wohnzimmer_01.jpg", "alt": "Gemütliche Stube mit Eckbank und Holztisch", "featured": true },
+        { "src": "/images/innen/Wohnzimmer_01.jpeg", "alt": "Wohnbereich mit traditioneller Einrichtung" },
+        { "src": "/images/innen/Wohnzimmer_02_Galerie.jpg", "alt": "Wohnzimmer Galerie-Ansicht" },
+        { "src": "/images/innen/Stube.jpg", "alt": "Stube mit Bauernschrank und Treppe" },
+        { "src": "/images/innen/Stube_02.jpg", "alt": "Stube zweite Ansicht" },
+        { "src": "/images/innen/Stube_03.jpg", "alt": "Stube Details" }
+      ]
+    },
+    "kitchen": {
+      "label": "Küche",
+      "description": "Voll ausgestattete Küche mit allem Komfort",
+      "images": [
+        { "src": "/images/innen/Küche_01.jpg", "alt": "Küche mit Bauernschrank und Treppe", "featured": true },
+        { "src": "/images/innen/Küche_02.jpg", "alt": "Küche mit Holzeinrichtung und Geschirrspüler" },
+        { "src": "/images/innen/Kaffeemaschinen.jpg", "alt": "Kaffeemaschinen und Küchengeräte" }
+      ]
+    },
+    "rooms": {
+      "label": "Schlafzimmer",
+      "description": "Gemütliche Schlafräume unter dem Dach",
+      "images": [
+        { "src": "/images/innen/Schlafzimmer_groß.jpg", "alt": "Großes Schlafzimmer mit Doppelbett und Einzelbett", "featured": true },
+        { "src": "/images/innen/Schlafzimmer_klein.jpg", "alt": "Kleines Schlafzimmer mit Doppelbett" }
+      ]
+    },
+    "sauna": {
+      "label": "Sauna & Wellness",
+      "description": "Eigene Sauna mit Ruheraum für pure Entspannung",
+      "images": [
+        { "src": "/images/innen/Sauna.jpg", "alt": "Finnische Sauna mit Holzverkleidung", "featured": true },
+        { "src": "/images/innen/Ruheraum.jpg", "alt": "Ruheraum mit Blick auf Winterlandschaft" },
+        { "src": "/images/innen/Ruheraum_02.jpg", "alt": "Ruheraum zweite Ansicht" },
+        { "src": "/images/innen/Ruheraum Dusche.jpg", "alt": "Dusche im Wellnessbereich" }
+      ]
+    },
+    "bathroom": {
+      "label": "Badezimmer",
+      "description": "Modernes Bad mit Dusche",
+      "images": [
+        { "src": "/images/innen/Badezimmer.jpg", "alt": "Badezimmer mit Dusche und Waschbecken", "featured": true },
+        { "src": "/images/innen/WC.jpg", "alt": "Separates WC" }
+      ]
+    },
+    "equipment": {
+      "label": "Ausstattung",
+      "description": "Details und besondere Ausstattung",
+      "images": [
+        { "src": "/images/innen/Kamin.jpg", "alt": "Moderner Pelletofen RIKA", "featured": true },
+        { "src": "/images/innen/Lampe.jpg", "alt": "Rustikale Deckenlampe" },
+        { "src": "/images/innen/Treppenaufgang.jpg", "alt": "Holztreppe ins Obergeschoss" },
+        { "src": "/images/innen/csm_grundrisse_b12eea715d.jpg", "alt": "Grundriss der Hütte" }
+      ]
+    },
+    "aussen": {
+      "label": "Außenansicht",
+      "description": "Die Hütte zu allen Jahreszeiten",
+      "images": [
+        { "src": "/images/aussen/Sommerhütte.jpg", "alt": "Hütte im Sommer mit Balkon und Sonnenschirm", "featured": true },
+        { "src": "/images/aussen/Aussen-Sommer.jpg", "alt": "Außenansicht im Sommer" },
+        { "src": "/images/aussen/Aussen-Sommer.jpeg", "alt": "Hütte von vorne im Herbst" },
+        { "src": "/images/aussen/Herbst.jpg", "alt": "Hütte im Herbst" },
+        { "src": "/images/aussen/Aussen-Herbst.png", "alt": "Herbstansicht der Hütte" },
+        { "src": "/images/aussen/Balkon.jpg", "alt": "Verschneiter Balkon mit Liegestühlen", "featured": true },
+        { "src": "/images/aussen/Rückseite_Schnee.jpg", "alt": "Hütte Rückseite im Schnee" },
+        { "src": "/images/aussen/Außen_Winter_Mücke_1.jpg", "alt": "Winteransicht 1" },
+        { "src": "/images/aussen/Außen_Winter_Mücke_2.jpg", "alt": "Winteransicht 2" },
+        { "src": "/images/aussen/Außen_Winter_Mücke_3.jpg", "alt": "Winteransicht 3" },
+        { "src": "/images/aussen/Außen_Sommer_Mücke.jpg", "alt": "Sommeransicht" },
+        { "src": "/images/aussen/Mücke_Herbst.jpg", "alt": "Herbstansicht" }
+      ]
+    },
+    "umgebung": {
+      "label": "Umgebung & Natur",
+      "description": "Die wunderschöne Berglandschaft der Nockberge",
+      "images": [
+        { "src": "/images/aussen/Nockberge.jpg", "alt": "Panorama der Nockberge", "featured": true },
+        { "src": "/images/aussen/Kühe_Rodresnock.jpg", "alt": "Almkühe am Rodresnock" },
+        { "src": "/images/aussen/Kühe_Haus.jpg", "alt": "Kühe bei der Hütte" },
+        { "src": "/images/aussen/Falkertsee_Winter.png", "alt": "Falkertsee im Winter", "featured": true },
+        { "src": "/images/aussen/Wandern_St_Oswald.jpg", "alt": "Wanderung St. Oswald über den Wolken" },
+        { "src": "/images/aussen/Wandern_Triglav.jpg", "alt": "Wanderung Triglav" },
+        { "src": "/images/aussen/Maltatal_1.jpg", "alt": "Maltatal Ansicht 1" },
+        { "src": "/images/aussen/Maltatal_2.jpg", "alt": "Maltatal Ansicht 2" },
+        { "src": "/images/aussen/Slowenien.jpg", "alt": "Ausflug nach Slowenien" },
+        { "src": "/images/aussen/Herbst_2.jpg", "alt": "Herbstlandschaft" }
+      ]
+    },
+    "sommer": {
+      "label": "Sommer-Aktivitäten",
+      "description": "Wandern, Radfahren, Pilze sammeln und mehr",
+      "images": [
+        { "src": "/images/aussen/Gravel.jpg", "alt": "Gravelbiken in den Lärchenwäldern", "featured": true },
+        { "src": "/images/aussen/Nockiflitzer.jpg", "alt": "Nocki-Flitzer Sommerrodelbahn", "featured": true },
+        { "src": "/images/aussen/Pilze.jpg", "alt": "Pilze sammeln im Wald" },
+        { "src": "/images/aussen/Pilze_2.jpg", "alt": "Steinpilze" },
+        { "src": "/images/aussen/Pilze_3.jpg", "alt": "Pilzfund" },
+        { "src": "/images/aussen/Angeln.jpg", "alt": "Angeln am Bergsee" },
+        { "src": "/images/aussen/Kaffee.jpg", "alt": "Kaffee auf der Alm" },
+        { "src": "/images/aussen/Kaiserschmarrn.jpg", "alt": "Kaiserschmarrn auf der Hütte" }
+      ]
+    },
+    "winter": {
+      "label": "Winter-Aktivitäten",
+      "description": "Skifahren, Snowboarden und Winterwandern",
+      "images": [
+        { "src": "/images/aussen/Skigebiet.jpeg", "alt": "Skigebiet Falkert Panorama", "featured": true },
+        { "src": "/images/aussen/Snowboard.jpg", "alt": "Snowboarden im Tiefschnee", "featured": true },
+        { "src": "/images/aussen/Snowboard_Header.jpg", "alt": "Snowboard Action" }
+      ]
+    },
+    "header": {
+      "label": "Header-Bilder",
+      "description": "Bilder für Hero-Bereich und Header",
+      "images": [
+        { "src": "/images/aussen/csm_header-19_666fbd97d0.jpeg", "alt": "Header Bild 1", "featured": true },
+        { "src": "/images/aussen/csm_header-09_a956037c64.jpeg", "alt": "Header Bild 2" }
+      ]
+    }
+  },
+  "amenityCards": {
+    "living": "/images/innen/Wohnzimmer_01.jpg",
+    "kitchen": "/images/innen/Küche_02.jpg",
+    "rooms": "/images/innen/Schlafzimmer_groß.jpg",
+    "sauna": "/images/innen/Sauna.jpg",
+    "bathroom": "/images/innen/Badezimmer.jpg",
+    "outdoor": "/images/aussen/Sommerhütte.jpg",
+    "equipment": "/images/innen/Kamin.jpg",
+    "location": "/images/aussen/Nockberge.jpg"
+  },
+  "hero": {
+    "images": [
+      "/images/aussen/Sommerhütte.jpg",
+      "/images/aussen/Balkon.jpg",
+      "/images/aussen/Falkertsee_Winter.png"
+    ]
+  }
+}

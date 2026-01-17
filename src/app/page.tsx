@@ -17,10 +17,10 @@ export default function HomePage() {
     <>
       <LoadingScreen minDisplayTime={1500} />
       <Hero />
-      <Bewertungen />
       <IntroText />
       <Ferienhaus />
       <Galerie />
+      <Bewertungen />
       <Location />
       <Umgebung />
       <Buchung />
