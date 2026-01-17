@@ -36,13 +36,13 @@ export function Header() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isSubpage, setIsSubpage] = useState(false);
 
-  // Don't render on admin pages
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
+  // Check if we're on admin page
+  const isAdminPage = pathname?.startsWith('/admin');
 
   // Scroll-spy: determine which section is currently in view
+  // IMPORTANT: All hooks must be called before any conditional returns
   const updateActiveSection = useCallback(() => {
+    if (isAdminPage) return; // Skip on admin pages
     const scrollPosition = window.scrollY + 150; // Offset for header height
 
     let currentSection: string | null = null;
@@ -59,9 +59,11 @@ export function Header() {
     }
 
     setActiveSection(currentSection);
-  }, []);
+  }, [isAdminPage]);
 
   useEffect(() => {
+    if (isAdminPage) return; // Skip on admin pages
+
     // Check if we're on a subpage (no hero section)
     const heroSection = document.querySelector('#hero');
     setIsSubpage(!heroSection);
@@ -81,7 +83,12 @@ export function Header() {
     // Initial check
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [updateActiveSection]);
+  }, [updateActiveSection, isAdminPage]);
+
+  // Don't render on admin pages (after all hooks are called)
+  if (isAdminPage) {
+    return null;
+  }
 
   // Check if a nav item is active
   const isNavItemActive = (sectionId: string) => {
