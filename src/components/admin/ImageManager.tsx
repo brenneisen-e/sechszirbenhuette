@@ -18,6 +18,8 @@ import {
   Sun,
   Snowflake,
   Edit3,
+  HardDrive,
+  FolderDown,
 } from 'lucide-react';
 import Image from 'next/image';
 import JSZip from 'jszip';
@@ -72,6 +74,9 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
   const [winterImages, setWinterImages] = useState<ImageRecord[]>([]);
   const [replacingSeasonImage, setReplacingSeasonImage] = useState<SeasonImageReplacement | null>(null);
   const [isReplacingImage, setIsReplacingImage] = useState(false);
+  const [isExportingR2, setIsExportingR2] = useState(false);
+  const [r2ExportProgress, setR2ExportProgress] = useState(0);
+  const [r2ExportStatus, setR2ExportStatus] = useState<string>('');
 
   useEffect(() => {
     loadImages();
@@ -216,6 +221,152 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     } finally {
       setIsDownloading(false);
       setDownloadProgress(0);
+    }
+  };
+
+  // Export all images from R2 bucket as ZIP (for GitHub migration)
+  const exportR2ToGitHub = async () => {
+    setIsExportingR2(true);
+    setR2ExportProgress(0);
+    setR2ExportStatus('Liste Bilder aus R2...');
+
+    try {
+      // Step 1: Get list of all images in R2
+      const listResponse = await fetch('/api/admin/export-r2');
+      const listData = (await listResponse.json()) as {
+        success?: boolean;
+        images?: Array<{ key: string; category: string; filename: string; size: number }>;
+        totalCount?: number;
+        byCategory?: Record<string, number>;
+        error?: string;
+      };
+
+      if (!listData.success || !listData.images) {
+        throw new Error(listData.error || 'Fehler beim Auflisten der R2-Objekte');
+      }
+
+      const images = listData.images;
+      if (images.length === 0) {
+        setError('Keine Bilder im R2-Bucket gefunden');
+        setIsExportingR2(false);
+        return;
+      }
+
+      setR2ExportStatus(`${images.length} Bilder gefunden. Starte Download...`);
+
+      // Step 2: Download each image and add to ZIP
+      const zip = new JSZip();
+      const total = images.length;
+      let downloaded = 0;
+      let errors = 0;
+
+      // Create manifest for GitHub
+      const manifest: Record<string, { files: string[]; count: number }> = {};
+
+      for (const img of images) {
+        try {
+          setR2ExportStatus(`Lade ${img.filename} (${downloaded + 1}/${total})...`);
+
+          const downloadResponse = await fetch('/api/admin/export-r2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: img.key }),
+          });
+
+          const downloadData = (await downloadResponse.json()) as {
+            success?: boolean;
+            data?: string;
+            contentType?: string;
+            error?: string;
+          };
+
+          if (downloadData.success && downloadData.data) {
+            // Convert base64 to binary
+            const binaryString = atob(downloadData.data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            // Add to ZIP with category folder structure
+            const filePath = `gallery/${img.category}/${img.filename}`;
+            zip.file(filePath, bytes);
+
+            // Update manifest
+            if (!manifest[img.category]) {
+              manifest[img.category] = { files: [], count: 0 };
+            }
+            manifest[img.category].files.push(img.filename);
+            manifest[img.category].count++;
+
+            downloaded++;
+          } else {
+            console.error(`Failed to download ${img.key}:`, downloadData.error);
+            errors++;
+          }
+
+          setR2ExportProgress(Math.round(((downloaded + errors) / total) * 100));
+        } catch (err) {
+          console.error(`Error downloading ${img.key}:`, err);
+          errors++;
+        }
+      }
+
+      // Add manifest to ZIP
+      zip.file('gallery/manifest.json', JSON.stringify(manifest, null, 2));
+
+      // Add README
+      const readme = `# Sechszirbenhütte Galerie-Bilder
+
+Diese Bilder wurden aus dem Cloudflare R2-Bucket exportiert.
+
+## Kategorien
+${Object.entries(manifest)
+  .map(([cat, info]) => `- **${cat}**: ${info.count} Bilder`)
+  .join('\n')}
+
+## Integration in GitHub
+
+1. Entpacken Sie diese ZIP-Datei
+2. Kopieren Sie den \`gallery\` Ordner nach \`public/images/\`
+3. Committen und pushen Sie die Änderungen
+
+## Datum
+Exportiert am: ${new Date().toLocaleString('de-DE')}
+`;
+      zip.file('README.md', readme);
+
+      setR2ExportStatus('Erstelle ZIP-Archiv...');
+
+      // Generate and download ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sechszirbenhuette-r2-export-${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setR2ExportStatus(`Fertig! ${downloaded} Bilder exportiert${errors > 0 ? `, ${errors} Fehler` : ''}`);
+      setMigrationResults([
+        `✓ ${downloaded} Bilder erfolgreich exportiert`,
+        ...Object.entries(manifest).map(([cat, info]) => `  - ${cat}: ${info.count} Bilder`),
+        errors > 0 ? `❌ ${errors} Bilder konnten nicht heruntergeladen werden` : '',
+        '',
+        '📋 Nächste Schritte:',
+        '  1. ZIP-Datei entpacken',
+        '  2. "gallery" Ordner nach public/images/ kopieren',
+        '  3. git add . && git commit -m "Add gallery images" && git push',
+      ].filter(Boolean));
+    } catch (err) {
+      console.error('R2 export error:', err);
+      setError(`Fehler beim R2-Export: ${err instanceof Error ? err.message : 'Unbekannt'}`);
+      setR2ExportStatus('');
+    } finally {
+      setIsExportingR2(false);
+      setR2ExportProgress(0);
     }
   };
 
@@ -631,6 +782,14 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
                 GitHub-Import
               </button>
               <button
+                onClick={exportR2ToGitHub}
+                disabled={isExportingR2}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isExportingR2 ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderDown className="w-4 h-4" />}
+                {isExportingR2 ? `${r2ExportProgress}%` : 'R2 → GitHub Export'}
+              </button>
+              <button
                 onClick={() => runMigration('delete_all_images')}
                 disabled={isMigrating}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
@@ -639,6 +798,12 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
                 Alle löschen
               </button>
             </div>
+            {r2ExportStatus && (
+              <div className="mt-3 text-sm text-purple-700 bg-purple-50 p-3 rounded-lg">
+                <HardDrive className="w-4 h-4 inline-block mr-2" />
+                {r2ExportStatus}
+              </div>
+            )}
             {migrationResults.length > 0 && (
               <div className="bg-gray-100 rounded-lg p-4 max-h-60 overflow-y-auto">
                 {migrationResults.map((result, i) => (
