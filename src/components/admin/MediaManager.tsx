@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
   ArrowUpDown,
+  FolderDown,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -100,6 +101,9 @@ export default function MediaManager() {
   const [bulkCategory, setBulkCategory] = useState('');
   const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
   const [isSavingBulk, setIsSavingBulk] = useState(false);
+  // GitHub import state
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResults, setImportResults] = useState<string[]>([]);
 
   // Load media on mount
   useEffect(() => {
@@ -136,6 +140,35 @@ export default function MediaManager() {
       setError('Fehler beim Laden der Medien');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // GitHub Import - imports static images from public/images/ to database
+  const runGitHubImport = async () => {
+    setIsImporting(true);
+    setImportResults([]);
+    setError('');
+    try {
+      const response = await fetch('/api/admin/images', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'migrate_from_github' }),
+      });
+      const data = await response.json() as { success?: boolean; results?: string[]; error?: string };
+      if (data.success && data.results) {
+        setImportResults(data.results);
+        setSuccess('GitHub-Import erfolgreich!');
+        await loadMedia();
+      } else {
+        setError(data.error || 'Import fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('GitHub import error:', err);
+      setError('Verbindungsfehler beim Import');
+    } finally {
+      setIsImporting(false);
+      // Clear results after 10 seconds
+      setTimeout(() => setImportResults([]), 10000);
     }
   };
 
@@ -592,6 +625,19 @@ export default function MediaManager() {
               <span>{bulkAssignMode ? 'Beenden' : 'Kategorie zuweisen'}</span>
             </button>
             <button
+              onClick={runGitHubImport}
+              disabled={isImporting || bulkAssignMode}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              title="Bilder aus GitHub importieren"
+            >
+              {isImporting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FolderDown className="w-4 h-4" />
+              )}
+              <span className="text-sm">GitHub-Import</span>
+            </button>
+            <button
               onClick={handleRemoveDuplicates}
               disabled={isCleaningDuplicates || bulkAssignMode}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
@@ -674,6 +720,18 @@ export default function MediaManager() {
                 Klicken Sie auf die Bilder, um sie der Kategorie &quot;{CATEGORIES.find(c => c.value === bulkCategory)?.label}&quot; hinzuzufügen oder zu entfernen.
               </p>
             )}
+          </div>
+        )}
+
+        {/* Import Results */}
+        {importResults.length > 0 && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+            <p className="font-medium mb-2">Import-Ergebnis:</p>
+            <ul className="text-sm space-y-1">
+              {importResults.map((result, i) => (
+                <li key={i}>{result}</li>
+              ))}
+            </ul>
           </div>
         )}
 
