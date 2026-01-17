@@ -939,21 +939,27 @@ export default function MediaManager() {
 
                         {/* Edit Form */}
                         {editingId === item.id && (
-                          <div className="absolute inset-0 bg-white p-2 flex flex-col gap-2">
-                            <input
-                              type="text"
-                              value={editValues.title}
-                              onChange={(e) => setEditValues(v => ({ ...v, title: e.target.value }))}
-                              placeholder="Titel"
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            />
-                            <input
-                              type="text"
-                              value={editValues.alt_text}
-                              onChange={(e) => setEditValues(v => ({ ...v, alt_text: e.target.value }))}
-                              placeholder="Alt-Text"
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                            />
+                          <div className="absolute inset-0 bg-white p-2 flex flex-col gap-1">
+                            <div>
+                              <label className="text-[10px] font-medium text-gray-500">Titel</label>
+                              <input
+                                type="text"
+                                value={editValues.title}
+                                onChange={(e) => setEditValues(v => ({ ...v, title: e.target.value }))}
+                                placeholder="Titel"
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-medium text-gray-500">Alt-Text</label>
+                              <input
+                                type="text"
+                                value={editValues.alt_text}
+                                onChange={(e) => setEditValues(v => ({ ...v, alt_text: e.target.value }))}
+                                placeholder="Alt-Text"
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              />
+                            </div>
                             <div className="flex gap-1 mt-auto">
                               <button
                                 onClick={() => handleSaveEdit(item.id)}
