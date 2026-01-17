@@ -62,6 +62,7 @@ export function Umgebung() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [dogTripImages, setDogTripImages] = useState<Record<string, MediaItem[]>>({});
   const [currentDogTrip, setCurrentDogTrip] = useState(0);
+  const [currentNockbergeFeature, setCurrentNockbergeFeature] = useState(0);
 
   // Tab state
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('nockberge');
@@ -110,7 +111,7 @@ export function Umgebung() {
           </div>
           <h2
             data-text-key="umgebung_title"
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
             style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('umgebung_title') }}
           >
             {getText('umgebung_title')}
@@ -139,96 +140,144 @@ export function Umgebung() {
             </button>
             <button
               onClick={() => setActiveMainTab('kaernten')}
-              className={`px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition-all ${
+              className={`px-6 py-3 rounded-lg font-semibold text-sm md:text-base transition-all flex items-center gap-2 ${
                 activeMainTab === 'kaernten'
                   ? 'bg-logo-green text-white shadow-md'
                   : 'text-gray-600 hover:text-logo-green'
               }`}
             >
-              <Globe className="inline w-5 h-5 mr-2" />
-              Kärnten
+              <Globe className="inline w-5 h-5" />
+              <span>Kärnten</span>
+              <span className={`hidden sm:inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                activeMainTab === 'kaernten'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-logo-green/10 text-logo-green'
+              }`}>
+                <Dog size={12} />
+                <Baby size={12} />
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Nockberge Tab Content */}
+        {/* Nockberge Tab Content - Carousel like Dog/Kids */}
         {activeMainTab === 'nockberge' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Outdoor Images Gallery */}
-            {images.length > 0 && (
-              <div className="mb-12">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {images.slice(0, 4).map((img, index) => (
-                    <button
-                      key={img.id}
-                      onClick={() => setSelectedImage(index)}
-                      className="relative aspect-[4/3] overflow-hidden rounded-xl hover:opacity-90 transition group"
-                    >
-                      <Image
-                        src={img.url}
-                        alt={img.alt_text || 'Umgebung Sechszirbenhütte'}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 50vw, 25vw"
-                      />
-                    </button>
-                  ))}
+            {/* Carousel Container */}
+            <div className="relative">
+              {/* Navigation Buttons */}
+              <button
+                onClick={() => setCurrentNockbergeFeature(prev => Math.max(0, prev - 1))}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentNockbergeFeature === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                disabled={currentNockbergeFeature === 0}
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <button
+                onClick={() => setCurrentNockbergeFeature(prev => Math.min(featureKeys.length - 1, prev + 1))}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentNockbergeFeature === featureKeys.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                disabled={currentNockbergeFeature === featureKeys.length - 1}
+              >
+                <ChevronRight size={24} />
+              </button>
+
+              {/* Carousel Track */}
+              <div className="overflow-hidden mx-4 md:mx-8">
+                <div
+                  className="flex transition-transform duration-300 ease-out"
+                  style={{ transform: `translateX(-${currentNockbergeFeature * 100}%)` }}
+                >
+                  {featureKeys.map((key, index) => {
+                    const Icon = featureIcons[key];
+                    const feature = t.umgebung.features[key];
+                    const featureImage = images[index] || null;
+
+                    return (
+                      <div
+                        key={key}
+                        className="w-full flex-shrink-0 px-2"
+                      >
+                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md mx-auto">
+                          {/* Portrait Image or Icon Placeholder */}
+                          <div className="relative aspect-[3/4] bg-gray-100">
+                            {featureImage ? (
+                              <button
+                                onClick={() => setSelectedImage(index)}
+                                className="w-full h-full"
+                              >
+                                <Image
+                                  src={featureImage.url}
+                                  alt={featureImage.alt_text || feature.title}
+                                  fill
+                                  className="object-cover hover:scale-105 transition-transform duration-300"
+                                  sizes="(max-width: 768px) 100vw, 400px"
+                                />
+                              </button>
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-logo-green/10 to-logo-green/20">
+                                <Icon size={80} className="text-logo-green/40" />
+                              </div>
+                            )}
+                            {/* Number Badge */}
+                            <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-logo-green flex items-center justify-center text-white font-bold shadow-lg">
+                              {index + 1}
+                            </div>
+                            {/* Icon Badge */}
+                            <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-logo-green shadow-lg">
+                              <Icon size={20} />
+                            </div>
+                          </div>
+
+                          {/* Text Content */}
+                          <div className="p-5">
+                            <h4 className="text-lg font-bold text-logo-green mb-3">{feature.title}</h4>
+                            <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                            {key === 'kaerntenCard' && (
+                              <div className="mt-4 flex flex-wrap gap-3">
+                                <a
+                                  href="https://www.kaerntencard.at"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                                >
+                                  Kärnten Card <ExternalLink size={14} />
+                                </a>
+                                <a
+                                  href="https://www.heidialm.at"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                                >
+                                  Heidialm <ExternalLink size={14} />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            )}
 
-            {/* Feature Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featureKeys.map((key, index) => {
-                const Icon = featureIcons[key];
-                const feature = t.umgebung.features[key];
-                return (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-xl p-6 shadow-sm"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-logo-green/10 flex items-center justify-center text-logo-green">
-                        <Icon size={20} />
-                      </div>
-                      <h3 className="text-lg font-bold text-logo-green">
-                        {feature.title}
-                      </h3>
-                    </div>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {feature.description}
-                    </p>
-                    {key === 'kaerntenCard' && (
-                      <div className="mt-4 flex gap-3">
-                        <a
-                          href="https://www.kaerntencard.at"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                        >
-                          Kärnten Card <ExternalLink size={14} />
-                        </a>
-                        <a
-                          href="https://www.heidialm.at"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                        >
-                          Heidialm <ExternalLink size={14} />
-                        </a>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
+              {/* Dots Indicator */}
+              <div className="flex justify-center gap-2 mt-6">
+                {featureKeys.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentNockbergeFeature(index)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      currentNockbergeFeature === index
+                        ? 'bg-logo-green w-6'
+                        : 'bg-logo-green/30 hover:bg-logo-green/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -252,7 +301,7 @@ export function Umgebung() {
                   }`}
                 >
                   <Dog size={18} />
-                  Mit Hunden
+                  {t.ui?.withDogs || 'Mit Hunden'}
                 </button>
                 <button
                   onClick={() => setActiveKaerntenSubTab('kinder')}
@@ -263,7 +312,7 @@ export function Umgebung() {
                   }`}
                 >
                   <Baby size={18} />
-                  Mit Kindern
+                  {t.ui?.withKids || 'Mit Kindern'}
                 </button>
               </div>
             </div>
@@ -279,7 +328,7 @@ export function Umgebung() {
               >
                 <div className="flex flex-col items-center text-center mb-8">
                   <h3
-                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
+                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green"
                     style={{ fontFamily: 'FeelingPassionate, cursive' }}
                   >
                     {t.umgebung.dogTrips.title}
@@ -335,7 +384,7 @@ export function Umgebung() {
                                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
                                     <div className="text-center text-wood-600">
                                       <Dog size={48} className="mx-auto mb-2 opacity-50" />
-                                      <p className="text-sm">Bild im Admin hinzufügen</p>
+                                      <p className="text-sm">{t.ui?.addImageInAdmin || 'Bild im Admin hinzufügen'}</p>
                                     </div>
                                   </div>
                                 )}
@@ -358,7 +407,7 @@ export function Umgebung() {
                                   )}
                                   {trip.tip && (
                                     <span className="text-wood-600 font-medium">
-                                      Tipp: {trip.tip}
+                                      {t.ui?.note || 'Tipp'}: {trip.tip}
                                     </span>
                                   )}
                                 </div>
@@ -397,7 +446,7 @@ export function Umgebung() {
               >
                 <div className="flex flex-col items-center text-center mb-8">
                   <h3
-                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green"
+                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green"
                     style={{ fontFamily: 'FeelingPassionate, cursive' }}
                   >
                     {t.umgebung.kidsTrips.title}

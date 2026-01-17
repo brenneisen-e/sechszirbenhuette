@@ -329,5 +329,80 @@
     "persons": "Personen",
     "nights": "Nächte",
     "perNight": "pro Nacht"
+  },
+  "ui": {
+    "withDogs": "Mit Hunden",
+    "withKids": "Mit Kindern",
+    "note": "Hinweis",
+    "swipeHint": "Wischen zum Blättern",
+    "addImageInAdmin": "Bild im Admin hinzufügen",
+    "onRequest": "auf Anfrage",
+    "perStay": "pro Aufenthalt",
+    "perPerson": "pro Person",
+    "perAnimal": "pro Tier",
+    "checkAvailability": "Verfügbarkeit prüfen",
+    "loadingBooking": "Buchungssystem wird geladen...",
+    "floorPlan": "Grundriss",
+    "floorPlanDesc": "Unsere Hütte bietet auf ca. 100 m² Wohnfläche Platz für bis zu 8 Personen.",
+    "livingSpace": "ca. 100 m² Wohnfläche",
+    "floors": "2 Etagen",
+    "previousReview": "Vorherige Bewertung",
+    "nextReview": "Nächste Bewertung",
+    "review": "Bewertung",
+    "previousImage": "Vorheriges Bild",
+    "nextImage": "Nächstes Bild",
+    "expandGallery": "Galerie ausklappen",
+    "collapseGallery": "Galerie einklappen",
+    "noImagesInCategory": "Keine Bilder in dieser Kategorie",
+    "imagesLoading": "Bilder werden geladen...",
+    "translatedFromGerman": "Aus dem Deutschen übersetzt"
+  },
+  "galerie": {
+    "categories": {
+      "all": "Alle",
+      "aussen": "Außenbereich",
+      "wohnen": "Wohnbereich",
+      "schlafen": "Schlafzimmer",
+      "kueche": "Küche",
+      "bad": "Bad & Sauna",
+      "umgebung": "Umgebung",
+      "extras": "Extras"
+    }
+  },
+  "amenities": {
+    "living": {
+      "title": "Wohnbereich",
+      "items": ["Schwedenofen", "Essecke für 8-10 Personen", "Satellit-TV & DVD", "Stereoanlage"]
+    },
+    "kitchen": {
+      "title": "Küche",
+      "items": ["Voll ausgestattet", "Spülmaschine", "Ceranherd & Backofen", "Mikrowelle mit Grill"]
+    },
+    "rooms": {
+      "title": "Schlafzimmer",
+      "items": ["1 Galeriezimmer (2 Einzelbetten)", "1 Doppelbettzimmer", "1 Zimmer mit 2 Stockbetten", "Platz für 8 Personen"],
+      "hint": "Bettwäsche selbst mitbringen oder Komfort-Paket buchen"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "items": ["Sauna mit Sanarium", "Ruheraum mit Liegen", "Extra Dusche mit Kneipp-Schlauch", "Fußbodenheizung"]
+    },
+    "bathroom": {
+      "title": "Badezimmer",
+      "items": ["Dusche & WC", "Doppelwaschbecken", "Fußbodenheizung", "Modern ausgestattet"],
+      "hint": "Handtücher selbst mitbringen oder Komfort-Paket buchen"
+    },
+    "outdoor": {
+      "title": "Außenbereich",
+      "items": ["15m² Balkon mit Außentreppe", "650m² Grundstück", "2 Parkplätze", "Grill & Gartenmöbel"]
+    },
+    "equipment": {
+      "title": "Ausstattung",
+      "items": ["WLAN / ADSL", "Satelliten-TV", "Grill", "Haustiere willkommen"]
+    },
+    "location": {
+      "title": "Lage",
+      "items": ["Skigebiet Falkert vor Ort", "Turracher Höhe (20 Min.)", "Bad Kleinkirchheim (25 Min.)", "Viele Wanderwege"]
+    }
   }
 }

@@ -1,6 +1,50 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, CSSProperties } from 'react';
+import { useLanguage, Language } from './LanguageContext';
+import de from '@/locales/de.json';
+import en from '@/locales/en.json';
+import it from '@/locales/it.json';
+import sl from '@/locales/sl.json';
+
+// Translation mappings for each text key to the locale structure
+const translations = { de, en, it, sl };
+
+// Map text_key to the path in locale files
+const textKeyToLocalePath: Record<string, string> = {
+  // Hero
+  hero_title: 'hero.welcome',
+  hero_subtitle: 'hero.subtitle',
+  hero_description: 'hero.description',
+  // Ferienhaus
+  ferienhaus_title: 'ferienhaus.title',
+  ferienhaus_subtitle: 'ferienhaus.intro',
+  // Galerie
+  galerie_title: 'navigation.galerie',
+  // Umgebung
+  umgebung_title: 'umgebung.title',
+  umgebung_subtitle: 'umgebung.subtitle',
+  // Buchung
+  buchung_title: 'buchung.title',
+  buchung_subtitle: 'buchung.subtitle',
+  // Bewertungen
+  bewertungen_title: 'bewertungen.title',
+  bewertungen_subtitle: 'bewertungen.subtitle',
+};
+
+// Helper to get nested value from object by path
+function getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
+  const parts = path.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current && typeof current === 'object' && part in current) {
+      current = (current as Record<string, unknown>)[part];
+    } else {
+      return undefined;
+    }
+  }
+  return typeof current === 'string' ? current : undefined;
+}
 
 export interface ContentText {
   id: number;
@@ -138,7 +182,9 @@ type ContentTextsContextType = {
 
 const ContentTextsContext = createContext<ContentTextsContextType | undefined>(undefined);
 
-export function ContentTextsProvider({ children }: { children: ReactNode }) {
+// Inner provider that has access to language context
+function ContentTextsProviderInner({ children }: { children: ReactNode }) {
+  const { language } = useLanguage();
   const [texts, setTexts] = useState<Record<string, ContentText>>(defaultTexts);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -160,7 +206,19 @@ export function ContentTextsProvider({ children }: { children: ReactNode }) {
     fetchTexts();
   }, []);
 
+  // Get text with language support
   const getText = (key: string): string => {
+    // First check if there's a locale path mapping for this key
+    const localePath = textKeyToLocalePath[key];
+    if (localePath) {
+      const localeData = translations[language as keyof typeof translations];
+      const translatedText = getNestedValue(localeData as Record<string, unknown>, localePath);
+      if (translatedText) {
+        return translatedText;
+      }
+    }
+
+    // Fallback to admin-customized text or default
     return texts[key]?.content || defaultTexts[key]?.content || '';
   };
 
@@ -219,6 +277,11 @@ export function ContentTextsProvider({ children }: { children: ReactNode }) {
       {children}
     </ContentTextsContext.Provider>
   );
+}
+
+// Wrapper provider for external use (must be inside LanguageProvider)
+export function ContentTextsProvider({ children }: { children: ReactNode }) {
+  return <ContentTextsProviderInner>{children}</ContentTextsProviderInner>;
 }
 
 export function useContentTexts() {
