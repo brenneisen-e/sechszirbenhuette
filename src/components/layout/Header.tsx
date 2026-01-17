@@ -36,10 +36,10 @@ export function Header() {
   const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [isSubpage, setIsSubpage] = useState(false);
 
-  // Check if we're on admin page
+  // Check if we're on admin page or a subpage (not homepage)
   const isAdminPage = pathname?.startsWith('/admin');
+  const isSubpage = pathname !== '/';
 
   // Scroll-spy: determine which section is currently in view
   // IMPORTANT: All hooks must be called before any conditional returns
@@ -66,9 +66,7 @@ export function Header() {
   useEffect(() => {
     if (isAdminPage) return; // Skip on admin pages
 
-    // Check if we're on a subpage (no hero section)
     const heroSection = document.querySelector('#hero');
-    setIsSubpage(!heroSection);
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
