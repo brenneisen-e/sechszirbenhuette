@@ -56,13 +56,31 @@ const categoryMap: Record<string, string> = {
   'hund-millstaetter': 'hund-millstaetter',
 };
 
-// Fallback static images
+// Fallback static images - Interior images from repo
 const fallbackImages: GalleryImage[] = [
-  { src: '/images/fallback/exterior-1.jpg', title: 'Sechszirbenhütte', description: 'Traumhafte Berglage auf 1700m', category: 'aussen' },
-  { src: '/images/fallback/living-1.jpg', title: 'Wohnraum', description: 'Gemütlicher Holzofen', category: 'wohnen' },
-  { src: '/images/fallback/bedroom-1.jpg', title: 'Schlafzimmer', description: 'Komfortable Betten', category: 'schlafen' },
-  { src: '/images/fallback/kitchen-1.jpg', title: 'Küche', description: 'Vollausgestattet', category: 'kueche' },
-  { src: '/images/fallback/bathroom-1.jpg', title: 'Bad', description: 'Modern mit Fußbodenheizung', category: 'bad' },
+  // Wohnbereich
+  { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Wohnzimmer', description: 'Gemütlicher Wohnbereich', category: 'wohnen' },
+  { src: '/images/innen/Wohnzimmer_02_Galerie.jpg', title: 'Wohnzimmer', description: 'Blick von der Galerie', category: 'wohnen' },
+  { src: '/images/innen/Stube.jpg', title: 'Stube', description: 'Traditionelle Holzstube', category: 'wohnen' },
+  { src: '/images/innen/Stube_02.jpg', title: 'Stube', description: 'Gemütliche Atmosphäre', category: 'wohnen' },
+  { src: '/images/innen/Stube_03.jpg', title: 'Stube', description: 'Rustikales Ambiente', category: 'wohnen' },
+  { src: '/images/innen/Kamin.jpg', title: 'Kamin', description: 'Wohlige Wärme', category: 'wohnen' },
+  { src: '/images/innen/Lampe.jpg', title: 'Beleuchtung', description: 'Stimmungsvolles Licht', category: 'wohnen' },
+  { src: '/images/innen/Treppenaufgang.jpg', title: 'Treppenaufgang', description: 'Zum Obergeschoss', category: 'wohnen' },
+  // Schlafzimmer
+  { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Schlafzimmer', description: 'Großes Schlafzimmer', category: 'schlafen' },
+  { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Schlafzimmer', description: 'Gemütliches Schlafzimmer', category: 'schlafen' },
+  // Küche
+  { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Voll ausgestattet', category: 'kueche' },
+  { src: '/images/innen/Küche_02.jpg', title: 'Küche', description: 'Mit modernen Geräten', category: 'kueche' },
+  { src: '/images/innen/Kaffeemaschinen.jpg', title: 'Kaffeemaschine', description: 'Für den perfekten Kaffee', category: 'kueche' },
+  // Bad & Sauna
+  { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Modernes Bad', category: 'bad' },
+  { src: '/images/innen/WC.jpg', title: 'WC', description: 'Separates WC', category: 'bad' },
+  { src: '/images/innen/Sauna.jpg', title: 'Sauna', description: 'Finnische Sauna', category: 'bad' },
+  { src: '/images/innen/Ruheraum.jpg', title: 'Ruheraum', description: 'Entspannung nach der Sauna', category: 'bad' },
+  { src: '/images/innen/Ruheraum_02.jpg', title: 'Ruheraum', description: 'Wellness-Bereich', category: 'bad' },
+  { src: '/images/innen/Ruheraum Dusche.jpg', title: 'Dusche', description: 'Im Ruheraum', category: 'bad' },
 ];
 
 // Parse alt_text format "Title - Description" into title and description
