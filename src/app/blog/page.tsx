@@ -163,7 +163,7 @@ export default function BlogPage() {
                 {t.umgebung.intro}
               </p>
 
-              {/* Nockberge Carousel */}
+              {/* Nockberge Carousel - 2 cards on desktop, 1 on mobile */}
               <div className="relative">
                 {/* Navigation Buttons */}
                 <button
@@ -174,95 +174,98 @@ export default function BlogPage() {
                   <ChevronLeft size={24} />
                 </button>
                 <button
-                  onClick={() => setCurrentNockbergeFeature(prev => Math.min(featureKeys.length - 1, prev + 1))}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentNockbergeFeature === featureKeys.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  disabled={currentNockbergeFeature === featureKeys.length - 1}
+                  onClick={() => setCurrentNockbergeFeature(prev => Math.min(Math.ceil(featureKeys.length / 2) - 1, prev + 1))}
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentNockbergeFeature >= Math.ceil(featureKeys.length / 2) - 1 ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  disabled={currentNockbergeFeature >= Math.ceil(featureKeys.length / 2) - 1}
                 >
                   <ChevronRight size={24} />
                 </button>
 
-                {/* Carousel Track */}
+                {/* Carousel Track - shows 2 cards on desktop */}
                 <div className="overflow-hidden mx-4 md:mx-8">
                   <div
                     className="flex transition-transform duration-300 ease-out"
                     style={{ transform: `translateX(-${currentNockbergeFeature * 100}%)` }}
                   >
-                    {featureKeys.map((key, index) => {
-                      const Icon = featureIcons[key];
-                      const feature = t.umgebung.features[key];
-                      const featureImage = images[index] || null;
+                    {/* Group features in pairs for desktop view */}
+                    {Array.from({ length: Math.ceil(featureKeys.length / 2) }).map((_, pairIndex) => (
+                      <div key={pairIndex} className="w-full flex-shrink-0 px-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                          {featureKeys.slice(pairIndex * 2, pairIndex * 2 + 2).map((key, idx) => {
+                            const index = pairIndex * 2 + idx;
+                            const Icon = featureIcons[key];
+                            const feature = t.umgebung.features[key];
+                            const featureImage = images[index] || null;
 
-                      return (
-                        <div
-                          key={key}
-                          className="w-full flex-shrink-0 px-2"
-                        >
-                          <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden max-w-md mx-auto">
-                            {/* Portrait Image or Icon Placeholder */}
-                            <div className="relative aspect-[3/4] bg-gray-100">
-                              {featureImage ? (
-                                <button
-                                  onClick={() => setSelectedImage(index)}
-                                  className="w-full h-full"
-                                >
-                                  <Image
-                                    src={featureImage.url}
-                                    alt={featureImage.alt_text || feature.title}
-                                    fill
-                                    className="object-cover hover:scale-105 transition-transform duration-300"
-                                    sizes="(max-width: 768px) 100vw, 400px"
-                                  />
-                                </button>
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-logo-green/10 to-logo-green/20">
-                                  <Icon size={80} className="text-logo-green/40" />
+                            return (
+                              <div key={key} className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                                {/* Portrait Image or Icon Placeholder */}
+                                <div className="relative aspect-[3/4] bg-gray-100">
+                                  {featureImage ? (
+                                    <button
+                                      onClick={() => setSelectedImage(index)}
+                                      className="w-full h-full"
+                                    >
+                                      <Image
+                                        src={featureImage.url}
+                                        alt={featureImage.alt_text || feature.title}
+                                        fill
+                                        className="object-cover hover:scale-105 transition-transform duration-300"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                      />
+                                    </button>
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-logo-green/10 to-logo-green/20">
+                                      <Icon size={80} className="text-logo-green/40" />
+                                    </div>
+                                  )}
+                                  {/* Number Badge */}
+                                  <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-logo-green flex items-center justify-center text-white font-bold shadow-lg">
+                                    {index + 1}
+                                  </div>
+                                  {/* Icon Badge */}
+                                  <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-logo-green shadow-lg">
+                                    <Icon size={20} />
+                                  </div>
                                 </div>
-                              )}
-                              {/* Number Badge */}
-                              <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-logo-green flex items-center justify-center text-white font-bold shadow-lg">
-                                {index + 1}
-                              </div>
-                              {/* Icon Badge */}
-                              <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-logo-green shadow-lg">
-                                <Icon size={20} />
-                              </div>
-                            </div>
 
-                            {/* Text Content */}
-                            <div className="p-5">
-                              <h4 className="text-lg font-bold text-logo-green mb-3">{feature.title}</h4>
-                              <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                              {key === 'kaerntenCard' && (
-                                <div className="mt-4 flex flex-wrap gap-3">
-                                  <a
-                                    href="https://www.kaerntencard.at"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                                  >
-                                    Kärnten Card <ExternalLink size={14} />
-                                  </a>
-                                  <a
-                                    href="https://www.heidialm.at"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
-                                  >
-                                    Heidialm <ExternalLink size={14} />
-                                  </a>
+                                {/* Text Content */}
+                                <div className="p-5">
+                                  <h4 className="text-lg font-bold text-logo-green mb-3">{feature.title}</h4>
+                                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                                  {key === 'kaerntenCard' && (
+                                    <div className="mt-4 flex flex-wrap gap-3">
+                                      <a
+                                        href="https://www.kaerntencard.at"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                                      >
+                                        Kärnten Card <ExternalLink size={14} />
+                                      </a>
+                                      <a
+                                        href="https://www.heidialm.at"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-wood-600 hover:text-logo-green flex items-center gap-1"
+                                      >
+                                        Heidialm <ExternalLink size={14} />
+                                      </a>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Dots Indicator */}
+                {/* Dots Indicator - 3 dots for 3 pairs */}
                 <div className="flex justify-center gap-2 mt-6">
-                  {featureKeys.map((_, index) => (
+                  {Array.from({ length: Math.ceil(featureKeys.length / 2) }).map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentNockbergeFeature(index)}
