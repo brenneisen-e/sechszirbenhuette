@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
   ArrowUpDown,
+  FolderDown,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -93,6 +94,9 @@ export default function MediaManager() {
   // Category editing state
   const [editingCategoriesId, setEditingCategoriesId] = useState<string | null>(null);
   const [editingCategories, setEditingCategories] = useState<string[]>([]);
+  // GitHub import state
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResults, setImportResults] = useState<string[]>([]);
 
   // Load media on mount
   useEffect(() => {
@@ -121,6 +125,35 @@ export default function MediaManager() {
       setError('Fehler beim Laden der Medien');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // GitHub Import - imports static images from public/images/ to database
+  const runGitHubImport = async () => {
+    setIsImporting(true);
+    setImportResults([]);
+    setError('');
+    try {
+      const response = await fetch('/api/admin/images', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'migrate_from_github' }),
+      });
+      const data = await response.json() as { success?: boolean; results?: string[]; error?: string };
+      if (data.success && data.results) {
+        setImportResults(data.results);
+        setSuccess('GitHub-Import erfolgreich!');
+        await loadMedia();
+      } else {
+        setError(data.error || 'Import fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('GitHub import error:', err);
+      setError('Verbindungsfehler beim Import');
+    } finally {
+      setIsImporting(false);
+      // Clear results after 10 seconds
+      setTimeout(() => setImportResults([]), 10000);
     }
   };
 
@@ -395,14 +428,41 @@ export default function MediaManager() {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">Bilderverwaltung</h2>
-          <button
-            onClick={loadMedia}
-            className="p-2 text-gray-500 hover:text-logo-green transition"
-            title="Aktualisieren"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={runGitHubImport}
+              disabled={isImporting}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              title="Bilder aus GitHub importieren"
+            >
+              {isImporting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FolderDown className="w-4 h-4" />
+              )}
+              <span className="text-sm">GitHub-Import</span>
+            </button>
+            <button
+              onClick={loadMedia}
+              className="p-2 text-gray-500 hover:text-logo-green transition"
+              title="Aktualisieren"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+
+        {/* Import Results */}
+        {importResults.length > 0 && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+            <p className="font-medium mb-2">Import-Ergebnis:</p>
+            <ul className="text-sm space-y-1">
+              {importResults.map((result, i) => (
+                <li key={i}>{result}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Messages */}
         {error && (
