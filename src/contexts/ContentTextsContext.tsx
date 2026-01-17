@@ -207,8 +207,19 @@ function ContentTextsProviderInner({ children }: { children: ReactNode }) {
   }, []);
 
   // Get text with language support
+  // Priority: 1) Database (admin-customized), 2) Locale translations, 3) Default texts
   const getText = (key: string): string => {
-    // First check if there's a locale path mapping for this key
+    // First check if there's a customized value in the database (from admin panel)
+    // Only use it if it differs from the default (meaning admin has customized it)
+    const dbText = texts[key];
+    const defaultText = defaultTexts[key];
+
+    if (dbText && defaultText && dbText.content !== defaultText.content) {
+      // Admin has customized this text - use it regardless of language
+      return dbText.content;
+    }
+
+    // If not customized, check for locale translations
     const localePath = textKeyToLocalePath[key];
     if (localePath) {
       const localeData = translations[language as keyof typeof translations];
@@ -218,8 +229,8 @@ function ContentTextsProviderInner({ children }: { children: ReactNode }) {
       }
     }
 
-    // Fallback to admin-customized text or default
-    return texts[key]?.content || defaultTexts[key]?.content || '';
+    // Fallback to database text or default
+    return dbText?.content || defaultText?.content || '';
   };
 
   const getTextStyle = (key: string): CSSProperties => {
