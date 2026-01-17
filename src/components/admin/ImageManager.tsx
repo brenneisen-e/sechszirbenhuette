@@ -726,8 +726,9 @@ Exportiert am: ${new Date().toLocaleString('de-DE')}
     setMigrationResults([]);
 
     try {
-      const response = await fetch('/api/admin/migrate', {
-        method: 'POST',
+      // Use /api/admin/images PATCH for image-related actions
+      const response = await fetch('/api/admin/images', {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
         body: JSON.stringify({ action }),
       });
