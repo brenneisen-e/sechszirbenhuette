@@ -103,6 +103,13 @@ export function Header() {
   };
 
   const scrollToSection = (href: string) => {
+    // If we're on a subpage and the href is an anchor, navigate to homepage with anchor
+    if (isSubpage && href.startsWith('#')) {
+      window.location.href = '/' + href;
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
