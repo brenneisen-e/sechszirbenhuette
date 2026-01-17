@@ -193,22 +193,41 @@ export function Header() {
           </nav>
 
           {/* Centered Logo */}
-          <button
-            onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
-          >
-            <Image
-              src="/images/logo.svg"
-              alt="Sechszirbenhütte"
-              width={240}
-              height={100}
-              className={cn(
-                "w-auto transition-all duration-300",
-                isScrolled ? "h-16" : "h-20"
-              )}
-              priority
-            />
-          </button>
+          {pathname === '/' ? (
+            <button
+              onClick={() => scrollToSection('#hero')}
+              className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={240}
+                height={100}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-16" : "h-20"
+                )}
+                priority
+              />
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={240}
+                height={100}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-16" : "h-20"
+                )}
+                priority
+              />
+            </Link>
+          )}
 
           {/* Right Navigation - justify-start to push items towards center */}
           <nav className="flex items-center gap-8 justify-start" style={{ minWidth: '280px' }}>
@@ -274,22 +293,41 @@ export function Header() {
           </button>
 
           {/* Centered Logo (Mobile) */}
-          <button
-            onClick={() => scrollToSection('#hero')}
-            className="transition-transform hover:scale-105"
-          >
-            <Image
-              src="/images/logo.svg"
-              alt="Sechszirbenhütte"
-              width={160}
-              height={60}
-              className={cn(
-                "w-auto transition-all duration-300",
-                isScrolled ? "h-12" : "h-14"
-              )}
-              priority
-            />
-          </button>
+          {pathname === '/' ? (
+            <button
+              onClick={() => scrollToSection('#hero')}
+              className="transition-transform hover:scale-105"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={160}
+                height={60}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-12" : "h-14"
+                )}
+                priority
+              />
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className="transition-transform hover:scale-105"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="Sechszirbenhütte"
+                width={160}
+                height={60}
+                className={cn(
+                  "w-auto transition-all duration-300",
+                  isScrolled ? "h-12" : "h-14"
+                )}
+                priority
+              />
+            </Link>
+          )}
 
           {/* Language Switcher (Mobile) */}
           <LanguageSwitcher isScrolled={isScrolled || isSubpage} />
