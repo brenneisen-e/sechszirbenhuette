@@ -56,13 +56,36 @@ const categoryMap: Record<string, string> = {
   'hund-millstaetter': 'hund-millstaetter',
 };
 
-// Fallback static images
+// Fallback static images from local gallery
 const fallbackImages: GalleryImage[] = [
-  { src: '/images/fallback/exterior-1.jpg', title: 'Sechszirbenhütte', description: 'Traumhafte Berglage auf 1700m', category: 'aussen' },
-  { src: '/images/fallback/living-1.jpg', title: 'Wohnraum', description: 'Gemütlicher Holzofen', category: 'wohnen' },
-  { src: '/images/fallback/bedroom-1.jpg', title: 'Schlafzimmer', description: 'Komfortable Betten', category: 'schlafen' },
-  { src: '/images/fallback/kitchen-1.jpg', title: 'Küche', description: 'Vollausgestattet', category: 'kueche' },
-  { src: '/images/fallback/bathroom-1.jpg', title: 'Bad', description: 'Modern mit Fußbodenheizung', category: 'bad' },
+  // Wohnbereich
+  { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Gemütliche Stube', description: 'Eckbank mit Holztisch', category: 'wohnen' },
+  { src: '/images/innen/Stube.jpg', title: 'Wohnbereich', description: 'Bauernschrank und Treppe', category: 'wohnen' },
+  // Küche
+  { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Mit Bauernschrank', category: 'kueche' },
+  { src: '/images/innen/Küche_02.jpg', title: 'Küchenzeile', description: 'Voll ausgestattet', category: 'kueche' },
+  // Schlafzimmer
+  { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Großes Schlafzimmer', description: 'Doppelbett und Einzelbett', category: 'schlafen' },
+  { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Kleines Schlafzimmer', description: 'Gemütliches Doppelbett', category: 'schlafen' },
+  // Bad & Sauna
+  { src: '/images/innen/Sauna.jpg', title: 'Finnische Sauna', description: 'Eigene Sauna im Haus', category: 'bad' },
+  { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Mit Dusche', category: 'bad' },
+  { src: '/images/innen/Ruheraum.jpg', title: 'Ruheraum', description: 'Entspannung nach der Sauna', category: 'bad' },
+  // Außenbereich
+  { src: '/images/aussen/Sommerhütte.jpg', title: 'Sechszirbenhütte', description: 'Im Sommer mit Balkon', category: 'aussen' },
+  { src: '/images/aussen/Herbst.jpg', title: 'Herbstansicht', description: 'Die Hütte im Herbst', category: 'aussen' },
+  { src: '/images/aussen/Balkon.jpg', title: 'Verschneiter Balkon', description: 'Winterstimmung', category: 'aussen' },
+  // Umgebung
+  { src: '/images/aussen/Nockberge.jpg', title: 'Nockberge Panorama', description: 'Atemberaubende Berglandschaft', category: 'umgebung' },
+  { src: '/images/aussen/Falkertsee_Winter.png', title: 'Falkertsee', description: 'Mystische Winterstimmung', category: 'umgebung' },
+  { src: '/images/aussen/Kühe_Rodresnock.jpg', title: 'Almkühe', description: 'Am Rodresnock', category: 'umgebung' },
+  // Aktivitäten
+  { src: '/images/aussen/Snowboard.jpg', title: 'Snowboarden', description: 'Im Tiefschnee', category: 'extras' },
+  { src: '/images/aussen/Skigebiet.jpeg', title: 'Skigebiet Falkert', description: 'Familiäres Skigebiet', category: 'extras' },
+  { src: '/images/aussen/Gravel.jpg', title: 'Gravelbiken', description: 'In den Lärchenwäldern', category: 'extras' },
+  { src: '/images/aussen/Nockiflitzer.jpg', title: 'Nocki-Flitzer', description: 'Sommerrodelbahn', category: 'extras' },
+  { src: '/images/aussen/Pilze.jpg', title: 'Pilze sammeln', description: 'Im Wald', category: 'extras' },
+  { src: '/images/aussen/Angeln.jpg', title: 'Angeln', description: 'Am Bergsee', category: 'extras' },
 ];
 
 // Parse alt_text format "Title - Description" into title and description
