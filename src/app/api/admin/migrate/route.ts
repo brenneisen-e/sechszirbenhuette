@@ -152,7 +152,62 @@ export async function POST(request: NextRequest) {
       console.error('Migration content_texts index error:', err);
     }
 
-    // Migration 6: Insert default content texts
+    // Migration 6: Media table
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS media (
+          id TEXT PRIMARY KEY,
+          file_key TEXT NOT NULL,
+          url TEXT NOT NULL,
+          alt_text TEXT,
+          title TEXT,
+          category TEXT NOT NULL DEFAULT 'aussen',
+          media_type TEXT NOT NULL DEFAULT 'image',
+          display_order INTEGER DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+      migrations.push('media table created/verified');
+    } catch (err) {
+      console.error('Migration media error:', err);
+    }
+
+    // Migration 7: Media categories junction table
+    try {
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS media_categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          media_id TEXT NOT NULL,
+          category TEXT NOT NULL,
+          FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+          UNIQUE(media_id, category)
+        )
+      `).run();
+      migrations.push('media_categories table created/verified');
+    } catch (err) {
+      console.error('Migration media_categories error:', err);
+    }
+
+    // Migration 8: Indexes for media tables
+    try {
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_media_category ON media(category)
+      `).run();
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_media_display_order ON media(display_order)
+      `).run();
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_media_categories_media_id ON media_categories(media_id)
+      `).run();
+      await env.DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_media_categories_category ON media_categories(category)
+      `).run();
+      migrations.push('media indexes created');
+    } catch (err) {
+      console.error('Migration media indexes error:', err);
+    }
+
+    // Migration 9: Insert default content texts
     const defaultTexts = [
       // Hero Section
       { key: 'hero_title', content: 'Herzlich Willkommen in der Sechszirbenhütte', section: 'hero', type: 'heading' },
