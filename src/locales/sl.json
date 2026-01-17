@@ -8,6 +8,7 @@
     "ferienhaus": "Počitniška Hiša",
     "umgebung": "Okolica",
     "galerie": "Galerija",
+    "blog": "Blog",
     "anfrage": "Povpraševanje",
     "buchung": "Rezervacija",
     "bewertungen": "Ocene",
@@ -388,5 +389,12 @@
       "title": "Lokacija",
       "items": ["Smučišče Falkert na mestu", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Številne pohodniške poti"]
     }
+  },
+  "blog": {
+    "intro": "Odkrijte naše potovalne nasvete in zgodbe iz gora Nockberge",
+    "articleLabel": "Blog Članek",
+    "kaerntenTitle": "Izleti na Koroškem",
+    "kaerntenSubtitle": "Najlepše destinacije s psi in otroki",
+    "kaerntenIntro": "Odkrijte najboljše destinacije na Koroškem za vso družino - popolne za počitnice s psi in otroki."
   }
 }

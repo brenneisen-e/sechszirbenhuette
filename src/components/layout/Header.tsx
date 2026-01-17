@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -13,13 +14,14 @@ const LOGO_GREEN = '#1e5631';
 
 // Navigation links - split for left and right of logo
 const leftNavItems = [
-  { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus' },
-  { key: 'umgebung', href: '#umgebung', sectionId: 'umgebung' },
+  { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus', isExternal: false },
+  { key: 'umgebung', href: '#umgebung', sectionId: 'umgebung', isExternal: false },
+  { key: 'blog', href: '/blog', sectionId: 'blog', isExternal: true },
 ] as const;
 
 const rightNavItems = [
-  { key: 'galerie', href: '#galerie', sectionId: 'galerie' },
-  { key: 'anfrage', href: '#buchung', sectionId: 'buchung' },
+  { key: 'galerie', href: '#galerie', sectionId: 'galerie', isExternal: false },
+  { key: 'anfrage', href: '#buchung', sectionId: 'buchung', isExternal: false },
 ] as const;
 
 const allNavItems = [...leftNavItems, ...rightNavItems];
@@ -124,6 +126,37 @@ export function Header() {
           <nav className="flex items-center gap-8 justify-end" style={{ minWidth: '280px' }}>
             {leftNavItems.map((item) => {
               const isActive = isNavItemActive(item.sectionId);
+              const isBlogPage = pathname === '/blog';
+              const isCurrentBlog = item.key === 'blog' && isBlogPage;
+
+              // For external links (like /blog), use Link component
+              if (item.isExternal) {
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={cn(
+                      'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
+                      (isScrolled || isSubpage)
+                        ? 'text-gray-700 hover:text-logo-green'
+                        : 'text-white hover:text-white/80',
+                      isCurrentBlog && 'font-bold'
+                    )}
+                    style={isCurrentBlog ? {
+                      color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white',
+                    } : undefined}
+                  >
+                    {t.navigation[item.key]}
+                    {isCurrentBlog && (
+                      <span
+                        className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
+                        style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
+                      />
+                    )}
+                  </Link>
+                );
+              }
+
               return (
                 <button
                   key={item.key}
@@ -264,6 +297,8 @@ export function Header() {
               const isActive = isNavItemActive(item.sectionId);
               const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
               const isAnfrage = item.key === 'anfrage';
+              const isBlogPage = pathname === '/blog';
+              const isCurrentBlog = item.key === 'blog' && isBlogPage;
 
               // Special styling for Anfragen button - green bg with white text
               if (isAnfrage) {
@@ -275,6 +310,26 @@ export function Header() {
                   >
                     {t.navigation[item.key]}
                   </button>
+                );
+              }
+
+              // For external links (like /blog), use Link component
+              if (item.isExternal) {
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
+                      isCurrentBlog && 'font-bold bg-logo-green/10'
+                    )}
+                    style={isCurrentBlog ? {
+                      color: LOGO_GREEN
+                    } : undefined}
+                  >
+                    {t.navigation[item.key]}
+                  </Link>
                 );
               }
 

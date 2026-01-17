@@ -7,6 +7,7 @@
     "home": "Startseite",
     "ferienhaus": "Ferienhaus",
     "umgebung": "Umgebung",
+    "blog": "Blog",
     "galerie": "Galerie",
     "anfrage": "Anfrage",
     "buchung": "Buchen",
@@ -404,5 +405,12 @@
       "title": "Lage",
       "items": ["Skigebiet Falkert vor Ort", "Turracher Höhe (20 Min.)", "Bad Kleinkirchheim (25 Min.)", "Viele Wanderwege"]
     }
+  },
+  "blog": {
+    "intro": "Entdecken Sie unsere Reisetipps und Geschichten aus den Nockbergen",
+    "articleLabel": "Blogartikel",
+    "kaerntenTitle": "Ausflüge in Kärnten",
+    "kaerntenSubtitle": "Die schönsten Ausflugsziele mit Hunden und Kindern",
+    "kaerntenIntro": "Entdecken Sie die besten Ausflugsziele in Kärnten für die ganze Familie - perfekt für Urlaub mit Hunden und Kindern."
   }
 }

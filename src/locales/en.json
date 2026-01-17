@@ -8,6 +8,7 @@
     "ferienhaus": "Holiday Home",
     "umgebung": "Surroundings",
     "galerie": "Gallery",
+    "blog": "Blog",
     "anfrage": "Inquire",
     "buchung": "Book Now",
     "bewertungen": "Reviews",
@@ -404,5 +405,12 @@
       "title": "Location",
       "items": ["Falkert ski area on site", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Many hiking trails"]
     }
+  },
+  "blog": {
+    "intro": "Discover our travel tips and stories from the Nockberge mountains",
+    "articleLabel": "Blog Article",
+    "kaerntenTitle": "Trips in Carinthia",
+    "kaerntenSubtitle": "The most beautiful destinations with dogs and children",
+    "kaerntenIntro": "Discover the best destinations in Carinthia for the whole family - perfect for vacations with dogs and children."
   }
 }

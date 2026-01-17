@@ -8,6 +8,7 @@
     "ferienhaus": "Casa Vacanze",
     "umgebung": "Dintorni",
     "galerie": "Galleria",
+    "blog": "Blog",
     "anfrage": "Richiesta",
     "buchung": "Prenota",
     "bewertungen": "Recensioni",
@@ -388,5 +389,12 @@
       "title": "Posizione",
       "items": ["Comprensorio Falkert in loco", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Molti sentieri escursionistici"]
     }
+  },
+  "blog": {
+    "intro": "Scoprite i nostri consigli di viaggio e le storie dalle montagne Nockberge",
+    "articleLabel": "Articolo del Blog",
+    "kaerntenTitle": "Escursioni in Carinzia",
+    "kaerntenSubtitle": "Le destinazioni più belle con cani e bambini",
+    "kaerntenIntro": "Scoprite le migliori destinazioni in Carinzia per tutta la famiglia - perfette per vacanze con cani e bambini."
   }
 }
