@@ -228,7 +228,7 @@ export function Galerie() {
             <Images className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
           </div>
           <h2
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-logo-green mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
             style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('galerie_title') }}
           >
             {getText('galerie_title') || (language === 'de' ? 'Galerie' : 'Gallery')}

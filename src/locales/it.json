@@ -142,17 +142,84 @@
     },
     "dogTrips": {
       "title": "Le 5 Escursioni Più Belle con Cani in Carinzia",
-      "trips": []
+      "trips": [
+        {
+          "title": "Falkert e Falkertsee",
+          "description": "Una passeggiata intorno al Falkertsee è una parte fissa del nostro soggiorno in montagna ed è fattibile anche per cani anziani. Un'escursione al Falkert è imprescindibile. A seconda della forma fisica richiede 1-3 ore.",
+          "difficulty": "facile a moderato",
+          "duration": "1-3 ore"
+        },
+        {
+          "title": "Escursione Rodresnock/Moschelitzen/Valle delle Marmotte",
+          "description": "Un'escursione circolare estesa, in parte sportiva e spesso molto ventosa. Il nostro preferito segreto – spesso non si incontra anima viva.",
+          "difficulty": "impegnativo",
+          "tip": "Cappottino per il cane in cima"
+        },
+        {
+          "title": "Escursione dei Tre Laghi alla Turracher Höhe",
+          "description": "Un'escursione moderata lungo i tre laghi. Adatta a tutti i livelli. Facilmente raggiungibile in auto. Assolutamente da visitare la Karl-Hütte per il Kaiserschmarrn.",
+          "difficulty": "facile",
+          "tip": "Kaiserschmarrn alla Karl-Hütte"
+        },
+        {
+          "title": "Sentiero Panoramico Hochrindl",
+          "description": "Da qui partono vari sentieri escursionistici, tra cui una bella escursione panoramica con molte possibilità di acqua fresca. Perfetto per i cani.",
+          "difficulty": "facile a moderato"
+        },
+        {
+          "title": "Spiaggia Tschinder al Millstätter See",
+          "description": "Chi cerca refrigerio in estate e vuole portare il proprio amico a quattro zampe dovrebbe andare alla Spiaggia Tschinder al Millstätter See. C'è un'area per cani, naturalmente con guinzaglio!",
+          "difficulty": "facile",
+          "tip": "Area cani con obbligo di guinzaglio"
+        }
+      ]
     },
     "kidsTrips": {
       "title": "Le 7 Escursioni Più Belle con Bambini in Carinzia",
       "featured": {
         "title": "Heidi-Alm al Falkert",
-        "description": "L'Heidi-Alm al Falkert è proprio dietro l'angolo e offre una passeggiata fiabesca.",
+        "description": "L'Heidi-Alm al Falkert è proprio dietro l'angolo e offre una passeggiata fiabesca attraverso il mondo di Heidi con vista sulle montagne circostanti. Un grande scivolo e un moderno parco giochi completano la gita.",
         "distance": "5 minuti a piedi",
         "age": "Tutte le età"
       },
-      "trips": []
+      "trips": [
+        {
+          "title": "Turracher Höhe e Nocky-Flitzer",
+          "description": "La Turracher Höhe è un bellissimo comprensorio sciistico per principianti e professionisti. Il paesaggio pittoresco, la neve garantita e i 43 km di piste sono perfetti per le famiglie. Fuori dalla stagione invernale, le montagne russe alpine Nockyflitzer sono un'attrazione assoluta.",
+          "distance": "15 minuti in auto",
+          "age": "Dai 3 anni"
+        },
+        {
+          "title": "Ossiacher See e Familywald",
+          "description": "Il Lago Ossiach è a circa 30 minuti di auto dalla Sechszirbenhütte. Proprio accanto c'è il parco avventura e arrampicata Familywald. Qui piccoli e grandi bambini si divertono un mondo.",
+          "distance": "30 minuti in auto",
+          "age": "Dai 4 anni"
+        },
+        {
+          "title": "Sentiero Panoramico St. Oswald (con Brunnachbahn)",
+          "description": "La nostra escursione standard quando siamo al Falkert. Con la Brunnachbahn a Bad Kleinkirchheim si arriva al Sentiero Panoramico St. Oswald. L'escursione è adatta ai bambini e non troppo ripida.",
+          "distance": "16 minuti in auto",
+          "age": "Tutte le età"
+        },
+        {
+          "title": "Parco Animali Feld am See",
+          "description": "Il Parco Animali Alpino Feld am See è un parco faunistico ai piedi di una montagna. Qui si possono osservare vari animali locali e un piccolo zoo interattivo. Due parchi giochi offrono varietà.",
+          "distance": "25 minuti in auto",
+          "age": "Tutte le età"
+        },
+        {
+          "title": "Funivia Gerlitzen-Alpe",
+          "description": "La Gerlitzen-Alpe è un noto punto di partenza per i parapendisti. In buone condizioni c'è sempre molto da ammirare. Alle singole stazioni delle funivie aspettano vari parchi giochi.",
+          "distance": "40 minuti in auto",
+          "age": "Tutte le età"
+        },
+        {
+          "title": "Strada Panoramica Nockalm",
+          "description": "Le Nockberge hanno una bellezza unica. Come giganti verdi e caldi, queste meraviglie naturali giacciono nel paesaggio. Si possono ammirare in modo particolarmente suggestivo sulla Strada Panoramica Nockalm.",
+          "distance": "15 minuti in auto",
+          "age": "Tutte le età"
+        }
+      ]
     },
     "directions": {
       "title": "Come Raggiungerci",
@@ -246,5 +313,80 @@
     "persons": "Persone",
     "nights": "Notti",
     "perNight": "per notte"
+  },
+  "ui": {
+    "withDogs": "Con Cani",
+    "withKids": "Con Bambini",
+    "note": "Nota",
+    "swipeHint": "Scorri per sfogliare",
+    "addImageInAdmin": "Aggiungi immagine nell'admin",
+    "onRequest": "su richiesta",
+    "perStay": "per soggiorno",
+    "perPerson": "per persona",
+    "perAnimal": "per animale",
+    "checkAvailability": "Verifica disponibilità",
+    "loadingBooking": "Caricamento sistema prenotazione...",
+    "floorPlan": "Planimetria",
+    "floorPlanDesc": "Il nostro rifugio offre circa 100 m² di superficie abitabile per un massimo di 8 persone.",
+    "livingSpace": "circa 100 m² di superficie",
+    "floors": "2 piani",
+    "previousReview": "Recensione precedente",
+    "nextReview": "Prossima recensione",
+    "review": "Recensione",
+    "previousImage": "Immagine precedente",
+    "nextImage": "Prossima immagine",
+    "expandGallery": "Espandi galleria",
+    "collapseGallery": "Riduci galleria",
+    "noImagesInCategory": "Nessuna immagine in questa categoria",
+    "imagesLoading": "Caricamento immagini...",
+    "translatedFromGerman": "Tradotto dal tedesco"
+  },
+  "galerie": {
+    "categories": {
+      "all": "Tutti",
+      "aussen": "Esterno",
+      "wohnen": "Soggiorno",
+      "schlafen": "Camere",
+      "kueche": "Cucina",
+      "bad": "Bagno & Sauna",
+      "umgebung": "Dintorni",
+      "extras": "Extra"
+    }
+  },
+  "amenities": {
+    "living": {
+      "title": "Zona Giorno",
+      "items": ["Stufa svedese", "Zona pranzo per 8-10 persone", "TV satellitare & DVD", "Impianto stereo"]
+    },
+    "kitchen": {
+      "title": "Cucina",
+      "items": ["Completamente attrezzata", "Lavastoviglie", "Piano cottura & forno", "Microonde con grill"]
+    },
+    "rooms": {
+      "title": "Camere da Letto",
+      "items": ["1 camera soppalco (2 letti singoli)", "1 camera matrimoniale", "1 camera con 2 letti a castello", "Posto per 8 persone"],
+      "hint": "Portare biancheria propria o prenotare pacchetto comfort"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "items": ["Sauna con sanarium", "Sala relax con lettini", "Doccia extra con tubo Kneipp", "Riscaldamento a pavimento"]
+    },
+    "bathroom": {
+      "title": "Bagno",
+      "items": ["Doccia & WC", "Doppio lavandino", "Riscaldamento a pavimento", "Servizi moderni"],
+      "hint": "Portare asciugamani propri o prenotare pacchetto comfort"
+    },
+    "outdoor": {
+      "title": "Area Esterna",
+      "items": ["Balcone di 15m² con scala esterna", "Terreno di 650m²", "2 posti auto", "BBQ & mobili da giardino"]
+    },
+    "equipment": {
+      "title": "Dotazioni",
+      "items": ["WiFi / ADSL", "TV satellitare", "BBQ", "Animali benvenuti"]
+    },
+    "location": {
+      "title": "Posizione",
+      "items": ["Comprensorio Falkert in loco", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Molti sentieri escursionistici"]
+    }
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Navigation, Mail, Phone, Hand } from 'lucide-react';
+import { MapPin, Navigation, Mail, Phone, Hand, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SITE_CONFIG } from '@/lib/constants';
 
@@ -141,10 +141,13 @@ export function Location() {
                     <li>• {language === 'de' ? 'Über Bad Kleinkirchheim Richtung Falkertsee' : 'Via Bad Kleinkirchheim towards Falkertsee'}</li>
                     <li>• {language === 'de' ? 'Der Heidi-Figur folgen (ca. 8 km Bergstraße)' : 'Follow the Heidi figure (approx. 8 km mountain road)'}</li>
                   </ul>
-                  <p className="mt-3 text-amber-700 text-sm font-medium">
-                    {language === 'de'
-                      ? '⚠️ Nov–April: Schneeketten empfohlen'
-                      : '⚠️ Nov–April: Snow chains recommended'}
+                  <p className="mt-3 text-amber-700 text-sm font-medium flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      {language === 'de'
+                        ? 'Nov–April: Schneeketten empfohlen'
+                        : 'Nov–April: Snow chains recommended'}
+                    </span>
                   </p>
                 </div>
               </div>

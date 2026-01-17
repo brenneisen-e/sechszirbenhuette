@@ -142,17 +142,84 @@
     },
     "dogTrips": {
       "title": "5 Najlepših Izletov s Psi na Koroškem",
-      "trips": []
+      "trips": [
+        {
+          "title": "Falkert in Falkertsee",
+          "description": "Sprehod okoli Falkertsee je stalen del našega bivanja v gorah in je izvedljiv tudi za starejše pse. Pohod na Falkert je nepogrešljiv. Glede na kondicijo traja 1-3 ure.",
+          "difficulty": "lahek do zmeren",
+          "duration": "1-3 ure"
+        },
+        {
+          "title": "Pohod Rodresnock/Moschelitzen/Dolina Svizcev",
+          "description": "Obsežen, delno športen in pogosto precej vetroven krožni pohod. Naš skrivni favorit – pogosto ne srečate žive duše.",
+          "difficulty": "zahteven",
+          "tip": "Pasji plašč za vrh"
+        },
+        {
+          "title": "Pohod Treh Jezer na Turracher Höhe",
+          "description": "Zmeren pohod ob treh jezerih. Primeren za vse ravni. Enostavno dostopen z avtom. Obvezno obiščite Karl-Hütte za Kaiserschmarrn.",
+          "difficulty": "lahek",
+          "tip": "Kaiserschmarrn v Karl-Hütte"
+        },
+        {
+          "title": "Panoramska Pot Hochrindl",
+          "description": "Od tu se začnejo različne pohodniške poti, vključno z lepim panoramskim pohodom z veliko možnostmi za svežo vodo. Popolno za pse.",
+          "difficulty": "lahek do zmeren"
+        },
+        {
+          "title": "Plaža Tschinder na Millstätter See",
+          "description": "Kdor poleti išče osvežitev in želi vzeti s seboj svojega štirinožnega prijatelja, naj gre na plažo Tschinder na Millstätter See. Tam je območje za pse, seveda na povodcu!",
+          "difficulty": "lahek",
+          "tip": "Pasje območje z obveznim povodcem"
+        }
+      ]
     },
     "kidsTrips": {
       "title": "7 Najlepših Izletov z Otroki na Koroškem",
       "featured": {
         "title": "Heidi-Alm na Falkertu",
-        "description": "Heidi-Alm na Falkertu je tik za vogalom in ponuja pravljično sprehajališče.",
+        "description": "Heidi-Alm na Falkertu je tik za vogalom in ponuja pravljični sprehod skozi Heidin svet z razgledom na okoliške gore. Velik tobogan in moderno igrišče zaokrožita izlet.",
         "distance": "5 minut hoje",
         "age": "Vse starosti"
       },
-      "trips": []
+      "trips": [
+        {
+          "title": "Turracher Höhe in Nocky-Flitzer",
+          "description": "Turracher Höhe je čudovito smučišče za začetnike in profesionalce. Slikovita pokrajina, zagotovljen sneg in 43 km prog so popolni za družine. Zunaj zimske sezone so alpske vlakčnice Nockyflitzer absolutna atrakcija.",
+          "distance": "15 minut z avtom",
+          "age": "Od 3 let"
+        },
+        {
+          "title": "Ossiacher See in Familywald",
+          "description": "Jezero Ossiach je približno 30 minut vožnje od Sechszirbenhütte. Tik ob njem je pustolovsko-plezalni gozd Familywald. Tu se mali in veliki otroci izjemno zabavajo.",
+          "distance": "30 minut z avtom",
+          "age": "Od 4 let"
+        },
+        {
+          "title": "Panoramska Pot St. Oswald (z Brunnachbahn)",
+          "description": "Naš standardni pohod, ko smo na Falkertu. Z Brunnachbahn v Bad Kleinkirchheim pridete do Panoramske poti St. Oswald. Pohod je primeren za otroke in ni prestrm.",
+          "distance": "16 minut z avtom",
+          "age": "Vse starosti"
+        },
+        {
+          "title": "Živalski Vrt Feld am See",
+          "description": "Alpski živalski vrt Feld am See je park divjih živali ob vznožju gore. Tu lahko opazujete različne lokalne živali in majhen interaktivni živalski vrt. Dve igrišči ponujata raznolikost.",
+          "distance": "25 minut z avtom",
+          "age": "Vse starosti"
+        },
+        {
+          "title": "Žičnica Gerlitzen-Alpe",
+          "description": "Gerlitzen-Alpe je znano izhodišče za jadralce. Ob dobrih razmerah je vedno veliko za občudovati. Na posameznih postajah žičnic čakajo različna igrišča.",
+          "distance": "40 minut z avtom",
+          "age": "Vse starosti"
+        },
+        {
+          "title": "Panoramska Cesta Nockalm",
+          "description": "Nockberge imajo edinstveno lepoto. Kot topli zeleni velikani te naravne čudeže ležijo v pokrajini. Posebej impresivno jih lahko občudujemo na Panoramski cesti Nockalm.",
+          "distance": "15 minut z avtom",
+          "age": "Vse starosti"
+        }
+      ]
     },
     "directions": {
       "title": "Kako do Nas",
@@ -246,5 +313,80 @@
     "persons": "Osebe",
     "nights": "Noči",
     "perNight": "na noč"
+  },
+  "ui": {
+    "withDogs": "S Psi",
+    "withKids": "Z Otroki",
+    "note": "Opomba",
+    "swipeHint": "Podrsajte za brskanje",
+    "addImageInAdmin": "Dodaj sliko v admin",
+    "onRequest": "na povpraševanje",
+    "perStay": "na bivanje",
+    "perPerson": "na osebo",
+    "perAnimal": "na žival",
+    "checkAvailability": "Preveri razpoložljivost",
+    "loadingBooking": "Nalaganje rezervacijskega sistema...",
+    "floorPlan": "Tloris",
+    "floorPlanDesc": "Naša koča ponuja približno 100 m² bivalne površine za do 8 oseb.",
+    "livingSpace": "približno 100 m² bivalne površine",
+    "floors": "2 nadstropji",
+    "previousReview": "Prejšnja ocena",
+    "nextReview": "Naslednja ocena",
+    "review": "Ocena",
+    "previousImage": "Prejšnja slika",
+    "nextImage": "Naslednja slika",
+    "expandGallery": "Razširi galerijo",
+    "collapseGallery": "Skrči galerijo",
+    "noImagesInCategory": "V tej kategoriji ni slik",
+    "imagesLoading": "Nalaganje slik...",
+    "translatedFromGerman": "Prevedeno iz nemščine"
+  },
+  "galerie": {
+    "categories": {
+      "all": "Vse",
+      "aussen": "Zunanjost",
+      "wohnen": "Dnevni Prostor",
+      "schlafen": "Spalnice",
+      "kueche": "Kuhinja",
+      "bad": "Kopalnica & Savna",
+      "umgebung": "Okolica",
+      "extras": "Dodatki"
+    }
+  },
+  "amenities": {
+    "living": {
+      "title": "Dnevni Prostor",
+      "items": ["Švedska peč", "Jedilni kotiček za 8-10 oseb", "Satelitska TV & DVD", "Stereo naprava"]
+    },
+    "kitchen": {
+      "title": "Kuhinja",
+      "items": ["Popolnoma opremljena", "Pomivalni stroj", "Keramična plošča & pečica", "Mikrovalovna z žarom"]
+    },
+    "rooms": {
+      "title": "Spalnice",
+      "items": ["1 galerijska soba (2 enojni postelji)", "1 dvoposteljna soba", "1 soba z 2 pogradi", "Prostor za 8 oseb"],
+      "hint": "Prinesite lastno posteljnino ali rezervirajte paket udobja"
+    },
+    "sauna": {
+      "title": "Savna & Wellness",
+      "items": ["Savna s sanarijem", "Prostor za sprostitev z ležalniki", "Dodatna prha s Kneipp cevjo", "Talno ogrevanje"]
+    },
+    "bathroom": {
+      "title": "Kopalnica",
+      "items": ["Tuš & WC", "Dvojno umivalnik", "Talno ogrevanje", "Moderna oprema"],
+      "hint": "Prinesite lastne brisače ali rezervirajte paket udobja"
+    },
+    "outdoor": {
+      "title": "Zunanjost",
+      "items": ["15m² balkon z zunanjim stopniščem", "650m² zemljišče", "2 parkirni mesti", "Žar & vrtno pohištvo"]
+    },
+    "equipment": {
+      "title": "Oprema",
+      "items": ["WiFi / ADSL", "Satelitska TV", "Žar", "Hišni ljubljenčki dobrodošli"]
+    },
+    "location": {
+      "title": "Lokacija",
+      "items": ["Smučišče Falkert na mestu", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Številne pohodniške poti"]
+    }
   }
 }

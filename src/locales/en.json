@@ -329,5 +329,80 @@
     "persons": "Persons",
     "nights": "Nights",
     "perNight": "per night"
+  },
+  "ui": {
+    "withDogs": "With Dogs",
+    "withKids": "With Kids",
+    "note": "Note",
+    "swipeHint": "Swipe to browse",
+    "addImageInAdmin": "Add image in admin",
+    "onRequest": "on request",
+    "perStay": "per stay",
+    "perPerson": "per person",
+    "perAnimal": "per animal",
+    "checkAvailability": "Check availability",
+    "loadingBooking": "Loading booking system...",
+    "floorPlan": "Floor Plan",
+    "floorPlanDesc": "Our cabin offers approx. 100 m² of living space for up to 8 people.",
+    "livingSpace": "approx. 100 m² living space",
+    "floors": "2 floors",
+    "previousReview": "Previous review",
+    "nextReview": "Next review",
+    "review": "Review",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "expandGallery": "Expand Gallery",
+    "collapseGallery": "Collapse Gallery",
+    "noImagesInCategory": "No images in this category",
+    "imagesLoading": "Loading images...",
+    "translatedFromGerman": "Translated from German"
+  },
+  "galerie": {
+    "categories": {
+      "all": "All",
+      "aussen": "Exterior",
+      "wohnen": "Living",
+      "schlafen": "Bedrooms",
+      "kueche": "Kitchen",
+      "bad": "Bath & Sauna",
+      "umgebung": "Surroundings",
+      "extras": "Extras"
+    }
+  },
+  "amenities": {
+    "living": {
+      "title": "Living Area",
+      "items": ["Wood stove", "Dining area for 8-10 people", "Satellite TV & DVD", "Stereo system"]
+    },
+    "kitchen": {
+      "title": "Kitchen",
+      "items": ["Fully equipped", "Dishwasher", "Ceramic hob & oven", "Microwave with grill"]
+    },
+    "rooms": {
+      "title": "Bedrooms",
+      "items": ["1 gallery room (2 single beds)", "1 double bedroom", "1 room with 2 bunk beds", "Space for 8 people"],
+      "hint": "Bring your own bedding or book comfort package"
+    },
+    "sauna": {
+      "title": "Sauna & Wellness",
+      "items": ["Sauna with sanarium", "Relaxation room with loungers", "Extra shower with Kneipp hose", "Underfloor heating"]
+    },
+    "bathroom": {
+      "title": "Bathroom",
+      "items": ["Shower & WC", "Double sink", "Underfloor heating", "Modern amenities"],
+      "hint": "Bring your own towels or book comfort package"
+    },
+    "outdoor": {
+      "title": "Outdoor Area",
+      "items": ["15m² balcony with external stairs", "650m² property", "2 parking spaces", "BBQ & garden furniture"]
+    },
+    "equipment": {
+      "title": "Amenities",
+      "items": ["WiFi / ADSL", "Satellite TV", "BBQ", "Pets welcome"]
+    },
+    "location": {
+      "title": "Location",
+      "items": ["Falkert ski area on site", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Many hiking trails"]
+    }
   }
 }
