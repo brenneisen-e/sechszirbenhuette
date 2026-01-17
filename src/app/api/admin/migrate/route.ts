@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
     const defaultTexts = [
       // Hero Section
       { key: 'hero_title', content: 'Herzlich Willkommen in der Sechszirbenhütte', section: 'hero', type: 'heading' },
-      { key: 'hero_subtitle', content: 'Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen', section: 'hero', type: 'heading' },
+      { key: 'hero_subtitle', content: 'Ihr Hüttenurlaub am Falkert', section: 'hero', type: 'heading' },
       { key: 'hero_description', content: 'Erleben Sie unvergessliche Urlaubstage in unserer über 250 Jahre alten Berghütte – liebevoll restauriert, mit Sauna-Anbau und in absoluter Alleinlage inmitten von Zirben- und Lärchenwäldern am Falkert.', section: 'hero', type: 'body' },
       // IntroText Section
       { key: 'introtext_main_heading', content: 'Uriges Ferienhaus am Falkert - mit Sauna und Ruheraum', section: 'introtext', type: 'heading' },
@@ -248,6 +248,18 @@ export async function POST(request: NextRequest) {
       }
     }
     migrations.push(`${textsInserted} default texts inserted/verified`);
+
+    // Migration 10: Update hero subtitle to new value
+    try {
+      await env.DB.prepare(`
+        UPDATE content_texts
+        SET content = 'Ihr Hüttenurlaub am Falkert'
+        WHERE text_key = 'hero_subtitle'
+      `).run();
+      migrations.push('hero_subtitle updated');
+    } catch (err) {
+      console.error('Migration hero_subtitle update error:', err);
+    }
 
     return NextResponse.json({
       success: true,
