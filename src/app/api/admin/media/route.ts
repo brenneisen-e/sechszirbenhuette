@@ -186,8 +186,7 @@ export async function POST(request: NextRequest) {
 
       // Insert into D1
       const id = `${timestamp}-${randomStr}`;
-      // Use public R2 URL for direct access
-      const url = `https://pub-76fcab5ec7604681a60e6c0df28978bf.r2.dev/${fileKey}`;
+      const url = `/api/admin/media/file/${fileKey}`;
 
       await env.DB.prepare(`
         INSERT INTO media (id, file_key, url, alt_text, title, category, media_type, display_order, created_at)
@@ -359,25 +358,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: `Category duplicates cleaned up. Removed ${deletedDuplicates} duplicate junction entries.`
-      });
-    }
-
-    if (action === 'migrate_to_public_urls') {
-      // Migrate old API URLs to public R2 URLs
-      // This enables direct R2 access for faster loading
-      const apiPrefix = '/api/admin/media/file/';
-      const publicR2Url = 'https://pub-76fcab5ec7604681a60e6c0df28978bf.r2.dev/';
-
-      const result = await env.DB.prepare(`
-        UPDATE media
-        SET url = '${publicR2Url}' || SUBSTR(url, ${apiPrefix.length + 1})
-        WHERE url LIKE '${apiPrefix}%'
-      `).run();
-
-      return NextResponse.json({
-        success: true,
-        message: `URLs migrated to public R2 format for Cloudflare Image Resizing.`,
-        result
       });
     }
 
