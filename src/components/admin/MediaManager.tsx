@@ -20,7 +20,7 @@ import {
   Cog,
 } from 'lucide-react';
 import Image from 'next/image';
-import { convertVideoForSafari, needsConversion, type ConversionProgress } from '@/lib/videoConverter';
+import { convertVideoForSafari, convertVideoMultiQuality, needsConversion, type ConversionProgress, VIDEO_QUALITIES } from '@/lib/videoConverter';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -203,40 +203,82 @@ export default function MediaManager() {
     let failCount = 0;
 
     for (let i = 0; i < fileArray.length; i++) {
-      let file = fileArray[i];
+      const file = fileArray[i];
+      const isVideo = file.type.startsWith('video/');
 
-      // Convert videos for Safari compatibility (adds faststart flag)
-      if (needsConversion(file)) {
+      // For hero videos, convert to multiple quality levels
+      if (isVideo && selectedCategory === 'hero' && needsConversion(file)) {
         try {
           setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
-          file = await convertVideoForSafari(file, (progress) => {
+          const multiResult = await convertVideoMultiQuality(file, (progress) => {
             setConversionProgress(progress);
           });
           setConversionProgress(null);
+
+          // Upload all quality versions
+          for (const { quality, file: convertedFile } of multiResult.files) {
+            const qualitySuffix = VIDEO_QUALITIES[quality].suffix;
+            const formData = new FormData();
+            formData.append('files', convertedFile);
+            // Use quality-specific category like "hero-720p", "hero-480p", "hero-360p"
+            formData.append('category', `${selectedCategory}-${qualitySuffix}`);
+
+            try {
+              const response = await fetch('/api/admin/media', {
+                method: 'POST',
+                body: formData,
+              });
+
+              if (response.ok) {
+                successCount++;
+              } else {
+                failCount++;
+              }
+            } catch {
+              failCount++;
+            }
+          }
         } catch (err) {
-          console.error('Video conversion failed:', err);
-          // Continue with original file
+          console.error('Multi-quality video conversion failed:', err);
           setConversionProgress(null);
-        }
-      }
-
-      const formData = new FormData();
-      formData.append('files', file);
-      formData.append('category', selectedCategory);
-
-      try {
-        const response = await fetch('/api/admin/media', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          successCount++;
-        } else {
           failCount++;
         }
-      } catch {
-        failCount++;
+      } else {
+        // Standard upload (images or non-hero videos)
+        let uploadFile = file;
+
+        // Convert non-hero videos for Safari compatibility
+        if (needsConversion(file)) {
+          try {
+            setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
+            uploadFile = await convertVideoForSafari(file, (progress) => {
+              setConversionProgress(progress);
+            });
+            setConversionProgress(null);
+          } catch (err) {
+            console.error('Video conversion failed:', err);
+            setConversionProgress(null);
+          }
+        }
+
+        const formData = new FormData();
+        formData.append('files', uploadFile);
+        formData.append('category', selectedCategory);
+
+        try {
+          const response = await fetch('/api/admin/media', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } catch {
+          failCount++;
+        }
       }
 
       setUploadProgress(Math.round(((i + 1) / fileArray.length) * 100));

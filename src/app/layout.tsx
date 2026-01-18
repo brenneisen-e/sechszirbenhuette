@@ -79,6 +79,26 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased overflow-x-hidden">
+        {/* Immediate CSS-only loading indicator - shows before JS loads */}
+        <div id="initial-loader" className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white">
+          <style dangerouslySetInnerHTML={{ __html: `
+            #initial-loader { transition: opacity 0.3s ease-out; }
+            #initial-loader.loaded { opacity: 0; pointer-events: none; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+            @keyframes bounce { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-8px); opacity: 1; } }
+            .init-spinner { width: 48px; height: 48px; border: 4px solid #1e563120; border-top-color: #1e5631; border-radius: 50%; animation: spin 1s linear infinite; }
+            .init-dots { display: flex; gap: 4px; margin-top: 16px; }
+            .init-dot { width: 8px; height: 8px; background: #1e5631; border-radius: 50%; animation: bounce 0.8s ease-in-out infinite; }
+            .init-dot:nth-child(2) { animation-delay: 0.2s; }
+            .init-dot:nth-child(3) { animation-delay: 0.4s; }
+          `}} />
+          <div className="init-spinner" />
+          <div className="init-dots">
+            <div className="init-dot" />
+            <div className="init-dot" />
+            <div className="init-dot" />
+          </div>
+        </div>
         <SiteSettingsProvider>
           <LanguageProvider>
             <ContentTextsProvider>

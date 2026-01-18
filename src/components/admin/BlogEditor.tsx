@@ -65,6 +65,7 @@ export default function BlogEditor() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [migrating, setMigrating] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState<EditorTab>('list');
@@ -105,6 +106,26 @@ export default function BlogEditor() {
     loadPosts();
     loadMedia();
   }, [loadPosts, loadMedia]);
+
+  // Migrate static blog articles
+  const handleMigrateBlog = async () => {
+    setMigrating(true);
+    try {
+      const res = await fetch('/api/admin/migrate-blog', { method: 'POST' });
+      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      if (res.ok && data.success) {
+        setSuccess(data.message || 'Blog-Artikel migriert!');
+        await loadPosts();
+      } else {
+        setError(data.error || 'Migration fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Error migrating blog:', err);
+      setError('Fehler bei der Migration');
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   // Clear messages
   useEffect(() => {
@@ -271,13 +292,24 @@ export default function BlogEditor() {
               </button>
             )}
             {activeTab === 'list' && (
-              <button
-                onClick={handleNewPost}
-                className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition"
-              >
-                <Plus className="w-5 h-5" />
-                Neuer Beitrag
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleMigrateBlog}
+                  disabled={migrating}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                  title="Statische Blog-Artikel in Datenbank migrieren"
+                >
+                  {migrating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  <span className="hidden sm:inline">Artikel importieren</span>
+                </button>
+                <button
+                  onClick={handleNewPost}
+                  className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition"
+                >
+                  <Plus className="w-5 h-5" />
+                  Neuer Beitrag
+                </button>
+              </div>
             )}
           </div>
         </div>

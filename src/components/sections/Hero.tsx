@@ -9,32 +9,101 @@ import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
 
+// Extend Navigator interface for connection API
+interface NetworkInformation {
+  effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
+  downlink?: number;
+  saveData?: boolean;
+}
+
+declare global {
+  interface Navigator {
+    connection?: NetworkInformation;
+    mozConnection?: NetworkInformation;
+    webkitConnection?: NetworkInformation;
+  }
+}
+
+// Determine video quality based on network speed
+function getVideoQuality(): '720p' | '480p' | '360p' {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+  if (connection) {
+    // Use saveData preference
+    if (connection.saveData) {
+      return '360p';
+    }
+
+    // Use effective connection type
+    if (connection.effectiveType) {
+      switch (connection.effectiveType) {
+        case 'slow-2g':
+        case '2g':
+          return '360p';
+        case '3g':
+          return '480p';
+        case '4g':
+        default:
+          return '720p';
+      }
+    }
+
+    // Use downlink speed (Mbps)
+    if (connection.downlink !== undefined) {
+      if (connection.downlink < 1) return '360p';
+      if (connection.downlink < 5) return '480p';
+      return '720p';
+    }
+  }
+
+  // Default to medium quality if we can't detect
+  return '480p';
+}
+
 export function Hero() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoError, setVideoError] = useState(false);
 
-  // Fetch video URL with caching
+  // Fetch video URL with adaptive quality
   useEffect(() => {
     // Check sessionStorage cache first to reduce API calls
     const cachedUrl = sessionStorage.getItem('hero-video-url');
-    if (cachedUrl) {
+    const cachedQuality = sessionStorage.getItem('hero-video-quality');
+    const currentQuality = getVideoQuality();
+
+    // Use cache if quality matches
+    if (cachedUrl && cachedQuality === currentQuality) {
       setVideoUrl(cachedUrl);
       return;
     }
 
-    // First try the streaming endpoint (supports Range requests for Safari)
-    // Fall back to direct R2 URL if streaming endpoint returns the URL
-    fetch('/api/media?category=hero&type=video')
+    // Check if multi-quality videos exist, otherwise fall back to standard hero
+    const quality = currentQuality;
+
+    // Try quality-specific video first (e.g., hero-720p)
+    fetch(`/api/media?category=hero-${quality}&type=video`)
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]) {
-          // Use our streaming proxy instead of direct R2 URL for Safari compatibility
-          const url = '/api/video-stream?category=hero';
+          // Use streaming proxy with quality parameter
+          const url = `/api/video-stream?category=hero-${quality}`;
           setVideoUrl(url);
-          // Cache for this session
           sessionStorage.setItem('hero-video-url', url);
+          sessionStorage.setItem('hero-video-quality', quality);
+        } else {
+          // Fall back to standard hero video (legacy)
+          return fetch('/api/media?category=hero&type=video')
+            .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+            .then((data) => {
+              if (data.media?.[0]) {
+                const url = '/api/video-stream?category=hero';
+                setVideoUrl(url);
+                sessionStorage.setItem('hero-video-url', url);
+                sessionStorage.setItem('hero-video-quality', 'default');
+              }
+            });
         }
       })
       .catch(() => {

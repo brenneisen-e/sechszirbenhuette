@@ -5,6 +5,22 @@ let ffmpeg: FFmpeg | null = null;
 let isLoading = false;
 
 /**
+ * Video quality presets for adaptive streaming
+ */
+export const VIDEO_QUALITIES = {
+  high: { width: 1280, height: 720, bitrate: '2500k', suffix: '720p' },
+  medium: { width: 854, height: 480, bitrate: '1200k', suffix: '480p' },
+  low: { width: 640, height: 360, bitrate: '600k', suffix: '360p' },
+} as const;
+
+export type VideoQuality = keyof typeof VIDEO_QUALITIES;
+
+export interface MultiQualityResult {
+  files: { quality: VideoQuality; file: File }[];
+  originalName: string;
+}
+
+/**
  * Load FFmpeg WASM - only loads once
  */
 async function loadFFmpeg(onProgress?: (message: string) => void): Promise<FFmpeg> {
@@ -50,6 +66,7 @@ export interface ConversionProgress {
   stage: 'loading' | 'converting' | 'done' | 'error';
   message: string;
   percent?: number;
+  quality?: string;
 }
 
 /**
@@ -137,6 +154,116 @@ export async function convertVideoForSafari(
     });
     // Return original file if conversion fails
     return file;
+  }
+}
+
+/**
+ * Convert video to multiple quality levels for adaptive streaming
+ */
+export async function convertVideoMultiQuality(
+  file: File,
+  onProgress?: (progress: ConversionProgress) => void
+): Promise<MultiQualityResult> {
+  // Skip if not a video
+  if (!file.type.startsWith('video/')) {
+    return { files: [{ quality: 'high', file }], originalName: file.name };
+  }
+
+  const results: { quality: VideoQuality; file: File }[] = [];
+  const qualities: VideoQuality[] = ['high', 'medium', 'low'];
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+
+  try {
+    onProgress?.({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
+
+    const ff = await loadFFmpeg((msg) => {
+      onProgress?.({ stage: 'loading', message: msg });
+    });
+
+    const inputName = 'input' + getExtension(file.name);
+
+    // Write input file once
+    await ff.writeFile(inputName, await fetchFile(file));
+
+    // Convert to each quality
+    for (let i = 0; i < qualities.length; i++) {
+      const quality = qualities[i];
+      const preset = VIDEO_QUALITIES[quality];
+      const outputName = `output_${preset.suffix}.mp4`;
+
+      onProgress?.({
+        stage: 'converting',
+        message: `Konvertiere ${preset.suffix}...`,
+        percent: Math.round((i / qualities.length) * 100),
+        quality: preset.suffix
+      });
+
+      // Set up progress handler for this quality
+      const progressHandler = ({ progress }: { progress: number }) => {
+        const basePercent = (i / qualities.length) * 100;
+        const qualityPercent = (progress * 100) / qualities.length;
+        const totalPercent = Math.round(basePercent + qualityPercent);
+        onProgress?.({
+          stage: 'converting',
+          message: `Konvertiere ${preset.suffix}... ${Math.round(progress * 100)}%`,
+          percent: totalPercent,
+          quality: preset.suffix
+        });
+      };
+
+      ff.on('progress', progressHandler);
+
+      // Convert with specific quality settings
+      await ff.exec([
+        '-i', inputName,
+        '-c:v', 'libx264',
+        '-profile:v', 'main',
+        '-level', '4.0',
+        '-preset', 'fast',
+        '-vf', `scale=${preset.width}:-2`,
+        '-b:v', preset.bitrate,
+        '-maxrate', preset.bitrate,
+        '-bufsize', `${parseInt(preset.bitrate) * 2}k`,
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-movflags', '+faststart',
+        '-y',
+        outputName
+      ]);
+
+      // Read output file
+      const data = await ff.readFile(outputName);
+
+      // Create new File object
+      const uint8Array = data as Uint8Array;
+      const blob = new Blob([new Uint8Array(uint8Array)], { type: 'video/mp4' });
+      const convertedFile = new File(
+        [blob],
+        `${baseName}-${preset.suffix}.mp4`,
+        { type: 'video/mp4' }
+      );
+
+      results.push({ quality, file: convertedFile });
+
+      // Clean up output
+      await ff.deleteFile(outputName);
+    }
+
+    // Clean up input
+    await ff.deleteFile(inputName);
+
+    onProgress?.({ stage: 'done', message: 'Alle Qualitätsstufen erstellt!', percent: 100 });
+
+    return { files: results, originalName: baseName };
+
+  } catch (error) {
+    console.error('Video conversion error:', error);
+    onProgress?.({
+      stage: 'error',
+      message: 'Konvertierung fehlgeschlagen - Original wird verwendet'
+    });
+    // Return original file if conversion fails
+    return { files: [{ quality: 'high', file }], originalName: file.name.replace(/\.[^.]+$/, '') };
   }
 }
 

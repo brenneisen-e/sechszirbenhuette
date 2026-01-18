@@ -16,6 +16,18 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
+  // Hide the initial CSS-only loader when this component mounts
+  useEffect(() => {
+    const initialLoader = document.getElementById('initial-loader');
+    if (initialLoader) {
+      initialLoader.classList.add('loaded');
+      // Remove from DOM after transition
+      setTimeout(() => {
+        initialLoader.remove();
+      }, 300);
+    }
+  }, []);
+
   // Minimum display time for the loading screen
   useEffect(() => {
     const timer = setTimeout(() => {
