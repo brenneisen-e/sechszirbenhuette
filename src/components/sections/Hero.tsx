@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
@@ -14,8 +14,6 @@ export function Hero() {
   const { getText, getTextStyle } = useContentTexts();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoError, setVideoError] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Fetch video URL with caching
   useEffect(() => {
@@ -42,42 +40,10 @@ export function Hero() {
       });
   }, []);
 
-  // Handle video events for Safari/macOS compatibility
-  const handleVideoCanPlay = useCallback(() => {
-    setVideoLoaded(true);
-    // Ensure video plays on Safari
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay blocked, show fallback
-        setVideoError(true);
-      });
-    }
-  }, []);
-
-  const handleVideoError = useCallback(() => {
+  // Handle video error - show fallback gradient
+  const handleVideoError = () => {
     setVideoError(true);
-  }, []);
-
-  // Safari fix: handle video waiting for data
-  const handleVideoWaiting = useCallback(() => {
-    // Video is buffering - this is normal, just wait
-    // Don't reload as that causes the 3-second loop issue
-  }, []);
-
-  // Handle video time update to detect if video is stuck
-  const lastTimeRef = useRef(0);
-  const stallCountRef = useRef(0);
-
-  const handleTimeUpdate = useCallback(() => {
-    if (videoRef.current) {
-      const currentTime = videoRef.current.currentTime;
-      // Reset stall counter when video is playing normally
-      if (currentTime !== lastTimeRef.current) {
-        stallCountRef.current = 0;
-        lastTimeRef.current = currentTime;
-      }
-    }
-  }, []);
+  };
 
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
@@ -114,30 +80,19 @@ export function Hero() {
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
         {videoUrl && !videoError ? (
-          <>
-            {/* Fallback gradient shown until video loads */}
-            {!videoLoaded && (
-              <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
-            )}
-            <video
-              ref={videoRef}
-              id="hero-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              disablePictureInPicture
-              // Use metadata preload to reduce initial resource usage
-              preload="metadata"
-              className={`h-full w-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onCanPlay={handleVideoCanPlay}
-              onError={handleVideoError}
-              onWaiting={handleVideoWaiting}
-              onTimeUpdate={handleTimeUpdate}
-            >
-              <source src={videoUrl} type="video/mp4" />
-            </video>
-          </>
+          <video
+            id="hero-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            preload="auto"
+            className="h-full w-full object-cover"
+            onError={handleVideoError}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}
