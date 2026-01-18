@@ -7,10 +7,6 @@
  * @see https://developers.cloudflare.com/images/transform-images/
  */
 
-// Public R2 URL for media serving
-// Using R2 Public Development URL (no custom domain required)
-const PUBLIC_R2_URL = 'https://pub-76fcab5ec7604681a60e6c0df28978bf.r2.dev';
-
 export interface ImageResizeOptions {
   width?: number;
   height?: number;
@@ -21,84 +17,18 @@ export interface ImageResizeOptions {
 }
 
 /**
- * Convert an API media URL to public R2 URL
- * API URLs like /api/admin/media/file/category/filename.jpg
- * become https://media.sechszirbenhuette.com/category/filename.jpg
- */
-export function getPublicMediaUrl(url: string): string {
-  if (!url) return url;
-
-  // Check if it's an API URL that needs conversion
-  const apiPrefix = '/api/admin/media/file/';
-  if (url.startsWith(apiPrefix)) {
-    const fileKey = url.substring(apiPrefix.length);
-    return `${PUBLIC_R2_URL}/${fileKey}`;
-  }
-
-  return url;
-}
-
-/**
  * Transform image URL to use Cloudflare Image Resizing
- * Only works for images served through Cloudflare
+ * Note: Currently disabled - returns original URL
+ * Cloudflare Image Resizing requires a custom domain with Cloudflare DNS
  *
  * @param url - Original image URL
- * @param options - Resize options
- * @returns Transformed URL with Cloudflare Image Resizing parameters
+ * @param options - Resize options (currently unused)
+ * @returns Original URL (resizing disabled)
  */
-export function getCloudflareImageUrl(url: string, options: ImageResizeOptions = {}): string {
-  // Skip if not an image URL, is a data URL, or already transformed
-  if (!url || url.startsWith('data:') || url.includes('/cdn-cgi/image/')) {
-    return url;
-  }
-
-  // Skip for local development (localhost doesn't have Cloudflare)
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return url;
-  }
-
-  // Convert API URLs to public R2 URLs
-  const publicUrl = getPublicMediaUrl(url);
-
-  // R2 Public Development URLs (r2.dev) don't support Cloudflare Image Resizing
-  // Just return the public URL directly for faster loading
-  if (publicUrl.includes('.r2.dev')) {
-    return publicUrl;
-  }
-
-  // Skip for external URLs that aren't on our domain
-  if (publicUrl.startsWith('http') && typeof window !== 'undefined' && !publicUrl.includes(window.location.hostname)) {
-    return publicUrl;
-  }
-
-  const {
-    width,
-    height,
-    quality = 75,
-    fit = 'cover',
-    format = 'auto',
-  } = options;
-
-  try {
-    const urlObj = new URL(publicUrl, typeof window !== 'undefined' ? window.location.origin : 'https://sechszirbenhuette.pages.dev');
-
-    // Build resize parameters
-    const params: string[] = [];
-    if (width) params.push(`width=${width}`);
-    if (height) params.push(`height=${height}`);
-    params.push(`quality=${quality}`);
-    params.push(`fit=${fit}`);
-    params.push(`format=${format}`);
-
-    const resizeParams = params.join(',');
-
-    // For R2 URLs, use the R2 domain for resizing
-    // Format: https://media.sechszirbenhuette.com/cdn-cgi/image/params/path
-    return `${urlObj.origin}/cdn-cgi/image/${resizeParams}${urlObj.pathname}`;
-  } catch {
-    // If URL parsing fails, return public URL
-    return publicUrl;
-  }
+export function getCloudflareImageUrl(url: string, _options: ImageResizeOptions = {}): string {
+  // Cloudflare Image Resizing is disabled - return original URL
+  // To enable, add domain to Cloudflare DNS and configure R2 custom domain
+  return url;
 }
 
 /**
