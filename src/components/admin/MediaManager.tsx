@@ -16,10 +16,11 @@ import {
   Tags,
   ChevronUp,
   ChevronDown,
-  ArrowUpDown,
   FolderDown,
+  Cog,
 } from 'lucide-react';
 import Image from 'next/image';
+import { convertVideoForSafari, needsConversion, type ConversionProgress } from '@/lib/videoConverter';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -104,6 +105,8 @@ export default function MediaManager() {
   // GitHub import state
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<string[]>([]);
+  // Video conversion state
+  const [conversionProgress, setConversionProgress] = useState<ConversionProgress | null>(null);
 
   // Load media on mount
   useEffect(() => {
@@ -200,7 +203,23 @@ export default function MediaManager() {
     let failCount = 0;
 
     for (let i = 0; i < fileArray.length; i++) {
-      const file = fileArray[i];
+      let file = fileArray[i];
+
+      // Convert videos for Safari compatibility (adds faststart flag)
+      if (needsConversion(file)) {
+        try {
+          setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
+          file = await convertVideoForSafari(file, (progress) => {
+            setConversionProgress(progress);
+          });
+          setConversionProgress(null);
+        } catch (err) {
+          console.error('Video conversion failed:', err);
+          // Continue with original file
+          setConversionProgress(null);
+        }
+      }
+
       const formData = new FormData();
       formData.append('files', file);
       formData.append('category', selectedCategory);
@@ -232,6 +251,7 @@ export default function MediaManager() {
 
     setIsUploading(false);
     setUploadProgress(0);
+    setConversionProgress(null);
     e.target.value = '';
   };
 
@@ -804,10 +824,27 @@ export default function MediaManager() {
             </label>
           </div>
 
-          {isUploading && (
+          {(isUploading || conversionProgress) && (
             <div className="flex items-center gap-2 text-gray-600">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>{uploadProgress}%</span>
+              {conversionProgress ? (
+                <div className="flex flex-col">
+                  <span className="flex items-center gap-1">
+                    <Cog className="w-4 h-4" />
+                    {conversionProgress.message}
+                  </span>
+                  {conversionProgress.percent !== undefined && (
+                    <div className="w-32 h-1.5 bg-gray-200 rounded-full mt-1">
+                      <div
+                        className="h-full bg-logo-green rounded-full transition-all"
+                        style={{ width: `${conversionProgress.percent}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span>Upload: {uploadProgress}%</span>
+              )}
             </div>
           )}
         </div>
