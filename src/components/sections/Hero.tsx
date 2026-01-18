@@ -274,28 +274,58 @@ export function Hero() {
     const upgradeQualityMatch = upgradeUrl?.match(/hero-(\d+p)/);
     const newQuality = (upgradeQualityMatch?.[1] as '1080p' | '720p') || '720p';
 
-    console.log(`[Hero] Higher quality video (${newQuality}) ready, preparing swap...`);
+    console.log(`[Hero] Higher quality video (${newQuality}) fully buffered, preparing swap...`);
+
+    const upgradeVideo = upgradeVideoRef.current;
+    const currentVideo = videoRef.current;
 
     // Get current playback position from the old video
-    const currentTime = videoRef.current.currentTime;
+    const currentTime = currentVideo.currentTime;
 
     // Set the upgrade video to the same position
-    upgradeVideoRef.current.currentTime = currentTime;
+    upgradeVideo.currentTime = currentTime;
 
-    // Start playing the upgrade video (still invisible due to opacity 0)
-    upgradeVideoRef.current.play().then(() => {
-      // Now trigger the cross-fade
-      setIsUpgradeReady(true);
-      setCurrentQuality(newQuality);
+    // Wait for the seek to complete before swapping
+    const onSeeked = () => {
+      upgradeVideo.removeEventListener('seeked', onSeeked);
 
-      // After the fade transition (300ms), pause the old video to save resources
-      setTimeout(() => {
-        videoRef.current?.pause();
-        console.log(`[Hero] Successfully upgraded to ${newQuality}`);
-      }, 350);
-    }).catch(err => {
-      console.error('[Hero] Failed to play upgrade video:', err);
-    });
+      // Sync playback rate
+      upgradeVideo.playbackRate = currentVideo.playbackRate;
+
+      // Start playing the upgrade video (still invisible)
+      upgradeVideo.play().then(() => {
+        // Small delay to ensure video is actually playing and synced
+        requestAnimationFrame(() => {
+          // Fine-tune position sync right before swap
+          const timeDiff = Math.abs(upgradeVideo.currentTime - currentVideo.currentTime);
+          if (timeDiff > 0.1) {
+            upgradeVideo.currentTime = currentVideo.currentTime;
+          }
+
+          // Now trigger the cross-fade
+          setIsUpgradeReady(true);
+          setCurrentQuality(newQuality);
+
+          // After the fade transition (300ms), pause the old video to save resources
+          setTimeout(() => {
+            currentVideo.pause();
+            console.log(`[Hero] Successfully upgraded to ${newQuality}`);
+          }, 350);
+        });
+      }).catch(err => {
+        console.error('[Hero] Failed to play upgrade video:', err);
+      });
+    };
+
+    upgradeVideo.addEventListener('seeked', onSeeked);
+
+    // Fallback if seeked doesn't fire (video already at correct position)
+    setTimeout(() => {
+      if (!isUpgradeReady) {
+        upgradeVideo.removeEventListener('seeked', onSeeked);
+        onSeeked();
+      }
+    }, 100);
   };
 
   const scrollToSection = (href: string) => {
@@ -381,7 +411,7 @@ export function Hero() {
             disablePictureInPicture
             preload="auto"
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${isUpgradeReady ? 'opacity-100' : 'opacity-0'}`}
-            onCanPlay={handleUpgradeCanPlay}
+            onCanPlayThrough={handleUpgradeCanPlay}
           >
             <source src={upgradeUrl} type="video/mp4" />
           </video>
