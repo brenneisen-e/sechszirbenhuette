@@ -1,0 +1,5 @@
+# Enable SharedArrayBuffer for FFmpeg.wasm support
+# Using 'credentialless' instead of 'require-corp' to allow cross-origin iframes (like OpenStreetMap)
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
