@@ -20,7 +20,7 @@ import {
   Cog,
 } from 'lucide-react';
 import Image from 'next/image';
-import { convertVideoForSafari, convertVideoMultiQuality, needsConversion, type ConversionProgress, VIDEO_QUALITIES } from '@/lib/videoConverter';
+import { convertVideoForSafari, convertVideoMultiQuality, needsConversion, extractThumbnailAtTime, type ConversionProgress, VIDEO_QUALITIES } from '@/lib/videoConverter';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -107,6 +107,13 @@ export default function MediaManager() {
   const [importResults, setImportResults] = useState<string[]>([]);
   // Video conversion state
   const [conversionProgress, setConversionProgress] = useState<ConversionProgress | null>(null);
+  // Thumbnail selection state for hero videos
+  const [thumbnailSelectorOpen, setThumbnailSelectorOpen] = useState(false);
+  const [pendingVideoFile, setPendingVideoFile] = useState<File | null>(null);
+  const [thumbnailTime, setThumbnailTime] = useState(1);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
   // Load media on mount
   useEffect(() => {
@@ -175,6 +182,162 @@ export default function MediaManager() {
     }
   };
 
+  // Open thumbnail selector for hero video uploads
+  const openThumbnailSelector = (file: File) => {
+    setPendingVideoFile(file);
+    setThumbnailTime(1);
+    setThumbnailPreview(null);
+    setVideoPreviewUrl(URL.createObjectURL(file));
+    setThumbnailSelectorOpen(true);
+  };
+
+  // Close thumbnail selector and cleanup
+  const closeThumbnailSelector = () => {
+    setThumbnailSelectorOpen(false);
+    if (videoPreviewUrl) {
+      URL.revokeObjectURL(videoPreviewUrl);
+    }
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setPendingVideoFile(null);
+    setVideoPreviewUrl(null);
+    setThumbnailPreview(null);
+    setThumbnailTime(1);
+    setVideoDuration(0);
+  };
+
+  // Handle video metadata loaded for thumbnail selector
+  const handleVideoMetadataLoaded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    setVideoDuration(video.duration);
+    // Generate initial thumbnail preview
+    updateThumbnailPreview(1, video);
+  };
+
+  // Update thumbnail preview at current time
+  const updateThumbnailPreview = (time: number, videoElement?: HTMLVideoElement) => {
+    const video = videoElement || document.getElementById('thumbnail-video') as HTMLVideoElement;
+    if (!video) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const scale = Math.min(1, 1280 / video.videoWidth);
+    canvas.width = video.videoWidth * scale;
+    canvas.height = video.videoHeight * scale;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    canvas.toBlob((blob) => {
+      if (blob) {
+        setThumbnailPreview(URL.createObjectURL(blob));
+      }
+    }, 'image/jpeg', 0.9);
+  };
+
+  // Handle time slider change
+  const handleTimeChange = (newTime: number) => {
+    setThumbnailTime(newTime);
+    const video = document.getElementById('thumbnail-video') as HTMLVideoElement;
+    if (video) {
+      video.currentTime = newTime;
+    }
+  };
+
+  // Handle video seeked event
+  const handleVideoSeeked = () => {
+    updateThumbnailPreview(thumbnailTime);
+  };
+
+  // Proceed with upload after thumbnail selection
+  const handleThumbnailConfirm = async () => {
+    if (!pendingVideoFile) return;
+
+    setThumbnailSelectorOpen(false);
+    setIsUploading(true);
+    setUploadProgress(0);
+    setError('');
+
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      // Extract thumbnail at selected time
+      setConversionProgress({ stage: 'converting', message: 'Extrahiere Vorschaubild...' });
+      const thumbnail = await extractThumbnailAtTime(pendingVideoFile, thumbnailTime);
+
+      // Upload thumbnail first
+      const thumbFormData = new FormData();
+      thumbFormData.append('files', thumbnail);
+      thumbFormData.append('category', 'hero-thumbnail');
+
+      try {
+        const thumbResponse = await fetch('/api/admin/media', {
+          method: 'POST',
+          body: thumbFormData,
+        });
+
+        if (thumbResponse.ok) {
+          successCount++;
+        } else {
+          console.warn('Thumbnail upload failed');
+        }
+      } catch {
+        console.warn('Thumbnail upload error');
+      }
+
+      // Now convert video to multiple quality levels
+      setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
+      const multiResult = await convertVideoMultiQuality(pendingVideoFile, (progress) => {
+        setConversionProgress(progress);
+      });
+      setConversionProgress(null);
+
+      // Upload all quality versions
+      for (const { quality, file: convertedFile } of multiResult.files) {
+        const qualitySuffix = VIDEO_QUALITIES[quality].suffix;
+        const formData = new FormData();
+        formData.append('files', convertedFile);
+        formData.append('category', `hero-${qualitySuffix}`);
+
+        try {
+          const response = await fetch('/api/admin/media', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } catch {
+          failCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        setSuccess(`${successCount} Datei(en) hochgeladen${failCount > 0 ? `, ${failCount} fehlgeschlagen` : ''}`);
+        await loadMedia();
+      } else {
+        setError('Keine Dateien konnten hochgeladen werden');
+      }
+    } catch (err) {
+      console.error('Hero video upload failed:', err);
+      setError('Fehler beim Hochladen des Videos');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setConversionProgress(null);
+      closeThumbnailSelector();
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -195,6 +358,13 @@ export default function MediaManager() {
       }
     }
 
+    // For hero video uploads, open thumbnail selector instead of immediate upload
+    if (selectedCategory === 'hero' && fileArray.length === 1 && fileArray[0].type.startsWith('video/')) {
+      openThumbnailSelector(fileArray[0]);
+      e.target.value = '';
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
     setError('');
@@ -206,7 +376,7 @@ export default function MediaManager() {
       const file = fileArray[i];
       const isVideo = file.type.startsWith('video/');
 
-      // For hero videos, convert to multiple quality levels
+      // For hero videos (shouldn't reach here for single video, but handle multiple)
       if (isVideo && selectedCategory === 'hero' && needsConversion(file)) {
         try {
           setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
@@ -215,13 +385,34 @@ export default function MediaManager() {
           });
           setConversionProgress(null);
 
+          // Upload thumbnail first (auto-generated at 1 second)
+          const thumbnail = await extractThumbnailAtTime(file, 1);
+          const thumbFormData = new FormData();
+          thumbFormData.append('files', thumbnail);
+          thumbFormData.append('category', 'hero-thumbnail');
+
+          try {
+            const thumbResponse = await fetch('/api/admin/media', {
+              method: 'POST',
+              body: thumbFormData,
+            });
+
+            if (thumbResponse.ok) {
+              successCount++;
+            } else {
+              console.warn('Thumbnail upload failed');
+            }
+          } catch {
+            console.warn('Thumbnail upload error');
+          }
+
           // Upload all quality versions
           for (const { quality, file: convertedFile } of multiResult.files) {
             const qualitySuffix = VIDEO_QUALITIES[quality].suffix;
             const formData = new FormData();
             formData.append('files', convertedFile);
             // Use quality-specific category like "hero-720p", "hero-480p", "hero-360p"
-            formData.append('category', `${selectedCategory}-${qualitySuffix}`);
+            formData.append('category', `hero-${qualitySuffix}`);
 
             try {
               const response = await fetch('/api/admin/media', {
@@ -1132,6 +1323,103 @@ export default function MediaManager() {
                 className="flex-1 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50"
               >
                 Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Thumbnail Selector Modal for Hero Videos */}
+      {thumbnailSelectorOpen && videoPreviewUrl && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-logo-green" />
+                Vorschaubild auswählen
+              </h3>
+              <button
+                onClick={closeThumbnailSelector}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Wählen Sie den Zeitpunkt im Video, der als Vorschaubild verwendet werden soll.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Video Preview */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Video</p>
+                <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                  <video
+                    id="thumbnail-video"
+                    src={videoPreviewUrl}
+                    className="w-full h-full object-contain"
+                    onLoadedMetadata={handleVideoMetadataLoaded}
+                    onSeeked={handleVideoSeeked}
+                    muted
+                    playsInline
+                  />
+                </div>
+
+                {/* Time Slider */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Zeitpunkt: {thumbnailTime.toFixed(1)}s / {videoDuration.toFixed(1)}s
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max={videoDuration || 10}
+                    step="0.1"
+                    value={thumbnailTime}
+                    onChange={(e) => handleTimeChange(parseFloat(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-logo-green"
+                  />
+                </div>
+              </div>
+
+              {/* Thumbnail Preview */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Vorschaubild-Vorschau</p>
+                <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-logo-green">
+                  {thumbnailPreview ? (
+                    <Image
+                      src={thumbnailPreview}
+                      alt="Thumbnail Preview"
+                      fill
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400">
+                      <Loader2 className="w-8 h-8 animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Dieses Bild wird angezeigt, während das Video lädt.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeThumbnailSelector}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleThumbnailConfirm}
+                disabled={!thumbnailPreview}
+                className="flex-1 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                Video hochladen
               </button>
             </div>
           </div>

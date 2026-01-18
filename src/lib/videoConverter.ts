@@ -17,6 +17,7 @@ export type VideoQuality = keyof typeof VIDEO_QUALITIES;
 
 export interface MultiQualityResult {
   files: { quality: VideoQuality; file: File }[];
+  thumbnail: File | null;
   originalName: string;
 }
 
@@ -166,12 +167,13 @@ export async function convertVideoMultiQuality(
 ): Promise<MultiQualityResult> {
   // Skip if not a video
   if (!file.type.startsWith('video/')) {
-    return { files: [{ quality: 'high', file }], originalName: file.name };
+    return { files: [{ quality: 'high', file }], thumbnail: null, originalName: file.name };
   }
 
   const results: { quality: VideoQuality; file: File }[] = [];
   const qualities: VideoQuality[] = ['high', 'medium', 'low'];
   const baseName = file.name.replace(/\.[^.]+$/, '');
+  let thumbnail: File | null = null;
 
   try {
     onProgress?.({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
@@ -185,6 +187,41 @@ export async function convertVideoMultiQuality(
     // Write input file once
     await ff.writeFile(inputName, await fetchFile(file));
 
+    // Extract thumbnail from first second of video
+    onProgress?.({
+      stage: 'converting',
+      message: 'Extrahiere Vorschaubild...',
+      percent: 0,
+      quality: 'thumbnail'
+    });
+
+    try {
+      const thumbnailName = 'thumbnail.jpg';
+      await ff.exec([
+        '-i', inputName,
+        '-ss', '00:00:01',  // Seek to 1 second
+        '-vframes', '1',    // Extract 1 frame
+        '-q:v', '2',        // High quality JPEG
+        '-vf', 'scale=1280:-2',  // Scale to 720p width
+        '-y',
+        thumbnailName
+      ]);
+
+      const thumbData = await ff.readFile(thumbnailName);
+      const thumbUint8 = thumbData as Uint8Array;
+      const thumbBlob = new Blob([new Uint8Array(thumbUint8)], { type: 'image/jpeg' });
+      thumbnail = new File(
+        [thumbBlob],
+        `${baseName}-thumbnail.jpg`,
+        { type: 'image/jpeg' }
+      );
+
+      await ff.deleteFile(thumbnailName);
+    } catch (thumbError) {
+      console.warn('Thumbnail extraction failed:', thumbError);
+      // Continue without thumbnail
+    }
+
     // Convert to each quality
     for (let i = 0; i < qualities.length; i++) {
       const quality = qualities[i];
@@ -194,14 +231,14 @@ export async function convertVideoMultiQuality(
       onProgress?.({
         stage: 'converting',
         message: `Konvertiere ${preset.suffix}...`,
-        percent: Math.round((i / qualities.length) * 100),
+        percent: Math.round(((i + 1) / (qualities.length + 1)) * 100),
         quality: preset.suffix
       });
 
       // Set up progress handler for this quality
       const progressHandler = ({ progress }: { progress: number }) => {
-        const basePercent = (i / qualities.length) * 100;
-        const qualityPercent = (progress * 100) / qualities.length;
+        const basePercent = ((i + 1) / (qualities.length + 1)) * 100;
+        const qualityPercent = (progress * 100) / (qualities.length + 1);
         const totalPercent = Math.round(basePercent + qualityPercent);
         onProgress?.({
           stage: 'converting',
@@ -254,7 +291,7 @@ export async function convertVideoMultiQuality(
 
     onProgress?.({ stage: 'done', message: 'Alle Qualitätsstufen erstellt!', percent: 100 });
 
-    return { files: results, originalName: baseName };
+    return { files: results, thumbnail, originalName: baseName };
 
   } catch (error) {
     console.error('Video conversion error:', error);
@@ -263,7 +300,7 @@ export async function convertVideoMultiQuality(
       message: 'Konvertierung fehlgeschlagen - Original wird verwendet'
     });
     // Return original file if conversion fails
-    return { files: [{ quality: 'high', file }], originalName: file.name.replace(/\.[^.]+$/, '') };
+    return { files: [{ quality: 'high', file }], thumbnail: null, originalName: file.name.replace(/\.[^.]+$/, '') };
   }
 }
 
@@ -284,4 +321,74 @@ export function needsConversion(file: File): boolean {
   // Always convert videos to ensure faststart is set
   // Even mp4 files might not have the moov atom at the start
   return true;
+}
+
+/**
+ * Extract a thumbnail from a video at a specific timestamp
+ * Uses canvas for client-side extraction (fast, no FFmpeg needed)
+ */
+export async function extractThumbnailAtTime(
+  videoFile: File,
+  timeInSeconds: number
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      reject(new Error('Canvas context not available'));
+      return;
+    }
+
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+
+    video.onloadedmetadata = () => {
+      // Set canvas size to match video dimensions (720p max)
+      const scale = Math.min(1, 1280 / video.videoWidth);
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
+
+      // Seek to the specified time
+      video.currentTime = Math.min(timeInSeconds, video.duration - 0.1);
+    };
+
+    video.onseeked = () => {
+      // Draw the current frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to blob
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const baseName = videoFile.name.replace(/\.[^.]+$/, '');
+            const thumbnailFile = new File(
+              [blob],
+              `${baseName}-thumbnail.jpg`,
+              { type: 'image/jpeg' }
+            );
+            resolve(thumbnailFile);
+          } else {
+            reject(new Error('Failed to create thumbnail blob'));
+          }
+
+          // Cleanup
+          URL.revokeObjectURL(video.src);
+        },
+        'image/jpeg',
+        0.92 // High quality
+      );
+    };
+
+    video.onerror = () => {
+      reject(new Error('Failed to load video for thumbnail extraction'));
+      URL.revokeObjectURL(video.src);
+    };
+
+    // Load the video file
+    video.src = URL.createObjectURL(videoFile);
+    video.load();
+  });
 }

@@ -70,11 +70,19 @@ export function AdaptiveImage({
   priority = false,
   onClick,
 }: AdaptiveImageProps) {
+  // Use consistent initial quality for SSR to prevent hydration mismatch
   const [quality, setQuality] = useState(75);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
+  // Mark as mounted and then adjust quality based on network
   useEffect(() => {
-    setQuality(getAdaptiveQuality());
+    setIsMounted(true);
+    // Only update quality after mount to prevent hydration issues
+    const adaptiveQuality = getAdaptiveQuality();
+    if (adaptiveQuality !== 75) {
+      setQuality(adaptiveQuality);
+    }
 
     // Listen for connection changes
     const connection = (navigator as Navigator & {
