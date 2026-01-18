@@ -323,6 +323,77 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Create blog tables
+    if (action === 'migrate_blog_tables') {
+      const results: string[] = [];
+
+      // Blog posts table
+      try {
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS blog_posts (
+            id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+            slug TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            subtitle TEXT,
+            excerpt TEXT,
+            content TEXT NOT NULL,
+            cover_image_url TEXT,
+            cover_image_alt TEXT,
+            layout TEXT DEFAULT 'standard' CHECK(layout IN ('standard', 'carousel')),
+            status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'published')),
+            author TEXT DEFAULT 'Sechszirbenhütte',
+            meta_title TEXT,
+            meta_description TEXT,
+            meta_keywords TEXT,
+            published_at TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now'))
+          )
+        `).run();
+        results.push('blog_posts table created/verified');
+      } catch (err) {
+        console.error('Error creating blog_posts table:', err);
+        results.push('blog_posts table error: ' + String(err));
+      }
+
+      // Blog post images table
+      try {
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS blog_post_images (
+            id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+            post_id TEXT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+            image_url TEXT NOT NULL,
+            image_alt TEXT,
+            caption TEXT,
+            display_order INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT (datetime('now'))
+          )
+        `).run();
+        results.push('blog_post_images table created/verified');
+      } catch (err) {
+        console.error('Error creating blog_post_images table:', err);
+        results.push('blog_post_images table error: ' + String(err));
+      }
+
+      // Create indexes
+      try {
+        await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug)').run();
+        await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status)').run();
+        await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at)').run();
+        await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_blog_post_images_post_id ON blog_post_images(post_id)').run();
+        results.push('blog indexes created/verified');
+      } catch (err) {
+        console.error('Error creating blog indexes:', err);
+        results.push('blog indexes error: ' + String(err));
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Blog-Tabellen erstellt: ${results.length} Operationen`,
+        results
+      });
+    }
+
     return NextResponse.json(
       { error: 'Unknown action', success: false },
       { status: 400 }

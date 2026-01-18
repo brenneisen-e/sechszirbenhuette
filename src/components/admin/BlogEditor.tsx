@@ -22,6 +22,7 @@ import {
   ExternalLink,
   AlertCircle,
   Check,
+  Database,
 } from 'lucide-react';
 
 interface BlogPost {
@@ -66,6 +67,7 @@ export default function BlogEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [migrating, setMigrating] = useState(false);
+  const [settingUpDb, setSettingUpDb] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState<EditorTab>('list');
@@ -106,6 +108,30 @@ export default function BlogEditor() {
     loadPosts();
     loadMedia();
   }, [loadPosts, loadMedia]);
+
+  // Setup blog database tables
+  const handleSetupBlogDb = async () => {
+    setSettingUpDb(true);
+    try {
+      const res = await fetch('/api/admin/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'migrate_blog_tables' }),
+      });
+      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      if (res.ok && data.success) {
+        setSuccess(data.message || 'Blog-Datenbank eingerichtet!');
+        await loadPosts();
+      } else {
+        setError(data.error || 'Einrichtung fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Error setting up blog db:', err);
+      setError('Fehler bei der Datenbank-Einrichtung');
+    } finally {
+      setSettingUpDb(false);
+    }
+  };
 
   // Migrate static blog articles
   const handleMigrateBlog = async () => {
@@ -293,6 +319,15 @@ export default function BlogEditor() {
             )}
             {activeTab === 'list' && (
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSetupBlogDb}
+                  disabled={settingUpDb}
+                  className="flex items-center gap-2 px-3 py-2 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition disabled:opacity-50"
+                  title="Blog-Datenbank einrichten (D1 Tabellen erstellen)"
+                >
+                  {settingUpDb ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+                  <span className="hidden sm:inline">DB einrichten</span>
+                </button>
                 <button
                   onClick={handleMigrateBlog}
                   disabled={migrating}
