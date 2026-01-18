@@ -92,7 +92,9 @@ async function loadFFmpeg(onProgress?: (message: string) => void): Promise<FFmpe
     return ffmpeg;
   } catch (error) {
     console.error('Failed to load FFmpeg:', error);
-    throw new Error('FFmpeg konnte nicht geladen werden');
+    // Return null instead of throwing to allow graceful fallback
+    ffmpegSupported = false;
+    return null;
   } finally {
     isLoading = false;
   }
