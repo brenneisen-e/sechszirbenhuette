@@ -74,7 +74,11 @@ export function Hero() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
+  const [currentQuality, setCurrentQuality] = useState<'720p' | '480p' | '360p' | null>(null);
+  const [upgradeUrl, setUpgradeUrl] = useState<string | null>(null);
+  const [isUpgradeReady, setIsUpgradeReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const upgradeVideoRef = useRef<HTMLVideoElement>(null);
   const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Mark as mounted on client to prevent hydration mismatch
@@ -131,6 +135,11 @@ export function Hero() {
             const url = `/api/video-stream?category=${category}`;
             console.log('[Hero] Found video, using URL:', url);
             setVideoUrl(url);
+            // Extract quality from category (e.g., 'hero-720p' -> '720p')
+            const qualityMatch = category.match(/hero-(\d+p)/);
+            if (qualityMatch) {
+              setCurrentQuality(qualityMatch[1] as '720p' | '480p' | '360p');
+            }
             return;
           }
         } catch (err) {
@@ -208,6 +217,60 @@ export function Hero() {
     setShowPlaceholder(true);
   };
 
+  // Progressive quality upgrade: After initial video loads, try to load higher quality
+  useEffect(() => {
+    if (!isMounted || !videoLoaded || !currentQuality || currentQuality === '720p') return;
+
+    // Determine the next higher quality to try
+    const upgradeQuality = currentQuality === '360p' ? '720p' : '720p';
+    const upgradeCategory = `hero-${upgradeQuality}`;
+
+    console.log(`[Hero] Checking for quality upgrade: ${currentQuality} -> ${upgradeQuality}`);
+
+    // Check if higher quality exists
+    fetch(`/api/media?category=${upgradeCategory}&type=video`)
+      .then(res => res.json() as Promise<{ media?: { url: string }[] }>)
+      .then(data => {
+        if (data.media?.[0]) {
+          console.log(`[Hero] Higher quality ${upgradeQuality} available, preloading...`);
+          setUpgradeUrl(`/api/video-stream?category=${upgradeCategory}`);
+        } else {
+          console.log(`[Hero] No higher quality available`);
+        }
+      })
+      .catch(err => {
+        console.error('[Hero] Error checking for upgrade:', err);
+      });
+  }, [isMounted, videoLoaded, currentQuality]);
+
+  // Handle upgrade video ready - swap to higher quality
+  const handleUpgradeCanPlay = () => {
+    if (!upgradeVideoRef.current || !videoRef.current || isUpgradeReady) return;
+
+    console.log('[Hero] Higher quality video ready, preparing swap...');
+
+    // Get current playback position from the old video
+    const currentTime = videoRef.current.currentTime;
+
+    // Set the upgrade video to the same position
+    upgradeVideoRef.current.currentTime = currentTime;
+
+    // Start playing the upgrade video (still invisible due to opacity 0)
+    upgradeVideoRef.current.play().then(() => {
+      // Now trigger the cross-fade
+      setIsUpgradeReady(true);
+      setCurrentQuality('720p');
+
+      // After the fade transition (300ms), pause the old video to save resources
+      setTimeout(() => {
+        videoRef.current?.pause();
+        console.log('[Hero] Successfully upgraded to 720p');
+      }, 350);
+    }).catch(err => {
+      console.error('[Hero] Failed to play upgrade video:', err);
+    });
+  };
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -273,11 +336,27 @@ export function Hero() {
             playsInline
             disablePictureInPicture
             preload="auto"
-            className="h-full w-full object-cover"
+            className={`h-full w-full object-cover transition-opacity duration-300 ${isUpgradeReady ? 'opacity-0' : 'opacity-100'}`}
             onCanPlay={handleVideoCanPlay}
             onError={handleVideoError}
           >
             <source src={videoUrl} type="video/mp4" />
+          </video>
+        )}
+
+        {/* Hidden upgrade video - preloads higher quality in background */}
+        {isMounted && upgradeUrl && !videoError && (
+          <video
+            ref={upgradeVideoRef}
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            preload="auto"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${isUpgradeReady ? 'opacity-100' : 'opacity-0'}`}
+            onCanPlay={handleUpgradeCanPlay}
+          >
+            <source src={upgradeUrl} type="video/mp4" />
           </video>
         )}
 
