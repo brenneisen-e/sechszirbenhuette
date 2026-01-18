@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE token = ? AND expires_at > datetime('now')"
+      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
     ).bind(sessionToken).first();
 
     if (!session) {
