@@ -299,31 +299,36 @@ function AdminPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header - Compact */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-1">
-            <a href="/" className="p-2 -ml-2 text-gray-500 hover:text-logo-green">
+      {/* Mobile Header - App Style */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-gray-100 z-40 safe-area-top">
+        <div className="flex items-center justify-between px-2 py-2">
+          <div className="flex items-center">
+            <a
+              href="/"
+              className="p-3 text-gray-500 active:text-logo-green active:bg-gray-100 rounded-xl touch-target no-select transition-all active:scale-95"
+            >
               <Home className="w-5 h-5" />
             </a>
             <button
               onClick={runMigration}
               disabled={isMigrating}
-              className="p-2 text-gray-500 hover:text-blue-600 disabled:opacity-50"
-              title="Migration"
+              className="p-3 text-gray-500 active:text-blue-600 active:bg-gray-100 rounded-xl touch-target no-select transition-all active:scale-95 disabled:opacity-50"
             >
               {isMigrating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Database className="w-5 h-5" />}
             </button>
           </div>
-          <div className="text-center">
-            <h1 className="text-lg font-bold text-gray-900">{currentTab?.shortLabel}</h1>
+          <div className="text-center flex-1">
+            <h1 className="text-lg font-semibold text-gray-900">{currentTab?.shortLabel}</h1>
             {migrationResult && (
               <span className={`text-xs ${migrationResult.success ? 'text-green-600' : 'text-red-600'}`}>
                 {migrationResult.success ? 'Migration OK' : 'Fehler'}
               </span>
             )}
           </div>
-          <button onClick={handleLogout} className="p-2 -mr-2 text-gray-500 hover:text-red-600">
+          <button
+            onClick={handleLogout}
+            className="p-3 text-gray-500 active:text-red-600 active:bg-red-50 rounded-xl touch-target no-select transition-all active:scale-95"
+          >
             <LogOut className="w-5 h-5" />
           </button>
         </div>
@@ -435,8 +440,8 @@ function AdminPageContent() {
       </div>
 
       {/* Mobile Bottom Navigation - App Style */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-6 h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 z-40 safe-area-bottom">
+        <div className="grid grid-cols-6">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -444,14 +449,18 @@ function AdminPageContent() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                className={`flex flex-col items-center justify-center py-2 min-h-[60px] touch-target no-select transition-all active:scale-95 ${
                   isActive
                     ? 'text-logo-green'
-                    : 'text-gray-400 active:text-gray-600'
+                    : 'text-gray-400 active:text-gray-600 active:bg-gray-100'
                 }`}
               >
-                <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5]' : ''}`} />
-                <span className="text-[10px] font-medium leading-tight">{tab.shortLabel}</span>
+                <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-logo-green/10' : ''}`}>
+                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
+                </div>
+                <span className={`text-[10px] font-medium leading-tight mt-0.5 ${isActive ? 'text-logo-green' : ''}`}>
+                  {tab.shortLabel}
+                </span>
               </button>
             );
           })}
