@@ -50,6 +50,10 @@ const GALLERY_CATEGORIES = ['aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'um
 const CATEGORIES = [
   // Haupt (nicht in Galerie)
   { value: 'hero', label: 'Hero (Startseite)', description: 'Hauptvideo/Bild auf der Startseite', supportsVideo: true, maxItems: 1, group: 'Haupt' },
+  { value: 'hero-720p', label: 'Hero Video 720p', description: 'HD Qualität (1280x720)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
+  { value: 'hero-480p', label: 'Hero Video 480p', description: 'SD Qualität (854x480)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
+  { value: 'hero-360p', label: 'Hero Video 360p', description: 'Mobil Qualität (640x360)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
+  { value: 'hero-thumbnail', label: 'Hero Vorschaubild', description: 'Standbild für Video', supportsVideo: false, maxItems: 1, group: 'Hero Videos' },
   { value: 'header', label: 'Header Hintergrund', description: 'Hintergrundbild im Header-Bereich', supportsVideo: false, maxItems: 1, group: 'Haupt' },
   // Galerie-Kategorien (wie auf Website)
   { value: 'aussen', label: 'Außenbereich', description: 'Außenansichten der Hütte', supportsVideo: true, maxItems: null, group: 'Galerie' },
