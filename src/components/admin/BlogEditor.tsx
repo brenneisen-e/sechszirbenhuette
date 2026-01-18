@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Check,
   Database,
+  RefreshCw,
 } from 'lucide-react';
 
 interface BlogPost {
@@ -82,9 +83,19 @@ export default function BlogEditor() {
   const loadPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/blog');
-      const data = await res.json() as { posts: BlogPost[] };
-      setPosts(data.posts || []);
+      // Add cache buster to avoid stale cached results
+      const res = await fetch(`/api/blog?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      const data = await res.json() as { posts?: BlogPost[]; error?: string };
+      console.log('[BlogEditor] Loaded posts:', data);
+      if (data.error) {
+        setError(data.error);
+        setPosts([]);
+      } else {
+        setPosts(data.posts || []);
+      }
     } catch (err) {
       console.error('Error loading posts:', err);
       setError('Fehler beim Laden der Beiträge');
@@ -319,6 +330,14 @@ export default function BlogEditor() {
             )}
             {activeTab === 'list' && (
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => loadPosts()}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                  title="Beiträge neu laden"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
                 <button
                   onClick={handleSetupBlogDb}
                   disabled={settingUpDb}
