@@ -39,9 +39,17 @@ const sectionSpacingMap: Record<string, string> = {
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Fetch settings from API
+  // Mark as mounted to prevent hydration issues
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Fetch settings from API (only after mount)
+  useEffect(() => {
+    if (!isMounted) return;
+
     async function fetchSettings() {
       try {
         const response = await fetch('/api/site-settings');
@@ -60,10 +68,12 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     }
 
     fetchSettings();
-  }, []);
+  }, [isMounted]);
 
-  // Apply CSS variables when settings change
+  // Apply CSS variables when settings change (only after mount)
   useEffect(() => {
+    if (!isMounted) return;
+
     const root = document.documentElement;
 
     // Colors
@@ -78,7 +88,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--heading-size', settings.headingSize + 'px');
     root.style.setProperty('--body-size', settings.bodySize + 'px');
     root.style.setProperty('--section-spacing', sectionSpacingMap[settings.sectionSpacing] || '5rem');
-  }, [settings]);
+  }, [settings, isMounted]);
 
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
