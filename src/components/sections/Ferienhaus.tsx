@@ -111,6 +111,7 @@ interface CardImage {
 export function Ferienhaus() {
   const { language } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
+  const [isMounted, setIsMounted] = useState(false);
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
@@ -118,6 +119,11 @@ export function Ferienhaus() {
   const [mobileCardIndex, setMobileCardIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+
+  // Mark as mounted to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -141,7 +147,10 @@ export function Ferienhaus() {
     }
   }, [mobileCardIndex]);
 
+  // Fetch images only after mount to prevent hydration mismatch
   useEffect(() => {
+    if (!isMounted) return;
+
     // Fetch gallery images
     fetch('/api/media?category=innen&type=image')
       .then((res) => res.json() as Promise<{ media?: MediaItem[] }>)
@@ -161,7 +170,7 @@ export function Ferienhaus() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [isMounted]);
 
   const openLightbox = (index: number) => {
     setSelectedImage(index);

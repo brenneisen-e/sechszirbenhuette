@@ -109,9 +109,11 @@ function parseAltText(altText: string): { title: string; description: string } {
 export function Galerie() {
   const { t, language } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
+  const [isMounted, setIsMounted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [images, setImages] = useState<GalleryImage[]>(fallbackImages);
+  // Start with empty images to prevent hydration mismatch
+  const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -121,13 +123,19 @@ export function Galerie() {
   const touchEndX = useRef(0);
   const imagesPerPage = 4;
 
-  // Detect mobile viewport
+  // Mark as mounted to prevent hydration mismatch
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Detect mobile viewport (only after mount)
+  useEffect(() => {
+    if (!isMounted) return;
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [isMounted]);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -160,8 +168,10 @@ export function Galerie() {
     setMobileIndex(0);
   }, [selectedCategory]);
 
-  // Fetch images from API on mount
+  // Fetch images from API on mount (only after client mount to prevent hydration mismatch)
   useEffect(() => {
+    if (!isMounted) return;
+
     async function fetchImages() {
       try {
         const response = await fetch('/api/media');
@@ -193,17 +203,25 @@ export function Galerie() {
 
           if (dbImages.length > 0) {
             setImages(dbImages);
+          } else {
+            // Use fallback images if no images from database
+            setImages(fallbackImages);
           }
+        } else {
+          // Use fallback images if no media returned
+          setImages(fallbackImages);
         }
       } catch (error) {
         console.error('Failed to fetch images from API:', error);
+        // Use fallback images on error
+        setImages(fallbackImages);
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchImages();
-  }, []);
+  }, [isMounted]);
 
   const categoryLabels: Record<string, { de: string; en: string }> = {
     all: { de: 'Alle', en: 'All' },
