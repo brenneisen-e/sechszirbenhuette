@@ -106,39 +106,41 @@ export function Hero() {
     sessionStorage.removeItem('hero-video-url');
     sessionStorage.removeItem('hero-video-quality');
 
-    const currentQuality = getVideoQuality();
-    console.log('[Hero] Looking for video with quality:', currentQuality);
+    const preferredQuality = getVideoQuality();
+    console.log('[Hero] Preferred quality:', preferredQuality);
 
-    // Try quality-specific video first (e.g., hero-720p)
-    fetch(`/api/media?category=hero-${currentQuality}&type=video`)
-      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-      .then((data) => {
-        console.log(`[Hero] hero-${currentQuality} response:`, data);
-        if (data.media?.[0]) {
-          const url = `/api/video-stream?category=hero-${currentQuality}`;
-          console.log('[Hero] Using video URL:', url);
-          setVideoUrl(url);
-        } else {
-          // Fall back to standard hero video (legacy)
-          console.log('[Hero] No quality-specific video, trying "hero" category...');
-          return fetch('/api/media?category=hero&type=video')
-            .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-            .then((data) => {
-              console.log('[Hero] hero response:', data);
-              if (data.media?.[0]) {
-                const url = '/api/video-stream?category=hero';
-                console.log('[Hero] Using fallback video URL:', url);
-                setVideoUrl(url);
-              } else {
-                console.log('[Hero] No video found in any category');
-              }
-            });
+    // Quality fallback order based on preferred quality
+    const qualityOrder = preferredQuality === '720p'
+      ? ['720p', '480p', '360p']
+      : preferredQuality === '480p'
+        ? ['480p', '720p', '360p']
+        : ['360p', '480p', '720p'];
+
+    // Try each quality level, then fall back to 'hero' category
+    const categoriesToTry = [...qualityOrder.map(q => `hero-${q}`), 'hero'];
+
+    async function findVideo() {
+      for (const category of categoriesToTry) {
+        console.log(`[Hero] Trying category: ${category}`);
+        try {
+          const res = await fetch(`/api/media?category=${category}&type=video`);
+          const data = await res.json() as { media?: { url: string }[] };
+          console.log(`[Hero] ${category} response:`, data);
+
+          if (data.media?.[0]) {
+            const url = `/api/video-stream?category=${category}`;
+            console.log('[Hero] Found video, using URL:', url);
+            setVideoUrl(url);
+            return;
+          }
+        } catch (err) {
+          console.error(`[Hero] Error fetching ${category}:`, err);
         }
-      })
-      .catch((err) => {
-        console.error('[Hero] Error fetching video:', err);
-        setVideoError(true);
-      });
+      }
+      console.log('[Hero] No video found in any category');
+    }
+
+    findVideo();
   }, [isMounted]);
 
   // Set up 5-second timeout to show placeholder if video hasn't loaded
