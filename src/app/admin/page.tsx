@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Database,
   CheckCircle,
+  FileText,
 } from 'lucide-react';
 
 // Loading component - must be defined before dynamic imports
@@ -80,6 +81,15 @@ const TextEditor = dynamic(
   { loading: createLoader('Lade Texteditor...'), ssr: false }
 );
 
+// Blog Editor Component
+const BlogEditor = dynamic(
+  () => import('@/components/admin/BlogEditor').catch(err => {
+    console.error('Failed to load BlogEditor:', err);
+    return { default: () => <div className="p-4 text-red-600">Fehler beim Laden der Blog-Verwaltung</div> };
+  }),
+  { loading: createLoader('Lade Blog-Verwaltung...'), ssr: false }
+);
+
 function FullScreenLoader() {
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
@@ -97,7 +107,7 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'calendar' | 'images' | 'finances' | 'expenses' | 'texts';
+type AdminTab = 'guests' | 'calendar' | 'images' | 'finances' | 'expenses' | 'texts' | 'blog';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gästedatenbank', shortLabel: 'Gäste', icon: Users },
@@ -106,6 +116,7 @@ const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.Compo
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'expenses', label: 'Ausgaben', shortLabel: 'Ausgaben', icon: TrendingDown },
   { id: 'texts', label: 'Texte', shortLabel: 'Texte', icon: Type },
+  { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
 ];
 
 function AdminPageContent() {
@@ -436,12 +447,14 @@ function AdminPageContent() {
           {activeTab === 'images' && <MediaManager />}
 
           {activeTab === 'texts' && <TextEditor />}
+
+          {activeTab === 'blog' && <BlogEditor />}
         </div>
       </div>
 
       {/* Mobile Bottom Navigation - App Style */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-6">
+        <div className="grid grid-cols-7">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

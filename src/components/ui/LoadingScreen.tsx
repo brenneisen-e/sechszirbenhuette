@@ -24,41 +24,71 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
     return () => clearTimeout(timer);
   }, [minDisplayTime]);
 
-  // Listen for video load event
+  // Listen for video load event - wait for actual playback to start
   useEffect(() => {
-    // Check if video is already loaded
-    const checkVideoLoaded = () => {
+    // Check if video is ready to play
+    const checkVideoReady = () => {
       const video = document.querySelector('#hero-video') as HTMLVideoElement;
       if (video) {
-        if (video.readyState >= 3) {
+        // If video is already playing, we're done
+        if (!video.paused && video.currentTime > 0) {
           setVideoLoaded(true);
           return true;
         }
-        video.addEventListener('canplaythrough', () => setVideoLoaded(true), { once: true });
-        video.addEventListener('loadeddata', () => setVideoLoaded(true), { once: true });
+
+        // Listen for the video to actually start playing (not just buffered)
+        const handlePlaying = () => {
+          setVideoLoaded(true);
+        };
+
+        // Also listen for timeupdate as a fallback (some browsers)
+        const handleTimeUpdate = () => {
+          if (video.currentTime > 0.1) {
+            setVideoLoaded(true);
+            video.removeEventListener('timeupdate', handleTimeUpdate);
+          }
+        };
+
+        video.addEventListener('playing', handlePlaying, { once: true });
+        video.addEventListener('timeupdate', handleTimeUpdate);
+
+        // If video is ready but paused, try to play it
+        if (video.readyState >= 3 && video.paused) {
+          video.play().catch(() => {
+            // Autoplay blocked, show content anyway
+            setVideoLoaded(true);
+          });
+        }
+
+        return () => {
+          video.removeEventListener('playing', handlePlaying);
+          video.removeEventListener('timeupdate', handleTimeUpdate);
+        };
       } else {
         // No video element yet, use fallback timeout
-        setTimeout(() => setVideoLoaded(true), 2000);
+        setTimeout(() => setVideoLoaded(true), 3000);
       }
       return false;
     };
 
     // Try to find video immediately
-    if (!checkVideoLoaded()) {
-      // Also listen for DOM changes in case video is added later
-      const observer = new MutationObserver(() => {
-        checkVideoLoaded();
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
+    const cleanup = checkVideoReady();
+    if (cleanup === true) return;
 
-      // Fallback: max wait time of 5 seconds
-      const fallbackTimer = setTimeout(() => setVideoLoaded(true), 5000);
+    // Also listen for DOM changes in case video is added later
+    const observer = new MutationObserver(() => {
+      checkVideoReady();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
-      return () => {
-        observer.disconnect();
-        clearTimeout(fallbackTimer);
-      };
-    }
+    // Fallback: max wait time of 6 seconds
+    const fallbackTimer = setTimeout(() => setVideoLoaded(true), 6000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+      if (typeof cleanup === 'function') cleanup();
+    };
   }, []);
 
   // Hide loading screen when both conditions are met
