@@ -3,6 +3,34 @@ import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 let ffmpeg: FFmpeg | null = null;
 let isLoading = false;
+let ffmpegSupported: boolean | null = null;
+
+/**
+ * Check if FFmpeg.wasm is supported in this browser/environment
+ * FFmpeg.wasm requires SharedArrayBuffer which needs COOP/COEP headers
+ */
+function isFFmpegSupported(): boolean {
+  if (ffmpegSupported !== null) {
+    return ffmpegSupported;
+  }
+
+  // Check for SharedArrayBuffer support (required by FFmpeg.wasm)
+  if (typeof SharedArrayBuffer === 'undefined') {
+    console.warn('FFmpeg.wasm nicht verfügbar: SharedArrayBuffer wird nicht unterstützt. COOP/COEP Header erforderlich.');
+    ffmpegSupported = false;
+    return false;
+  }
+
+  // Additional check: crossOriginIsolated must be true for SharedArrayBuffer to work
+  if (typeof window !== 'undefined' && !window.crossOriginIsolated) {
+    console.warn('FFmpeg.wasm nicht verfügbar: Seite ist nicht cross-origin isoliert. COOP/COEP Header erforderlich.');
+    ffmpegSupported = false;
+    return false;
+  }
+
+  ffmpegSupported = true;
+  return true;
+}
 
 /**
  * Video quality presets for adaptive streaming
@@ -23,8 +51,15 @@ export interface MultiQualityResult {
 
 /**
  * Load FFmpeg WASM - only loads once
+ * Returns null if FFmpeg is not supported in this environment
  */
-async function loadFFmpeg(onProgress?: (message: string) => void): Promise<FFmpeg> {
+async function loadFFmpeg(onProgress?: (message: string) => void): Promise<FFmpeg | null> {
+  // Check if FFmpeg is supported before attempting to load
+  if (!isFFmpegSupported()) {
+    onProgress?.('Video-Konvertierung nicht verfügbar (COOP/COEP Header fehlen)');
+    return null;
+  }
+
   if (ffmpeg && ffmpeg.loaded) {
     return ffmpeg;
   }
@@ -89,6 +124,16 @@ export async function convertVideoForSafari(
     const ff = await loadFFmpeg((msg) => {
       onProgress?.({ stage: 'loading', message: msg });
     });
+
+    // If FFmpeg is not supported, return original file
+    if (!ff) {
+      onProgress?.({
+        stage: 'done',
+        message: 'Video wird ohne Konvertierung hochgeladen (FFmpeg nicht verfügbar)',
+        percent: 100
+      });
+      return file;
+    }
 
     const inputName = 'input' + getExtension(file.name);
     const outputName = 'output.mp4';
@@ -181,6 +226,23 @@ export async function convertVideoMultiQuality(
     const ff = await loadFFmpeg((msg) => {
       onProgress?.({ stage: 'loading', message: msg });
     });
+
+    // If FFmpeg is not supported, return original file without conversion
+    if (!ff) {
+      onProgress?.({
+        stage: 'done',
+        message: 'Video wird ohne Konvertierung hochgeladen (FFmpeg nicht verfügbar)',
+        percent: 100
+      });
+      // Try to extract thumbnail using canvas instead
+      let thumbnail: File | null = null;
+      try {
+        thumbnail = await extractThumbnailAtTime(file, 1);
+      } catch {
+        // Ignore thumbnail extraction errors
+      }
+      return { files: [{ quality: 'high', file }], thumbnail, originalName: baseName };
+    }
 
     const inputName = 'input' + getExtension(file.name);
 
