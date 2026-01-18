@@ -24,11 +24,14 @@ export function Hero() {
       return;
     }
 
+    // First try the streaming endpoint (supports Range requests for Safari)
+    // Fall back to direct R2 URL if streaming endpoint returns the URL
     fetch('/api/media?category=hero&type=video')
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]) {
-          const url = data.media[0].url;
+          // Use our streaming proxy instead of direct R2 URL for Safari compatibility
+          const url = '/api/video-stream?category=hero';
           setVideoUrl(url);
           // Cache for this session
           sessionStorage.setItem('hero-video-url', url);
