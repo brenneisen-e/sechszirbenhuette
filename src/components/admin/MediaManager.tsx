@@ -51,6 +51,7 @@ const GALLERY_CATEGORIES = ['aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'um
 const CATEGORIES = [
   // Haupt (nicht in Galerie)
   { value: 'hero', label: 'Hero (Startseite)', description: 'Hauptvideo/Bild auf der Startseite', supportsVideo: true, maxItems: 1, group: 'Haupt' },
+  { value: 'hero-1080p', label: 'Hero Video 1080p', description: 'Full HD Qualität (1920x1080)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
   { value: 'hero-720p', label: 'Hero Video 720p', description: 'HD Qualität (1280x720)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
   { value: 'hero-480p', label: 'Hero Video 480p', description: 'SD Qualität (854x480)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
   { value: 'hero-360p', label: 'Hero Video 360p', description: 'Mobil Qualität (640x360)', supportsVideo: true, maxItems: 1, group: 'Hero Videos' },
@@ -184,7 +185,35 @@ export default function MediaManager() {
   };
 
   // Upload hero video with selected quality
-  const uploadHeroVideo = async (quality: '720p' | '480p' | '360p') => {
+  // Detect video resolution from file
+  const detectVideoResolution = (file: File): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(video.src);
+        resolve({ width: video.videoWidth, height: video.videoHeight });
+      };
+
+      video.onerror = () => {
+        URL.revokeObjectURL(video.src);
+        reject(new Error('Could not load video metadata'));
+      };
+
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Determine quality category based on video height
+  const getQualityFromResolution = (height: number): '1080p' | '720p' | '480p' | '360p' => {
+    if (height >= 1080) return '1080p';
+    if (height >= 720) return '720p';
+    if (height >= 480) return '480p';
+    return '360p';
+  };
+
+  const uploadHeroVideo = async (quality: '1080p' | '720p' | '480p' | '360p') => {
     if (!heroVideoFile) return;
 
     setHeroQualityModalOpen(false);
@@ -211,6 +240,47 @@ export default function MediaManager() {
     } catch (err) {
       console.error('Hero video upload failed:', err);
       setError('Upload fehlgeschlagen');
+    } finally {
+      setHeroVideoFile(null);
+      setIsUploading(false);
+      setUploadProgress(100);
+    }
+  };
+
+  // Auto-detect quality and upload
+  const uploadHeroVideoAutoDetect = async () => {
+    if (!heroVideoFile) return;
+
+    setHeroQualityModalOpen(false);
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Detect resolution
+      const resolution = await detectVideoResolution(heroVideoFile);
+      const quality = getQualityFromResolution(resolution.height);
+
+      console.log(`[MediaManager] Detected resolution: ${resolution.width}x${resolution.height} -> ${quality}`);
+
+      const formData = new FormData();
+      formData.append('files', heroVideoFile);
+      formData.append('category', `hero-${quality}`);
+
+      const response = await fetch('/api/admin/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        setSuccess(`Hero Video automatisch als ${quality} erkannt und hochgeladen! (${resolution.width}×${resolution.height})`);
+        await loadMedia();
+      } else {
+        const data = await response.json() as { error?: string };
+        setError(data.error || 'Upload fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Hero video auto-detect upload failed:', err);
+      setError('Upload fehlgeschlagen - Qualität konnte nicht erkannt werden');
     } finally {
       setHeroVideoFile(null);
       setIsUploading(false);
@@ -1242,6 +1312,28 @@ export default function MediaManager() {
             </p>
 
             <div className="space-y-2">
+              <button
+                onClick={uploadHeroVideoAutoDetect}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-left flex items-center gap-3"
+              >
+                <Cog className="w-5 h-5" />
+                <div>
+                  <span className="font-bold">Qualität erkennen</span>
+                  <span className="text-white/80 ml-2">— Automatisch</span>
+                </div>
+              </button>
+
+              <div className="border-t border-gray-200 my-3 pt-3">
+                <p className="text-xs text-gray-500 mb-2">Oder manuell auswählen:</p>
+              </div>
+
+              <button
+                onClick={() => uploadHeroVideo('1080p')}
+                className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-left"
+              >
+                <span className="font-bold">1080p</span>
+                <span className="text-white/80 ml-2">— 1920 × 1080 (Full HD)</span>
+              </button>
               <button
                 onClick={() => uploadHeroVideo('720p')}
                 className="w-full px-4 py-3 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition text-left"

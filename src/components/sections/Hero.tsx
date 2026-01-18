@@ -26,7 +26,7 @@ declare global {
 }
 
 // Determine video quality based on network speed (only call on client)
-function getVideoQuality(): '720p' | '480p' | '360p' {
+function getVideoQuality(): '1080p' | '720p' | '480p' | '360p' {
   if (typeof window === 'undefined') return '480p';
 
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -47,6 +47,10 @@ function getVideoQuality(): '720p' | '480p' | '360p' {
           return '480p';
         case '4g':
         default:
+          // For 4G, check downlink for 1080p capability
+          if (connection.downlink !== undefined && connection.downlink >= 10) {
+            return '1080p';
+          }
           return '720p';
       }
     }
@@ -55,6 +59,7 @@ function getVideoQuality(): '720p' | '480p' | '360p' {
     if (connection.downlink !== undefined) {
       if (connection.downlink < 1) return '360p';
       if (connection.downlink < 5) return '480p';
+      if (connection.downlink >= 10) return '1080p';
       return '720p';
     }
   }
@@ -74,7 +79,7 @@ export function Hero() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [currentQuality, setCurrentQuality] = useState<'720p' | '480p' | '360p' | null>(null);
+  const [currentQuality, setCurrentQuality] = useState<'1080p' | '720p' | '480p' | '360p' | null>(null);
   const [upgradeUrl, setUpgradeUrl] = useState<string | null>(null);
   const [isUpgradeReady, setIsUpgradeReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -114,11 +119,13 @@ export function Hero() {
     console.log('[Hero] Preferred quality:', preferredQuality);
 
     // Quality fallback order based on preferred quality
-    const qualityOrder = preferredQuality === '720p'
-      ? ['720p', '480p', '360p']
-      : preferredQuality === '480p'
-        ? ['480p', '720p', '360p']
-        : ['360p', '480p', '720p'];
+    const qualityOrder = preferredQuality === '1080p'
+      ? ['1080p', '720p', '480p', '360p']
+      : preferredQuality === '720p'
+        ? ['720p', '1080p', '480p', '360p']
+        : preferredQuality === '480p'
+          ? ['480p', '720p', '360p']
+          : ['360p', '480p', '720p'];
 
     // Try each quality level, then fall back to 'hero' category
     const categoriesToTry = [...qualityOrder.map(q => `hero-${q}`), 'hero'];
@@ -138,7 +145,7 @@ export function Hero() {
             // Extract quality from category (e.g., 'hero-720p' -> '720p')
             const qualityMatch = category.match(/hero-(\d+p)/);
             if (qualityMatch) {
-              setCurrentQuality(qualityMatch[1] as '720p' | '480p' | '360p');
+              setCurrentQuality(qualityMatch[1] as '1080p' | '720p' | '480p' | '360p');
             }
             return;
           }
@@ -219,35 +226,50 @@ export function Hero() {
 
   // Progressive quality upgrade: After initial video loads, try to load higher quality
   useEffect(() => {
-    if (!isMounted || !videoLoaded || !currentQuality || currentQuality === '720p') return;
+    if (!isMounted || !videoLoaded || !currentQuality || currentQuality === '1080p') return;
 
-    // Determine the next higher quality to try
-    const upgradeQuality = currentQuality === '360p' ? '720p' : '720p';
-    const upgradeCategory = `hero-${upgradeQuality}`;
+    // Determine the upgrade path based on current quality
+    // Try 1080p first, then 720p as fallback
+    const upgradeQualities = currentQuality === '720p'
+      ? ['1080p']
+      : currentQuality === '480p'
+        ? ['1080p', '720p']
+        : ['1080p', '720p']; // 360p -> try both
 
-    console.log(`[Hero] Checking for quality upgrade: ${currentQuality} -> ${upgradeQuality}`);
+    console.log(`[Hero] Checking for quality upgrade from ${currentQuality}...`);
 
-    // Check if higher quality exists
-    fetch(`/api/media?category=${upgradeCategory}&type=video`)
-      .then(res => res.json() as Promise<{ media?: { url: string }[] }>)
-      .then(data => {
-        if (data.media?.[0]) {
-          console.log(`[Hero] Higher quality ${upgradeQuality} available, preloading...`);
-          setUpgradeUrl(`/api/video-stream?category=${upgradeCategory}`);
-        } else {
-          console.log(`[Hero] No higher quality available`);
+    // Try each upgrade quality in order
+    const tryUpgrade = async () => {
+      for (const upgradeQuality of upgradeQualities) {
+        const upgradeCategory = `hero-${upgradeQuality}`;
+        try {
+          const res = await fetch(`/api/media?category=${upgradeCategory}&type=video`);
+          const data = await res.json() as { media?: { url: string }[] };
+
+          if (data.media?.[0]) {
+            console.log(`[Hero] Higher quality ${upgradeQuality} available, preloading...`);
+            setUpgradeUrl(`/api/video-stream?category=${upgradeCategory}`);
+            return; // Stop after finding first available upgrade
+          }
+        } catch (err) {
+          console.error(`[Hero] Error checking ${upgradeQuality}:`, err);
         }
-      })
-      .catch(err => {
-        console.error('[Hero] Error checking for upgrade:', err);
-      });
+      }
+      console.log(`[Hero] No higher quality available`);
+    };
+
+    tryUpgrade();
   }, [isMounted, videoLoaded, currentQuality]);
 
   // Handle upgrade video ready - swap to higher quality
   const handleUpgradeCanPlay = () => {
     if (!upgradeVideoRef.current || !videoRef.current || isUpgradeReady) return;
 
-    console.log('[Hero] Higher quality video ready, preparing swap...');
+    // Determine the upgrade quality from the URL
+    const upgradeQualityMatch = upgradeUrl?.match(/hero-(\d+p)/);
+    const newQuality = (upgradeQualityMatch?.[1] as '1080p' | '720p') || '720p';
+
+    console.log(`[Hero] Higher quality video (${newQuality}) ready, preparing swap...`);
 
     // Get current playback position from the old video
     const currentTime = videoRef.current.currentTime;
@@ -259,12 +281,12 @@ export function Hero() {
     upgradeVideoRef.current.play().then(() => {
       // Now trigger the cross-fade
       setIsUpgradeReady(true);
-      setCurrentQuality('720p');
+      setCurrentQuality(newQuality);
 
       // After the fade transition (300ms), pause the old video to save resources
       setTimeout(() => {
         videoRef.current?.pause();
-        console.log('[Hero] Successfully upgraded to 720p');
+        console.log(`[Hero] Successfully upgraded to ${newQuality}`);
       }, 350);
     }).catch(err => {
       console.error('[Hero] Failed to play upgrade video:', err);
