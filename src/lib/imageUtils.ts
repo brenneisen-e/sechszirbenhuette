@@ -7,6 +7,10 @@
  * @see https://developers.cloudflare.com/images/transform-images/
  */
 
+// Public R2 URL for media serving
+// Using R2 Public Development URL (no custom domain required)
+const PUBLIC_R2_URL = 'https://pub-76fcab5ec7604681a60e6c0df28978bf.r2.dev';
+
 export interface ImageResizeOptions {
   width?: number;
   height?: number;
@@ -14,6 +18,24 @@ export interface ImageResizeOptions {
   fit?: 'scale-down' | 'contain' | 'cover' | 'crop' | 'pad';
   format?: 'auto' | 'webp' | 'avif' | 'json';
   blur?: number;
+}
+
+/**
+ * Convert an API media URL to public R2 URL
+ * API URLs like /api/admin/media/file/category/filename.jpg
+ * become https://media.sechszirbenhuette.com/category/filename.jpg
+ */
+export function getPublicMediaUrl(url: string): string {
+  if (!url) return url;
+
+  // Check if it's an API URL that needs conversion
+  const apiPrefix = '/api/admin/media/file/';
+  if (url.startsWith(apiPrefix)) {
+    const fileKey = url.substring(apiPrefix.length);
+    return `${PUBLIC_R2_URL}/${fileKey}`;
+  }
+
+  return url;
 }
 
 /**
@@ -35,6 +57,20 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
     return url;
   }
 
+  // Convert API URLs to public R2 URLs
+  const publicUrl = getPublicMediaUrl(url);
+
+  // R2 Public Development URLs (r2.dev) don't support Cloudflare Image Resizing
+  // Just return the public URL directly for faster loading
+  if (publicUrl.includes('.r2.dev')) {
+    return publicUrl;
+  }
+
+  // Skip for external URLs that aren't on our domain
+  if (publicUrl.startsWith('http') && typeof window !== 'undefined' && !publicUrl.includes(window.location.hostname)) {
+    return publicUrl;
+  }
+
   const {
     width,
     height,
@@ -44,7 +80,7 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
   } = options;
 
   try {
-    const urlObj = new URL(url, typeof window !== 'undefined' ? window.location.origin : 'https://sechszirbenhuette.pages.dev');
+    const urlObj = new URL(publicUrl, typeof window !== 'undefined' ? window.location.origin : 'https://sechszirbenhuette.pages.dev');
 
     // Build resize parameters
     const params: string[] = [];
@@ -56,11 +92,12 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
 
     const resizeParams = params.join(',');
 
-    // Format: /cdn-cgi/image/params/original-path
+    // For R2 URLs, use the R2 domain for resizing
+    // Format: https://media.sechszirbenhuette.com/cdn-cgi/image/params/path
     return `${urlObj.origin}/cdn-cgi/image/${resizeParams}${urlObj.pathname}`;
   } catch {
-    // If URL parsing fails, return original
-    return url;
+    // If URL parsing fails, return public URL
+    return publicUrl;
   }
 }
 
