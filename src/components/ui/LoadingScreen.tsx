@@ -17,13 +17,15 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   // Hide the initial CSS-only loader when this component mounts
+  // Use CSS opacity to hide instead of DOM removal to prevent hydration errors
   useEffect(() => {
     const initialLoader = document.getElementById('initial-loader');
     if (initialLoader) {
       initialLoader.classList.add('loaded');
-      // Remove from DOM after transition
+      // Hide with CSS instead of removing from DOM to prevent React hydration issues
+      // The element will be hidden via CSS (opacity: 0, visibility: hidden)
       setTimeout(() => {
-        initialLoader.remove();
+        initialLoader.style.display = 'none';
       }, 300);
     }
   }, []);
@@ -88,10 +90,18 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
     if (cleanup === true) return;
 
     // Also listen for DOM changes in case video is added later
+    // Use a more targeted observer to avoid interfering with React hydration
     const observer = new MutationObserver(() => {
-      checkVideoReady();
+      // Only check if the video element exists now
+      const video = document.querySelector('#hero-video');
+      if (video) {
+        checkVideoReady();
+        observer.disconnect(); // Stop observing once video is found
+      }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Observe the main content area, not the entire body, to minimize hydration interference
+    const mainContent = document.getElementById('__next') || document.body;
+    observer.observe(mainContent, { childList: true, subtree: true });
 
     // Fallback: max wait time of 6 seconds
     const fallbackTimer = setTimeout(() => setVideoLoaded(true), 6000);
