@@ -165,9 +165,11 @@ export function Hero() {
     };
   }, [isMounted, videoUrl, videoLoaded]);
 
-  // Handle video loaded and playing
-  const handleVideoCanPlay = () => {
+  // Handle video loaded and ready to play smoothly
+  const handleVideoCanPlayThrough = () => {
     if (videoRef.current) {
+      // Reset to beginning before playing (in case it buffered ahead)
+      videoRef.current.currentTime = 0;
       // Try to play the video
       videoRef.current.play().then(() => {
         setVideoLoaded(true);
@@ -244,14 +246,13 @@ export function Hero() {
           <video
             ref={videoRef}
             id="hero-video"
-            autoPlay
             muted
             loop
             playsInline
             disablePictureInPicture
             preload="auto"
             className="h-full w-full object-cover"
-            onCanPlay={handleVideoCanPlay}
+            onCanPlayThrough={handleVideoCanPlayThrough}
             onError={handleVideoError}
           >
             <source src={videoUrl} type="video/mp4" />
