@@ -165,9 +165,11 @@ export function Hero() {
     };
   }, [isMounted, videoUrl, videoLoaded]);
 
-  // Handle video loaded and playing
+  // Handle video ready to play
   const handleVideoCanPlay = () => {
-    if (videoRef.current) {
+    if (videoRef.current && !videoLoaded) {
+      // Reset to beginning before playing
+      videoRef.current.currentTime = 0;
       // Try to play the video
       videoRef.current.play().then(() => {
         setVideoLoaded(true);
@@ -180,6 +182,28 @@ export function Hero() {
       });
     }
   };
+
+  // Fallback: Try to play after 10 seconds even if canplay hasn't fired
+  useEffect(() => {
+    if (!isMounted || !videoUrl || videoLoaded) return;
+
+    const fallbackTimer = setTimeout(() => {
+      if (videoRef.current && !videoLoaded) {
+        // Check if video has any data loaded
+        if (videoRef.current.readyState >= 2) { // HAVE_CURRENT_DATA or better
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().then(() => {
+            setVideoLoaded(true);
+            setTimeout(() => setShowPlaceholder(false), 300);
+          }).catch(() => {
+            // Failed to play - keep thumbnail
+          });
+        }
+      }
+    }, 10000);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [isMounted, videoUrl, videoLoaded]);
 
   // Handle video error - show fallback gradient
   const handleVideoError = () => {
@@ -244,7 +268,6 @@ export function Hero() {
           <video
             ref={videoRef}
             id="hero-video"
-            autoPlay
             muted
             loop
             playsInline
