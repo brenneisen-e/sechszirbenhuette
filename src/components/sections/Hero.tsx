@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
@@ -13,18 +13,70 @@ export function Hero() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Fetch video URL with caching
   useEffect(() => {
+    // Check sessionStorage cache first to reduce API calls
+    const cachedUrl = sessionStorage.getItem('hero-video-url');
+    if (cachedUrl) {
+      setVideoUrl(cachedUrl);
+      return;
+    }
+
     fetch('/api/media?category=hero&type=video')
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]) {
-          setVideoUrl(data.media[0].url);
+          const url = data.media[0].url;
+          setVideoUrl(url);
+          // Cache for this session
+          sessionStorage.setItem('hero-video-url', url);
         }
       })
       .catch(() => {
         // Use fallback
+        setVideoError(true);
       });
+  }, []);
+
+  // Handle video events for Safari/macOS compatibility
+  const handleVideoCanPlay = useCallback(() => {
+    setVideoLoaded(true);
+    // Ensure video plays on Safari
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Autoplay blocked, show fallback
+        setVideoError(true);
+      });
+    }
+  }, []);
+
+  const handleVideoError = useCallback(() => {
+    setVideoError(true);
+  }, []);
+
+  // Safari fix: handle video waiting for data
+  const handleVideoWaiting = useCallback(() => {
+    // Video is buffering - this is normal, just wait
+    // Don't reload as that causes the 3-second loop issue
+  }, []);
+
+  // Handle video time update to detect if video is stuck
+  const lastTimeRef = useRef(0);
+  const stallCountRef = useRef(0);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current) {
+      const currentTime = videoRef.current.currentTime;
+      // Reset stall counter when video is playing normally
+      if (currentTime !== lastTimeRef.current) {
+        stallCountRef.current = 0;
+        lastTimeRef.current = currentTime;
+      }
+    }
   }, []);
 
   const scrollToSection = (href: string) => {
@@ -61,18 +113,31 @@ export function Hero() {
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
-        {videoUrl ? (
-          <video
-            id="hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            className="h-full w-full object-cover"
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
+        {videoUrl && !videoError ? (
+          <>
+            {/* Fallback gradient shown until video loads */}
+            {!videoLoaded && (
+              <div className="absolute inset-0 h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
+            )}
+            <video
+              ref={videoRef}
+              id="hero-video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              disablePictureInPicture
+              // Use metadata preload to reduce initial resource usage
+              preload="metadata"
+              className={`h-full w-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onCanPlay={handleVideoCanPlay}
+              onError={handleVideoError}
+              onWaiting={handleVideoWaiting}
+              onTimeUpdate={handleTimeUpdate}
+            >
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+          </>
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}

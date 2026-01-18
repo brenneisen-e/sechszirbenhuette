@@ -68,13 +68,17 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category');
   const type = searchParams.get('type'); // 'image' | 'video' | null
 
+  // Cache headers to reduce worker load
+  // Hero videos and images can be cached longer since they rarely change
+  const cacheMaxAge = category === 'hero' ? 3600 : 300; // 1 hour for hero, 5 minutes for others
+
   try {
     // Try to get data from D1
     const env = await getCloudflareEnv();
 
     if (!env || !env.DB) {
       // Not in Cloudflare environment, use placeholders
-      return getPlaceholderResponse(category, type);
+      return getPlaceholderResponse(category, type, cacheMaxAge);
     }
 
     let query = 'SELECT * FROM media';
@@ -100,17 +104,24 @@ export async function GET(request: NextRequest) {
     const stmt = env.DB.prepare(query);
     const result = await (params.length > 0 ? stmt.bind(...params) : stmt).all<MediaRecord>();
 
-    // If we have data from D1, return it
+    // If we have data from D1, return it with cache headers
     if (result.results && result.results.length > 0) {
-      return NextResponse.json({ media: result.results });
+      return NextResponse.json(
+        { media: result.results },
+        {
+          headers: {
+            'Cache-Control': `public, max-age=${cacheMaxAge}, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,
+          },
+        }
+      );
     }
 
     // Otherwise fall back to placeholder data
-    return getPlaceholderResponse(category, type);
+    return getPlaceholderResponse(category, type, cacheMaxAge);
   } catch (error) {
     console.error('Error fetching from D1, using placeholders:', error);
     // Fall back to placeholder data
-    return getPlaceholderResponse(category, type);
+    return getPlaceholderResponse(category, type, cacheMaxAge);
   }
 }
 
@@ -186,7 +197,7 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-function getPlaceholderResponse(category: string | null, type: string | null) {
+function getPlaceholderResponse(category: string | null, type: string | null, cacheMaxAge: number = 300) {
   let media: Array<{
     id: string;
     url: string;
@@ -206,5 +217,12 @@ function getPlaceholderResponse(category: string | null, type: string | null) {
     media = media.filter(m => m.media_type === type);
   }
 
-  return NextResponse.json({ media });
+  return NextResponse.json(
+    { media },
+    {
+      headers: {
+        'Cache-Control': `public, max-age=${cacheMaxAge}, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,
+      },
+    }
+  );
 }
