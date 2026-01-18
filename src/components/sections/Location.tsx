@@ -14,23 +14,35 @@ interface MediaItem {
 export function Location() {
   const { language } = useLanguage();
   const [mapInteractive, setMapInteractive] = useState(false);
-  const [markerImage, setMarkerImage] = useState('/images/aussen/Aussen-Sommer.jpg');
+  const [isMounted, setIsMounted] = useState(false);
+  const [markerImage, setMarkerImage] = useState<string | null>(null);
 
-  // Fetch exterior image for map marker
+  // Mark as mounted to prevent hydration mismatch
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Fetch exterior image for map marker (only after mount)
+  useEffect(() => {
+    if (!isMounted) return;
+
     async function fetchMarkerImage() {
       try {
         const response = await fetch('/api/media?category=aussen&type=image');
         const data = await response.json() as { media?: MediaItem[] };
         if (data.media && data.media.length > 0) {
           setMarkerImage(data.media[0].url);
+        } else {
+          // Use fallback if no images in database
+          setMarkerImage('/images/aussen/Aussen-Sommer.jpg');
         }
       } catch {
-        // Use fallback image
+        // Use fallback image on error
+        setMarkerImage('/images/aussen/Aussen-Sommer.jpg');
       }
     }
     fetchMarkerImage();
-  }, []);
+  }, [isMounted]);
 
   // Sechszirbenhütte coordinates
   const lat = SITE_CONFIG.coordinates.lat;
@@ -95,22 +107,24 @@ export function Location() {
               </button>
             )}
             {/* Custom Marker with Image */}
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none z-10"
-              style={{ marginTop: '-20px' }}
-            >
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-2xl">
-                  <img
-                    src={markerImage}
-                    alt="Sechszirbenhütte"
-                    className="w-full h-full object-cover"
-                  />
+            {markerImage && (
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none z-10"
+                style={{ marginTop: '-20px' }}
+              >
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+                    <img
+                      src={markerImage}
+                      alt="Sechszirbenhütte"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {/* Triangle pointer */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
                 </div>
-                {/* Triangle pointer */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
               </div>
-            </div>
+            )}
           </div>
 
           {/* Info Cards */}
