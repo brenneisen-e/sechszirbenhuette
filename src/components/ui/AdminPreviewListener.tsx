@@ -108,48 +108,55 @@ export function AdminPreviewListener() {
   useEffect(() => {
     if (!isInteractive) return;
 
-    // Add styles for interactive mode
-    const style = document.createElement('style');
-    style.id = 'admin-interactive-styles';
-    style.textContent = `
-      [data-text-key] {
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-        position: relative !important;
+    // Check if style already exists to prevent duplicates
+    let style = document.getElementById('admin-interactive-styles') as HTMLStyleElement;
+    if (!style) {
+      // Add styles for interactive mode - use insertAdjacentHTML to avoid insertBefore issues
+      style = document.createElement('style');
+      style.id = 'admin-interactive-styles';
+      style.textContent = `
+        [data-text-key] {
+          cursor: pointer !important;
+          transition: all 0.2s ease !important;
+          position: relative !important;
+        }
+        [data-text-key]:hover {
+          outline: 3px dashed #1e5631 !important;
+          outline-offset: 4px !important;
+          background-color: rgba(30, 86, 49, 0.1) !important;
+        }
+        [data-text-key].admin-selected {
+          outline: 3px solid #1e5631 !important;
+          outline-offset: 4px !important;
+          background-color: rgba(30, 86, 49, 0.2) !important;
+        }
+        [data-text-key]::after {
+          content: 'Klicken zum Bearbeiten';
+          position: absolute;
+          top: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #1e5631;
+          color: white;
+          font-size: 11px;
+          padding: 4px 8px;
+          border-radius: 4px;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.2s;
+          font-family: system-ui, sans-serif !important;
+          z-index: 9999;
+        }
+        [data-text-key]:hover::after {
+          opacity: 1;
+        }
+      `;
+      // Use appendChild only after checking document.head is ready
+      if (document.head) {
+        document.head.appendChild(style);
       }
-      [data-text-key]:hover {
-        outline: 3px dashed #1e5631 !important;
-        outline-offset: 4px !important;
-        background-color: rgba(30, 86, 49, 0.1) !important;
-      }
-      [data-text-key].admin-selected {
-        outline: 3px solid #1e5631 !important;
-        outline-offset: 4px !important;
-        background-color: rgba(30, 86, 49, 0.2) !important;
-      }
-      [data-text-key]::after {
-        content: 'Klicken zum Bearbeiten';
-        position: absolute;
-        top: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #1e5631;
-        color: white;
-        font-size: 11px;
-        padding: 4px 8px;
-        border-radius: 4px;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-        font-family: system-ui, sans-serif !important;
-        z-index: 9999;
-      }
-      [data-text-key]:hover::after {
-        opacity: 1;
-      }
-    `;
-    document.head.appendChild(style);
+    }
 
     // Add click handlers to all text elements
     const handleClick = (e: MouseEvent) => {
@@ -184,8 +191,18 @@ export function AdminPreviewListener() {
 
     return () => {
       document.removeEventListener('click', handleClick, true);
+      // Safely remove style element by hiding it instead of removing
+      // This prevents hydration issues with DOM manipulation
       const styleEl = document.getElementById('admin-interactive-styles');
-      if (styleEl) styleEl.remove();
+      if (styleEl && styleEl.parentNode) {
+        // Use parentNode.removeChild for safer removal
+        try {
+          styleEl.parentNode.removeChild(styleEl);
+        } catch {
+          // If removal fails, just disable the styles
+          styleEl.textContent = '';
+        }
+      }
     };
   }, [isInteractive]);
 

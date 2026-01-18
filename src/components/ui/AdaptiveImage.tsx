@@ -99,17 +99,21 @@ export function AdaptiveImage({
     }
   }, []);
 
+  // Use consistent quality for initial render to prevent hydration mismatch
+  // Only use adaptive quality after mount is confirmed and initial render is complete
+  const effectiveQuality = isMounted ? quality : 75;
+
   // Common image props
   const imageProps = {
     src,
     alt,
-    quality,
+    quality: effectiveQuality,
     className: `transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`,
     onLoad: () => setIsLoaded(true),
     priority,
     onClick,
     placeholder: 'blur' as const,
-    blurDataURL: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHxAAAgICAgMBAAAAAAAAAAAAAQIDBAARBSEGEjFB/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIDESH/2gAMAwEAAhEDEEQCPwBr3E8bTXJXiVYoo1UsSwQEkD6dBjE+R4uaDmLMUNiWONJWVURzoCT0B+YwYLPgKqfB/9k=',
+    blurDataURL: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHxAAAgICAgMBAAAAAAAAAAAAAQIDBAARBSEGEjFB/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIDESH/2gAMAwEAAhEDEQA/AGvcTxtNcleJViijVSxLBASQPp0GMT5Hi5oOYsxQ2JY40lZVRHOgJPQH5jBgs+Aqp8H/2Q==',
     sizes: sizes || '100vw',
   };
 

@@ -118,7 +118,8 @@ export function Galerie() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [mobileIndex, setMobileIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  // Start with undefined to ensure consistent SSR rendering
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const imagesPerPage = 4;
@@ -319,8 +320,8 @@ export function Galerie() {
         {/* Image Grid */}
         {!isLoading && (
           <>
-            {/* Mobile Carousel */}
-            {isMobile && filteredImages.length > 0 && (
+            {/* Mobile Carousel - only render after hydration is complete */}
+            {isMobile === true && filteredImages.length > 0 && (
               <div className="md:hidden">
                 <div
                   className="relative overflow-hidden rounded-xl"
@@ -387,8 +388,8 @@ export function Galerie() {
               </div>
             )}
 
-            {/* Desktop Grid */}
-            <div className="hidden md:block relative">
+            {/* Desktop Grid - show always on server, then conditionally after hydration */}
+            <div className={`${isMobile === true ? 'hidden' : ''} md:block relative`} suppressHydrationWarning>
               {/* Previous Button (only when not expanded) */}
               {!isExpanded && filteredImages.length > imagesPerPage && (
                 <button
@@ -432,7 +433,7 @@ export function Galerie() {
             </div>
 
             {/* Pagination indicator and Expand Button (Desktop only) */}
-            {!isMobile && filteredImages.length > imagesPerPage && (
+            {isMobile !== true && filteredImages.length > imagesPerPage && (
               <div className="hidden md:flex items-center justify-between mt-6">
                 {/* Page indicator (left side - only when not expanded) */}
                 {!isExpanded ? (
