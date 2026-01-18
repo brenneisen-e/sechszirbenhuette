@@ -67,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
       <head>
         {/* Preconnect to font CDNs */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,9 +78,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         />
       </head>
-      <body className="font-sans antialiased overflow-x-hidden">
+      <body className="font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
         {/* Immediate CSS-only loading indicator - shows before JS loads */}
-        <div id="initial-loader" className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white">
+        <div id="initial-loader" className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white" suppressHydrationWarning>
           <style dangerouslySetInnerHTML={{ __html: `
             #initial-loader { transition: opacity 0.3s ease-out; }
             #initial-loader.loaded { opacity: 0; pointer-events: none; }

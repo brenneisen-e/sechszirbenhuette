@@ -187,6 +187,12 @@ function ContentTextsProviderInner({ children }: { children: ReactNode }) {
   const { language } = useLanguage();
   const [texts, setTexts] = useState<Record<string, ContentText>>(defaultTexts);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Mark as mounted to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchTexts = async () => {
     try {
@@ -202,9 +208,11 @@ function ContentTextsProviderInner({ children }: { children: ReactNode }) {
     }
   };
 
+  // Only fetch texts after mount to prevent hydration issues
   useEffect(() => {
+    if (!isMounted) return;
     fetchTexts();
-  }, []);
+  }, [isMounted]);
 
   // Get text with language support
   // Priority: 1) Database (admin-customized), 2) Locale translations, 3) Default texts

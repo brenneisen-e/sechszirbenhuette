@@ -27,14 +27,22 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>('de');
+  const [isMounted, setIsMounted] = useState(false);
 
+  // Mark as mounted to prevent hydration mismatch
   useEffect(() => {
-    // Load language from localStorage
+    setIsMounted(true);
+  }, []);
+
+  // Load language from localStorage only after mount
+  useEffect(() => {
+    if (!isMounted) return;
+
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && translations[savedLanguage]) {
       setLanguageState(savedLanguage);
     }
-  }, []);
+  }, [isMounted]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
