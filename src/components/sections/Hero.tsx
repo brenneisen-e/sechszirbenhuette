@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
+import Image from 'next/image';
 
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
@@ -24,8 +25,10 @@ declare global {
   }
 }
 
-// Determine video quality based on network speed
+// Determine video quality based on network speed (only call on client)
 function getVideoQuality(): '720p' | '480p' | '360p' {
+  if (typeof window === 'undefined') return '480p';
+
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
   if (connection) {
@@ -63,11 +66,42 @@ function getVideoQuality(): '720p' | '480p' | '360p' {
 export function Hero() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
+
+  // Use refs for hydration-safe state initialization
+  const [isMounted, setIsMounted] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [showPlaceholder, setShowPlaceholder] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mark as mounted on client to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Fetch thumbnail URL (for placeholder while video loads)
+  useEffect(() => {
+    if (!isMounted) return;
+
+    fetch('/api/media?category=hero-thumbnail&type=image')
+      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+      .then((data) => {
+        if (data.media?.[0]) {
+          setThumbnailUrl(data.media[0].url);
+        }
+      })
+      .catch(() => {
+        // Thumbnail fetch failed, will use gradient fallback
+      });
+  }, [isMounted]);
 
   // Fetch video URL with adaptive quality
   useEffect(() => {
+    if (!isMounted) return;
+
     // Check sessionStorage cache first to reduce API calls
     const cachedUrl = sessionStorage.getItem('hero-video-url');
     const cachedQuality = sessionStorage.getItem('hero-video-quality');
@@ -110,11 +144,47 @@ export function Hero() {
         // Use fallback
         setVideoError(true);
       });
-  }, []);
+  }, [isMounted]);
+
+  // Set up 5-second timeout to show placeholder if video hasn't loaded
+  useEffect(() => {
+    if (!isMounted || !videoUrl) return;
+
+    // Start 5-second timer - if video isn't loaded by then, keep showing placeholder
+    placeholderTimeoutRef.current = setTimeout(() => {
+      if (!videoLoaded) {
+        // Video still loading after 5 seconds - placeholder is already showing
+        // The video will continue to load in the background
+      }
+    }, 5000);
+
+    return () => {
+      if (placeholderTimeoutRef.current) {
+        clearTimeout(placeholderTimeoutRef.current);
+      }
+    };
+  }, [isMounted, videoUrl, videoLoaded]);
+
+  // Handle video loaded and playing
+  const handleVideoCanPlay = () => {
+    if (videoRef.current) {
+      // Try to play the video
+      videoRef.current.play().then(() => {
+        setVideoLoaded(true);
+        // Fade out placeholder after video starts playing
+        setTimeout(() => setShowPlaceholder(false), 300);
+      }).catch(() => {
+        // Autoplay blocked - keep showing placeholder
+        setVideoLoaded(true);
+        setTimeout(() => setShowPlaceholder(false), 300);
+      });
+    }
+  };
 
   // Handle video error - show fallback gradient
   const handleVideoError = () => {
     setVideoError(true);
+    setShowPlaceholder(true);
   };
 
   const scrollToSection = (href: string) => {
@@ -151,8 +221,28 @@ export function Hero() {
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
-        {videoUrl && !videoError ? (
+        {/* Placeholder layer - shows thumbnail or gradient while video loads */}
+        {showPlaceholder && (
+          <div className={`absolute inset-0 z-10 transition-opacity duration-500 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+            {thumbnailUrl && !videoError ? (
+              <Image
+                src={thumbnailUrl}
+                alt="Sechszirbenhütte"
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
+            )}
+          </div>
+        )}
+
+        {/* Video layer - renders behind placeholder, fades in when ready */}
+        {isMounted && videoUrl && !videoError && (
           <video
+            ref={videoRef}
             id="hero-video"
             autoPlay
             muted
@@ -161,11 +251,15 @@ export function Hero() {
             disablePictureInPicture
             preload="auto"
             className="h-full w-full object-cover"
+            onCanPlay={handleVideoCanPlay}
             onError={handleVideoError}
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
-        ) : (
+        )}
+
+        {/* Fallback gradient when no video or thumbnail */}
+        {!isMounted && (
           <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}
       </div>
