@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { getCloudflareImageUrl } from '@/lib/imageUtils';
 
 interface AdaptiveImageProps {
   src: string;
@@ -13,6 +14,8 @@ interface AdaptiveImageProps {
   sizes?: string;
   priority?: boolean;
   onClick?: () => void;
+  /** Target width for Cloudflare resizing (default: 800) */
+  cfWidth?: number;
 }
 
 // Determine image quality based on network conditions
@@ -69,6 +72,7 @@ export function AdaptiveImage({
   sizes,
   priority = false,
   onClick,
+  cfWidth = 800,
 }: AdaptiveImageProps) {
   // Use consistent initial quality for SSR to prevent hydration mismatch
   const [quality, setQuality] = useState(75);
@@ -103,9 +107,15 @@ export function AdaptiveImage({
   // Only use adaptive quality after mount is confirmed and initial render is complete
   const effectiveQuality = isMounted ? quality : 75;
 
+  // Use Cloudflare Image Resizing for optimized delivery
+  // This works because Next.js image optimization is disabled for Cloudflare Pages
+  const optimizedSrc = isMounted
+    ? getCloudflareImageUrl(src, { width: cfWidth, quality: effectiveQuality })
+    : src; // Use original src during SSR for consistent hydration
+
   // Common image props
   const imageProps = {
-    src,
+    src: optimizedSrc,
     alt,
     quality: effectiveQuality,
     className: `transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`,

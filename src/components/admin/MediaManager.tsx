@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { convertVideoForSafari, convertVideoMultiQuality, needsConversion, extractThumbnailAtTime, type ConversionProgress, VIDEO_QUALITIES } from '@/lib/videoConverter';
+import { getThumbnailUrl } from '@/lib/imageUtils';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -1344,13 +1345,11 @@ export default function MediaManager() {
                             <Video className="w-12 h-12 text-white" />
                           </div>
                         ) : (
-                          <Image
-                            src={item.url}
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={getThumbnailUrl(item.url)}
                             alt={item.alt_text || 'Bild'}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 25vw, (max-width: 1024px) 16vw, 10vw"
-                            quality={30}
+                            className="w-full h-full object-cover"
                             loading="lazy"
                           />
                         )}
