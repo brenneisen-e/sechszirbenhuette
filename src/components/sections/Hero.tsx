@@ -25,14 +25,15 @@ declare global {
   }
 }
 
-// Determine video quality based on network speed (only call on client)
-function getVideoQuality(): '1080p' | '720p' | '480p' | '360p' {
-  if (typeof window === 'undefined') return '480p';
+// Determine TARGET video quality based on network speed (for progressive upgrade)
+// We always START with 360p for fast initial load, then upgrade to this target
+function getTargetVideoQuality(): '1080p' | '720p' | '480p' | '360p' {
+  if (typeof window === 'undefined') return '720p';
 
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
   if (connection) {
-    // Use saveData preference
+    // Use saveData preference - stay at 360p
     if (connection.saveData) {
       return '360p';
     }
@@ -64,8 +65,8 @@ function getVideoQuality(): '1080p' | '720p' | '480p' | '360p' {
     }
   }
 
-  // Default to medium quality if we can't detect
-  return '480p';
+  // Default to HD quality for upgrade target
+  return '720p';
 }
 
 export function Hero() {
@@ -80,6 +81,7 @@ export function Hero() {
   const [videoError, setVideoError] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const [currentQuality, setCurrentQuality] = useState<'1080p' | '720p' | '480p' | '360p' | null>(null);
+  const [targetQuality, setTargetQuality] = useState<'1080p' | '720p' | '480p' | '360p'>('720p');
   const [upgradeUrl, setUpgradeUrl] = useState<string | null>(null);
   const [isUpgradeReady, setIsUpgradeReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -115,20 +117,15 @@ export function Hero() {
     sessionStorage.removeItem('hero-video-url');
     sessionStorage.removeItem('hero-video-quality');
 
-    const preferredQuality = getVideoQuality();
-    console.log('[Hero] Preferred quality:', preferredQuality);
+    // Determine target quality based on network speed (for later upgrade)
+    const target = getTargetVideoQuality();
+    setTargetQuality(target);
+    console.log('[Hero] Target quality:', target);
 
-    // Quality fallback order based on preferred quality
-    const qualityOrder = preferredQuality === '1080p'
-      ? ['1080p', '720p', '480p', '360p']
-      : preferredQuality === '720p'
-        ? ['720p', '1080p', '480p', '360p']
-        : preferredQuality === '480p'
-          ? ['480p', '720p', '360p']
-          : ['360p', '480p', '720p'];
-
-    // Try each quality level, then fall back to 'hero' category
-    const categoriesToTry = [...qualityOrder.map(q => `hero-${q}`), 'hero'];
+    // ALWAYS start with 360p for fast initial load, then upgrade
+    // Fallback order: 360p first, then higher qualities if 360p not available
+    const categoriesToTry = ['hero-360p', 'hero-480p', 'hero-720p', 'hero-1080p', 'hero'];
+    console.log('[Hero] Starting with 360p for fast load, will upgrade to', target);
 
     async function findVideo() {
       for (const category of categoriesToTry) {
@@ -224,30 +221,38 @@ export function Hero() {
     setShowPlaceholder(true);
   };
 
-  // Progressive quality upgrade: After initial video loads, try to load higher quality
+  // Progressive quality upgrade: After initial video loads, upgrade to target quality
   useEffect(() => {
-    if (!isMounted || !videoLoaded || !currentQuality || currentQuality === '1080p') return;
+    if (!isMounted || !videoLoaded || !currentQuality) return;
 
-    // Determine the upgrade path based on current quality
-    // Try 1080p first, then 720p as fallback
-    const upgradeQualities = currentQuality === '720p'
-      ? ['1080p']
-      : currentQuality === '480p'
-        ? ['1080p', '720p']
-        : ['1080p', '720p']; // 360p -> try both
+    // Already at target quality or higher - no upgrade needed
+    const qualityRank = { '360p': 1, '480p': 2, '720p': 3, '1080p': 4 };
+    if (qualityRank[currentQuality] >= qualityRank[targetQuality]) {
+      console.log(`[Hero] Already at target quality (${currentQuality}), no upgrade needed`);
+      return;
+    }
 
-    console.log(`[Hero] Checking for quality upgrade from ${currentQuality}...`);
+    console.log(`[Hero] Upgrading from ${currentQuality} to target ${targetQuality}...`);
 
-    // Try each upgrade quality in order
+    // Try to load target quality, with fallbacks to lower qualities
     const tryUpgrade = async () => {
-      for (const upgradeQuality of upgradeQualities) {
+      // Build upgrade path from target down to current+1
+      const upgradeQualities: ('1080p' | '720p' | '480p')[] = [];
+      if (targetQuality === '1080p') upgradeQualities.push('1080p');
+      if (targetQuality === '1080p' || targetQuality === '720p') upgradeQualities.push('720p');
+      if (targetQuality === '1080p' || targetQuality === '720p' || targetQuality === '480p') upgradeQualities.push('480p');
+
+      // Filter out qualities we already have or lower
+      const qualitiesToTry = upgradeQualities.filter(q => qualityRank[q] > qualityRank[currentQuality]);
+
+      for (const upgradeQuality of qualitiesToTry) {
         const upgradeCategory = `hero-${upgradeQuality}`;
         try {
           const res = await fetch(`/api/media?category=${upgradeCategory}&type=video`);
           const data = await res.json() as { media?: { url: string }[] };
 
           if (data.media?.[0]) {
-            console.log(`[Hero] Higher quality ${upgradeQuality} available, preloading...`);
+            console.log(`[Hero] Found ${upgradeQuality}, preloading...`);
             setUpgradeUrl(`/api/video-stream?category=${upgradeCategory}`);
             return; // Stop after finding first available upgrade
           }
@@ -255,11 +260,11 @@ export function Hero() {
           console.error(`[Hero] Error checking ${upgradeQuality}:`, err);
         }
       }
-      console.log(`[Hero] No higher quality available`);
+      console.log(`[Hero] No higher quality available for upgrade`);
     };
 
     tryUpgrade();
-  }, [isMounted, videoLoaded, currentQuality]);
+  }, [isMounted, videoLoaded, currentQuality, targetQuality]);
 
   // Handle upgrade video ready - swap to higher quality
   const handleUpgradeCanPlay = () => {
@@ -450,27 +455,38 @@ export function Hero() {
 
             {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: videoLoaded ? 0 : 1.0 }}
               className="grid grid-cols-2 min-[400px]:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 px-2"
             >
               {features.map((feature, index) => (
-                <button
+                <motion.button
                   key={index}
                   onClick={feature.onClick}
-                  className="flex flex-col items-center group cursor-pointer hover:scale-105 transition-transform"
+                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: videoLoaded ? 0.4 : 0.8,
+                    delay: videoLoaded ? index * 0.05 : 1.2 + index * 0.15,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex flex-col items-center group cursor-pointer"
                 >
-                  <div
-                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2 transition-all group-hover:scale-110"
+                  <motion.div
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
                     style={{ backgroundColor: LOGO_GREEN }}
+                    whileHover={{ scale: 1.15, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
-                  </div>
+                  </motion.div>
                   <span className="text-[clamp(0.625rem,1.5vw,0.875rem)] font-semibold text-white drop-shadow-sm leading-tight">
                     {feature.label}
                   </span>
-                </button>
+                </motion.button>
               ))}
             </motion.div>
           </motion.div>
