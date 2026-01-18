@@ -7,6 +7,9 @@
  * @see https://developers.cloudflare.com/images/transform-images/
  */
 
+// Public R2 URL for media serving (enables Cloudflare Image Resizing)
+const PUBLIC_R2_URL = 'https://media.sechszirbenhuette.com';
+
 export interface ImageResizeOptions {
   width?: number;
   height?: number;
@@ -14,6 +17,24 @@ export interface ImageResizeOptions {
   fit?: 'scale-down' | 'contain' | 'cover' | 'crop' | 'pad';
   format?: 'auto' | 'webp' | 'avif' | 'json';
   blur?: number;
+}
+
+/**
+ * Convert an API media URL to public R2 URL
+ * API URLs like /api/admin/media/file/category/filename.jpg
+ * become https://media.sechszirbenhuette.com/category/filename.jpg
+ */
+export function getPublicMediaUrl(url: string): string {
+  if (!url) return url;
+
+  // Check if it's an API URL that needs conversion
+  const apiPrefix = '/api/admin/media/file/';
+  if (url.startsWith(apiPrefix)) {
+    const fileKey = url.substring(apiPrefix.length);
+    return `${PUBLIC_R2_URL}/${fileKey}`;
+  }
+
+  return url;
 }
 
 /**
@@ -35,15 +56,14 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
     return url;
   }
 
-  // Skip for API routes - Cloudflare Image Resizing only works with static files
-  // API routes like /api/admin/media/file/... serve files dynamically
-  if (url.includes('/api/')) {
-    return url;
-  }
+  // Convert API URLs to public R2 URLs for Cloudflare Image Resizing
+  const publicUrl = getPublicMediaUrl(url);
 
-  // Skip for external URLs (R2, other domains) - these need different handling
-  if (url.startsWith('http') && typeof window !== 'undefined' && !url.includes(window.location.hostname)) {
-    return url;
+  // Skip for external URLs that aren't our R2 bucket
+  if (publicUrl.startsWith('http') && !publicUrl.includes('media.sechszirbenhuette.com')) {
+    if (typeof window !== 'undefined' && !publicUrl.includes(window.location.hostname)) {
+      return publicUrl;
+    }
   }
 
   const {
@@ -55,7 +75,7 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
   } = options;
 
   try {
-    const urlObj = new URL(url, typeof window !== 'undefined' ? window.location.origin : 'https://sechszirbenhuette.pages.dev');
+    const urlObj = new URL(publicUrl, typeof window !== 'undefined' ? window.location.origin : 'https://sechszirbenhuette.pages.dev');
 
     // Build resize parameters
     const params: string[] = [];
@@ -67,11 +87,12 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
 
     const resizeParams = params.join(',');
 
-    // Format: /cdn-cgi/image/params/original-path
+    // For R2 URLs, use the R2 domain for resizing
+    // Format: https://media.sechszirbenhuette.com/cdn-cgi/image/params/path
     return `${urlObj.origin}/cdn-cgi/image/${resizeParams}${urlObj.pathname}`;
   } catch {
-    // If URL parsing fails, return original
-    return url;
+    // If URL parsing fails, return public URL
+    return publicUrl;
   }
 }
 

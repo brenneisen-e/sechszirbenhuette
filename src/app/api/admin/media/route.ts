@@ -186,7 +186,8 @@ export async function POST(request: NextRequest) {
 
       // Insert into D1
       const id = `${timestamp}-${randomStr}`;
-      const url = `/api/admin/media/file/${fileKey}`;
+      // Use public R2 URL for Cloudflare Image Resizing support
+      const url = `https://media.sechszirbenhuette.com/${fileKey}`;
 
       await env.DB.prepare(`
         INSERT INTO media (id, file_key, url, alt_text, title, category, media_type, display_order, created_at)
@@ -358,6 +359,25 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: `Category duplicates cleaned up. Removed ${deletedDuplicates} duplicate junction entries.`
+      });
+    }
+
+    if (action === 'migrate_to_public_urls') {
+      // Migrate old API URLs to public R2 URLs
+      // This enables Cloudflare Image Resizing for existing media
+      const apiPrefix = '/api/admin/media/file/';
+      const publicR2Url = 'https://media.sechszirbenhuette.com/';
+
+      const result = await env.DB.prepare(`
+        UPDATE media
+        SET url = '${publicR2Url}' || SUBSTR(url, ${apiPrefix.length + 1})
+        WHERE url LIKE '${apiPrefix}%'
+      `).run();
+
+      return NextResponse.json({
+        success: true,
+        message: `URLs migrated to public R2 format for Cloudflare Image Resizing.`,
+        result
       });
     }
 
