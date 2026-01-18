@@ -102,46 +102,41 @@ export function Hero() {
   useEffect(() => {
     if (!isMounted) return;
 
-    // Check sessionStorage cache first to reduce API calls
-    const cachedUrl = sessionStorage.getItem('hero-video-url');
-    const cachedQuality = sessionStorage.getItem('hero-video-quality');
+    // Clear old cache to ensure fresh fetch
+    sessionStorage.removeItem('hero-video-url');
+    sessionStorage.removeItem('hero-video-quality');
+
     const currentQuality = getVideoQuality();
-
-    // Use cache if quality matches
-    if (cachedUrl && cachedQuality === currentQuality) {
-      setVideoUrl(cachedUrl);
-      return;
-    }
-
-    // Check if multi-quality videos exist, otherwise fall back to standard hero
-    const quality = currentQuality;
+    console.log('[Hero] Looking for video with quality:', currentQuality);
 
     // Try quality-specific video first (e.g., hero-720p)
-    fetch(`/api/media?category=hero-${quality}&type=video`)
+    fetch(`/api/media?category=hero-${currentQuality}&type=video`)
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
+        console.log(`[Hero] hero-${currentQuality} response:`, data);
         if (data.media?.[0]) {
-          // Use streaming proxy with quality parameter
-          const url = `/api/video-stream?category=hero-${quality}`;
+          const url = `/api/video-stream?category=hero-${currentQuality}`;
+          console.log('[Hero] Using video URL:', url);
           setVideoUrl(url);
-          sessionStorage.setItem('hero-video-url', url);
-          sessionStorage.setItem('hero-video-quality', quality);
         } else {
           // Fall back to standard hero video (legacy)
+          console.log('[Hero] No quality-specific video, trying "hero" category...');
           return fetch('/api/media?category=hero&type=video')
             .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
             .then((data) => {
+              console.log('[Hero] hero response:', data);
               if (data.media?.[0]) {
                 const url = '/api/video-stream?category=hero';
+                console.log('[Hero] Using fallback video URL:', url);
                 setVideoUrl(url);
-                sessionStorage.setItem('hero-video-url', url);
-                sessionStorage.setItem('hero-video-quality', 'default');
+              } else {
+                console.log('[Hero] No video found in any category');
               }
             });
         }
       })
-      .catch(() => {
-        // Use fallback
+      .catch((err) => {
+        console.error('[Hero] Error fetching video:', err);
         setVideoError(true);
       });
   }, [isMounted]);
