@@ -269,6 +269,7 @@ export function Ferienhaus() {
                             fill
                             className="object-cover"
                             sizes="100vw"
+                            loading="lazy"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-logo-green/30">
@@ -374,6 +375,7 @@ export function Ferienhaus() {
                       fill
                       className="object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                       sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-logo-green/20 group-hover:text-logo-green/40 transition-colors duration-300">
@@ -474,6 +476,7 @@ export function Ferienhaus() {
                     fill
                     className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, 40vw"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">

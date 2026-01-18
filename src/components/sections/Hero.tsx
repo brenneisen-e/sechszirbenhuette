@@ -247,7 +247,10 @@ export function Hero() {
       <div className="absolute inset-0 bg-gray-900">
         {/* Placeholder layer - shows thumbnail or gradient while video loads */}
         {showPlaceholder && (
-          <div className={`absolute inset-0 z-10 transition-opacity duration-500 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+          <div
+            className={`absolute inset-0 z-10 transition-opacity duration-500 ${videoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            style={{ zIndex: videoLoaded ? -1 : 10 }}
+          >
             {thumbnailUrl && !videoError ? (
               <Image
                 src={thumbnailUrl}
