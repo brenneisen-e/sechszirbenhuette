@@ -114,6 +114,14 @@ export default function MediaManager() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
+  // Manual multi-quality upload state
+  const [manualMultiQualityMode, setManualMultiQualityMode] = useState(false);
+  const [manualFiles, setManualFiles] = useState<{
+    '720p': File | null;
+    '480p': File | null;
+    '360p': File | null;
+    thumbnail: File | null;
+  }>({ '720p': null, '480p': null, '360p': null, thumbnail: null });
 
   // Load media on mount
   useEffect(() => {
@@ -335,6 +343,95 @@ export default function MediaManager() {
       setUploadProgress(0);
       setConversionProgress(null);
       closeThumbnailSelector();
+    }
+  };
+
+  // Handle manual multi-quality video upload
+  const handleManualMultiQualityUpload = async () => {
+    // Need at least the 720p version
+    if (!manualFiles['720p']) {
+      setError('Bitte mindestens die 720p Version hochladen');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      const qualities = ['720p', '480p', '360p'] as const;
+      const totalFiles = qualities.filter(q => manualFiles[q]).length + (manualFiles.thumbnail ? 1 : 0);
+      let uploadedCount = 0;
+
+      // Upload thumbnail if provided
+      if (manualFiles.thumbnail) {
+        const thumbFormData = new FormData();
+        thumbFormData.append('files', manualFiles.thumbnail);
+        thumbFormData.append('category', 'hero-thumbnail');
+
+        try {
+          const thumbResponse = await fetch('/api/admin/media', {
+            method: 'POST',
+            body: thumbFormData,
+          });
+
+          if (thumbResponse.ok) {
+            successCount++;
+          } else {
+            console.warn('Thumbnail upload failed');
+            failCount++;
+          }
+        } catch {
+          console.warn('Thumbnail upload error');
+          failCount++;
+        }
+        uploadedCount++;
+        setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
+      }
+
+      // Upload each quality version
+      for (const quality of qualities) {
+        const file = manualFiles[quality];
+        if (!file) continue;
+
+        const formData = new FormData();
+        formData.append('files', file);
+        formData.append('category', `hero-${quality}`);
+
+        try {
+          const response = await fetch('/api/admin/media', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            failCount++;
+          }
+        } catch {
+          failCount++;
+        }
+        uploadedCount++;
+        setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
+      }
+
+      if (successCount > 0) {
+        setSuccess(`${successCount} Datei(en) hochgeladen${failCount > 0 ? `, ${failCount} fehlgeschlagen` : ''}`);
+        await loadMedia();
+        // Reset manual upload state
+        setManualFiles({ '720p': null, '480p': null, '360p': null, thumbnail: null });
+        setManualMultiQualityMode(false);
+      } else {
+        setError('Keine Dateien konnten hochgeladen werden');
+      }
+    } catch (err) {
+      console.error('Manual multi-quality upload failed:', err);
+      setError('Fehler beim Hochladen der Videos');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -1055,7 +1152,104 @@ export default function MediaManager() {
                 disabled={isUploading || !selectedCategory}
               />
             </label>
+            {/* Manual multi-quality upload toggle for hero videos */}
+            {selectedCategory === 'hero' && (
+              <button
+                type="button"
+                onClick={() => setManualMultiQualityMode(!manualMultiQualityMode)}
+                className="mt-2 text-sm text-logo-green hover:underline"
+              >
+                {manualMultiQualityMode ? 'Automatische Konvertierung' : 'Manuell 3 Qualitätsstufen hochladen'}
+              </button>
+            )}
           </div>
+
+          {/* Manual Multi-Quality Upload UI */}
+          {selectedCategory === 'hero' && manualMultiQualityMode && (
+            <div className="w-full bg-gray-50 rounded-lg p-4 space-y-3">
+              <p className="text-sm text-gray-600 mb-2">
+                Lade vorkonvertierte Videos hoch (720p, 480p, 360p). Mindestens 720p erforderlich.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* 720p */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">720p (HD) *</label>
+                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['720p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
+                    {manualFiles['720p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+                    <span>{manualFiles['720p']?.name?.slice(0, 15) || '720p wählen'}</span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setManualFiles(prev => ({ ...prev, '720p': file }));
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {/* 480p */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">480p (SD)</label>
+                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['480p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
+                    {manualFiles['480p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+                    <span>{manualFiles['480p']?.name?.slice(0, 15) || '480p wählen'}</span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setManualFiles(prev => ({ ...prev, '480p': file }));
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {/* 360p */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">360p (Mobil)</label>
+                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['360p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
+                    {manualFiles['360p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+                    <span>{manualFiles['360p']?.name?.slice(0, 15) || '360p wählen'}</span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setManualFiles(prev => ({ ...prev, '360p': file }));
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {/* Thumbnail */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Vorschaubild</label>
+                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles.thumbnail ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
+                    {manualFiles.thumbnail ? <Check className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
+                    <span>{manualFiles.thumbnail?.name?.slice(0, 15) || 'Bild wählen'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setManualFiles(prev => ({ ...prev, thumbnail: file }));
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleManualMultiQualityUpload}
+                disabled={isUploading || !manualFiles['720p']}
+                className="mt-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploading ? 'Wird hochgeladen...' : 'Videos hochladen'}
+              </button>
+            </div>
+          )}
 
           {(isUploading || conversionProgress) && (
             <div className="flex items-center gap-2 text-gray-600">
