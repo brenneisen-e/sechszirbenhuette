@@ -6,6 +6,7 @@ import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
 import Image from 'next/image';
+import { getPublicMediaUrl } from '@/lib/imageUtils';
 
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
@@ -89,8 +90,9 @@ export function Hero() {
     fetch('/api/media?category=hero-thumbnail&type=image')
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
-        if (data.media?.[0]) {
-          setThumbnailUrl(data.media[0].url);
+        if (data.media?.[0]?.url) {
+          // Convert API URLs to public R2 URLs
+          setThumbnailUrl(getPublicMediaUrl(data.media[0].url));
         }
       })
       .catch(() => {
@@ -107,9 +109,9 @@ export function Hero() {
     const cachedQuality = sessionStorage.getItem('hero-video-quality');
     const currentQuality = getVideoQuality();
 
-    // Use cache if quality matches
+    // Use cache if quality matches (convert old API URLs to public R2 URLs)
     if (cachedUrl && cachedQuality === currentQuality) {
-      setVideoUrl(cachedUrl);
+      setVideoUrl(getPublicMediaUrl(cachedUrl));
       return;
     }
 
@@ -120,9 +122,9 @@ export function Hero() {
     fetch(`/api/media?category=hero-${quality}&type=video`)
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
-        if (data.media?.[0]) {
-          // Use streaming proxy with quality parameter
-          const url = `/api/video-stream?category=hero-${quality}`;
+        if (data.media?.[0]?.url) {
+          // Use the direct R2 URL (convert API URLs to public R2 URLs)
+          const url = getPublicMediaUrl(data.media[0].url);
           setVideoUrl(url);
           sessionStorage.setItem('hero-video-url', url);
           sessionStorage.setItem('hero-video-quality', quality);
@@ -131,8 +133,9 @@ export function Hero() {
           return fetch('/api/media?category=hero&type=video')
             .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
             .then((data) => {
-              if (data.media?.[0]) {
-                const url = '/api/video-stream?category=hero';
+              if (data.media?.[0]?.url) {
+                // Use the direct R2 URL (convert API URLs to public R2 URLs)
+                const url = getPublicMediaUrl(data.media[0].url);
                 setVideoUrl(url);
                 sessionStorage.setItem('hero-video-url', url);
                 sessionStorage.setItem('hero-video-quality', 'default');
