@@ -7,8 +7,9 @@
  * @see https://developers.cloudflare.com/images/transform-images/
  */
 
-// Public R2 URL for media serving (enables Cloudflare Image Resizing)
-const PUBLIC_R2_URL = 'https://media.sechszirbenhuette.com';
+// Public R2 URL for media serving
+// Using R2 Public Development URL (no custom domain required)
+const PUBLIC_R2_URL = 'https://pub-76fcab5ec7604681a60e6c0df28978bf.r2.dev';
 
 export interface ImageResizeOptions {
   width?: number;
@@ -56,14 +57,18 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
     return url;
   }
 
-  // Convert API URLs to public R2 URLs for Cloudflare Image Resizing
+  // Convert API URLs to public R2 URLs
   const publicUrl = getPublicMediaUrl(url);
 
-  // Skip for external URLs that aren't our R2 bucket
-  if (publicUrl.startsWith('http') && !publicUrl.includes('media.sechszirbenhuette.com')) {
-    if (typeof window !== 'undefined' && !publicUrl.includes(window.location.hostname)) {
-      return publicUrl;
-    }
+  // R2 Public Development URLs (r2.dev) don't support Cloudflare Image Resizing
+  // Just return the public URL directly for faster loading
+  if (publicUrl.includes('.r2.dev')) {
+    return publicUrl;
+  }
+
+  // Skip for external URLs that aren't on our domain
+  if (publicUrl.startsWith('http') && typeof window !== 'undefined' && !publicUrl.includes(window.location.hostname)) {
+    return publicUrl;
   }
 
   const {
