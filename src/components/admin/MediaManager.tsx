@@ -112,21 +112,9 @@ export default function MediaManager() {
   const [importResults, setImportResults] = useState<string[]>([]);
   // Video conversion state
   const [conversionProgress, setConversionProgress] = useState<ConversionProgress | null>(null);
-  // Thumbnail selection state for hero videos
-  const [thumbnailSelectorOpen, setThumbnailSelectorOpen] = useState(false);
-  const [pendingVideoFile, setPendingVideoFile] = useState<File | null>(null);
-  const [thumbnailTime, setThumbnailTime] = useState(1);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [videoDuration, setVideoDuration] = useState(0);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
-  // Manual multi-quality upload state
-  const [manualMultiQualityMode, setManualMultiQualityMode] = useState(false);
-  const [manualFiles, setManualFiles] = useState<{
-    '720p': File | null;
-    '480p': File | null;
-    '360p': File | null;
-    thumbnail: File | null;
-  }>({ '720p': null, '480p': null, '360p': null, thumbnail: null });
+  // Hero video quality selection
+  const [heroVideoFile, setHeroVideoFile] = useState<File | null>(null);
+  const [heroQualityModalOpen, setHeroQualityModalOpen] = useState(false);
 
   // Load media on mount
   useEffect(() => {
@@ -195,248 +183,38 @@ export default function MediaManager() {
     }
   };
 
-  // Open thumbnail selector for hero video uploads
-  const openThumbnailSelector = (file: File) => {
-    setPendingVideoFile(file);
-    setThumbnailTime(1);
-    setThumbnailPreview(null);
-    setVideoPreviewUrl(URL.createObjectURL(file));
-    setThumbnailSelectorOpen(true);
-  };
+  // Upload hero video with selected quality
+  const uploadHeroVideo = async (quality: '720p' | '480p' | '360p') => {
+    if (!heroVideoFile) return;
 
-  // Close thumbnail selector and cleanup
-  const closeThumbnailSelector = () => {
-    setThumbnailSelectorOpen(false);
-    if (videoPreviewUrl) {
-      URL.revokeObjectURL(videoPreviewUrl);
-    }
-    if (thumbnailPreview) {
-      URL.revokeObjectURL(thumbnailPreview);
-    }
-    setPendingVideoFile(null);
-    setVideoPreviewUrl(null);
-    setThumbnailPreview(null);
-    setThumbnailTime(1);
-    setVideoDuration(0);
-  };
-
-  // Handle video metadata loaded for thumbnail selector
-  const handleVideoMetadataLoaded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    setVideoDuration(video.duration);
-    // Generate initial thumbnail preview
-    updateThumbnailPreview(1, video);
-  };
-
-  // Update thumbnail preview at current time
-  const updateThumbnailPreview = (time: number, videoElement?: HTMLVideoElement) => {
-    const video = videoElement || document.getElementById('thumbnail-video') as HTMLVideoElement;
-    if (!video) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const scale = Math.min(1, 1280 / video.videoWidth);
-    canvas.width = video.videoWidth * scale;
-    canvas.height = video.videoHeight * scale;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    if (thumbnailPreview) {
-      URL.revokeObjectURL(thumbnailPreview);
-    }
-    canvas.toBlob((blob) => {
-      if (blob) {
-        setThumbnailPreview(URL.createObjectURL(blob));
-      }
-    }, 'image/jpeg', 0.9);
-  };
-
-  // Handle time slider change
-  const handleTimeChange = (newTime: number) => {
-    setThumbnailTime(newTime);
-    const video = document.getElementById('thumbnail-video') as HTMLVideoElement;
-    if (video) {
-      video.currentTime = newTime;
-    }
-  };
-
-  // Handle video seeked event
-  const handleVideoSeeked = () => {
-    updateThumbnailPreview(thumbnailTime);
-  };
-
-  // Proceed with upload after thumbnail selection
-  const handleThumbnailConfirm = async () => {
-    if (!pendingVideoFile) return;
-
-    setThumbnailSelectorOpen(false);
+    setHeroQualityModalOpen(false);
     setIsUploading(true);
     setUploadProgress(0);
-    setError('');
-
-    let successCount = 0;
-    let failCount = 0;
 
     try {
-      // Extract thumbnail at selected time
-      setConversionProgress({ stage: 'converting', message: 'Extrahiere Vorschaubild...' });
-      const thumbnail = await extractThumbnailAtTime(pendingVideoFile, thumbnailTime);
+      const formData = new FormData();
+      formData.append('files', heroVideoFile);
+      formData.append('category', `hero-${quality}`);
 
-      // Upload thumbnail first
-      const thumbFormData = new FormData();
-      thumbFormData.append('files', thumbnail);
-      thumbFormData.append('category', 'hero-thumbnail');
-
-      try {
-        const thumbResponse = await fetch('/api/admin/media', {
-          method: 'POST',
-          body: thumbFormData,
-        });
-
-        if (thumbResponse.ok) {
-          successCount++;
-        } else {
-          console.warn('Thumbnail upload failed');
-        }
-      } catch {
-        console.warn('Thumbnail upload error');
-      }
-
-      // Now convert video to multiple quality levels
-      setConversionProgress({ stage: 'loading', message: 'Video-Konverter wird geladen...' });
-      const multiResult = await convertVideoMultiQuality(pendingVideoFile, (progress) => {
-        setConversionProgress(progress);
+      const response = await fetch('/api/admin/media', {
+        method: 'POST',
+        body: formData,
       });
-      setConversionProgress(null);
 
-      // Upload all quality versions
-      for (const { quality, file: convertedFile } of multiResult.files) {
-        const qualitySuffix = VIDEO_QUALITIES[quality].suffix;
-        const formData = new FormData();
-        formData.append('files', convertedFile);
-        formData.append('category', `hero-${qualitySuffix}`);
-
-        try {
-          const response = await fetch('/api/admin/media', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (response.ok) {
-            successCount++;
-          } else {
-            failCount++;
-          }
-        } catch {
-          failCount++;
-        }
-      }
-
-      if (successCount > 0) {
-        setSuccess(`${successCount} Datei(en) hochgeladen${failCount > 0 ? `, ${failCount} fehlgeschlagen` : ''}`);
+      if (response.ok) {
+        setSuccess(`Hero Video (${quality}) erfolgreich hochgeladen!`);
         await loadMedia();
       } else {
-        setError('Keine Dateien konnten hochgeladen werden');
+        const data = await response.json() as { error?: string };
+        setError(data.error || 'Upload fehlgeschlagen');
       }
     } catch (err) {
       console.error('Hero video upload failed:', err);
-      setError('Fehler beim Hochladen des Videos');
+      setError('Upload fehlgeschlagen');
     } finally {
+      setHeroVideoFile(null);
       setIsUploading(false);
-      setUploadProgress(0);
-      setConversionProgress(null);
-      closeThumbnailSelector();
-    }
-  };
-
-  // Handle manual multi-quality video upload
-  const handleManualMultiQualityUpload = async () => {
-    // Need at least the 720p version
-    if (!manualFiles['720p']) {
-      setError('Bitte mindestens die 720p Version hochladen');
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-    let successCount = 0;
-    let failCount = 0;
-
-    try {
-      const qualities = ['720p', '480p', '360p'] as const;
-      const totalFiles = qualities.filter(q => manualFiles[q]).length + (manualFiles.thumbnail ? 1 : 0);
-      let uploadedCount = 0;
-
-      // Upload thumbnail if provided
-      if (manualFiles.thumbnail) {
-        const thumbFormData = new FormData();
-        thumbFormData.append('files', manualFiles.thumbnail);
-        thumbFormData.append('category', 'hero-thumbnail');
-
-        try {
-          const thumbResponse = await fetch('/api/admin/media', {
-            method: 'POST',
-            body: thumbFormData,
-          });
-
-          if (thumbResponse.ok) {
-            successCount++;
-          } else {
-            console.warn('Thumbnail upload failed');
-            failCount++;
-          }
-        } catch {
-          console.warn('Thumbnail upload error');
-          failCount++;
-        }
-        uploadedCount++;
-        setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
-      }
-
-      // Upload each quality version
-      for (const quality of qualities) {
-        const file = manualFiles[quality];
-        if (!file) continue;
-
-        const formData = new FormData();
-        formData.append('files', file);
-        formData.append('category', `hero-${quality}`);
-
-        try {
-          const response = await fetch('/api/admin/media', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (response.ok) {
-            successCount++;
-          } else {
-            failCount++;
-          }
-        } catch {
-          failCount++;
-        }
-        uploadedCount++;
-        setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
-      }
-
-      if (successCount > 0) {
-        setSuccess(`${successCount} Datei(en) hochgeladen${failCount > 0 ? `, ${failCount} fehlgeschlagen` : ''}`);
-        await loadMedia();
-        // Reset manual upload state
-        setManualFiles({ '720p': null, '480p': null, '360p': null, thumbnail: null });
-        setManualMultiQualityMode(false);
-      } else {
-        setError('Keine Dateien konnten hochgeladen werden');
-      }
-    } catch (err) {
-      console.error('Manual multi-quality upload failed:', err);
-      setError('Fehler beim Hochladen der Videos');
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
+      setUploadProgress(100);
     }
   };
 
@@ -460,9 +238,10 @@ export default function MediaManager() {
       }
     }
 
-    // For hero video uploads, open thumbnail selector instead of immediate upload
+    // For hero video uploads, open quality selector
     if (selectedCategory === 'hero' && fileArray.length === 1 && fileArray[0].type.startsWith('video/')) {
-      openThumbnailSelector(fileArray[0]);
+      setHeroVideoFile(fileArray[0]);
+      setHeroQualityModalOpen(true);
       e.target.value = '';
       return;
     }
@@ -1157,104 +936,13 @@ export default function MediaManager() {
                 disabled={isUploading || !selectedCategory}
               />
             </label>
-            {/* Manual multi-quality upload toggle for hero videos */}
+            {/* Info for hero video uploads */}
             {selectedCategory === 'hero' && (
-              <button
-                type="button"
-                onClick={() => setManualMultiQualityMode(!manualMultiQualityMode)}
-                className="mt-2 text-sm text-logo-green hover:underline"
-              >
-                {manualMultiQualityMode ? 'Automatische Konvertierung' : 'Manuell 3 Qualitätsstufen hochladen'}
-              </button>
+              <p className="mt-2 text-xs text-gray-500">
+                Nach dem Upload wählst du die Qualität (720p, 480p, 360p)
+              </p>
             )}
           </div>
-
-          {/* Manual Multi-Quality Upload UI */}
-          {selectedCategory === 'hero' && manualMultiQualityMode && (
-            <div className="w-full bg-gray-50 rounded-lg p-4 space-y-3">
-              <p className="text-sm text-gray-600 mb-2">
-                Lade vorkonvertierte Videos hoch (720p, 480p, 360p). Mindestens 720p erforderlich.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {/* 720p */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">720p (HD) *</label>
-                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['720p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
-                    {manualFiles['720p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                    <span>{manualFiles['720p']?.name?.slice(0, 15) || '720p wählen'}</span>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setManualFiles(prev => ({ ...prev, '720p': file }));
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                {/* 480p */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">480p (SD)</label>
-                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['480p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
-                    {manualFiles['480p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                    <span>{manualFiles['480p']?.name?.slice(0, 15) || '480p wählen'}</span>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setManualFiles(prev => ({ ...prev, '480p': file }));
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                {/* 360p */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">360p (Mobil)</label>
-                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles['360p'] ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
-                    {manualFiles['360p'] ? <Check className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                    <span>{manualFiles['360p']?.name?.slice(0, 15) || '360p wählen'}</span>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setManualFiles(prev => ({ ...prev, '360p': file }));
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-                {/* Thumbnail */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Vorschaubild</label>
-                  <label className={`flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg cursor-pointer transition ${manualFiles.thumbnail ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-white border border-gray-300 hover:bg-gray-50'}`}>
-                    {manualFiles.thumbnail ? <Check className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
-                    <span>{manualFiles.thumbnail?.name?.slice(0, 15) || 'Bild wählen'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setManualFiles(prev => ({ ...prev, thumbnail: file }));
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleManualMultiQualityUpload}
-                disabled={isUploading || !manualFiles['720p']}
-                className="mt-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUploading ? 'Wird hochgeladen...' : 'Videos hochladen'}
-              </button>
-            </div>
-          )}
 
           {(isUploading || conversionProgress) && (
             <div className="flex items-center gap-2 text-gray-600">
@@ -1526,17 +1214,19 @@ export default function MediaManager() {
         </div>
       )}
 
-      {/* Thumbnail Selector Modal for Hero Videos */}
-      {thumbnailSelectorOpen && videoPreviewUrl && (
+      {/* Hero Video Quality Selection Modal */}
+      {heroQualityModalOpen && heroVideoFile && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full p-6">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-logo-green" />
-                Vorschaubild auswählen
+              <h3 className="text-lg font-bold text-gray-900">
+                Video-Qualität wählen
               </h3>
               <button
-                onClick={closeThumbnailSelector}
+                onClick={() => {
+                  setHeroQualityModalOpen(false);
+                  setHeroVideoFile(null);
+                }}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 <X className="w-5 h-5" />
@@ -1544,81 +1234,46 @@ export default function MediaManager() {
             </div>
 
             <p className="text-sm text-gray-600 mb-4">
-              Wählen Sie den Zeitpunkt im Video, der als Vorschaubild verwendet werden soll.
+              Welche Auflösung hat dieses Video?
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Video Preview */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Video</p>
-                <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-                  <video
-                    id="thumbnail-video"
-                    src={videoPreviewUrl}
-                    className="w-full h-full object-contain"
-                    onLoadedMetadata={handleVideoMetadataLoaded}
-                    onSeeked={handleVideoSeeked}
-                    muted
-                    playsInline
-                  />
-                </div>
+            <p className="text-xs text-gray-500 mb-4">
+              Datei: {heroVideoFile.name}
+            </p>
 
-                {/* Time Slider */}
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Zeitpunkt: {thumbnailTime.toFixed(1)}s / {videoDuration.toFixed(1)}s
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={videoDuration || 10}
-                    step="0.1"
-                    value={thumbnailTime}
-                    onChange={(e) => handleTimeChange(parseFloat(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-logo-green"
-                  />
-                </div>
-              </div>
-
-              {/* Thumbnail Preview */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Vorschaubild-Vorschau</p>
-                <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-logo-green">
-                  {thumbnailPreview ? (
-                    <Image
-                      src={thumbnailPreview}
-                      alt="Thumbnail Preview"
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                      <Loader2 className="w-8 h-8 animate-spin" />
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Dieses Bild wird angezeigt, während das Video lädt.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
+            <div className="space-y-2">
               <button
-                onClick={closeThumbnailSelector}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                onClick={() => uploadHeroVideo('720p')}
+                className="w-full px-4 py-3 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition text-left"
               >
-                Abbrechen
+                <span className="font-bold">720p</span>
+                <span className="text-white/80 ml-2">— 1280 × 720 (HD)</span>
               </button>
               <button
-                onClick={handleThumbnailConfirm}
-                disabled={!thumbnailPreview}
-                className="flex-1 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                onClick={() => uploadHeroVideo('480p')}
+                className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-left"
               >
-                <Check className="w-4 h-4" />
-                Video hochladen
+                <span className="font-bold">480p</span>
+                <span className="text-gray-500 ml-2">— 854 × 480 (SD)</span>
+              </button>
+              <button
+                onClick={() => uploadHeroVideo('360p')}
+                className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-left"
+              >
+                <span className="font-bold">360p</span>
+                <span className="text-gray-500 ml-2">— 640 × 360 (Mobil)</span>
               </button>
             </div>
+
+            <button
+              onClick={() => {
+                setHeroQualityModalOpen(false);
+                setHeroVideoFile(null);
+              }}
+              className="w-full mt-4 px-4 py-2 text-gray-500 hover:text-gray-700 transition"
+            >
+              Abbrechen
+            </button>
           </div>
         </div>
       )}
