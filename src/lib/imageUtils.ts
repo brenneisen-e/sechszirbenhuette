@@ -35,6 +35,17 @@ export function getCloudflareImageUrl(url: string, options: ImageResizeOptions =
     return url;
   }
 
+  // Skip for API routes - Cloudflare Image Resizing only works with static files
+  // API routes like /api/admin/media/file/... serve files dynamically
+  if (url.includes('/api/')) {
+    return url;
+  }
+
+  // Skip for external URLs (R2, other domains) - these need different handling
+  if (url.startsWith('http') && typeof window !== 'undefined' && !url.includes(window.location.hostname)) {
+    return url;
+  }
+
   const {
     width,
     height,
