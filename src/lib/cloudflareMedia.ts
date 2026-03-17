@@ -33,7 +33,7 @@ export async function uploadImage(
   metadata?: Record<string, string>
 ): Promise<CFImageUploadResult> {
   const formData = new FormData();
-  formData.append('file', new Blob([file]), filename);
+  formData.append('file', new Blob([file as BlobPart]), filename);
 
   if (metadata) {
     formData.append('metadata', JSON.stringify(metadata));
@@ -137,7 +137,7 @@ export async function uploadVideo(
   metadata?: Record<string, string>
 ): Promise<CFStreamUploadResult> {
   const formData = new FormData();
-  formData.append('file', new Blob([file]), filename);
+  formData.append('file', new Blob([file as BlobPart]), filename);
 
   if (metadata) {
     formData.append('meta', JSON.stringify(metadata));
