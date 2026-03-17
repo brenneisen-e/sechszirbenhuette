@@ -146,92 +146,6 @@ export async function deleteCost(adminPassword: string, costId: number) {
 }
 
 // ============================================
-// Email Operations
-// ============================================
-
-export async function fetchEmails(adminPassword: string, guestId?: number) {
-  const url = guestId ? `${API_BASE}/emails?guest_id=${guestId}` : `${API_BASE}/emails`;
-  const response = await fetch(url, {
-    headers: createHeaders(adminPassword),
-  });
-  return response.json();
-}
-
-export async function fetchUnassignedEmails(adminPassword: string) {
-  const response = await fetch(`${API_BASE}/emails?unassigned=true`, {
-    headers: createHeaders(adminPassword),
-  });
-  return response.json();
-}
-
-export async function assignEmailToGuest(adminPassword: string, emailId: number, guestId: number) {
-  const response = await fetch(`${API_BASE}/emails`, {
-    method: 'PUT',
-    headers: createHeaders(adminPassword),
-    body: JSON.stringify({ id: emailId, guest_id: guestId }),
-  });
-  return response.json();
-}
-
-export async function markEmailAsOrganization(adminPassword: string, emailId: number) {
-  const response = await fetch(`${API_BASE}/emails`, {
-    method: 'PUT',
-    headers: createHeaders(adminPassword),
-    body: JSON.stringify({ id: emailId, is_organization: 1 }),
-  });
-  return response.json();
-}
-
-export async function syncEmails(adminPassword: string) {
-  const response = await fetch(`${API_BASE}/emails/sync`, {
-    method: 'POST',
-    headers: createHeaders(adminPassword),
-  });
-  return response.json();
-}
-
-export async function matchEmails(adminPassword: string) {
-  const response = await fetch(`${API_BASE}/emails/match`, {
-    method: 'POST',
-    headers: createHeaders(adminPassword),
-  });
-  return response.json();
-}
-
-export async function createCommunication(
-  adminPassword: string,
-  commData: {
-    guest_id: number;
-    subject: string;
-    body_text: string;
-    folder: string;
-    is_incoming?: number;
-  },
-) {
-  const response = await fetch(`${API_BASE}/emails`, {
-    method: 'POST',
-    headers: createHeaders(adminPassword),
-    body: JSON.stringify({
-      ...commData,
-      date_sent: new Date().toISOString(),
-      is_incoming: commData.is_incoming ?? 1,
-      is_read: 1,
-      from_address: 'Manual Entry',
-      message_id: `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    }),
-  });
-  return response.json();
-}
-
-export async function deleteCommunication(adminPassword: string, emailId: number) {
-  const response = await fetch(`${API_BASE}/emails?id=${emailId}`, {
-    method: 'DELETE',
-    headers: createHeaders(adminPassword),
-  });
-  return response.json();
-}
-
-// ============================================
 // Document Operations
 // ============================================
 
@@ -272,13 +186,13 @@ export async function deleteDocument(adminPassword: string, documentId: number) 
 }
 
 // ============================================
-// Ronald Payments Operations
+// Bank Transactions Operations
 // ============================================
 
-export async function fetchRonaldPayments(adminPassword: string, guestId?: number) {
+export async function fetchBankPayments(adminPassword: string, guestId?: number) {
   const url = guestId
-    ? `${API_BASE}/ronald-payments?guest_id=${guestId}`
-    : `${API_BASE}/ronald-payments`;
+    ? `${API_BASE}/bank-transactions?guest_id=${guestId}`
+    : `${API_BASE}/bank-transactions`;
   const response = await fetch(url, {
     headers: createHeaders(adminPassword),
   });

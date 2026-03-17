@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-  X, Plus, Upload, Loader2, Camera, FileText, Users, Calendar, ListTodo
+  X, Plus, Upload, Loader2, Camera, FileText, ListTodo
 } from 'lucide-react';
 import type { Guest, ScreenshotAnalysisResponse } from './types';
-import { PLATFORMS, COUNTRIES, STANDARD_TASKS, DEFAULT_NEW_GUEST } from './constants';
+import { COUNTRIES, STANDARD_TASKS, DEFAULT_NEW_GUEST } from './constants';
 import { FlagIcon } from './FlagIcon';
 
 interface CreateGuestModalProps {
@@ -20,8 +20,7 @@ interface CreateGuestModalProps {
     createStandardTasks: boolean,
     importFile: File | null,
     extractedNetRent: number | null,
-    isPlatformPayment: boolean,
-    extractedCommunication: string | null
+    isPlatformPayment: boolean
   ) => void;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
@@ -37,29 +36,19 @@ export function CreateGuestModal({
   onError,
 }: CreateGuestModalProps) {
   const [newGuest, setNewGuest] = useState<Partial<Guest>>(DEFAULT_NEW_GUEST);
-  const [bookingMode, setBookingMode] = useState<'new' | 'existing'>('new');
-  const [selectedExistingGuestId, setSelectedExistingGuestId] = useState<number | null>(null);
   const [createStandardTasks, setCreateStandardTasks] = useState(true);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [isAnalyzingScreenshot, setIsAnalyzingScreenshot] = useState(false);
   const [isAnalyzingPdf, setIsAnalyzingPdf] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [extractedNetRent, setExtractedNetRent] = useState<number | null>(null);
-  const [isPlatformPayment, setIsPlatformPayment] = useState(false);
-  const [extractedCommunication, setExtractedCommunication] = useState<string | null>(null);
   const resetRef = useRef(false);
 
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen && !resetRef.current) {
       setNewGuest(DEFAULT_NEW_GUEST);
-      setBookingMode('new');
-      setSelectedExistingGuestId(null);
       setScreenshotPreview(null);
       setImportFile(null);
-      setExtractedNetRent(null);
-      setIsPlatformPayment(false);
-      setExtractedCommunication(null);
       resetRef.current = true;
     } else if (!isOpen) {
       resetRef.current = false;
@@ -98,9 +87,8 @@ export function CreateGuestModal({
                           (data.rental_price && data.rental_price > 0);
 
         if (hasAnyData) {
-          // Use payout_amount as rental_price (Gesamtauszahlung)
-          const rentalPriceValue = data.payout_amount || data.rental_price || 0;
-
+          // Only populate guest-level fields (personal data)
+          // Booking data (dates, prices, etc.) will be entered when creating a booking
           setNewGuest(prev => ({
             ...prev,
             guest_name: data.guest_name || prev.guest_name,
@@ -108,30 +96,10 @@ export function CreateGuestModal({
             email: data.email || prev.email,
             phone: data.phone || prev.phone,
             address: data.address || prev.address,
-            arrival_date: data.arrival_date || prev.arrival_date,
-            departure_date: data.departure_date || prev.departure_date,
-            adults: data.adults || prev.adults,
-            children: data.children ?? prev.children,
-            children_ages: data.children_ages || prev.children_ages,
-            platform: data.platform || prev.platform,
-            rental_price: rentalPriceValue || prev.rental_price,
-            booking_number: data.booking_number || prev.booking_number,
-            first_contact_date: data.first_contact_date || prev.first_contact_date,
             other_notes: data.notes || prev.other_notes,
           }));
 
-          if (data.net_rent) setExtractedNetRent(data.net_rent);
-          if (data.platform_payment) setIsPlatformPayment(true);
-          if (data.communication) setExtractedCommunication(data.communication);
-
-          const isFeWo = data.platform === 'FeWo';
-          // Show billing info if available
-          const billingInfo = data.guest_total_payment && data.platform_fees
-            ? ` Gast zahlt: ${data.guest_total_payment.toFixed(2)}€, Gebühren: ${data.platform_fees.toFixed(2)}€`
-            : (data.net_rent ? ` Netto Miete: ${data.net_rent.toFixed(2)}€` : '');
-          const paymentInfo = isFeWo ? ' (FeWo: Zahlung über Plattform, kein Vertrag nötig)' : '';
-          const commInfo = data.communication ? ' Kommunikation wird mit gespeichert.' : '';
-          onSuccess(`${isScreenshot ? 'Screenshot' : 'PDF'} analysiert! Daten wurden extrahiert.${billingInfo}${paymentInfo}${commInfo} Bitte prüfen.`);
+          onSuccess(`${isScreenshot ? 'Screenshot' : 'PDF'} analysiert! Gastdaten wurden extrahiert. Bitte prüfen. Buchungsdaten können nach dem Anlegen des Gastes in einer neuen Buchung erfasst werden.`);
         } else {
           onError(`${isScreenshot ? 'Screenshot' : 'PDF'}-Analyse konnte keine Daten extrahieren.`);
         }
@@ -154,99 +122,30 @@ export function CreateGuestModal({
   const handleSubmit = () => {
     onCreateGuest(
       newGuest,
-      bookingMode,
-      selectedExistingGuestId,
+      'new',
+      null,
       createStandardTasks,
       importFile,
-      extractedNetRent,
-      isPlatformPayment,
-      extractedCommunication
+      null,
+      false
     );
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+      <div className="bg-white rounded-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Plus className="w-5 h-5 text-green-600" />
-              Neuer Gast / Buchung
-            </h3>
-            <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Mode Tabs */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => {
-                setBookingMode('new');
-                setSelectedExistingGuestId(null);
-              }}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                bookingMode === 'new'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Users className="w-4 h-4 inline mr-2" />
               Neuer Gast
-            </button>
-            <button
-              onClick={() => setBookingMode('existing')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                bookingMode === 'existing'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Calendar className="w-4 h-4 inline mr-2" />
-              Buchung für bestehenden Gast
+            </h3>
+            <button onClick={handleClose} className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+              <X className="w-5 h-5" />
             </button>
           </div>
-
-          {/* Existing Guest Selection */}
-          {bookingMode === 'existing' && (
-            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <label className="block text-sm font-medium text-blue-900 mb-2">
-                Gast auswählen
-              </label>
-              <select
-                value={selectedExistingGuestId || ''}
-                onChange={(e) => {
-                  const guestId = e.target.value ? parseInt(e.target.value) : null;
-                  setSelectedExistingGuestId(guestId);
-                  if (guestId) {
-                    const guest = guests.find(g => g.id === guestId);
-                    if (guest) {
-                      setNewGuest(prev => ({
-                        ...prev,
-                        guest_name: guest.guest_name,
-                        nationality: guest.nationality || '',
-                        email: guest.email || '',
-                        phone: guest.phone || '',
-                      }));
-                    }
-                  }
-                }}
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="">-- Gast wählen --</option>
-                {guests
-                  .sort((a, b) => a.guest_name.localeCompare(b.guest_name))
-                  .map(guest => (
-                    <option key={guest.id} value={guest.id}>
-                      {guest.guest_name} {guest.email ? `(${guest.email})` : ''}
-                    </option>
-                  ))
-                }
-              </select>
-            </div>
-          )}
 
           {/* File Import Section */}
           <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
@@ -364,7 +263,7 @@ export function CreateGuestModal({
             </p>
           </div>
 
-          {/* Guest Form Fields */}
+          {/* Guest Form Fields - Only personal/guest data, no booking fields */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
@@ -437,38 +336,6 @@ export function CreateGuestModal({
                 placeholder="z.B. +49 123 456789"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Plattform</label>
-              <select
-                value={newGuest.platform || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, platform: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">-- Auswählen --</option>
-                {PLATFORMS.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Buchungsnummer</label>
-              <input
-                type="text"
-                value={newGuest.booking_number || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, booking_number: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="z.B. 6077787334"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Buchung eingegangen</label>
-              <input
-                type="date"
-                value={newGuest.first_contact_date || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, first_contact_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
               <input
@@ -478,90 +345,6 @@ export function CreateGuestModal({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="z.B. Musterstr. 123, 12345 Musterstadt"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Anreise</label>
-              <input
-                type="date"
-                value={newGuest.arrival_date || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, arrival_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Abreise</label>
-              <input
-                type="date"
-                value={newGuest.departure_date || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, departure_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Erwachsene</label>
-              <input
-                type="number"
-                min="1"
-                value={newGuest.adults || 2}
-                onChange={(e) => setNewGuest({ ...newGuest, adults: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kinder</label>
-              <input
-                type="number"
-                min="0"
-                value={newGuest.children || 0}
-                onChange={(e) => setNewGuest({ ...newGuest, children: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Haustiere</label>
-              <input
-                type="text"
-                value={newGuest.pets || ''}
-                onChange={(e) => setNewGuest({ ...newGuest, pets: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="z.B. 1 Hund"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mietpreis (EUR)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={newGuest.rental_price || 0}
-                onChange={(e) => setNewGuest({ ...newGuest, rental_price: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Anzahlung (EUR)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={newGuest.deposit_amount || 0}
-                onChange={(e) => setNewGuest({ ...newGuest, deposit_amount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={newGuest.status || 'pending'}
-                onChange={(e) => setNewGuest({ ...newGuest, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="pending">Ausstehend</option>
-                <option value="active">Aktiv</option>
-                <option value="completed">Abgeschlossen</option>
-                <option value="cancelled">Storniert</option>
-                <option value="refunded">Erstattet</option>
-              </select>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Notizen</label>

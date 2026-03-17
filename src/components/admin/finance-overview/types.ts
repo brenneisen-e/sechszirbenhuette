@@ -9,10 +9,27 @@ export interface FinanceGuest {
   departure_date: string | null;
   adults: number;
   children: number;
-  rental_price: number;
+  children_ages?: string | null; // Comma-separated ages for Kurtaxe calculation (only >= 16 pay)
+
+  // === FINANCIAL DATA - ONLY FROM BOOKINGS TABLE ===
+  // All financial calculations use booking_additional_costs JSON
+  rental_price: number;  // From bookings.rental_price
+  booking_additional_costs?: string | null;  // JSON with payout_amount, fees, etc.
+  utilities_cash?: number;  // From bookings.utilities_cash
+  cleaning_cash?: number;   // From bookings.cleaning_cash
+  kurtaxe_cash?: number;    // From bookings.kurtaxe_cash
+
+  // === DEPRECATED - NOT USED FOR CALCULATIONS ===
+  // These fields exist in guests table but are NOT used for financial calculations
+  // They are kept for backwards compatibility but should not be relied upon
+  /** @deprecated Use calculateBookingFinances() instead */
   net_rent: number | null;
-  ancillary_costs_amount: number;  // NK - Nebenkosten (actual from PDF)
-  final_cleaning_amount: number;   // ER - Endreinigung (actual from PDF)
+  /** @deprecated Use calculateBookingFinances() instead */
+  ancillary_costs_amount: number;
+  /** @deprecated Use calculateBookingFinances() instead */
+  final_cleaning_amount: number;
+
+  // === NON-FINANCIAL GUEST DATA ===
   additional_costs: string | null; // NK notes (e.g., "vor Ort")
   final_cleaning: string | null;   // ER notes (e.g., "vor Ort")
   deposit_amount: number;
@@ -29,11 +46,8 @@ export interface FinanceGuest {
   other_notes?: string | null;
   pets?: string | null;
   is_private?: number;
+  private_config?: string | null;
   no_nebenkosten?: number;
-  // Booking financial data (from bookings table)
-  booking_additional_costs?: string | null;
-  utilities_cash?: number;
-  cleaning_cash?: number;
 }
 
 export interface MonthData {

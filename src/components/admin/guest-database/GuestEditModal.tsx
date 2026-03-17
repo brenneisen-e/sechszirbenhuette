@@ -26,31 +26,31 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+      <div className="bg-white rounded-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Gast bearbeiten</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X className="w-6 h-6" />
+            <h3 className="text-lg font-semibold text-gray-900">Gast bearbeiten</h3>
+            <button onClick={onClose} className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
               <input
                 type="text"
                 value={editingGuest.guest_name}
                 onChange={(e) => setEditingGuest({ ...editingGuest, guest_name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               />
             </div>
 
             {/* Nationality */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nationalität</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Nationalität</label>
               <div className="flex flex-wrap gap-1 p-2 border border-gray-300 rounded-lg min-h-[42px]">
                 {(editingGuest.nationality || '').split(',').filter(Boolean).map(code => {
                   const country = COUNTRIES.find(c => c.code === code.trim());
@@ -93,29 +93,29 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">E-Mail</label>
               <input
                 type="email"
                 value={editingGuest.email || ''}
                 onChange={(e) => setEditingGuest({ ...editingGuest, email: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Telefon</label>
               <input
                 type="text"
                 value={editingGuest.phone || ''}
                 onChange={(e) => setEditingGuest({ ...editingGuest, phone: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               />
             </div>
 
             {/* Platform - Multiple Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Plattform(en)</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Plattform(en)</label>
               <div className="flex flex-wrap gap-2">
                 {PLATFORMS.map(p => {
                   const currentPlatforms = (editingGuest.platform || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -148,114 +148,25 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Address */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Adresse</label>
               <input
                 type="text"
                 value={editingGuest.address || ''}
                 onChange={(e) => setEditingGuest({ ...editingGuest, address: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
                 placeholder="z.B. Musterstr. 123, 12345 Musterstadt"
               />
             </div>
 
-            {/* Arrival Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Anreise</label>
-              <input
-                type="date"
-                value={editingGuest.arrival_date || ''}
-                onChange={(e) => setEditingGuest({ ...editingGuest, arrival_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Departure Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Abreise</label>
-              <input
-                type="date"
-                value={editingGuest.departure_date || ''}
-                onChange={(e) => setEditingGuest({ ...editingGuest, departure_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Adults */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Erwachsene</label>
-              <input
-                type="number"
-                value={editingGuest.adults}
-                onChange={(e) => setEditingGuest({ ...editingGuest, adults: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Children */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kinder</label>
-              <input
-                type="number"
-                value={editingGuest.children}
-                onChange={(e) => setEditingGuest({ ...editingGuest, children: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Children Ages */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Alter der Kinder</label>
-              <input
-                type="text"
-                value={editingGuest.children_ages || ''}
-                onChange={(e) => setEditingGuest({ ...editingGuest, children_ages: e.target.value })}
-                placeholder="z.B. 5, 8, 12"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Pets */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Haustiere</label>
-              <input
-                type="text"
-                value={editingGuest.pets || ''}
-                onChange={(e) => setEditingGuest({ ...editingGuest, pets: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Rental Price */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mietpreis</label>
-              <input
-                type="number"
-                step="0.01"
-                value={editingGuest.rental_price}
-                onChange={(e) => setEditingGuest({ ...editingGuest, rental_price: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Deposit Amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Anzahlung</label>
-              <input
-                type="number"
-                step="0.01"
-                value={editingGuest.deposit_amount}
-                onChange={(e) => setEditingGuest({ ...editingGuest, deposit_amount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            {/* Note: Buchungsfelder (Anreise, Abreise, Personen, Mietpreis etc.) werden in Buchungen verwaltet */}
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Status</label>
               <select
                 value={editingGuest.status}
                 onChange={(e) => setEditingGuest({ ...editingGuest, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               >
                 {STATUS_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -265,12 +176,12 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Notes */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notizen</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Notizen</label>
               <textarea
                 value={editingGuest.other_notes || ''}
                 onChange={(e) => setEditingGuest({ ...editingGuest, other_notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               />
             </div>
           </div>
@@ -307,17 +218,17 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="flex-1 px-4 py-2 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Abbrechen
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-40 flex items-center justify-center gap-2 font-medium transition-colors"
             >
               {isSaving ? (
                 <>

@@ -24,6 +24,12 @@ export interface ExpenseGuest {
   adults: number;
   children: number;
   status: string;
+  // Additional fields needed for central calculation
+  pets?: string | null;
+  platform?: string | null;
+  is_private?: number;
+  no_nebenkosten?: number;
+  final_cleaning?: string | null;
 }
 
 export interface KurtaxeRatePeriod {
@@ -50,4 +56,15 @@ export interface KurtaxeBooking {
   adults: number;
   days: number;
   amount: number;
+}
+
+export interface ProvisionBooking {
+  id: number;
+  guestName: string;
+  arrival: string;
+  departure: string;
+  platform: string | null;
+  rentalPrice: number;
+  mieterlos: number;
+  provision: number;
 }

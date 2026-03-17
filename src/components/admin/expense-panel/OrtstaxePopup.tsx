@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import type { KurtaxeBooking } from './types';
+import { formatCurrency } from '@/lib/utils/formatting';
 
 interface OrtstaxePopupProps {
   month: number;
@@ -48,7 +49,7 @@ export function OrtstaxePopup({
                 {new Date(booking.departure).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
               </div>
               <div className="text-xs text-gray-500">
-                {booking.adults} Erw. × {booking.days} Tage × {kurtaxeRate.toFixed(2)} €
+                {booking.adults} Erw. × {booking.days} Nächte × {formatCurrency(kurtaxeRate)}
               </div>
             </div>
             <span className="font-semibold text-gray-700">{formatCurrency(booking.amount)}</span>

@@ -1,4 +1,8 @@
 import { CONFIG, DEFAULT_PRICING } from './constants';
+
+/** Format number in German locale for display in descriptions */
+const fmtNum = (n: number, decimals = 2) =>
+  n.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 import type {
   PricingSettings,
   CostBreakdown,
@@ -21,14 +25,39 @@ export function getKurtaxeRateForDate(date: Date, pricing: PricingSettings): num
 
   const dateStr = date.toISOString().split('T')[0];
 
+  // Exact match: date falls within a defined period
   for (const period of pricing.kurtaxeRates) {
     if (dateStr >= period.from && dateStr <= period.to) {
       return period.rate;
     }
   }
 
-  // Fallback to default rate
-  return pricing.kurtaxe;
+  // Gap handling: no exact match found — find the temporally nearest rate.
+  // This covers gaps between valid_to of one period and valid_from of the next.
+  // Log a warning so admins notice and can fix the gap in kurtaxe_rates.
+  let nearestRate = pricing.kurtaxe;
+  let smallestGap = Infinity;
+  const dateMs = date.getTime();
+
+  for (const period of pricing.kurtaxeRates) {
+    const fromMs = new Date(period.from).getTime();
+    const toMs = new Date(period.to).getTime();
+    const gapToFrom = Math.abs(dateMs - fromMs);
+    const gapToTo = Math.abs(dateMs - toMs);
+    const minGap = Math.min(gapToFrom, gapToTo);
+
+    if (minGap < smallestGap) {
+      smallestGap = minGap;
+      nearestRate = period.rate;
+    }
+  }
+
+  console.warn(
+    `[Kurtaxe] Kein Satz fuer Datum ${dateStr} gefunden — Luecke in kurtaxe_rates. ` +
+    `Verwende naechsten Satz (${nearestRate} EUR). Bitte Kurtaxe-Saetze pruefen.`
+  );
+
+  return nearestRate;
 }
 
 // Calculate Kurtaxe with date-based rates (handles rate changes during booking)
@@ -47,7 +76,7 @@ export function calculateKurtaxeWithDateRates(
     const kurtaxe = pricing.kurtaxe * days * adults;
     return {
       kurtaxe,
-      kurtaxeDetails: `${adults} Erw. × ${days} Tage × ${pricing.kurtaxe.toFixed(2)} €`,
+      kurtaxeDetails: `${adults} Erw. × ${days} Nächte × ${fmtNum(pricing.kurtaxe)} €`,
     };
   }
 
@@ -67,11 +96,11 @@ export function calculateKurtaxeWithDateRates(
   let details: string;
   if (rateCounts.size === 1) {
     const rate = Array.from(rateCounts.keys())[0];
-    details = `${adults} Erw. × ${days} Tage × ${rate.toFixed(2)} €`;
+    details = `${adults} Erw. × ${days} Nächte × ${fmtNum(rate)} €`;
   } else {
     const parts: string[] = [];
     rateCounts.forEach((dayCount, rate) => {
-      parts.push(`${dayCount} Tage × ${rate.toFixed(2)} €`);
+      parts.push(`${dayCount} Nächte × ${fmtNum(rate)} €`);
     });
     details = `${adults} Erw. (${parts.join(', ')})`;
   }
@@ -85,7 +114,8 @@ export function calculateUtilityCostsForBooking(
   departureDate: string,
   adults: number,
   pricing?: PricingSettings,
-  hasDog?: boolean
+  hasDog?: boolean,
+  childrenAges?: number[] // Optional: ages of children for Kurtaxe calculation
 ): BookingCostResult {
   const prices = pricing || { ...DEFAULT_PRICING };
   const arrival = new Date(arrivalDate);
@@ -100,8 +130,13 @@ export function calculateUtilityCostsForBooking(
   // Cap adults at 8 for calculation, minimum 2
   const cappedAdults = Math.min(8, Math.max(2, adults)) as AdultsCount;
 
-  // Calculate Kurtaxe with date-based rates
-  const { kurtaxe, kurtaxeDetails } = calculateKurtaxeWithDateRates(arrivalDate, departureDate, cappedAdults, prices);
+  // Kurtaxe: Count adults + children >= 16 years
+  // Children under 16 are exempt from Kurtaxe
+  const kurtaxePayingChildren = childrenAges ? childrenAges.filter(age => age >= 16).length : 0;
+  const kurtaxePayingPersons = Math.min(8, Math.max(1, adults + kurtaxePayingChildren));
+
+  // Calculate Kurtaxe with date-based rates (using kurtaxe-paying persons)
+  const { kurtaxe, kurtaxeDetails } = calculateKurtaxeWithDateRates(arrivalDate, departureDate, kurtaxePayingPersons, prices);
 
   // Reinigungskosten (cleaning) per booking - fixed cost: 100€ base + 25€ if dog
   const reinigungBase = 100;
@@ -228,4 +263,32 @@ export function calculateCostsForDays(
     holzBuendel,
     trashBags,
   };
+}
+
+// ============================================================================
+// Shared NK calculation primitives (used by both calculations.ts and positionCalculator.ts)
+// ============================================================================
+
+export function calcHolz(weeks: number, season: Season, pricing: PricingSettings): { buendel: number; amount: number } {
+  const buendelPerWeek = season === 'summer' ? 2 : 5;
+  const buendel = Math.ceil(buendelPerWeek * weeks);
+  return { buendel, amount: (pricing.holz ?? DEFAULT_PRICING.holz) * buendel };
+}
+
+export function calcWasser(weeks: number, cappedAdults: AdultsCount, pricing: PricingSettings): number {
+  return (pricing.water ?? DEFAULT_PRICING.water) * cappedAdults * weeks;
+}
+
+export function calcMuell(weeks: number, season: Season, cappedAdults: AdultsCount, pricing: PricingSettings): { bags: number; amount: number } {
+  const config = CONFIG[season].weeks[1];
+  const bagsPerWeek = config.trashBags[cappedAdults];
+  const bags = Math.ceil(bagsPerWeek * weeks);
+  return { bags, amount: (pricing.trash ?? DEFAULT_PRICING.trash) * bags };
+}
+
+export function calcStrom(weeks: number, season: Season, cappedAdults: AdultsCount, pricing: PricingSettings): { kwh: number; amount: number } {
+  const config = CONFIG[season].weeks[1];
+  const kwhPerWeek = config.electricityIncluded[cappedAdults];
+  const kwh = Math.round(kwhPerWeek * weeks);
+  return { kwh, amount: (pricing.electricity ?? DEFAULT_PRICING.electricity) * kwh };
 }

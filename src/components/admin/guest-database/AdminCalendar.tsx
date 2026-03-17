@@ -12,6 +12,7 @@ interface AdminCalendarProps {
   guests: Guest[];
   onSwitchToGuests: () => void;
   onSelectGuest?: (guestId: number) => void;
+  adminPassword: string;
 }
 
 // Combined booking type for calendar display
@@ -25,7 +26,7 @@ interface CalendarBooking {
   isAdditionalBooking?: boolean; // true if from bookings table
 }
 
-export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: AdminCalendarProps) {
+export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest, adminPassword }: AdminCalendarProps) {
   const [calendarYear, setCalendarYear] = useState(2026);
   const [externalBookings, setExternalBookings] = useState<FeratelBooking[]>([]);
   const [additionalBookings, setAdditionalBookings] = useState<Booking[]>([]);
@@ -45,7 +46,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
   // Fetch additional bookings from the bookings table
   const fetchAdditionalBookings = async () => {
     try {
-      const res = await fetch('/api/admin/bookings');
+      const res = await fetch('/api/admin/bookings', {
+        headers: { 'x-admin-password': adminPassword }
+      });
       const data = (await res.json()) as { bookings?: Booking[]; error?: string };
       if (data.bookings) {
         setAdditionalBookings(data.bookings);
@@ -61,7 +64,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
       setCalendarError('');
 
       try {
-        const res = await fetch('/api/admin/feratel-calendar');
+        const res = await fetch('/api/admin/feratel-calendar', {
+          headers: { 'x-admin-password': adminPassword }
+        });
         const data = (await res.json()) as {
           success: boolean;
           bookedPeriods: FeratelBooking[];
@@ -92,11 +97,16 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
     fetchAdditionalBookings();
   }, [guests]);
 
+  // Set of guest IDs that have entries in the bookings table
+  const guestsWithBookings = new Set(additionalBookings.map((b) => b.guest_id));
+
   // Combine guests with additional bookings for calendar display
   const allCalendarBookings: CalendarBooking[] = [
-    // Main bookings from guests table
+    // Legacy bookings from guests table - only for guests WITHOUT entries in bookings table
+    // When a guest has bookings in the bookings table, those are authoritative
     ...guests
       .filter((g) => g.arrival_date && g.departure_date && g.status !== 'cancelled')
+      .filter((g) => !guestsWithBookings.has(g.id))
       .map((g) => ({
         id: g.id,
         guest_id: g.id,
@@ -106,7 +116,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
         departure_date: g.departure_date!,
         isAdditionalBooking: false,
       })),
-    // Additional bookings from bookings table
+    // Bookings from bookings table (authoritative source for dates)
     ...additionalBookings
       .filter((b) => b.arrival_date && b.departure_date && b.status !== 'cancelled')
       .map((b) => {
@@ -439,7 +449,16 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                             }
                           }
 
-                          // For main guest bookings, create a pseudo-booking object
+                          // Try to find an actual booking for this guest (prefer bookings table data)
+                          const guestBooking = additionalBookings.find(b => b.guest_id === guest.id);
+                          if (guestBooking) {
+                            setSelectedBooking(guestBooking);
+                            setSelectedGuest(guest);
+                            return;
+                          }
+
+                          // Fallback for legacy guests without booking entries - use guest data
+                          // Note: This is deprecated, all new guests should have bookings
                           const pseudoBooking: Booking = {
                             id: guest.id,
                             guest_id: guest.id,
@@ -449,8 +468,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                             departure_date: guest.departure_date,
                             adults: guest.adults,
                             children: guest.children,
+                            children_ages: guest.children_ages,
                             pets: guest.pets,
-                            rental_price: guest.rental_price,
+                            rental_price: guest.rental_price, // Legacy: should come from booking
                             deposit_amount: guest.deposit_amount,
                             deposit_paid: guest.deposit_paid,
                             final_payment: guest.final_payment,
@@ -469,6 +489,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                             notes: guest.other_notes,
                             cleaning_cash: guest.cleaning_cash,
                             utilities_cash: 0,
+                            kurtaxe_cash: 0,
+                            is_private: guest.is_private,
+                            private_config: null,
                             created_at: guest.created_at,
                             updated_at: guest.updated_at,
                           };
@@ -517,6 +540,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
           guests={guests}
           bookings={additionalBookings}
           year={calendarYear}
+          adminPassword={adminPassword}
           onSelectBooking={(booking, guest) => {
             setSelectedBooking(booking);
             setSelectedGuest(guest);

@@ -19,13 +19,14 @@ export type { CostBreakdownDetailed } from './utility-costs';
 
 interface UtilityCostsCalculatorProps {
   adminPassword?: string;
+  demoMode?: boolean;
 }
 
 // Kurtaxe rates
-const KURTAXE_ALT = 2.7;  // bis 30.04.2026
-const KURTAXE_NEU = 4.0;  // ab 01.05.2026
+const KURTAXE_ALT = 2.7;  // bis 31.10.2026
+const KURTAXE_NEU = 4.5;  // ab 01.11.2026
 
-export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCalculatorProps) {
+export default function UtilityCostsCalculator({ adminPassword, demoMode = false }: UtilityCostsCalculatorProps) {
   const [selectedSeason, setSelectedSeason] = useState<Season>('summer');
   const [selectedWeeks, setSelectedWeeks] = useState<WeeksCount>(1);
   const [viewMode, setViewMode] = useState<'weeks' | 'days'>('weeks');
@@ -44,7 +45,9 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const res = await fetch('/api/admin/settings');
+        const res = await fetch('/api/admin/settings', {
+          headers: adminPassword ? { 'x-admin-password': adminPassword } : {}
+        });
         const data = (await res.json()) as { settings?: Record<string, string> };
         if (data.settings) {
           // Parse kurtaxe rates JSON if available
@@ -121,14 +124,14 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <Calculator className="w-6 h-6 text-purple-600" />
               Nebenkosten (kalkulatorisch)
             </h2>
-            <p className="text-gray-600 mt-1">Kalkulatorische Nebenkosten für Gäste (2-8 Personen) · Kurtaxe: 2,70€ bis 30.04.2026, ab 01.05.2026 dann 4,00€</p>
+            <p className="text-gray-600 mt-1">Kalkulatorische Nebenkosten für Gäste (2-8 Personen) · Kurtaxe: 2,70€ bis 31.10.2026, ab 01.11.2026 dann 4,50€</p>
           </div>
 
           <button
@@ -146,7 +149,7 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
       </div>
 
       {/* Season/Week Selector */}
-      <div className="bg-white rounded-xl shadow-sm p-6 print:hidden">
+      <div className="bg-white rounded-xl p-6 print:hidden">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700">Saison:</span>
@@ -243,7 +246,7 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
                   selectedKurtaxe === 'alt' ? 'bg-green-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                2,70€ (alt)
+                2,70€ (bis 31.10.26)
               </button>
               <button
                 onClick={() => setSelectedKurtaxe('neu')}
@@ -251,7 +254,7 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
                   selectedKurtaxe === 'neu' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                4,00€ (neu)
+                4,50€ (ab 01.11.26)
               </button>
             </div>
           </div>
@@ -282,7 +285,7 @@ export default function UtilityCostsCalculator({ adminPassword }: UtilityCostsCa
       <div className="bg-gray-50 rounded-xl p-6 text-sm text-gray-600">
         <h4 className="font-semibold text-gray-800 mb-2">Hinweise:</h4>
         <ul className="list-disc list-inside space-y-1">
-          <li>Kurtaxe wird pro Erwachsenen und Tag berechnet ({formatCurrency(pricing.kurtaxe)})</li>
+          <li>Kurtaxe wird pro Erwachsenen und Nacht berechnet ({formatCurrency(pricing.kurtaxe)})</li>
           <li>Holz: Im Sommer weniger Verbrauch (2 Bündel/Woche), im Winter mehr (5 Bündel/Woche)</li>
           <li>Müllsäcke: Anzahl variiert je nach Personenzahl (1-4 Säcke)</li>
           <li>Strom: Inklusiv-kWh variiert je nach Saison, Dauer und Personenzahl (150-900 kWh)</li>

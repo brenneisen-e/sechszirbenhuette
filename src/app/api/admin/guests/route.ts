@@ -65,6 +65,14 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
+    }
+
     if (!env.DB) {
       return NextResponse.json({
         error: 'D1 Database binding not configured.',
@@ -87,12 +95,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
       }
 
-      // Also fetch associated emails
-      const { results: emails } = await env.DB.prepare(
-        'SELECT * FROM emails WHERE guest_id = ? ORDER BY date_sent DESC'
-      ).bind(id).all();
-
-      return NextResponse.json({ guest, emails: emails || [] });
+      return NextResponse.json({ guest });
     }
 
     let query = 'SELECT * FROM guests';
@@ -378,11 +381,6 @@ export async function DELETE(request: NextRequest) {
     if (!guest) {
       return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
     }
-
-    // Delete associated emails first (or set guest_id to NULL)
-    await env.DB.prepare(
-      'UPDATE emails SET guest_id = NULL WHERE guest_id = ?'
-    ).bind(guestId).run();
 
     // Delete guest
     await env.DB.prepare(

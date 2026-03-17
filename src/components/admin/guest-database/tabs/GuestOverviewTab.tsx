@@ -6,13 +6,14 @@ import {
   CheckCircle2, Clock, CreditCard, MessageSquare, Plus, Edit3, Trash2, Save, X, Loader2,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
-import type { Guest, Booking, RonaldPayment, GuestNote } from '../types';
+import type { Guest, Booking, BankPayment, GuestNote } from '../types';
 import { FlagIcon } from '../FlagIcon';
+import { getEffectiveBookingAmount } from '../helpers';
 
 interface GuestOverviewTabProps {
   guest: Guest;
   bookings: Booking[];
-  ronaldPayments: RonaldPayment[];
+  bankPayments: BankPayment[];
   adminPassword: string;
   notes: GuestNote[];
   notesLoading: boolean;
@@ -50,7 +51,7 @@ function formatRelativeTime(dateString: string): string {
 export function GuestOverviewTab({
   guest,
   bookings,
-  ronaldPayments,
+  bankPayments,
   notes,
   notesLoading,
   onAddNote,
@@ -108,14 +109,11 @@ export function GuestOverviewTab({
   const totalBookings = bookings.length;
   const completedBookings = bookings.filter(b => b.status === 'completed').length;
 
-  // Gesamtumsatz nur aus bookings-Tabelle
-  const totalRevenue = bookings.reduce((sum, b) => sum + (b.rental_price || 0), 0);
+  // Gesamtumsatz nur aus bookings-Tabelle (payout_amount für Plattform-Buchungen)
+  const totalRevenue = bookings.reduce((sum, b) => sum + getEffectiveBookingAmount(b), 0);
 
-  // Gesamtzahlungen (Ronald-Einzahlungen)
-  const totalPayments = ronaldPayments.reduce((sum, p) => sum + p.amount, 0);
-
-  // Offener Betrag
-  const openAmount = Math.max(0, totalRevenue - totalPayments);
+  // Gesamtzahlungen (Kontobewegungen)
+  const totalPayments = bankPayments.reduce((sum, p) => sum + p.amount, 0);
 
   // Erste und letzte Buchung (nur aus bookings-Tabelle)
   const allArrivalDates = bookings
@@ -329,19 +327,6 @@ export function GuestOverviewTab({
           <p className="text-xs text-gray-500">Mieteinnahmen</p>
         </div>
 
-        {/* Zahlungen */}
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-          <div className="flex items-center gap-2 text-orange-600 mb-1">
-            <CreditCard className="w-4 h-4" />
-            <span className="text-xs font-medium">Eingegangen</span>
-          </div>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalPayments, false)}</p>
-          {openAmount > 0 ? (
-            <p className="text-xs text-red-500">{formatCurrency(openAmount)} offen</p>
-          ) : (
-            <p className="text-xs text-green-500">Vollständig bezahlt</p>
-          )}
-        </div>
       </div>
 
       {/* Buchungshistorie */}
@@ -386,7 +371,7 @@ export function GuestOverviewTab({
                   </div>
                 </div>
                 <span className={`font-medium ${booking.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                  {formatCurrency(booking.rental_price || 0)}
+                  {formatCurrency(getEffectiveBookingAmount(booking))}
                 </span>
               </div>
             );
@@ -395,14 +380,14 @@ export function GuestOverviewTab({
       </div>
 
       {/* Zahlungsübersicht */}
-      {ronaldPayments.length > 0 && (
+      {bankPayments.length > 0 && (
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Euro className="w-5 h-5" />
             Zahlungseingänge
           </h4>
           <div className="space-y-2">
-            {ronaldPayments.map((payment) => (
+            {bankPayments.map((payment) => (
               <div key={payment.id} className="flex items-center justify-between p-2 bg-green-50 rounded">
                 <div className="text-sm">
                   <span className="text-gray-600">{formatDate(payment.payment_date)}</span>

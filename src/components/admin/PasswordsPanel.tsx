@@ -9,33 +9,33 @@ const BOOKING_SERVICES = [
   {
     name: 'Feratel',
     loginUrl: 'https://webclient4.deskline.net/KTN/de/login',
-    user: 'NATBERGER',
+    user: 'SECHSZIRBEN',
     password: 'Falkertsee36',
     note: 'Deskline WebClient',
   },
   {
     name: 'FeWo-Direkt',
     loginUrl: 'https://www.fewo-direkt.de/',
-    user: 'info@natberger-huette.de',
+    user: 'info@sechszirbenhuette.de',
     password: '&tt#34BjMKj$zATA',
     note: 'VRBO/FeWo-Direkt',
   },
   {
     name: 'Booking.com',
     loginUrl: 'https://admin.booking.com/',
-    user: 'info@natberger-huette.de',
+    user: 'info@sechszirbenhuette.de',
     password: 'H((&-W3hjqe=HFq',
     note: 'Extranet',
   },
+  {
+    name: 'E-Mail Webmail',
+    loginUrl: 'https://webmail.your-server.de/',
+    user: 'info@sechszirbenhuette.de',
+    password: 'yWYboH9dH46cQG52',
+    note: 'Webmail Client',
+  },
 ];
 
-const IMAP_SETTINGS = [
-  { label: 'Server', value: 'mail.your-server.de', key: 'imap-server' },
-  { label: 'Port Eingang (IMAP)', value: '993', key: 'imap-port-in' },
-  { label: 'Port Ausgang (SMTP)', value: '587', key: 'imap-port-out' },
-  { label: 'Benutzername', value: 'info@natberger-huette.de', key: 'imap-user' },
-  { label: 'Passwort', value: 'yWYboH9dH46cQG52', key: 'imap-pass' },
-];
 
 interface ImportResult {
   message: string;
@@ -189,30 +189,6 @@ export function PasswordsPanel() {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* IMAP Settings */}
-      <div className="mb-6 sm:mb-8">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">E-Mail IMAP Einstellungen</h3>
-        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            {IMAP_SETTINGS.map((field) => (
-              <div key={field.key}>
-                <label className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">{field.label}</label>
-                <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                  <code className="flex-1 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded border text-xs sm:text-sm font-mono truncate">{field.value}</code>
-                  <button
-                    onClick={() => copyToClipboard(field.value, field.key)}
-                    className="p-1.5 sm:p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors"
-                    title="Kopieren"
-                  >
-                    {copiedField === field.key ? <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

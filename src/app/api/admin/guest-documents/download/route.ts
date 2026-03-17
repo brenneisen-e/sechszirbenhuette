@@ -4,6 +4,12 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 interface Env {
   DB: D1Database;
   IMAGES_BUCKET: R2Bucket;
+  ADMIN_PASSWORD?: string;
+  ADMIN_PWD?: string;
+}
+
+function getAdminPassword(env: Env): string | undefined {
+  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
 }
 
 interface DocumentRecord {
@@ -22,6 +28,14 @@ export async function GET(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();
     const env = (ctx as unknown as { env: Env }).env;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
+    }
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });

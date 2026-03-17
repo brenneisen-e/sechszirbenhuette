@@ -1,4 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
+interface Env {
+  DB: D1Database;
+  ADMIN_PASSWORD?: string;
+  ADMIN_PWD?: string;
+}
+
+function getAdminPassword(env: Env): string | undefined {
+  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
+}
 
 // All iCal sources for the calendar
 const ICAL_SOURCES = [
@@ -114,6 +125,16 @@ export async function GET(request: NextRequest) {
   const debug = searchParams.get('debug') === 'true';
 
   try {
+    const ctx = await getCloudflareContext();
+    const env = (ctx as { env: Env }).env;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
+    }
     const results = await Promise.all(
       ICAL_SOURCES.map(source => fetchICalFromSource(source))
     );

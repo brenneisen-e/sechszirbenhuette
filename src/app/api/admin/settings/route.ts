@@ -17,17 +17,22 @@ interface Setting {
   updated_at: string;
 }
 
+// Korrekte Kurtaxe-Staffelung:
+// 2,70 € bis 31.10.2026, ab 01.11.2026 dann 4,50 € pro Person/Nacht
+const CORRECT_KURTAXE_RATES = [
+  { from: '2024-01-01', to: '2024-12-31', rate: 2.70 },
+  { from: '2025-01-01', to: '2025-12-31', rate: 2.70 },
+  { from: '2026-01-01', to: '2026-10-31', rate: 2.70 },
+  { from: '2026-11-01', to: '2099-12-31', rate: 4.50 },
+];
+
 // Default settings - all pricing values
 const DEFAULT_SETTINGS: Record<string, string> = {
   // Pricing rates
-  kurtaxe_rate: '4.00',           // € per day per adult (fallback)
+  kurtaxe_rate: '2.70',           // € per day per adult (current fallback rate)
   // Kurtaxe rates by date periods (JSON array)
   // Format: [{"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "rate": number}, ...]
-  kurtaxe_rates: JSON.stringify([
-    { from: '2024-01-01', to: '2024-12-31', rate: 2.70 },
-    { from: '2025-01-01', to: '2025-12-31', rate: 4.00 },
-    { from: '2026-01-01', to: '2099-12-31', rate: 4.00 }
-  ]),
+  kurtaxe_rates: JSON.stringify(CORRECT_KURTAXE_RATES),
   holz_rate: '10.00',             // € per Bündel
   water_rate: '7.00',             // € per person per week
   trash_rate: '11.00',            // € per bag
@@ -54,6 +59,29 @@ async function ensureDefaultSettings(db: D1Database) {
       'INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)'
     ).bind(key, value).run();
   }
+
+  // Fix: Migrate any wrong kurtaxe_rates that contain 4.00 EUR entries
+  try {
+    const existing = await db.prepare(
+      'SELECT value FROM settings WHERE key = ?'
+    ).bind('kurtaxe_rates').first<{ value: string }>();
+    if (existing?.value) {
+      const parsed = JSON.parse(existing.value);
+      if (Array.isArray(parsed)) {
+        const hasWrongRate = parsed.some(
+          (r: { rate: number }) => r.rate === 4.00
+        );
+        if (hasWrongRate) {
+          await db.prepare(
+            'UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?'
+          ).bind(JSON.stringify(CORRECT_KURTAXE_RATES), 'kurtaxe_rates').run();
+          await db.prepare(
+            'UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?'
+          ).bind('2.70', 'kurtaxe_rate').run();
+        }
+      }
+    }
+  } catch { /* ignore migration errors */ }
 }
 
 // GET - Fetch all settings or a specific setting
@@ -63,6 +91,14 @@ export async function GET(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
+    }
 
     if (!env.DB) {
       return NextResponse.json({

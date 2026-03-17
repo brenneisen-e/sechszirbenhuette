@@ -1,5 +1,3 @@
 // Export all hooks
-export { useGuestData, useGuestEmails, useGuestTasks, useGuestBookings, useGuestCosts } from './useGuestData';
-export { useEmailSync } from './useEmailSync';
+export { useGuestData, useGuestTasks, useGuestBookings, useGuestCosts } from './useGuestData';
 export { useGuestFiltering } from './useGuestFiltering';
-export { useGuestDatabase } from './useGuestDatabase';
