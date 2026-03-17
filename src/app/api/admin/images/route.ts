@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import {
-  getCredentials,
+  getCredentialsWithDb,
   uploadImage,
   deleteImage,
   parseImageUrl,
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      const creds = getCredentials(env);
+      const creds = await getCredentialsWithDb(env);
 
       return NextResponse.json({
         status: 'ok',
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
     const { results } = await stmt.all<ImageRecord>();
 
     // Determine account hash for CF Images delivery URLs
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
     // The account hash for delivery URLs is obtained from existing variant URLs
     // or we can try the account ID (not always the same as hash)
     let accountHash: string | null = null;
@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
     await ensureCfImageIdColumn(env.DB);
 
     const fileBuffer = await file.arrayBuffer();
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     let imageKey: string;
     let cfImageId: string | null = null;
@@ -393,7 +393,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Determine account hash for delivery URL
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
     let accountHash: string | null = null;
     if (creds && result.cf_image_id) {
       accountHash = await discoverAccountHash(env.DB);
@@ -446,7 +446,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
     }
 
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     if (image.cf_image_id && creds) {
       // Delete from Cloudflare Images

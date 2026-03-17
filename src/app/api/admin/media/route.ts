@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import {
-  getCredentials,
+  getCredentialsWithDb,
   uploadImage,
   uploadVideo,
   deleteImage,
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     // Ensure cf_image_id / cf_stream_uid columns exist
     await ensureCfColumns(env.DB);
 
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
@@ -479,7 +479,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     // Delete from the appropriate storage backend
     if (media.cf_image_id && creds) {

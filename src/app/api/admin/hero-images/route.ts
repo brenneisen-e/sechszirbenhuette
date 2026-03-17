@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import {
-  getCredentials,
+  getCredentialsWithDb,
   uploadImage,
   deleteImage,
   parseImageUrl,
@@ -95,7 +95,7 @@ export async function GET() {
     ).all<HeroImageRecord>();
 
     // Determine account hash for CF Images delivery URLs
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
     let accountHash: string | null = null;
     if (creds) {
       accountHash = await discoverAccountHash(env.DB);
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
 
     // Delete old image if exists
     if (existing) {
-      const creds = getCredentials(env);
+      const creds = await getCredentialsWithDb(env);
       if (existing.cf_image_id && creds) {
         try {
           await deleteImage(creds, existing.cf_image_id);
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
     }
 
     const fileBuffer = await file.arrayBuffer();
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     let imageKey: string;
     let cfImageId: string | null = null;
@@ -269,7 +269,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Hero image not found' }, { status: 404 });
     }
 
-    const creds = getCredentials(env);
+    const creds = await getCredentialsWithDb(env);
 
     if (existing.cf_image_id && creds) {
       // Delete from Cloudflare Images

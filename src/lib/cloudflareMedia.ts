@@ -255,7 +255,9 @@ export function getStreamEmbedUrl(streamUid: string, subdomain?: string): string
 // ============================================================================
 
 /**
- * Extract credentials from Cloudflare env
+ * Extract credentials from Cloudflare env.
+ * Falls back to reading CLOUDFLARE_API_TOKEN from the D1 settings table
+ * if not set as an environment variable.
  */
 export function getCredentials(env: {
   CLOUDFLARE_ACCOUNT_ID?: string;
@@ -270,6 +272,39 @@ export function getCredentials(env: {
     apiToken: env.CLOUDFLARE_API_TOKEN,
     streamSubdomain: env.CLOUDFLARE_STREAM_SUBDOMAIN,
   };
+}
+
+/**
+ * Get credentials with DB fallback for the API token.
+ * Checks env vars first, then falls back to the settings table in D1.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getCredentialsWithDb(env: any): Promise<CloudflareCredentials | null> {
+  // Try env vars first
+  const fromEnv = getCredentials(env);
+  if (fromEnv) return fromEnv;
+
+  // Fallback: read token from DB settings
+  if (!env.CLOUDFLARE_ACCOUNT_ID || !env.DB) return null;
+
+  try {
+    const db = env.DB as D1Database;
+    const result = await db.prepare(
+      "SELECT value FROM settings WHERE key = 'cloudflare_api_token'"
+    ).first<{ value: string }>();
+
+    if (result?.value) {
+      return {
+        accountId: env.CLOUDFLARE_ACCOUNT_ID,
+        apiToken: result.value,
+        streamSubdomain: env.CLOUDFLARE_STREAM_SUBDOMAIN,
+      };
+    }
+  } catch {
+    // Settings table might not exist yet
+  }
+
+  return null;
 }
 
 /**
