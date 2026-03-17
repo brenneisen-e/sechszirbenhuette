@@ -21,7 +21,7 @@ interface Step1Props {
   setPets: (v: string) => void;
   nights: number;
   isAnalyzing: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   analyzeFile: (file: File) => void;
 }
 
