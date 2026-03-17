@@ -141,3 +141,13 @@ export const BODY_SIZE_OPTIONS = [
   { value: '22', label: '22px' },
   { value: '24', label: '24px' },
 ];
+
+export interface EditingTextValues {
+  content: string;
+  font_family: string;
+  font_size: string;
+  font_size_mobile: string;
+  font_size_desktop: string;
+  color: string;
+  padding: string;
+}

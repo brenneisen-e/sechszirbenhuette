@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import {
   Type,
-  Save,
   Loader2,
   AlertCircle,
   Check,
@@ -11,177 +10,23 @@ import {
   ChevronUp,
   RefreshCw,
   Database,
-  Smartphone,
-  Monitor,
   Eye,
-  X,
-  ExternalLink,
-  MousePointerClick,
 } from 'lucide-react';
+import { SECTION_LABELS, TEXT_KEY_LABELS } from './text-editor/types';
+import type { ContentText, EditingTextValues } from './text-editor/types';
+import { parseFontSize, serializeFontSize } from './text-editor/utils';
+import PreviewModal from './text-editor/PreviewModal';
+import TextEditorForm from './text-editor/TextEditorForm';
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
-
-interface FontSizeResponsive {
-  mobile: string;
-  desktop: string;
-}
-
-interface ContentText {
-  id: number;
-  text_key: string;
-  content: string;
-  font_family: string | null;
-  font_size: string | null; // Can be JSON string for responsive sizes
-  color: string | null;
-  padding: string | null;
-  section: string;
-  text_type: string;
-  updated_at: string;
-}
-
-// Helper to parse font_size (can be plain number or JSON with mobile/desktop)
-function parseFontSize(fontSizeStr: string | null): FontSizeResponsive | null {
-  if (!fontSizeStr) return null;
-  try {
-    const parsed = JSON.parse(fontSizeStr);
-    if (parsed.mobile && parsed.desktop) {
-      return parsed as FontSizeResponsive;
-    }
-  } catch {
-    // Not JSON, treat as single value for both
-    return { mobile: fontSizeStr, desktop: fontSizeStr };
-  }
-  return { mobile: fontSizeStr, desktop: fontSizeStr };
-}
-
-// Helper to serialize font_size
-function serializeFontSize(sizes: FontSizeResponsive): string {
-  return JSON.stringify(sizes);
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const SECTION_LABELS: Record<string, string> = {
-  hero: 'Hero (Startbereich)',
-  introtext: 'Einleitungstexte',
-  ferienhaus: 'Ausstattung & Komfort',
-  galerie: 'Galerie',
-  location: 'Anfahrt & Lage',
-  umgebung: 'Umgebung & Aktivitäten',
-  buchung: 'Buchung & Preise',
-  bewertungen: 'Bewertungen',
-  footer: 'Footer',
+const EMPTY_EDITING_VALUES: EditingTextValues = {
+  content: '',
+  font_family: '',
+  font_size: '',
+  font_size_mobile: '',
+  font_size_desktop: '',
+  color: '',
+  padding: '',
 };
-
-const TEXT_KEY_LABELS: Record<string, string> = {
-  // Hero
-  hero_title: 'Hauptüberschrift',
-  hero_subtitle: 'Untertitel',
-  hero_description: 'Beschreibungstext',
-  // Introtext
-  introtext_main_heading: 'Hauptüberschrift (Retro)',
-  introtext_heading_1: 'Überschrift - Wandern & Skifahren',
-  introtext_text_1: 'Text - Wandern & Skifahren',
-  introtext_heading_2: 'Überschrift - Heidi Alm',
-  introtext_text_2: 'Text - Heidi Alm',
-  introtext_heading_3: 'Überschrift - Winterurlaub',
-  introtext_text_3: 'Text - Winterurlaub',
-  // Ferienhaus
-  ferienhaus_title: 'Titel',
-  ferienhaus_subtitle: 'Untertitel',
-  ferienhaus_grundriss_title: 'Grundriss - Titel',
-  ferienhaus_grundriss_description: 'Grundriss - Beschreibung',
-  ferienhaus_wohnflaeche: 'Wohnfläche',
-  ferienhaus_etagen: 'Etagen',
-  // Galerie
-  galerie_title: 'Titel',
-  galerie_subtitle: 'Untertitel',
-  // Location
-  location_title: 'Titel',
-  location_subtitle: 'Untertitel',
-  location_maps_button: 'Google Maps Button',
-  location_address_title: 'Adresse - Titel',
-  location_directions_title: 'Anfahrt - Titel',
-  location_directions_1: 'Anfahrt - Schritt 1',
-  location_directions_2: 'Anfahrt - Schritt 2',
-  location_directions_3: 'Anfahrt - Schritt 3',
-  location_chains_warning: 'Schneeketten-Hinweis',
-  location_contact_title: 'Kontakt - Titel',
-  // Umgebung
-  umgebung_title: 'Titel',
-  umgebung_subtitle: 'Untertitel',
-  // Buchung
-  buchung_title: 'Titel',
-  buchung_subtitle: 'Untertitel',
-  buchung_preise_title: 'Preise - Titel',
-  buchung_preise_base: 'Preise - Basispreis',
-  buchung_nebensaison: 'Nebensaison',
-  buchung_hauptsaison: 'Hauptsaison',
-  buchung_mindestaufenthalt: 'Mindestaufenthalt',
-  buchung_extras_title: 'Extras - Titel',
-  buchung_extra_person: 'Extra - Person',
-  buchung_extra_hund: 'Extra - Hund',
-  buchung_extra_waesche: 'Extra - Wäsche',
-  buchung_inklusive_title: 'Inklusive - Titel',
-  buchung_kontakt_title: 'Kontakt - Titel',
-  buchung_form_title: 'Formular - Titel',
-  buchung_form_intro: 'Formular - Einleitung',
-  buchung_check_button: 'Verfügbarkeit Button',
-  // Bewertungen
-  bewertungen_title: 'Titel',
-  bewertungen_subtitle: 'Untertitel',
-  // Footer
-  footer_company: 'Firmenname',
-  footer_description: 'Beschreibung',
-  footer_contact_title: 'Kontakt - Titel',
-  footer_legal_title: 'Rechtliches - Titel',
-  footer_social_title: 'Social Media - Titel',
-  footer_copyright: 'Copyright',
-};
-
-// Font options including GitHub fonts
-const FONT_OPTIONS = [
-  { value: 'FeelingPassionate', label: 'FeelingPassionate (Handschrift)' },
-  { value: 'Autography', label: 'Autography (Signatur)' },
-  { value: 'BrittanySignature', label: 'Brittany Signature' },
-  { value: 'RetroSignature', label: 'Retro Signature' },
-  { value: 'AdleryPro', label: 'Adlery Pro' },
-  { value: 'system-ui', label: 'System (Standard)' },
-  { value: 'Inter', label: 'Inter (Modern)' },
-  { value: 'Georgia', label: 'Georgia (Serif)' },
-  { value: 'Arial', label: 'Arial (Sans-Serif)' },
-];
-
-const HEADING_SIZE_OPTIONS = [
-  { value: '18', label: '18px' },
-  { value: '20', label: '20px' },
-  { value: '22', label: '22px' },
-  { value: '24', label: '24px' },
-  { value: '28', label: '28px' },
-  { value: '32', label: '32px' },
-  { value: '36', label: '36px' },
-  { value: '42', label: '42px' },
-  { value: '48', label: '48px' },
-  { value: '56', label: '56px' },
-  { value: '64', label: '64px' },
-  { value: '72', label: '72px' },
-  { value: '80', label: '80px' },
-  { value: '96', label: '96px' },
-];
-
-const BODY_SIZE_OPTIONS = [
-  { value: '12', label: '12px' },
-  { value: '14', label: '14px' },
-  { value: '16', label: '16px' },
-  { value: '18', label: '18px' },
-  { value: '20', label: '20px' },
-  { value: '22', label: '22px' },
-  { value: '24', label: '24px' },
-];
 
 // ============================================================================
 // MAIN COMPONENT
@@ -194,15 +39,7 @@ export default function TextEditor() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingTextKey, setEditingTextKey] = useState<string | null>(null);
-  const [editingTextValues, setEditingTextValues] = useState<{
-    content: string;
-    font_family: string;
-    font_size: string;
-    font_size_mobile: string;
-    font_size_desktop: string;
-    color: string;
-    padding: string;
-  }>({ content: '', font_family: '', font_size: '', font_size_mobile: '', font_size_desktop: '', color: '', padding: '' });
+  const [editingTextValues, setEditingTextValues] = useState<EditingTextValues>(EMPTY_EDITING_VALUES);
   const [isSavingText, setIsSavingText] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
@@ -373,7 +210,7 @@ export default function TextEditor() {
 
   const cancelEditing = () => {
     setEditingTextKey(null);
-    setEditingTextValues({ content: '', font_family: '', font_size: '', font_size_mobile: '', font_size_desktop: '', color: '', padding: '' });
+    setEditingTextValues(EMPTY_EDITING_VALUES);
   };
 
   if (loading) {
@@ -478,8 +315,6 @@ export default function TextEditor() {
                     sectionTexts.map((text) => {
                       const isEditing = editingTextKey === text.text_key;
                       const label = TEXT_KEY_LABELS[text.text_key] || text.text_key;
-                      const isHeading = text.text_type === 'heading';
-                      const sizeOptions = isHeading ? HEADING_SIZE_OPTIONS : BODY_SIZE_OPTIONS;
 
                       return (
                         <div
@@ -502,180 +337,15 @@ export default function TextEditor() {
                           </div>
 
                           {isEditing ? (
-                            <div className="space-y-4">
-                              {/* Content */}
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Text</label>
-                                {isHeading ? (
-                                  <input
-                                    type="text"
-                                    value={editingTextValues.content}
-                                    onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                  />
-                                ) : (
-                                  <textarea
-                                    value={editingTextValues.content}
-                                    onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
-                                    rows={3}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                  />
-                                )}
-                              </div>
-
-                              {/* Font & Size */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">Schriftart</label>
-                                  <select
-                                    value={editingTextValues.font_family}
-                                    onChange={(e) => setEditingTextValues(v => ({ ...v, font_family: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                  >
-                                    <option value="">Standard</option>
-                                    {FONT_OPTIONS.map(font => (
-                                      <option key={font.value} value={font.value}>{font.label}</option>
-                                    ))}
-                                  </select>
-                                </div>
-
-                                <div className="col-span-2">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Schriftgröße (Responsiv)
-                                  </label>
-                                  {/* Device indicator */}
-                                  <div className="flex items-center gap-2 mb-3 p-2 bg-gray-100 rounded-lg">
-                                    {isMobile ? (
-                                      <>
-                                        <Smartphone className="w-4 h-4 text-logo-green" />
-                                        <span className="text-sm text-gray-700">Du bearbeitest auf einem <strong className="text-logo-green">Mobilgerät</strong></span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Monitor className="w-4 h-4 text-logo-green" />
-                                        <span className="text-sm text-gray-700">Du bearbeitest auf einem <strong className="text-logo-green">Desktop</strong></span>
-                                      </>
-                                    )}
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    {/* Mobile Size */}
-                                    <div>
-                                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1">
-                                        <Smartphone className="w-3.5 h-3.5" />
-                                        Mobil
-                                        {isMobile && <span className="text-logo-green">(aktuell)</span>}
-                                      </label>
-                                      <select
-                                        value={editingTextValues.font_size_mobile}
-                                        onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_mobile: e.target.value }))}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green ${isMobile ? 'border-logo-green bg-logo-green/5' : 'border-gray-300'}`}
-                                      >
-                                        <option value="">Standard</option>
-                                        {sizeOptions.map(size => (
-                                          <option key={size.value} value={size.value}>{size.label}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                    {/* Desktop Size */}
-                                    <div>
-                                      <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1">
-                                        <Monitor className="w-3.5 h-3.5" />
-                                        Desktop
-                                        {!isMobile && <span className="text-logo-green">(aktuell)</span>}
-                                      </label>
-                                      <select
-                                        value={editingTextValues.font_size_desktop}
-                                        onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_desktop: e.target.value }))}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green ${!isMobile ? 'border-logo-green bg-logo-green/5' : 'border-gray-300'}`}
-                                      >
-                                        <option value="">Standard</option>
-                                        {sizeOptions.map(size => (
-                                          <option key={size.value} value={size.value}>{size.label}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <p className="text-xs text-gray-500 mt-2">
-                                    Die Größe wird je nach Bildschirmgröße automatisch angepasst
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Color & Padding */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">Farbe</label>
-                                  <div className="flex gap-2">
-                                    <input
-                                      type="color"
-                                      value={editingTextValues.color || '#000000'}
-                                      onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
-                                      className="w-12 h-10 p-1 border border-gray-300 rounded cursor-pointer"
-                                    />
-                                    <input
-                                      type="text"
-                                      value={editingTextValues.color}
-                                      onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
-                                      placeholder="#000000"
-                                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-1">Padding (px)</label>
-                                  <input
-                                    type="number"
-                                    value={editingTextValues.padding}
-                                    onChange={(e) => setEditingTextValues(v => ({ ...v, padding: e.target.value }))}
-                                    placeholder="0"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Preview */}
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Vorschau ({isMobile ? 'Mobil' : 'Desktop'})
-                                </label>
-                                <div
-                                  className="p-4 bg-gray-100 rounded-lg overflow-hidden"
-                                  style={{
-                                    fontFamily: editingTextValues.font_family || 'inherit',
-                                    fontSize: (isMobile ? editingTextValues.font_size_mobile : editingTextValues.font_size_desktop)
-                                      ? `${isMobile ? editingTextValues.font_size_mobile : editingTextValues.font_size_desktop}px`
-                                      : 'inherit',
-                                    color: editingTextValues.color || 'inherit',
-                                    padding: editingTextValues.padding ? `${editingTextValues.padding}px` : undefined,
-                                  }}
-                                >
-                                  {editingTextValues.content || 'Vorschautext...'}
-                                </div>
-                              </div>
-
-                              {/* Actions */}
-                              <div className="flex justify-end gap-2">
-                                <button
-                                  onClick={cancelEditing}
-                                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
-                                >
-                                  Abbrechen
-                                </button>
-                                <button
-                                  onClick={() => saveContentText(text.text_key)}
-                                  disabled={isSavingText}
-                                  className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition disabled:opacity-50"
-                                >
-                                  {isSavingText ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Save className="w-4 h-4" />
-                                  )}
-                                  Speichern
-                                </button>
-                              </div>
-                            </div>
+                            <TextEditorForm
+                              text={text}
+                              editingTextValues={editingTextValues}
+                              isSavingText={isSavingText}
+                              isMobile={isMobile}
+                              onValuesChange={setEditingTextValues}
+                              onSave={saveContentText}
+                              onCancel={cancelEditing}
+                            />
                           ) : (
                             <div>
                               <p
@@ -730,253 +400,26 @@ export default function TextEditor() {
 
       {/* Live Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <div className="flex items-center gap-3">
-                <Eye className="w-5 h-5 text-logo-green" />
-                <h3 className="font-semibold text-gray-900">Live-Vorschau der Homepage</h3>
-                {isInteractivePreview && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-logo-green/10 text-logo-green rounded-full">
-                    Interaktiv
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsInteractivePreview(!isInteractivePreview)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition ${
-                    isInteractivePreview
-                      ? 'bg-logo-green text-white hover:bg-logo-green/90'
-                      : 'text-gray-600 hover:text-logo-green hover:bg-gray-100'
-                  }`}
-                  title={isInteractivePreview ? 'Interaktiver Modus aktiv - Texte anklicken zum Bearbeiten' : 'Interaktiven Modus aktivieren'}
-                >
-                  <MousePointerClick className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isInteractivePreview ? 'Klick-Modus' : 'Nur Ansicht'}</span>
-                </button>
-                <button
-                  onClick={() => setPreviewKey(k => k + 1)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
-                  title="Vorschau aktualisieren"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span className="hidden sm:inline">Aktualisieren</span>
-                </button>
-                <a
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="hidden sm:inline">In neuem Tab</span>
-                </a>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="p-2 text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Content area with iframe and optional edit panel */}
-            <div className="flex-1 flex overflow-hidden">
-              {/* iframe Container */}
-              <div className={`flex-1 relative bg-gray-100 ${editingTextKey && isInteractivePreview ? 'border-r border-gray-200' : ''}`}>
-                <iframe
-                  key={`${previewKey}-${isInteractivePreview}`}
-                  src={`/?preview=1${isInteractivePreview ? '&interactive=1' : ''}`}
-                  className="absolute inset-0 w-full h-full border-0"
-                  title="Homepage Vorschau"
-                />
-              </div>
-
-              {/* Edit Panel - shown when a text is selected in interactive mode */}
-              {editingTextKey && isInteractivePreview && (() => {
-                const text = contentTexts[editingTextKey];
-                if (!text) return null;
-                const label = TEXT_KEY_LABELS[text.text_key] || text.text_key;
-                const isHeading = text.text_type === 'heading';
-                const sizeOptions = isHeading ? HEADING_SIZE_OPTIONS : BODY_SIZE_OPTIONS;
-
-                return (
-                  <div className="w-96 bg-white flex flex-col overflow-hidden">
-                    {/* Edit Panel Header */}
-                    <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{label}</h4>
-                          <p className="text-xs text-gray-500">{editingTextKey}</p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            cancelEditing();
-                            setSelectedTextKeyFromPreview(null);
-                          }}
-                          className="p-1 text-gray-400 hover:text-gray-600 transition"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Edit Panel Content */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                      {/* Content */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Text</label>
-                        {isHeading ? (
-                          <input
-                            type="text"
-                            value={editingTextValues.content}
-                            onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green text-sm"
-                          />
-                        ) : (
-                          <textarea
-                            value={editingTextValues.content}
-                            onChange={(e) => setEditingTextValues(v => ({ ...v, content: e.target.value }))}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green text-sm"
-                          />
-                        )}
-                      </div>
-
-                      {/* Font */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Schriftart</label>
-                        <select
-                          value={editingTextValues.font_family}
-                          onChange={(e) => setEditingTextValues(v => ({ ...v, font_family: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green text-sm"
-                        >
-                          <option value="">Standard</option>
-                          {FONT_OPTIONS.map(font => (
-                            <option key={font.value} value={font.value}>{font.label}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Size (Responsive) */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Schriftgröße</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1">
-                              <Smartphone className="w-3 h-3" /> Mobil
-                            </label>
-                            <select
-                              value={editingTextValues.font_size_mobile}
-                              onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_mobile: e.target.value }))}
-                              className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
-                            >
-                              <option value="">Standard</option>
-                              {sizeOptions.map(size => (
-                                <option key={size.value} value={size.value}>{size.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1">
-                              <Monitor className="w-3 h-3" /> Desktop
-                            </label>
-                            <select
-                              value={editingTextValues.font_size_desktop}
-                              onChange={(e) => setEditingTextValues(v => ({ ...v, font_size_desktop: e.target.value }))}
-                              className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
-                            >
-                              <option value="">Standard</option>
-                              {sizeOptions.map(size => (
-                                <option key={size.value} value={size.value}>{size.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Color */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Farbe</label>
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            value={editingTextValues.color || '#000000'}
-                            onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
-                            className="w-10 h-9 p-1 border border-gray-300 rounded cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={editingTextValues.color}
-                            onChange={(e) => setEditingTextValues(v => ({ ...v, color: e.target.value }))}
-                            placeholder="#000000"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Preview */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Vorschau</label>
-                        <div
-                          className="p-3 bg-gray-100 rounded-lg text-sm overflow-hidden"
-                          style={{
-                            fontFamily: editingTextValues.font_family || 'inherit',
-                            fontSize: editingTextValues.font_size_desktop
-                              ? `${Math.min(parseInt(editingTextValues.font_size_desktop), 24)}px`
-                              : 'inherit',
-                            color: editingTextValues.color || 'inherit',
-                          }}
-                        >
-                          {editingTextValues.content || 'Vorschautext...'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Edit Panel Footer */}
-                    <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex gap-2">
-                      <button
-                        onClick={() => {
-                          cancelEditing();
-                          setSelectedTextKeyFromPreview(null);
-                        }}
-                        className="flex-1 px-3 py-2 text-gray-600 hover:text-gray-800 transition text-sm"
-                      >
-                        Abbrechen
-                      </button>
-                      <button
-                        onClick={async () => {
-                          await saveContentText(editingTextKey);
-                          setPreviewKey(k => k + 1); // Refresh preview after save
-                        }}
-                        disabled={isSavingText}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition text-sm disabled:opacity-50"
-                      >
-                        {isSavingText ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Save className="w-4 h-4" />
-                        )}
-                        Speichern
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-              <p className="text-xs text-gray-500 text-center">
-                {isInteractivePreview
-                  ? 'Klicken Sie auf Texte in der Vorschau, um sie direkt zu bearbeiten. Der Text wird rechts im Editor geöffnet.'
-                  : 'Änderungen werden nach dem Speichern in der Vorschau angezeigt. Klicken Sie auf "Aktualisieren" um die neuesten Änderungen zu sehen.'}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PreviewModal
+          previewKey={previewKey}
+          isInteractivePreview={isInteractivePreview}
+          editingTextKey={editingTextKey}
+          editingTextValues={editingTextValues}
+          contentTexts={contentTexts}
+          isSavingText={isSavingText}
+          onClose={() => setShowPreview(false)}
+          onRefresh={() => setPreviewKey(k => k + 1)}
+          onToggleInteractive={() => setIsInteractivePreview(!isInteractivePreview)}
+          onCancelEditing={cancelEditing}
+          onSave={async () => {
+            if (editingTextKey) {
+              await saveContentText(editingTextKey);
+              setPreviewKey(k => k + 1); // Refresh preview after save
+            }
+          }}
+          onEditingValuesChange={setEditingTextValues}
+          onClearSelectedFromPreview={() => setSelectedTextKeyFromPreview(null)}
+        />
       )}
     </div>
   );
