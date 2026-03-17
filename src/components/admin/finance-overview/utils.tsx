@@ -1,4 +1,5 @@
 // Utility functions for FinanceOverview
+import React from 'react';
 
 export const formatDate = (dateStr: string | null): string => {
   if (!dateStr) return '-';
@@ -47,5 +48,3 @@ export const getPlatformBadge = (platform: string | null): React.ReactElement =>
   return <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${classes}`}>{name}</span>;
 };
 
-// Need React for JSX
-import React from 'react';

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { BlogPost, BlogPostImage, MediaItem, EditorTab } from './types';
 
 interface UseBlogEditorReturn {
@@ -32,9 +32,6 @@ interface UseBlogEditorReturn {
   addImageToGallery: (media: MediaItem) => void;
   removeImageFromGallery: (index: number) => void;
 }
-
-// Re-export React so consumers can use the Dispatch type
-import React from 'react';
 
 export function useBlogEditor(): UseBlogEditorReturn {
   const [posts, setPosts] = useState<BlogPost[]>([]);
