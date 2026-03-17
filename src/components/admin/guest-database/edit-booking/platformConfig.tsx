@@ -1,5 +1,6 @@
+'use client';
+
 import { Building2, Mail, Users } from 'lucide-react';
-import React from 'react';
 
 export type PlatformType = 'booking' | 'fewo' | 'airbnb' | 'direct' | 'private';
 
@@ -27,7 +28,7 @@ export const PLATFORM_CONFIG: Record<PlatformType, {
 }> = {
   booking: {
     label: 'Booking.com',
-    icon: React.createElement(Building2, { className: 'w-5 h-5' }),
+    icon: <Building2 className="w-5 h-5" />,
     color: 'bg-blue-500',
     description: 'Auszahlung oder Gastzahlung mit Gebühren eingeben',
     showNkInput: false,
@@ -38,7 +39,7 @@ export const PLATFORM_CONFIG: Record<PlatformType, {
   },
   fewo: {
     label: 'FeWo-direkt / Vrbo',
-    icon: React.createElement(Building2, { className: 'w-5 h-5' }),
+    icon: <Building2 className="w-5 h-5" />,
     color: 'bg-orange-500',
     description: 'PDF hochladen oder manuell eingeben',
     showNkInput: true,
@@ -49,7 +50,7 @@ export const PLATFORM_CONFIG: Record<PlatformType, {
   },
   airbnb: {
     label: 'Airbnb',
-    icon: React.createElement(Building2, { className: 'w-5 h-5' }),
+    icon: <Building2 className="w-5 h-5" />,
     color: 'bg-rose-500',
     description: 'Auszahlung enthält alles inkl. NK & Reinigung',
     showNkInput: false,
@@ -60,7 +61,7 @@ export const PLATFORM_CONFIG: Record<PlatformType, {
   },
   direct: {
     label: 'Direkt',
-    icon: React.createElement(Mail, { className: 'w-5 h-5' }),
+    icon: <Mail className="w-5 h-5" />,
     color: 'bg-green-500',
     description: 'E-Mail, Telefon oder persönlich',
     showNkInput: true,
@@ -71,7 +72,7 @@ export const PLATFORM_CONFIG: Record<PlatformType, {
   },
   private: {
     label: 'Privat',
-    icon: React.createElement(Users, { className: 'w-5 h-5' }),
+    icon: <Users className="w-5 h-5" />,
     color: 'bg-gray-500',
     description: 'Familie & Freunde - keine NK',
     showNkInput: false,

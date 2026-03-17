@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, CreditCard, Calendar, ChevronDown, ChevronUp, CheckCircle2, Circle, X, Plus } from 'lucide-react';
+import { TrendingUp, CreditCard, ChevronDown, ChevronUp, CheckCircle2, Circle, X, Plus } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/utils/formatting';
 import type { RonaldPayment } from '../types';
 import type { PlatformFees } from '@/lib/utils/financeCalculations';
+import type { BookingCostResult } from '@/components/admin/utility-costs/types';
 
 interface Transaction {
   date: string;
@@ -15,19 +16,7 @@ interface Transaction {
   fee?: number;
 }
 
-interface UtilityCosts {
-  details: string;
-  kurtaxeDetails: string;
-  breakdown: {
-    electricityKwh: number;
-    electricity: number;
-    holzBuendel: number;
-    holz: number;
-    water: number;
-    trashBags: number;
-    trash: number;
-  };
-}
+type UtilityCosts = BookingCostResult;
 
 interface BookingFinancialDetailsProps {
   // Finance result values
@@ -44,8 +33,8 @@ interface BookingFinancialDetailsProps {
   mietAnteil: number;
   anteiligeMietgebuehr: number;
   gesamtauszahlung: number;
-  barNk: boolean;
-  barReinigung: boolean;
+  barNk: number;
+  barReinigung: number;
   gesamteinzahlung: number;
   totalNkCosts: number;
   gesamtkosten: number;
