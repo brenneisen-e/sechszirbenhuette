@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import { convertVideoForSafari, convertVideoMultiQuality, needsConversion, extractThumbnailAtTime, type ConversionProgress, VIDEO_QUALITIES } from '@/lib/videoConverter';
 import { MediaRecord } from './types';

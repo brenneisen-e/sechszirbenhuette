@@ -1,0 +1,298 @@
+import { useState, useEffect, useCallback } from 'react';
+import type { BlogPost, BlogPostImage, MediaItem, EditorTab } from './types';
+
+interface UseBlogEditorReturn {
+  posts: BlogPost[];
+  loading: boolean;
+  saving: boolean;
+  migrating: boolean;
+  settingUpDb: boolean;
+  error: string;
+  success: string;
+  activeTab: EditorTab;
+  currentPost: Partial<BlogPost> | null;
+  postImages: BlogPostImage[];
+  availableMedia: MediaItem[];
+  showMediaPicker: boolean;
+  mediaPickerTarget: 'cover' | 'gallery' | null;
+  previewImageIndex: number;
+  setActiveTab: (tab: EditorTab) => void;
+  setCurrentPost: React.Dispatch<React.SetStateAction<Partial<BlogPost> | null>>;
+  setPostImages: React.Dispatch<React.SetStateAction<BlogPostImage[]>>;
+  setShowMediaPicker: (show: boolean) => void;
+  setMediaPickerTarget: (target: 'cover' | 'gallery' | null) => void;
+  setPreviewImageIndex: React.Dispatch<React.SetStateAction<number>>;
+  loadPosts: () => Promise<void>;
+  handleSetupBlogDb: () => Promise<void>;
+  handleMigrateBlog: () => Promise<void>;
+  handleNewPost: () => void;
+  handleEditPost: (post: BlogPost) => Promise<void>;
+  handleSave: (publish?: boolean) => Promise<void>;
+  handleDelete: (postId: string) => Promise<void>;
+  addImageToGallery: (media: MediaItem) => void;
+  removeImageFromGallery: (index: number) => void;
+}
+
+// Re-export React so consumers can use the Dispatch type
+import React from 'react';
+
+export function useBlogEditor(): UseBlogEditorReturn {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [settingUpDb, setSettingUpDb] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState<EditorTab>('list');
+  const [currentPost, setCurrentPost] = useState<Partial<BlogPost> | null>(null);
+  const [postImages, setPostImages] = useState<BlogPostImage[]>([]);
+  const [availableMedia, setAvailableMedia] = useState<MediaItem[]>([]);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<'cover' | 'gallery' | null>(null);
+  const [previewImageIndex, setPreviewImageIndex] = useState(0);
+
+  // Load posts
+  const loadPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Add cache buster to avoid stale cached results
+      const res = await fetch(`/api/blog?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      const data = await res.json() as { posts?: BlogPost[]; error?: string };
+      console.log('[BlogEditor] Loaded posts:', data);
+      if (data.error) {
+        setError(data.error);
+        setPosts([]);
+      } else {
+        setPosts(data.posts || []);
+      }
+    } catch (err) {
+      console.error('Error loading posts:', err);
+      setError('Fehler beim Laden der Beiträge');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load available media
+  const loadMedia = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/media');
+      const data = await res.json() as { media: MediaItem[] };
+      setAvailableMedia(data.media || []);
+    } catch (err) {
+      console.error('Error loading media:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPosts();
+    loadMedia();
+  }, [loadPosts, loadMedia]);
+
+  // Setup blog database tables
+  const handleSetupBlogDb = async () => {
+    setSettingUpDb(true);
+    try {
+      const res = await fetch('/api/admin/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'migrate_blog_tables' }),
+      });
+      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      if (res.ok && data.success) {
+        setSuccess(data.message || 'Blog-Datenbank eingerichtet!');
+        await loadPosts();
+      } else {
+        setError(data.error || 'Einrichtung fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Error setting up blog db:', err);
+      setError('Fehler bei der Datenbank-Einrichtung');
+    } finally {
+      setSettingUpDb(false);
+    }
+  };
+
+  // Migrate static blog articles
+  const handleMigrateBlog = async () => {
+    setMigrating(true);
+    try {
+      const res = await fetch('/api/admin/migrate-blog', { method: 'POST' });
+      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      if (res.ok && data.success) {
+        setSuccess(data.message || 'Blog-Artikel migriert!');
+        await loadPosts();
+      } else {
+        setError(data.error || 'Migration fehlgeschlagen');
+      }
+    } catch (err) {
+      console.error('Error migrating blog:', err);
+      setError('Fehler bei der Migration');
+    } finally {
+      setMigrating(false);
+    }
+  };
+
+  // Clear messages
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError('');
+        setSuccess('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
+
+  // Create new post
+  const handleNewPost = () => {
+    setCurrentPost({
+      title: '',
+      subtitle: '',
+      excerpt: '',
+      content: '',
+      cover_image_url: null,
+      cover_image_alt: null,
+      layout: 'standard',
+      status: 'draft',
+      author: 'Sechszirbenhütte',
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: '',
+    });
+    setPostImages([]);
+    setActiveTab('edit');
+  };
+
+  // Edit existing post
+  const handleEditPost = async (post: BlogPost) => {
+    try {
+      const res = await fetch(`/api/blog?slug=${post.slug}&images=true`);
+      const data = await res.json() as { post: BlogPost; images: BlogPostImage[] };
+      setCurrentPost(data.post);
+      setPostImages(data.images || []);
+      setActiveTab('edit');
+    } catch (err) {
+      console.error('Error loading post:', err);
+      setError('Fehler beim Laden des Beitrags');
+    }
+  };
+
+  // Save post
+  const handleSave = async (publish = false) => {
+    if (!currentPost?.title || !currentPost?.content) {
+      setError('Titel und Inhalt sind erforderlich');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const postData = {
+        ...currentPost,
+        status: publish ? 'published' : currentPost.status,
+        images: postImages,
+      };
+
+      const method = currentPost.id ? 'PUT' : 'POST';
+      const res = await fetch('/api/blog', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData),
+      });
+
+      const data = await res.json() as { success?: boolean; error?: string; id?: string; slug?: string };
+
+      if (res.ok && data.success) {
+        setSuccess(publish ? 'Beitrag veröffentlicht!' : 'Beitrag gespeichert!');
+        if (!currentPost.id && data.id) {
+          setCurrentPost(prev => ({ ...prev, id: data.id, slug: data.slug }));
+        }
+        await loadPosts();
+      } else {
+        setError(data.error || 'Fehler beim Speichern');
+      }
+    } catch (err) {
+      console.error('Error saving post:', err);
+      setError('Fehler beim Speichern');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete post
+  const handleDelete = async (postId: string) => {
+    if (!confirm('Beitrag wirklich löschen?')) return;
+
+    try {
+      const res = await fetch(`/api/blog?id=${postId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSuccess('Beitrag gelöscht');
+        await loadPosts();
+        if (currentPost?.id === postId) {
+          setCurrentPost(null);
+          setActiveTab('list');
+        }
+      } else {
+        setError('Fehler beim Löschen');
+      }
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      setError('Fehler beim Löschen');
+    }
+  };
+
+  // Add image to gallery
+  const addImageToGallery = (media: MediaItem) => {
+    setPostImages(prev => [
+      ...prev,
+      {
+        image_url: media.url,
+        image_alt: media.alt_text,
+        caption: null,
+        display_order: prev.length,
+      },
+    ]);
+    setShowMediaPicker(false);
+  };
+
+  // Remove image from gallery
+  const removeImageFromGallery = (index: number) => {
+    setPostImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  return {
+    posts,
+    loading,
+    saving,
+    migrating,
+    settingUpDb,
+    error,
+    success,
+    activeTab,
+    currentPost,
+    postImages,
+    availableMedia,
+    showMediaPicker,
+    mediaPickerTarget,
+    previewImageIndex,
+    setActiveTab,
+    setCurrentPost,
+    setPostImages,
+    setShowMediaPicker,
+    setMediaPickerTarget,
+    setPreviewImageIndex,
+    loadPosts,
+    handleSetupBlogDb,
+    handleMigrateBlog,
+    handleNewPost,
+    handleEditPost,
+    handleSave,
+    handleDelete,
+    addImageToGallery,
+    removeImageFromGallery,
+  };
+}
