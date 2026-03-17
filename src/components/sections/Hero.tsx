@@ -10,93 +10,29 @@ import Image from 'next/image';
 // Logo green color (matches the logo)
 const LOGO_GREEN = '#1e5631';
 
-// Extend Navigator interface for connection API
-interface NetworkInformation {
-  effectiveType?: 'slow-2g' | '2g' | '3g' | '4g';
-  downlink?: number;
-  saveData?: boolean;
-}
-
-declare global {
-  interface Navigator {
-    connection?: NetworkInformation;
-    mozConnection?: NetworkInformation;
-    webkitConnection?: NetworkInformation;
-  }
-}
-
-// Determine TARGET video quality based on network speed (for progressive upgrade)
-// We always START with 360p for fast initial load, then upgrade to this target
-function getTargetVideoQuality(): '1080p' | '720p' | '480p' | '360p' {
-  if (typeof window === 'undefined') return '720p';
-
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-
-  if (connection) {
-    // Use saveData preference - stay at 360p
-    if (connection.saveData) {
-      return '360p';
-    }
-
-    // Use effective connection type
-    if (connection.effectiveType) {
-      switch (connection.effectiveType) {
-        case 'slow-2g':
-        case '2g':
-          return '360p';
-        case '3g':
-          return '480p';
-        case '4g':
-        default:
-          // For 4G, check downlink for 1080p capability
-          if (connection.downlink !== undefined && connection.downlink >= 10) {
-            return '1080p';
-          }
-          return '720p';
-      }
-    }
-
-    // Use downlink speed (Mbps)
-    if (connection.downlink !== undefined) {
-      if (connection.downlink < 1) return '360p';
-      if (connection.downlink < 5) return '480p';
-      if (connection.downlink >= 10) return '1080p';
-      return '720p';
-    }
-  }
-
-  // Default to HD quality for upgrade target
-  return '720p';
-}
-
 export function Hero() {
   const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
 
-  // Use refs for hydration-safe state initialization
   const [isMounted, setIsMounted] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [currentQuality, setCurrentQuality] = useState<'1080p' | '720p' | '480p' | '360p' | null>(null);
-  const [targetQuality, setTargetQuality] = useState<'1080p' | '720p' | '480p' | '360p'>('720p');
-  const [upgradeUrl, setUpgradeUrl] = useState<string | null>(null);
-  const [isUpgradeReady, setIsUpgradeReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const upgradeVideoRef = useRef<HTMLVideoElement>(null);
-  const placeholderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hlsRef = useRef<{ destroy: () => void } | null>(null);
 
   // Mark as mounted on client to prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Fetch thumbnail URL (for placeholder while video loads)
+  // Fetch video and thumbnail URLs from API
   useEffect(() => {
     if (!isMounted) return;
 
+    // Fetch thumbnail
     fetch('/api/media?category=hero-thumbnail&type=image')
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
@@ -107,83 +43,70 @@ export function Hero() {
       .catch(() => {
         // Thumbnail fetch failed, will use gradient fallback
       });
+
+    // Fetch hero video (expects an HLS manifest URL from Cloudflare Stream)
+    fetch('/api/media?category=hero&type=video')
+      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+      .then((data) => {
+        if (data.media?.[0]?.url) {
+          setVideoUrl(data.media[0].url);
+        }
+      })
+      .catch(() => {
+        setVideoError(true);
+      });
   }, [isMounted]);
 
-  // Fetch video URL with adaptive quality
+  // Set up HLS.js or native HLS playback
   useEffect(() => {
-    if (!isMounted) return;
+    if (!videoRef.current || !videoUrl) return;
 
-    // Clear old cache to ensure fresh fetch
-    sessionStorage.removeItem('hero-video-url');
-    sessionStorage.removeItem('hero-video-quality');
+    const video = videoRef.current;
 
-    // Determine target quality based on network speed (for later upgrade)
-    const target = getTargetVideoQuality();
-    setTargetQuality(target);
-    console.log('[Hero] Target quality:', target);
-
-    // ALWAYS start with 360p for fast initial load, then upgrade
-    // Fallback order: 360p first, then higher qualities if 360p not available
-    const categoriesToTry = ['hero-360p', 'hero-480p', 'hero-720p', 'hero-1080p', 'hero'];
-    console.log('[Hero] Starting with 360p for fast load, will upgrade to', target);
-
-    async function findVideo() {
-      for (const category of categoriesToTry) {
-        console.log(`[Hero] Trying category: ${category}`);
-        try {
-          const res = await fetch(`/api/media?category=${category}&type=video`);
-          const data = await res.json() as { media?: { url: string }[] };
-          console.log(`[Hero] ${category} response:`, data);
-
-          if (data.media?.[0]) {
-            const url = `/api/video-stream?category=${category}`;
-            console.log('[Hero] Found video, using URL:', url);
-            setVideoUrl(url);
-            // Extract quality from category (e.g., 'hero-720p' -> '720p')
-            const qualityMatch = category.match(/hero-(\d+p)/);
-            if (qualityMatch) {
-              setCurrentQuality(qualityMatch[1] as '1080p' | '720p' | '480p' | '360p');
-            }
-            return;
-          }
-        } catch (err) {
-          console.error(`[Hero] Error fetching ${category}:`, err);
-        }
-      }
-      console.log('[Hero] No video found in any category');
+    // Clean up previous HLS instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
     }
 
-    findVideo();
-  }, [isMounted]);
-
-  // Set up 5-second timeout to show placeholder if video hasn't loaded
-  useEffect(() => {
-    if (!isMounted || !videoUrl) return;
-
-    // Start 5-second timer - if video isn't loaded by then, keep showing placeholder
-    placeholderTimeoutRef.current = setTimeout(() => {
-      if (!videoLoaded) {
-        // Video still loading after 5 seconds - placeholder is already showing
-        // The video will continue to load in the background
-      }
-    }, 5000);
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari supports HLS natively
+      video.src = videoUrl;
+    } else {
+      // Chrome, Firefox, etc. - use HLS.js
+      (async () => {
+        try {
+          const Hls = (await import('hls.js')).default;
+          if (Hls.isSupported()) {
+            const hls = new Hls({ enableWorker: false });
+            hls.loadSource(videoUrl);
+            hls.attachMedia(video);
+            hlsRef.current = hls;
+          } else {
+            // Fallback: try setting src directly (unlikely to work for HLS)
+            video.src = videoUrl;
+          }
+        } catch {
+          // hls.js failed to load, try direct src as last resort
+          video.src = videoUrl;
+        }
+      })();
+    }
 
     return () => {
-      if (placeholderTimeoutRef.current) {
-        clearTimeout(placeholderTimeoutRef.current);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
       }
     };
-  }, [isMounted, videoUrl, videoLoaded]);
+  }, [videoUrl]);
 
   // Handle video ready to play
   const handleVideoCanPlay = () => {
     if (videoRef.current && !videoLoaded) {
-      // Reset to beginning before playing
       videoRef.current.currentTime = 0;
-      // Try to play the video
       videoRef.current.play().then(() => {
         setVideoLoaded(true);
-        // Fade out placeholder after video starts playing
         setTimeout(() => setShowPlaceholder(false), 300);
       }).catch(() => {
         // Autoplay blocked - keep showing placeholder
@@ -193,139 +116,10 @@ export function Hero() {
     }
   };
 
-  // Fallback: Try to play after 10 seconds even if canplay hasn't fired
-  useEffect(() => {
-    if (!isMounted || !videoUrl || videoLoaded) return;
-
-    const fallbackTimer = setTimeout(() => {
-      if (videoRef.current && !videoLoaded) {
-        // Check if video has any data loaded
-        if (videoRef.current.readyState >= 2) { // HAVE_CURRENT_DATA or better
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().then(() => {
-            setVideoLoaded(true);
-            setTimeout(() => setShowPlaceholder(false), 300);
-          }).catch(() => {
-            // Failed to play - keep thumbnail
-          });
-        }
-      }
-    }, 10000);
-
-    return () => clearTimeout(fallbackTimer);
-  }, [isMounted, videoUrl, videoLoaded]);
-
   // Handle video error - show fallback gradient
   const handleVideoError = () => {
     setVideoError(true);
     setShowPlaceholder(true);
-  };
-
-  // Progressive quality upgrade: After initial video loads, upgrade to target quality
-  useEffect(() => {
-    if (!isMounted || !videoLoaded || !currentQuality) return;
-
-    // Already at target quality or higher - no upgrade needed
-    const qualityRank = { '360p': 1, '480p': 2, '720p': 3, '1080p': 4 };
-    if (qualityRank[currentQuality] >= qualityRank[targetQuality]) {
-      console.log(`[Hero] Already at target quality (${currentQuality}), no upgrade needed`);
-      return;
-    }
-
-    console.log(`[Hero] Upgrading from ${currentQuality} to target ${targetQuality}...`);
-
-    // Try to load target quality, with fallbacks to lower qualities
-    const tryUpgrade = async () => {
-      // Build upgrade path from target down to current+1
-      const upgradeQualities: ('1080p' | '720p' | '480p')[] = [];
-      if (targetQuality === '1080p') upgradeQualities.push('1080p');
-      if (targetQuality === '1080p' || targetQuality === '720p') upgradeQualities.push('720p');
-      if (targetQuality === '1080p' || targetQuality === '720p' || targetQuality === '480p') upgradeQualities.push('480p');
-
-      // Filter out qualities we already have or lower
-      const qualitiesToTry = upgradeQualities.filter(q => qualityRank[q] > qualityRank[currentQuality]);
-
-      for (const upgradeQuality of qualitiesToTry) {
-        const upgradeCategory = `hero-${upgradeQuality}`;
-        try {
-          const res = await fetch(`/api/media?category=${upgradeCategory}&type=video`);
-          const data = await res.json() as { media?: { url: string }[] };
-
-          if (data.media?.[0]) {
-            console.log(`[Hero] Found ${upgradeQuality}, preloading...`);
-            setUpgradeUrl(`/api/video-stream?category=${upgradeCategory}`);
-            return; // Stop after finding first available upgrade
-          }
-        } catch (err) {
-          console.error(`[Hero] Error checking ${upgradeQuality}:`, err);
-        }
-      }
-      console.log(`[Hero] No higher quality available for upgrade`);
-    };
-
-    tryUpgrade();
-  }, [isMounted, videoLoaded, currentQuality, targetQuality]);
-
-  // Handle upgrade video ready - swap to higher quality
-  const handleUpgradeCanPlay = () => {
-    if (!upgradeVideoRef.current || !videoRef.current || isUpgradeReady) return;
-
-    // Determine the upgrade quality from the URL
-    const upgradeQualityMatch = upgradeUrl?.match(/hero-(\d+p)/);
-    const newQuality = (upgradeQualityMatch?.[1] as '1080p' | '720p') || '720p';
-
-    console.log(`[Hero] Higher quality video (${newQuality}) fully buffered, preparing swap...`);
-
-    const upgradeVideo = upgradeVideoRef.current;
-    const currentVideo = videoRef.current;
-
-    // Get current playback position from the old video
-    const currentTime = currentVideo.currentTime;
-
-    // Set the upgrade video to the same position
-    upgradeVideo.currentTime = currentTime;
-
-    // Wait for the seek to complete before swapping
-    const onSeeked = () => {
-      upgradeVideo.removeEventListener('seeked', onSeeked);
-
-      // Sync playback rate
-      upgradeVideo.playbackRate = currentVideo.playbackRate;
-
-      // Start playing the upgrade video (still invisible)
-      upgradeVideo.play().then(() => {
-        // Small delay to ensure video is actually playing and synced
-        requestAnimationFrame(() => {
-          // Fine-tune position sync right before swap
-          const timeDiff = Math.abs(upgradeVideo.currentTime - currentVideo.currentTime);
-          if (timeDiff > 0.1) {
-            upgradeVideo.currentTime = currentVideo.currentTime;
-          }
-
-          // Now trigger the cross-fade
-          setIsUpgradeReady(true);
-          setCurrentQuality(newQuality);
-
-          // After the fade transition (300ms), pause the old video to save resources
-          setTimeout(() => {
-            currentVideo.pause();
-            console.log(`[Hero] Successfully upgraded to ${newQuality}`);
-          }, 350);
-        });
-      }).catch(err => {
-        console.error('[Hero] Failed to play upgrade video:', err);
-      });
-    };
-
-    upgradeVideo.addEventListener('seeked', onSeeked);
-
-    // Fallback if seeked doesn't fire (video already at correct position)
-    setTimeout(() => {
-      if (!isUpgradeReady) {
-        upgradeVideo.removeEventListener('seeked', onSeeked);
-        onSeeked();
-      }
-    }, 100);
   };
 
   const scrollToSection = (href: string) => {
@@ -383,7 +177,7 @@ export function Hero() {
           </div>
         )}
 
-        {/* Video layer - renders behind placeholder, fades in when ready */}
+        {/* Video layer - single element, HLS.js handles adaptive bitrate */}
         {isMounted && videoUrl && !videoError && (
           <video
             ref={videoRef}
@@ -393,31 +187,13 @@ export function Hero() {
             playsInline
             disablePictureInPicture
             preload="auto"
-            className={`h-full w-full object-cover transition-opacity duration-300 ${isUpgradeReady ? 'opacity-0' : 'opacity-100'}`}
+            className="h-full w-full object-cover"
             onCanPlay={handleVideoCanPlay}
             onError={handleVideoError}
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
+          />
         )}
 
-        {/* Hidden upgrade video - preloads higher quality in background */}
-        {isMounted && upgradeUrl && !videoError && (
-          <video
-            ref={upgradeVideoRef}
-            muted
-            loop
-            playsInline
-            disablePictureInPicture
-            preload="auto"
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${isUpgradeReady ? 'opacity-100' : 'opacity-0'}`}
-            onCanPlayThrough={handleUpgradeCanPlay}
-          >
-            <source src={upgradeUrl} type="video/mp4" />
-          </video>
-        )}
-
-        {/* Fallback gradient when no video or thumbnail */}
+        {/* Fallback gradient when not mounted */}
         {!isMounted && (
           <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
         )}

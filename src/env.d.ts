@@ -19,6 +19,9 @@ declare global {
     PUBLIC_R2_URL?: string;
     ADMIN_PASSWORD?: string;
     ADMIN_PWD?: string;
+    CLOUDFLARE_ACCOUNT_ID?: string;
+    CLOUDFLARE_API_TOKEN?: string;
+    CLOUDFLARE_STREAM_SUBDOMAIN?: string;
   }
 }
 
