@@ -5,6 +5,8 @@ interface Env {
   DB: D1Database;
   ADMIN_PASSWORD?: string;
   ADMIN_PWD?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
 }
 
 function getAdminPassword(env: Env): string | undefined {
@@ -111,6 +113,41 @@ export async function GET(request: NextRequest) {
     await ensureDefaultSettings(env.DB);
 
     const key = searchParams.get('key');
+    const action = searchParams.get('action');
+
+    // Test Cloudflare API connection
+    if (action === 'test-cloudflare') {
+      try {
+        // Read token from DB
+        const tokenSetting = await env.DB.prepare(
+          "SELECT value FROM settings WHERE key = 'cloudflare_api_token'"
+        ).first<{ value: string }>();
+
+        const token = env.CLOUDFLARE_API_TOKEN || tokenSetting?.value;
+        const accountId = env.CLOUDFLARE_ACCOUNT_ID;
+
+        if (!token || !accountId) {
+          return NextResponse.json({ success: false, error: 'API Token oder Account ID fehlt' });
+        }
+
+        const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/stats`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          const data = await res.json() as { result?: { count?: { current?: number } } };
+          const imageCount = data.result?.count?.current || 0;
+          return NextResponse.json({
+            success: true,
+            message: `Verbindung OK! ${imageCount} Bilder gespeichert.`,
+          });
+        } else {
+          return NextResponse.json({ success: false, error: `API Fehler: ${res.status} ${res.statusText}` });
+        }
+      } catch (err) {
+        return NextResponse.json({ success: false, error: `Verbindungsfehler: ${err instanceof Error ? err.message : 'Unbekannt'}` });
+      }
+    }
 
     if (key) {
       const setting = await env.DB.prepare(

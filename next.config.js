@@ -1,22 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable image optimization for Cloudflare Pages
   images: {
     unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'imagedelivery.net' },
+      { protocol: 'https', hostname: '*.cloudflarestream.com' },
+      { protocol: 'https', hostname: 'videodelivery.net' },
+      { protocol: 'https', hostname: 'customer-0p71mv70kmvniiuy.cloudflarestream.com' },
+    ],
   },
 
-  // Skip ESLint during builds
   eslint: {
     ignoreDuringBuilds: true,
   },
 
-  // Enable experimental features for better Cloudflare compatibility
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-  },
-  // Erhöhe Body-Limit für Bild-Uploads (100MB)
   experimental: {
     serverActions: {
       bodySizeLimit: '100mb',

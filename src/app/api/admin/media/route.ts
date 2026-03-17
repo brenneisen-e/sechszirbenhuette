@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import {
+  getCredentialsWithDb,
+  uploadImage,
+  uploadVideo,
+  deleteImage,
+  deleteVideo,
+  isVideoFile,
+  isImageFile,
+  buildImageDeliveryUrl,
+  getStreamHlsUrl,
+  getStreamThumbnailUrl,
+} from '@/lib/cloudflareMedia';
 
 // Cloudflare types
 interface R2Object {
@@ -29,6 +41,10 @@ interface D1Database {
 interface CloudflareEnv {
   DB: D1Database;
   R2: R2Bucket;
+  ADMIN_PASSWORD?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+  CLOUDFLARE_STREAM_SUBDOMAIN?: string;
 }
 
 // Get Cloudflare environment
@@ -52,11 +68,35 @@ interface MediaRecord {
   media_type: 'image' | 'video';
   display_order: number;
   created_at: string;
+  cf_image_id?: string | null;
+  cf_stream_uid?: string | null;
 }
 
 interface MediaCategoryRecord {
   media_id: string;
   category: string;
+}
+
+/**
+ * Ensure the cf_image_id and cf_stream_uid columns exist on the media table.
+ * Uses ALTER TABLE ... ADD COLUMN which is a no-op if the column already exists
+ * in SQLite (D1). We catch errors silently for the "duplicate column" case.
+ */
+async function ensureCfColumns(db: D1Database): Promise<void> {
+  try {
+    await db.prepare(
+      "ALTER TABLE media ADD COLUMN cf_image_id TEXT DEFAULT NULL"
+    ).run();
+  } catch {
+    // Column already exists – ignore
+  }
+  try {
+    await db.prepare(
+      "ALTER TABLE media ADD COLUMN cf_stream_uid TEXT DEFAULT NULL"
+    ).run();
+  } catch {
+    // Column already exists – ignore
+  }
 }
 
 // GET - List all media or filter by category/type
@@ -145,6 +185,12 @@ export async function POST(request: NextRequest) {
     if (!env) {
       return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
     }
+
+    // Ensure cf_image_id / cf_stream_uid columns exist
+    await ensureCfColumns(env.DB);
+
+    const creds = await getCredentialsWithDb(env);
+
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const category = formData.get('category') as string || 'aussen';
@@ -160,23 +206,50 @@ export async function POST(request: NextRequest) {
     const uploadedMedia: MediaRecord[] = [];
 
     for (const file of files) {
-      // Determine media type
-      const isVideo = file.type.startsWith('video/');
+      // Determine media type using helpers
+      const isVideo = isVideoFile(file.name, file.type);
+      const isImage = isImageFile(file.name, file.type);
       const mediaType = isVideo ? 'video' : 'image';
 
-      // Generate unique key
+      // Generate unique key (kept for DB record / legacy reference)
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 8);
       const extension = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
       const fileKey = `${category}/${timestamp}-${randomStr}.${extension}`;
+      const id = `${timestamp}-${randomStr}`;
 
-      // Upload to R2
       const arrayBuffer = await file.arrayBuffer();
-      await env.R2.put(fileKey, arrayBuffer, {
-        httpMetadata: {
-          contentType: file.type,
-        },
-      });
+
+      let url: string;
+      let cfImageId: string | null = null;
+      let cfStreamUid: string | null = null;
+
+      if (creds && isVideo) {
+        // ---- Upload to Cloudflare Stream ----
+        const streamResult = await uploadVideo(creds, arrayBuffer, file.name, {
+          category,
+          originalName: file.name,
+          mediaId: id,
+        });
+        cfStreamUid = streamResult.uid;
+        url = getStreamHlsUrl(streamResult.uid, creds.streamSubdomain);
+      } else if (creds && isImage) {
+        // ---- Upload to Cloudflare Images ----
+        const imgResult = await uploadImage(creds, arrayBuffer, file.name, {
+          category,
+          originalName: file.name,
+          mediaId: id,
+        });
+        cfImageId = imgResult.id;
+        // Use the first variant URL returned by Cloudflare Images
+        url = imgResult.variants[0] || buildImageDeliveryUrl('', imgResult.id, 'public');
+      } else {
+        // Fallback to R2 when credentials are missing or file type is unknown
+        await env.R2.put(fileKey, arrayBuffer, {
+          httpMetadata: { contentType: file.type },
+        });
+        url = `/api/admin/media/file/${fileKey}`;
+      }
 
       // Get current max display_order for this category
       const orderResult = await env.DB.prepare(
@@ -185,13 +258,14 @@ export async function POST(request: NextRequest) {
       const nextOrder = (orderResult?.max_order ?? -1) + 1;
 
       // Insert into D1
-      const id = `${timestamp}-${randomStr}`;
-      const url = `/api/admin/media/file/${fileKey}`;
-
       await env.DB.prepare(`
-        INSERT INTO media (id, file_key, url, alt_text, title, category, media_type, display_order, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-      `).bind(id, fileKey, url, altText || file.name, file.name, category, mediaType, nextOrder).run();
+        INSERT INTO media (id, file_key, url, alt_text, title, category, media_type, display_order, created_at, cf_image_id, cf_stream_uid)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
+      `).bind(
+        id, fileKey, url, altText || file.name, file.name,
+        category, mediaType, nextOrder,
+        cfImageId, cfStreamUid
+      ).run();
 
       uploadedMedia.push({
         id,
@@ -203,6 +277,8 @@ export async function POST(request: NextRequest) {
         media_type: mediaType,
         display_order: nextOrder,
         created_at: new Date().toISOString(),
+        cf_image_id: cfImageId,
+        cf_stream_uid: cfStreamUid,
       });
     }
 
@@ -391,10 +467,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Get file key before deleting
+    // Get file key and CF IDs before deleting
     const media = await env.DB.prepare(
-      'SELECT file_key FROM media WHERE id = ?'
-    ).bind(id).first<{ file_key: string }>();
+      'SELECT file_key, cf_image_id, cf_stream_uid FROM media WHERE id = ?'
+    ).bind(id).first<{ file_key: string; cf_image_id?: string | null; cf_stream_uid?: string | null }>();
 
     if (!media) {
       return NextResponse.json(
@@ -403,8 +479,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete from R2
-    await env.R2.delete(media.file_key);
+    const creds = await getCredentialsWithDb(env);
+
+    // Delete from the appropriate storage backend
+    if (media.cf_image_id && creds) {
+      // Delete from Cloudflare Images
+      await deleteImage(creds, media.cf_image_id);
+    } else if (media.cf_stream_uid && creds) {
+      // Delete from Cloudflare Stream
+      await deleteVideo(creds, media.cf_stream_uid);
+    } else {
+      // Legacy item stored in R2 – fall back to R2 deletion
+      await env.R2.delete(media.file_key);
+    }
+
+    // Delete from media_categories junction table
+    await env.DB.prepare('DELETE FROM media_categories WHERE media_id = ?').bind(id).run();
 
     // Delete from D1
     await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();

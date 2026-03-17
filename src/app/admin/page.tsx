@@ -91,6 +91,10 @@ const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), {
   loading: () => <LoadingSpinner text="Lade Blog-Verwaltung..." />,
 });
 
+const CloudflareSettings = dynamic(() => import('@/components/admin/CloudflareSettings'), {
+  loading: () => <LoadingSpinner text="Lade Einstellungen..." />,
+});
+
 function FullScreenLoader() {
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
@@ -393,7 +397,10 @@ function AdminPageContent() {
 
           {activeTab === 'system' && (
             <div className="space-y-12">
-              <MigrationPanel adminPassword={adminPassword} />
+              <CloudflareSettings adminPassword={adminPassword} />
+              <div className="border-t border-gray-200 pt-8">
+                <MigrationPanel adminPassword={adminPassword} />
+              </div>
               <div className="border-t border-gray-200 pt-8">
                 <KurtaxeRatesEditor adminPassword={adminPassword} />
               </div>
