@@ -2,3 +2,4 @@
 export { useGuestData, useGuestEmails, useGuestTasks, useGuestBookings, useGuestCosts } from './useGuestData';
 export { useEmailSync } from './useEmailSync';
 export { useGuestFiltering } from './useGuestFiltering';
+export { useGuestDatabase } from './useGuestDatabase';
