@@ -20,26 +20,65 @@ import type {
   KurtaxeRatePeriod,
   PricingSettings,
   KurtaxeBooking,
+  ProvisionBooking,
 } from './expense-panel/types';
 import { DEFAULT_SETTINGS, MONTH_NAMES, FULL_MONTH_NAMES, CALCULATED_CATEGORIES } from './expense-panel/constants';
 import { SettingsPanel } from './expense-panel/SettingsPanel';
 import { OrtstaxePopup } from './expense-panel/OrtstaxePopup';
+import { ProvisionPopup } from './expense-panel/ProvisionPopup';
 import { AddCategoryForm } from './expense-panel/AddCategoryForm';
 import { MonthlyOverview } from './expense-panel/MonthlyOverview';
+import {
+  calculateBookingFinances,
+  parsePlatformFeesFromJson,
+  parseKomfortpaketFromJson,
+  parseChildrenAges,
+  parsePrivateConfig,
+} from '@/lib/utils/financeCalculations';
+import { roundDemoAmount } from '@/lib/utils/demoMode';
+import type { PricingSettings as UtilityPricingSettings } from './utility-costs';
 
 interface ExpensePanelProps {
   adminPassword: string;
+  demoMode?: boolean;
 }
 
-type Guest = ExpenseGuest;
+type Guest = ExpenseGuest & {
+  // Booking financial data
+  booking_additional_costs?: string | null;
+  utilities_cash?: number;
+  cleaning_cash?: number;
+};
 
-export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
+// Booking data from API
+interface BookingData {
+  id: number;
+  guest_id: number;
+  arrival_date: string | null;
+  departure_date: string | null;
+  rental_price?: number;
+  additional_costs: string | null;
+  utilities_cash?: number;
+  cleaning_cash?: number;
+  final_cleaning?: string | null;
+  adults?: number;
+  children?: number;
+  children_ages?: string | null;
+  pets?: string | null;
+  platform?: string | null;
+  is_private?: number;
+  private_config?: string | null;
+  no_nebenkosten?: number;
+}
+
+export default function ExpensePanel({ adminPassword, demoMode = false }: ExpensePanelProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedYear, setSelectedYear] = useState(2026);
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [allBookings, setAllBookings] = useState<BookingData[]>([]);
   const [editedCells, setEditedCells] = useState<Map<string, number>>(new Map());
   const [error, setError] = useState('');
   const [settings, setSettings] = useState<PricingSettings>(DEFAULT_SETTINGS);
@@ -47,6 +86,8 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
   const [editedSettings, setEditedSettings] = useState<PricingSettings>(DEFAULT_SETTINGS);
   const [savingSettings, setSavingSettings] = useState(false);
   const [ortstaxePopupMonth, setOrtstaxePopupMonth] = useState<number | null>(null);
+  const [provisionPopupMonth, setProvisionPopupMonth] = useState<number | null>(null);
+  const [utilityPricing, setUtilityPricing] = useState<UtilityPricingSettings | undefined>(undefined);
 
   useEffect(() => {
     loadData();
@@ -55,10 +96,19 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [expenseRes, guestRes, settingsRes] = await Promise.all([
-        fetch(`/api/admin/expenses?year=${selectedYear}`),
-        fetch('/api/admin/guests'),
-        fetch('/api/admin/settings'),
+      const [expenseRes, guestRes, settingsRes, bookingsRes] = await Promise.all([
+        fetch(`/api/admin/expenses?year=${selectedYear}`, {
+          headers: { 'x-admin-password': adminPassword }
+        }),
+        fetch('/api/admin/guests', {
+          headers: { 'x-admin-password': adminPassword }
+        }),
+        fetch('/api/admin/settings', {
+          headers: { 'x-admin-password': adminPassword }
+        }),
+        fetch('/api/admin/bookings', {
+          headers: { 'x-admin-password': adminPassword }
+        }),
       ]);
 
       const expenseData = (await expenseRes.json()) as { expenses?: ExpenseRecord[]; categories?: ExpenseCategory[] };
@@ -66,7 +116,42 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
       setCategories(expenseData.categories || []);
 
       const guestData = (await guestRes.json()) as { guests?: Guest[] };
-      setGuests(guestData.guests || []);
+      const bookingsData = (await bookingsRes.json()) as { bookings?: BookingData[] };
+
+      // Store ALL bookings for commission/kurtaxe calculations
+      const bookings = bookingsData.bookings || [];
+      setAllBookings(bookings);
+
+      // Create a map of booking data by guest_id (newest booking per guest) - for display purposes only
+      const bookingsByGuestId = new Map<number, BookingData>();
+      for (const booking of bookings) {
+        if (!bookingsByGuestId.has(booking.guest_id)) {
+          bookingsByGuestId.set(booking.guest_id, booking);
+        }
+      }
+
+      // Merge guests with booking financial data - NUR BUCHUNGSDATEN!
+      const guestsWithBookingData = (guestData.guests || []).map(guest => {
+        const bookingData = bookingsByGuestId.get(guest.id);
+        return {
+          ...guest,
+          // === NUR BUCHUNGSDATEN - KEINE FALLBACKS auf guests! ===
+          rental_price: bookingData?.rental_price ?? 0,
+          arrival_date: bookingData?.arrival_date ?? null,
+          departure_date: bookingData?.departure_date ?? null,
+          adults: bookingData?.adults ?? 2,
+          children: bookingData?.children ?? 0,
+          children_ages: bookingData?.children_ages ?? null,
+          pets: bookingData?.pets ?? null,
+          platform: bookingData?.platform ?? null,
+          is_private: bookingData?.is_private ?? 0,
+          no_nebenkosten: bookingData?.no_nebenkosten ?? 0,
+          booking_additional_costs: bookingData?.additional_costs ?? null,
+          utilities_cash: bookingData?.utilities_cash ?? 0,
+          cleaning_cash: bookingData?.cleaning_cash ?? 0,
+        };
+      });
+      setGuests(guestsWithBookingData);
 
       const settingsData = (await settingsRes.json()) as { settings?: Record<string, string> };
       if (settingsData.settings) {
@@ -91,6 +176,22 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
         };
         setSettings(loadedSettings);
         setEditedSettings(loadedSettings);
+
+        // Also set utility pricing for calculateBookingFinances
+        // Include kurtaxeRates for date-based rate calculations
+        setUtilityPricing({
+          kurtaxe: loadedSettings.kurtaxe_rate,
+          kurtaxeRates: loadedSettings.kurtaxe_rates?.map(r => ({
+            from: r.from,
+            to: r.to,
+            rate: r.rate,
+          })),
+          holz: loadedSettings.holz_rate,
+          water: loadedSettings.water_rate,
+          trash: loadedSettings.trash_rate,
+          electricity: loadedSettings.electricity_rate,
+          reinigung: loadedSettings.reinigung_rate,
+        });
       }
 
       setEditedCells(new Map());
@@ -104,64 +205,200 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
 
   const getMonthlyCommission = useCallback(
     (month: number): number => {
-      return guests
-        .filter((g) => {
-          if (!g.arrival_date || g.status === 'cancelled') return false;
-          const arrivalDate = new Date(g.arrival_date);
+      // Iterate over ALL BOOKINGS, not guests - to catch all bookings including multiple per guest
+      return allBookings
+        .filter((b) => {
+          if (!b.arrival_date) return false;
+          const arrivalDate = new Date(b.arrival_date);
           return arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() + 1 === month;
         })
-        .reduce((sum, g) => {
-          const commissionBase = g.net_rent ?? g.rental_price ?? 0;
-          return sum + commissionBase * settings.commission_rate;
+        .reduce((sum, b) => {
+          // Use central calculation function - consistent with FinanceOverview
+          const hasDog = b.pets?.toLowerCase().includes('hund') ?? false;
+          const isCleaningCash = b.cleaning_cash === 1 || (b.final_cleaning?.includes('vor Ort') ?? false);
+          const isUtilitiesCash = b.utilities_cash === 1;
+          const additionalCostsJson = b.additional_costs;
+          const platformFees = parsePlatformFeesFromJson(additionalCostsJson);
+          const komfortpaket = parseKomfortpaketFromJson(additionalCostsJson);
+          const childrenAges = parseChildrenAges(b.children_ages);
+
+          const financeResult = calculateBookingFinances({
+            arrivalDate: b.arrival_date,
+            departureDate: b.departure_date,
+            adults: b.adults || 2,
+            rentalPrice: b.rental_price ?? 0,
+            platform: b.platform ?? null,
+            hasDog,
+            isPrivate: b.is_private === 1,
+            privateConfig: parsePrivateConfig(b.private_config),
+            skipNk: b.no_nebenkosten === 1,
+            isCleaningCash,
+            isUtilitiesCash,
+            platformFees,
+            pricingSettings: utilityPricing,
+            komfortpaket,
+            childrenAges,
+          });
+
+          return sum + financeResult.provision;
         }, 0);
     },
-    [guests, selectedYear, settings.commission_rate]
+    [allBookings, selectedYear, utilityPricing]
   );
 
   const getMonthlyKurtaxe = useCallback(
     (month: number): number => {
-      return guests
-        .filter((g) => {
-          if (!g.arrival_date || !g.departure_date || g.status === 'cancelled') return false;
-          const arrivalDate = new Date(g.arrival_date);
+      // Use central calculation function for consistent Kurtaxe with date-based rates
+      return allBookings
+        .filter((b) => {
+          if (!b.arrival_date || !b.departure_date) return false;
+          const arrivalDate = new Date(b.arrival_date);
           return arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() + 1 === month;
         })
-        .reduce((sum, g) => {
-          const arrival = new Date(g.arrival_date!);
-          const departure = new Date(g.departure_date!);
-          const days = Math.ceil((departure.getTime() - arrival.getTime()) / (1000 * 60 * 60 * 24));
-          const adults = g.adults || 2;
-          return sum + settings.kurtaxe_rate * days * adults;
+        .reduce((sum, b) => {
+          // Skip private bookings (no Kurtaxe)
+          if (b.is_private === 1 || b.no_nebenkosten === 1) return sum;
+
+          const hasDog = b.pets?.toLowerCase().includes('hund') ?? false;
+          const isCleaningCash = b.cleaning_cash === 1 || (b.final_cleaning?.includes('vor Ort') ?? false);
+          const isUtilitiesCash = b.utilities_cash === 1;
+          const additionalCostsJson = b.additional_costs;
+          const platformFees = parsePlatformFeesFromJson(additionalCostsJson);
+          const komfortpaket = parseKomfortpaketFromJson(additionalCostsJson);
+          const childrenAges = parseChildrenAges(b.children_ages);
+
+          const financeResult = calculateBookingFinances({
+            arrivalDate: b.arrival_date,
+            departureDate: b.departure_date,
+            adults: b.adults || 2,
+            rentalPrice: b.rental_price ?? 0,
+            platform: b.platform ?? null,
+            hasDog,
+            isPrivate: b.is_private === 1,
+            privateConfig: parsePrivateConfig(b.private_config),
+            skipNk: b.no_nebenkosten === 1,
+            isCleaningCash,
+            isUtilitiesCash,
+            platformFees,
+            pricingSettings: utilityPricing,
+            komfortpaket,
+            childrenAges,
+          });
+
+          return sum + financeResult.kurtaxe;
         }, 0);
     },
-    [guests, selectedYear, settings.kurtaxe_rate]
+    [allBookings, selectedYear, utilityPricing]
   );
 
   const getKurtaxeContributingBookings = useCallback(
     (month: number): KurtaxeBooking[] => {
-      return guests
-        .filter((g) => {
-          if (!g.arrival_date || !g.departure_date || g.status === 'cancelled') return false;
-          const arrivalDate = new Date(g.arrival_date);
+      // Use central calculation function for consistent Kurtaxe with date-based rates
+      return allBookings
+        .filter((b) => {
+          if (!b.arrival_date || !b.departure_date) return false;
+          if (b.is_private === 1 || b.no_nebenkosten === 1) return false;
+          const arrivalDate = new Date(b.arrival_date);
           return arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() + 1 === month;
         })
-        .map((g) => {
-          const arrival = new Date(g.arrival_date!);
-          const departure = new Date(g.departure_date!);
+        .map((b) => {
+          const arrival = new Date(b.arrival_date!);
+          const departure = new Date(b.departure_date!);
           const days = Math.ceil((departure.getTime() - arrival.getTime()) / (1000 * 60 * 60 * 24));
-          const adults = g.adults || 2;
-          const amount = settings.kurtaxe_rate * days * adults;
+          const hasDog = b.pets?.toLowerCase().includes('hund') ?? false;
+          const isCleaningCash = b.cleaning_cash === 1 || (b.final_cleaning?.includes('vor Ort') ?? false);
+          const isUtilitiesCash = b.utilities_cash === 1;
+          const additionalCostsJson = b.additional_costs;
+          const platformFees = parsePlatformFeesFromJson(additionalCostsJson);
+          const komfortpaket = parseKomfortpaketFromJson(additionalCostsJson);
+          const childrenAges = parseChildrenAges(b.children_ages);
+
+          const financeResult = calculateBookingFinances({
+            arrivalDate: b.arrival_date,
+            departureDate: b.departure_date,
+            adults: b.adults || 2,
+            rentalPrice: b.rental_price ?? 0,
+            platform: b.platform ?? null,
+            hasDog,
+            isPrivate: b.is_private === 1,
+            privateConfig: parsePrivateConfig(b.private_config),
+            skipNk: b.no_nebenkosten === 1,
+            isCleaningCash,
+            isUtilitiesCash,
+            platformFees,
+            pricingSettings: utilityPricing,
+            komfortpaket,
+            childrenAges,
+          });
+
           return {
-            id: g.id,
-            arrival: g.arrival_date!,
-            departure: g.departure_date!,
-            adults,
+            id: b.id,
+            arrival: b.arrival_date!,
+            departure: b.departure_date!,
+            adults: financeResult.kurtaxePersons || (b.adults || 2),
             days,
-            amount,
+            amount: financeResult.kurtaxe,
           };
         });
     },
-    [guests, selectedYear, settings.kurtaxe_rate]
+    [allBookings, selectedYear, utilityPricing]
+  );
+
+  const getProvisionContributingBookings = useCallback(
+    (month: number): ProvisionBooking[] => {
+      // Create a map of guest names by guest_id
+      const guestNameById = new Map<number, string>();
+      for (const g of guests) {
+        guestNameById.set(g.id, (g as { guest_name?: string }).guest_name || `Gast #${g.id}`);
+      }
+
+      // Iterate over ALL BOOKINGS
+      return allBookings
+        .filter((b) => {
+          if (!b.arrival_date) return false;
+          const arrivalDate = new Date(b.arrival_date);
+          return arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() + 1 === month;
+        })
+        .map((b) => {
+          const hasDog = b.pets?.toLowerCase().includes('hund') ?? false;
+          const isCleaningCash = b.cleaning_cash === 1 || (b.final_cleaning?.includes('vor Ort') ?? false);
+          const isUtilitiesCash = b.utilities_cash === 1;
+          const additionalCostsJson = b.additional_costs;
+          const platformFees = parsePlatformFeesFromJson(additionalCostsJson);
+          const komfortpaket = parseKomfortpaketFromJson(additionalCostsJson);
+          const childrenAges = parseChildrenAges(b.children_ages);
+
+          const financeResult = calculateBookingFinances({
+            arrivalDate: b.arrival_date,
+            departureDate: b.departure_date,
+            adults: b.adults || 2,
+            rentalPrice: b.rental_price ?? 0,
+            platform: b.platform ?? null,
+            hasDog,
+            isPrivate: b.is_private === 1,
+            privateConfig: parsePrivateConfig(b.private_config),
+            skipNk: b.no_nebenkosten === 1,
+            isCleaningCash,
+            isUtilitiesCash,
+            platformFees,
+            pricingSettings: utilityPricing,
+            komfortpaket,
+            childrenAges,
+          });
+
+          return {
+            id: b.id,
+            guestName: guestNameById.get(b.guest_id) || `Gast #${b.guest_id}`,
+            arrival: b.arrival_date!,
+            departure: b.departure_date || b.arrival_date!,
+            platform: b.platform ?? null,
+            rentalPrice: b.rental_price ?? 0,
+            mieterlos: financeResult.mieterlos,
+            provision: financeResult.provision,
+          };
+        });
+    },
+    [allBookings, guests, selectedYear, utilityPricing]
   );
 
   const saveSettings = async () => {
@@ -294,6 +531,9 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
   };
 
   const formatCurrency = (amount: number) => {
+    if (demoMode) {
+      return `~${roundDemoAmount(amount).toLocaleString('de-DE')} €`;
+    }
     return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: 'EUR',
@@ -322,7 +562,7 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -390,7 +630,7 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
           <div className="flex items-center gap-2 text-gray-600 mb-1">
             <Calculator className="w-4 h-4" />
             <span className="text-sm font-medium">Gesamtausgaben {selectedYear}</span>
@@ -400,7 +640,7 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
       </div>
 
       {error && (
-        <div className="bg-white border-l-4 border-red-500 p-4 rounded-r shadow-sm">
+        <div className="bg-white border-l-4 border-red-500 p-4 rounded-r">
           <p className="text-red-700 font-medium">{error}</p>
         </div>
       )}
@@ -420,7 +660,7 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
       )}
 
       {/* Expense Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl overflow-visible">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-100">
@@ -467,7 +707,8 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
 
                       if (isCalculated) {
                         const isOrtstaxe = category.name === 'Ortstaxe';
-                        const isClickable = isOrtstaxe && value > 0;
+                        const isProvision = category.name === 'Malte & Eike (Provision)';
+                        const isClickable = (isOrtstaxe || isProvision) && value > 0;
                         return (
                           <td key={month} className="px-1 py-1 relative">
                             <div
@@ -476,7 +717,15 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
                               } ${isClickable ? 'cursor-pointer hover:bg-gray-200' : ''}`}
                               onClick={
                                 isClickable
-                                  ? () => setOrtstaxePopupMonth(ortstaxePopupMonth === month ? null : month)
+                                  ? () => {
+                                      if (isOrtstaxe) {
+                                        setOrtstaxePopupMonth(ortstaxePopupMonth === month ? null : month);
+                                        setProvisionPopupMonth(null);
+                                      } else if (isProvision) {
+                                        setProvisionPopupMonth(provisionPopupMonth === month ? null : month);
+                                        setOrtstaxePopupMonth(null);
+                                      }
+                                    }
                                   : undefined
                               }
                             >
@@ -491,6 +740,16 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
                                 kurtaxeRate={settings.kurtaxe_rate}
                                 totalAmount={value}
                                 onClose={() => setOrtstaxePopupMonth(null)}
+                              />
+                            )}
+                            {isProvision && provisionPopupMonth === month && (
+                              <ProvisionPopup
+                                month={month}
+                                monthName={FULL_MONTH_NAMES[month - 1]}
+                                year={selectedYear}
+                                bookings={getProvisionContributingBookings(month)}
+                                totalAmount={value}
+                                onClose={() => setProvisionPopupMonth(null)}
                               />
                             )}
                           </td>
@@ -548,7 +807,7 @@ export default function ExpensePanel({ adminPassword }: ExpensePanelProps) {
       </div>
 
       {/* Add Category */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl p-6">
         <AddCategoryForm onAdd={addCategory} />
       </div>
 

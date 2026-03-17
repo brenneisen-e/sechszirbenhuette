@@ -95,10 +95,62 @@ export const MONTH_NAMES_SHORT = [
 // Status options for bookings/guests
 export const STATUS_OPTIONS = [
   { value: 'active', label: 'Aktiv', color: 'green' },
-  { value: 'pending', label: 'Ausstehend', color: 'yellow' },
-  { value: 'completed', label: 'Abgeschlossen', color: 'blue' },
-  { value: 'cancelled', label: 'Storniert', color: 'red' },
+  { value: 'completed', label: 'Abgeschlossen', color: 'gray' },
+  { value: 'cancelled', label: 'Storniert', color: 'orange' },
 ];
+
+// Centralized status colors (single source of truth)
+export const STATUS_STYLES: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  active:    { label: 'Aktiv',         bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
+  completed: { label: 'Abgeschlossen', bg: 'bg-gray-100',  text: 'text-gray-600',  border: 'border-gray-200' },
+  cancelled: { label: 'Storniert',     bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
+};
+
+export function getStatusClasses(status: string): string {
+  const s = STATUS_STYLES[status] || STATUS_STYLES.active;
+  return `${s.bg} ${s.text} ${s.border}`;
+}
+
+// Centralized platform color configuration (single source of truth)
+// Used by BookingCard, GuestTableRow, helpers.ts, and BookingWizard
+export interface PlatformConfig {
+  key: string;
+  label: string;
+  /** Tailwind classes for badges (bg + text) */
+  badgeBg: string;
+  badgeText: string;
+  /** Solid color class for wizard tiles / icons */
+  solidBg: string;
+  /** Keywords used to match raw platform strings */
+  keywords: string[];
+}
+
+export const PLATFORM_CONFIGS: PlatformConfig[] = [
+  { key: 'booking',  label: 'Booking.com', badgeBg: 'bg-blue-100',   badgeText: 'text-blue-700',   solidBg: 'bg-blue-500',   keywords: ['booking'] },
+  { key: 'fewo',     label: 'FeWo/VRBO',   badgeBg: 'bg-orange-100', badgeText: 'text-orange-700', solidBg: 'bg-orange-500', keywords: ['fewo', 'vrbo', 'ferienwohnung'] },
+  { key: 'airbnb',   label: 'Airbnb',      badgeBg: 'bg-pink-100',   badgeText: 'text-pink-700',   solidBg: 'bg-pink-500',   keywords: ['airbnb'] },
+  { key: 'feratel',  label: 'Feratel',     badgeBg: 'bg-cyan-100',   badgeText: 'text-cyan-700',   solidBg: 'bg-cyan-500',   keywords: ['feratel', 'kaernten', 'kärnten'] },
+  { key: 'mail',     label: 'E-Mail',      badgeBg: 'bg-green-100',  badgeText: 'text-green-700',  solidBg: 'bg-green-500',  keywords: ['mail', 'direkt', 'e-mail'] },
+  { key: 'whatsapp', label: 'WhatsApp',    badgeBg: 'bg-lime-100',   badgeText: 'text-lime-700',   solidBg: 'bg-lime-500',   keywords: ['whatsapp'] },
+  { key: 'telefon',  label: 'Telefon',     badgeBg: 'bg-indigo-100', badgeText: 'text-indigo-700', solidBg: 'bg-indigo-500', keywords: ['telefon', 'phone'] },
+  { key: 'privat',   label: 'Privat',      badgeBg: 'bg-purple-100', badgeText: 'text-purple-700', solidBg: 'bg-purple-500', keywords: ['privat'] },
+];
+
+/** Resolve a raw platform string to a PlatformConfig, or null if no match */
+export function resolvePlatformConfig(platform: string | null): PlatformConfig | null {
+  if (!platform) return null;
+  const lower = platform.toLowerCase();
+  return PLATFORM_CONFIGS.find(cfg =>
+    cfg.keywords.some(kw => lower.includes(kw))
+  ) || null;
+}
+
+/** Get badge classes for a platform string (for table/card badges) */
+export function getPlatformBadgeClasses(platform: string | null): string {
+  const cfg = resolvePlatformConfig(platform);
+  if (!cfg) return 'bg-gray-100 text-gray-600';
+  return `${cfg.badgeBg} ${cfg.badgeText}`;
+}
 
 // iCal calendar sources
 export const ICAL_SOURCES = [
@@ -116,30 +168,15 @@ export const ICAL_SOURCES = [
   }
 ];
 
-// Default new guest data
+// Default new guest data - only personal/guest fields
+// Booking fields (dates, prices, persons) are managed in the bookings table
 export const DEFAULT_NEW_GUEST = {
   guest_name: '',
   nationality: '',
   email: '',
   phone: '',
-  platform: '',
-  arrival_date: '',
-  departure_date: '',
-  adults: 2,
-  children: 0,
-  children_ages: '',
-  pets: '',
-  rental_price: 0,
-  deposit_amount: 0,
-  status: 'active',
-  other_notes: '',
   address: '',
+  other_notes: '',
+  status: 'active',
   is_returning_guest: 0,
-  offer_sent: 0,
-  contract_sent: 0,
-  welcome_guide_sent: 0,
-  deposit_paid: 0,
-  final_payment: 0,
-  final_payment_paid: 0,
-  admin_briefed: 0,
 };

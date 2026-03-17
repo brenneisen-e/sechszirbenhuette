@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Euro, Users, X, User, ChevronDown, ChevronUp, CheckCircle2, Circle, MessageCircle, FileText, Send, Inbox, Upload, Download, Loader2 } from 'lucide-react';
+import { Calendar, Euro, Users, X, User, ChevronDown, ChevronUp, MessageCircle, FileText, Send, Inbox, Upload, Download, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import {
   calculateBookingFinances,
   parsePlatformFeesFromJson,
-  parseTransactionsFromJson,
   parseCommunicationsFromJson,
   parsePayoutDateFromJson,
+  parseKomfortpaketFromJson,
+  parsePrivateConfig,
   type PlatformFees,
 } from '@/lib/utils/financeCalculations';
 import type { PricingSettings } from '../utility-costs';
@@ -63,7 +64,9 @@ export interface BookingDetailData {
   no_nebenkosten?: number;
   cleaning_cash?: number;
   utilities_cash?: number;
+  kurtaxe_cash?: number;
   is_private?: number;
+  private_config?: string | null;
   final_cleaning?: string | null;
 
   // Additional costs JSON (can be from booking or guest table)
@@ -86,6 +89,7 @@ interface BookingDetailPopupProps {
 
 export function BookingDetailPopup({ data, pricing, documents, onClose, onNavigateToGuest, onUploadDocument }: BookingDetailPopupProps) {
   const [showNkDetails, setShowNkDetails] = useState(false);
+  const [showFinanceDetails, setShowFinanceDetails] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   // === Basis-Flags aus Buchungsdaten ===
@@ -93,13 +97,14 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
   const skipNk = data.no_nebenkosten === 1;
   const isCleaningCash = data.cleaning_cash === 1 || (data.final_cleaning?.includes('vor Ort') ?? false);
   const isUtilitiesCash = data.utilities_cash === 1;
+  const isKurtaxeCash = data.kurtaxe_cash === 1;
 
   // === Parse additional_costs JSON (zentrale Hilfsfunktionen) ===
   const additionalCostsJson = data.booking_additional_costs || data.additional_costs;
   const platformFees = parsePlatformFeesFromJson(additionalCostsJson);
-  const transactions = parseTransactionsFromJson(additionalCostsJson);
   const communications = parseCommunicationsFromJson(additionalCostsJson);
   const payoutDate = parsePayoutDateFromJson(additionalCostsJson);
+  const komfortpaket = parseKomfortpaketFromJson(additionalCostsJson);
 
   // === ZENTRALE FINANZBERECHNUNG ===
   // Alle Berechnungen erfolgen in financeCalculations.ts
@@ -111,11 +116,14 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
     platform: data.platform ?? null,
     hasDog,
     isPrivate: data.is_private === 1,
+    privateConfig: parsePrivateConfig(data.private_config),
     skipNk,
     isCleaningCash,
     isUtilitiesCash,
+    isKurtaxeCash,
     platformFees: platformFees as PlatformFees,
     pricingSettings: pricing,
+    komfortpaket,
   });
 
   // === Alle Werte aus der zentralen Berechnung (NUR ANZEIGE!) ===
@@ -124,16 +132,29 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
     baseCosts,
     kurtaxe,
     cleaningCost,
-    calculatedCostsForMieterlos: calculatedCosts,
+    totalNkCosts,  // NK ohne Reinigung - für Anzeige
     basisMiete,
+    mieterlos,  // Basis für Provision
     nkEinnahmen,
     reinigungEinnahmen,
+    kurtaxeEinnahmen,
     provision: commission,
     gesamteinzahlung,
-    gesamtkosten,
+    gesamtbelastung,
+    gesamtauszahlung,  // Für Mieterlös-Berechnung (Booking.com)
+    calculatedCostsForMieterlos,  // Abzug für Booking.com
+    anteiligeMietgebuehr,  // Abzug für andere Plattformen
+    paymentProcessingFee,
+    mietAnteil,
     isBookingCom,
     isAirbnb,
     isPlatformWithIncludedCosts,
+    barNk,
+    barKurtaxe,
+    barReinigung,
+    komfortpaketCosts,
+    komfortpaketIncome,
+    komfortpaketEnabled,
   } = financeResult;
 
   const formatDateWithWeekday = (dateStr: string | null) => {
@@ -229,234 +250,198 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
             )}
           </div>
 
-          {/* Financial Summary */}
-          <div className="bg-purple-50 rounded-lg p-4">
-            <h4 className="font-semibold text-purple-900 flex items-center gap-2 mb-3">
-              <Euro className="w-4 h-4" />
-              Finanzen
-            </h4>
-            <table className="w-full text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              <tbody>
-                {/* === EINZAHLUNGEN === */}
-                <tr>
-                  <td colSpan={2} className="py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Einzahlungen</td>
-                </tr>
+          {/* Financial Summary Bar */}
+          {(() => {
+            const ertrag = financeResult.gesamtertrag;
+            return (
+              <div className="grid grid-cols-4 gap-2">
+                <div className="bg-green-50 rounded-lg p-2 text-center">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wide">Einzahlung</p>
+                  <p className="text-sm font-bold text-green-700">{formatCurrency(gesamteinzahlung)}</p>
+                </div>
+                <div className="bg-purple-50 rounded-lg p-2 text-center">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wide">Mieterlös</p>
+                  <p className="text-sm font-bold text-purple-700">{formatCurrency(mieterlos)}</p>
+                </div>
+                <div className="bg-red-50 rounded-lg p-2 text-center">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wide">Kosten</p>
+                  <p className="text-sm font-bold text-red-600">{formatCurrency(gesamtbelastung)}</p>
+                </div>
+                <div className={`${ertrag >= 0 ? 'bg-emerald-50' : 'bg-red-50'} rounded-lg p-2 text-center`}>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wide">Ertrag</p>
+                  <p className={`text-sm font-bold ${ertrag >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{formatCurrency(ertrag)}</p>
+                </div>
+              </div>
+            );
+          })()}
 
-                {/* Miete */}
-                <tr className="text-green-700">
-                  <td className="py-1 pl-2">Miete:</td>
-                  <td className="py-1 text-right w-28">{formatCurrency(basisMiete)}</td>
-                </tr>
+          {/* Provision + Payout summary line */}
+          <div className="flex items-center justify-between text-xs text-gray-500 px-1">
+            <span>Provision: {formatCurrency(commission)} (10% v. {formatCurrency(mieterlos)})</span>
+            {payoutDate && <span className="text-emerald-700 font-medium">Eingegangen: {payoutDate}</span>}
+          </div>
 
-                {/* NK-Einnahmen */}
-                {(nkEinnahmen > 0 || isPlatformWithIncludedCosts) && (
-                  <tr className="text-green-700">
-                    <td className="py-1 pl-2">Nebenkosten:</td>
-                    <td className="py-1 text-right w-28">
-                      {isPlatformWithIncludedCosts ? '(inkl.)' : formatCurrency(nkEinnahmen)}
-                    </td>
-                  </tr>
-                )}
+          {/* Expandable financial details */}
+          <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setShowFinanceDetails(!showFinanceDetails)}
+              className="w-full px-3 py-2 flex items-center justify-between text-sm text-gray-600 hover:bg-gray-50"
+            >
+              <span className="flex items-center gap-2">
+                <Euro className="w-4 h-4" />
+                Finanzdetails
+              </span>
+              {showFinanceDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
 
-                {/* NK bar bezahlt */}
-                {isUtilitiesCash && calculatedCosts > 0 && (
-                  <tr className="text-green-700">
-                    <td className="py-1 pl-2">NK + Kurtaxe (bar):</td>
-                    <td className="py-1 text-right w-28">{formatCurrency(calculatedCosts)}</td>
-                  </tr>
-                )}
-
-                {/* Reinigungsgebühr */}
-                {(reinigungEinnahmen > 0 || isPlatformWithIncludedCosts) && (
-                  <tr className="text-green-700">
-                    <td className="py-1 pl-2">Reinigung:</td>
-                    <td className="py-1 text-right w-28">
-                      {isPlatformWithIncludedCosts ? '(inkl.)' : formatCurrency(reinigungEinnahmen)}
-                    </td>
-                  </tr>
-                )}
-
-                {/* Reinigung bar bezahlt */}
-                {isCleaningCash && (
-                  <tr className="text-green-700">
-                    <td className="py-1 pl-2">Reinigung (bar):</td>
-                    <td className="py-1 text-right w-28">{formatCurrency(cleaningCost)}</td>
-                  </tr>
-                )}
-
-                {/* Gesamteinzahlung */}
-                <tr className="bg-green-50">
-                  <td className="py-1.5 pl-2 font-medium border-t border-green-200">= Gesamteinzahlung:</td>
-                  <td className="py-1.5 text-right w-28 font-semibold text-green-700 border-t border-green-200">
-                    {formatCurrency(gesamteinzahlung + (isUtilitiesCash ? calculatedCosts : 0) + (isCleaningCash ? cleaningCost : 0))}
-                  </td>
-                </tr>
-
-                {/* === KOSTEN === */}
-                <tr>
-                  <td colSpan={2} className="py-1 pt-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kosten</td>
-                </tr>
-
-                {/* Kalkulatorische Kosten (expandable) */}
-                {!skipNk && (
-                  <>
-                    <tr className="text-red-600">
-                      <td className="py-1 pl-2">
-                        <button
-                          onClick={() => setShowNkDetails(!showNkDetails)}
-                          className="flex items-center gap-1 hover:text-red-800"
-                        >
-                          NK (kalk. inkl. Kurtaxe)
-                          {showNkDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                        </button>
+            {showFinanceDetails && (
+              <div className="px-3 pb-3 border-t">
+                <table className="w-full text-sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <tbody>
+                    {/* === EINZAHLUNGEN === */}
+                    <tr>
+                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Einzahlungen</td>
+                    </tr>
+                    <tr className="text-green-700">
+                      <td className="py-0.5 pl-2">Miete:</td>
+                      <td className="py-0.5 text-right w-28">{formatCurrency(basisMiete)}</td>
+                    </tr>
+                    {(nkEinnahmen > 0 || isPlatformWithIncludedCosts) && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Nebenkosten:</td>
+                        <td className="py-0.5 text-right w-28">
+                          {isPlatformWithIncludedCosts ? '(inkl.)' : formatCurrency(nkEinnahmen)}
+                        </td>
+                      </tr>
+                    )}
+                    {isUtilitiesCash && totalNkCosts > 0 && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">NK + Kurtaxe (bar):</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(totalNkCosts)}</td>
+                      </tr>
+                    )}
+                    {kurtaxeEinnahmen > 0 && !isPlatformWithIncludedCosts && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Kurtaxe:</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(kurtaxeEinnahmen)}</td>
+                      </tr>
+                    )}
+                    {!isUtilitiesCash && (isKurtaxeCash || isPlatformWithIncludedCosts) && barKurtaxe > 0 && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Kurtaxe (bar):</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(barKurtaxe)}</td>
+                      </tr>
+                    )}
+                    {(reinigungEinnahmen > 0 || isPlatformWithIncludedCosts) && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Reinigung:</td>
+                        <td className="py-0.5 text-right w-28">
+                          {isPlatformWithIncludedCosts ? '(inkl.)' : formatCurrency(reinigungEinnahmen)}
+                        </td>
+                      </tr>
+                    )}
+                    {isCleaningCash && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Reinigung (bar):</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(cleaningCost)}</td>
+                      </tr>
+                    )}
+                    {komfortpaketEnabled && komfortpaketIncome > 0 && (
+                      <tr className="text-green-700">
+                        <td className="py-0.5 pl-2">Komfortpaket:</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(komfortpaketIncome)}</td>
+                      </tr>
+                    )}
+                    <tr className="bg-green-50">
+                      <td className="py-1 pl-2 font-medium border-t border-green-200">= Gesamteinzahlung:</td>
+                      <td className="py-1 text-right w-28 font-semibold text-green-700 border-t border-green-200">
+                        {formatCurrency(gesamteinzahlung)}
                       </td>
-                      <td className="py-1 text-right w-28">{formatCurrency(calculatedCosts)}</td>
                     </tr>
 
-                    {showNkDetails && costCalc?.breakdown && (
+                    {/* === KOSTEN === */}
+                    <tr>
+                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kosten</td>
+                    </tr>
+                    {!skipNk && (
                       <>
-                        <tr className="text-xs text-gray-500">
-                          <td className="py-0.5 pl-6">Kurtaxe ({costCalc.breakdown.kurtaxeDetails}):</td>
-                          <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.kurtaxe)}</td>
+                        <tr className="text-red-600">
+                          <td className="py-0.5 pl-2">
+                            <button
+                              onClick={() => setShowNkDetails(!showNkDetails)}
+                              className="flex items-center gap-1 hover:text-red-800"
+                            >
+                              NK (kalk. inkl. Kurtaxe)
+                              {showNkDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                            </button>
+                          </td>
+                          <td className="py-0.5 text-right w-28">{formatCurrency(totalNkCosts)}</td>
                         </tr>
-                        <tr className="text-xs text-gray-500">
-                          <td className="py-0.5 pl-6">Holz ({costCalc.breakdown.holzBuendel} Bündel):</td>
-                          <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.holz)}</td>
-                        </tr>
-                        <tr className="text-xs text-gray-500">
-                          <td className="py-0.5 pl-6">Wasser:</td>
-                          <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.water)}</td>
-                        </tr>
-                        <tr className="text-xs text-gray-500">
-                          <td className="py-0.5 pl-6">Müll ({costCalc.breakdown.trashBags} Säcke):</td>
-                          <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.trash)}</td>
-                        </tr>
-                        <tr className="text-xs text-gray-500">
-                          <td className="py-0.5 pl-6">Strom ({costCalc.breakdown.electricityKwh} kWh inkl.):</td>
-                          <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.electricity)}</td>
-                        </tr>
-                        {!isCleaningCash && (
-                          <tr className="text-xs text-gray-500">
-                            <td className="py-0.5 pl-6">Reinigung ({hasDog ? 'mit Hund' : 'Standard'}):</td>
-                            <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.reinigung)}</td>
-                          </tr>
+                        {showNkDetails && costCalc?.breakdown && (
+                          <>
+                            <tr className="text-xs text-gray-500">
+                              <td className="py-0.5 pl-6">Kurtaxe ({costCalc.breakdown.kurtaxeDetails}):</td>
+                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.kurtaxe)}</td>
+                            </tr>
+                            <tr className="text-xs text-gray-500">
+                              <td className="py-0.5 pl-6">Holz ({costCalc.breakdown.holzBuendel} Bündel):</td>
+                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.holz)}</td>
+                            </tr>
+                            <tr className="text-xs text-gray-500">
+                              <td className="py-0.5 pl-6">Wasser:</td>
+                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.water)}</td>
+                            </tr>
+                            <tr className="text-xs text-gray-500">
+                              <td className="py-0.5 pl-6">Müll ({costCalc.breakdown.trashBags} Säcke):</td>
+                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.trash)}</td>
+                            </tr>
+                            <tr className="text-xs text-gray-500">
+                              <td className="py-0.5 pl-6">Strom ({costCalc.breakdown.electricityKwh} kWh inkl.):</td>
+                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.electricity)}</td>
+                            </tr>
+                            {!isCleaningCash && (
+                              <tr className="text-xs text-gray-500">
+                                <td className="py-0.5 pl-6">Reinigung ({hasDog ? 'mit Hund' : 'Standard'}):</td>
+                                <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.reinigung)}</td>
+                              </tr>
+                            )}
+                          </>
                         )}
-                        <tr>
-                          <td colSpan={2} className="text-xs text-gray-400 pl-6 pb-1">{costCalc.details}</td>
+                        <tr className="text-red-600">
+                          <td className="py-0.5 pl-2">Reinigung{isCleaningCash && ' (bar)'}:</td>
+                          <td className="py-0.5 text-right w-28">{formatCurrency(cleaningCost)}</td>
                         </tr>
                       </>
                     )}
-                  </>
-                )}
+                    {komfortpaketEnabled && komfortpaketCosts > 0 && (
+                      <tr className="text-red-600">
+                        <td className="py-0.5 pl-2">Komfortpaket ({komfortpaket?.persons || 0} Pers.):</td>
+                        <td className="py-0.5 text-right w-28">{formatCurrency(komfortpaketCosts)}</td>
+                      </tr>
+                    )}
 
-                {/* Reinigung immer als Kosten anzeigen */}
-                {!skipNk && (
-                  <tr className="text-red-600">
-                    <td className="py-1 pl-2">Reinigung{isCleaningCash && ' (bar)'}:</td>
-                    <td className="py-1 text-right w-28">{formatCurrency(cleaningCost)}</td>
-                  </tr>
-                )}
-
-                {/* Provision */}
-                <tr className="text-red-600">
-                  <td className="py-1 pl-2">Provision (10% v. Mieterlös):</td>
-                  <td className="py-1 text-right w-28">{formatCurrency(commission)}</td>
-                </tr>
-
-                {/* Gesamtkosten */}
-                <tr className="bg-red-50">
-                  <td className="py-1.5 pl-2 font-medium border-t border-red-200">= Gesamtkosten:</td>
-                  <td className="py-1.5 text-right w-28 font-semibold text-red-600 border-t border-red-200">
-                    {formatCurrency(gesamtkosten + cleaningCost)}
-                  </td>
-                </tr>
-
-                {/* === ERGEBNIS === */}
-                {(() => {
-                  const totalIncome = gesamteinzahlung + (isUtilitiesCash ? calculatedCosts : 0) + (isCleaningCash ? cleaningCost : 0);
-                  const totalCosts = gesamtkosten + cleaningCost;
-                  const ertrag = totalIncome - totalCosts;
-                  return (
-                    <tr className="bg-emerald-100">
-                      <td className="py-2 font-bold border-t-2 border-purple-300">= Kalk. Gesamtertrag:</td>
-                      <td className={`py-2 text-right w-28 font-bold border-t-2 border-purple-300 ${ertrag >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
-                        {formatCurrency(ertrag)}
-                      </td>
+                    {/* === MIETERLÖS === */}
+                    <tr>
+                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mieterlös (Basis für Provision)</td>
                     </tr>
-                  );
-                })()}
-                {/* === AUSZAHLUNG === */}
-                {payoutDate && (
-                  <tr className="bg-emerald-50">
-                    <td className="py-2 font-medium text-emerald-800">Auszahlung auf Konto am:</td>
-                    <td className="py-2 text-right w-28 font-bold text-emerald-700">{payoutDate}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    <tr className="text-gray-500 text-xs">
+                      <td className="py-0.5 pl-4">Gesamteinzahlung (Basis):</td>
+                      <td className="py-0.5 text-right">{formatCurrency(mieterlos + calculatedCostsForMieterlos)}</td>
+                    </tr>
+                    <tr className="text-gray-500 text-xs">
+                      <td className="py-0.5 pl-4">./. kalk. Kosten (NK+Kurtaxe+Reinigung{komfortpaketEnabled && komfortpaketCosts > 0 ? '+Komfortpaket' : ''}):</td>
+                      <td className="py-0.5 text-right">-{formatCurrency(calculatedCostsForMieterlos)}</td>
+                    </tr>
+                    <tr className="text-purple-700 font-medium">
+                      <td className="py-0.5 pl-2">= Mieterlös:</td>
+                      <td className="py-0.5 text-right w-28">{formatCurrency(mieterlos)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
-          {/* Transactions / Zahlungen */}
-          {transactions.length > 0 && (
-            <div className="bg-blue-50 rounded-lg p-3 space-y-2">
-              <h4 className="font-semibold text-blue-900 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                Zahlungen
-              </h4>
-              <div className="space-y-1.5">
-                {transactions.map((t, idx) => {
-                  const isRefund = t.type === 'refund';
-                  return (
-                    <div key={idx} className="flex items-center justify-between py-1 text-sm border-b border-blue-100 last:border-0">
-                      <div className="flex items-center gap-2">
-                        {isRefund ? (
-                          <Circle className="w-3.5 h-3.5 text-orange-400" />
-                        ) : t.status === 'paid' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                        ) : (
-                          <Circle className="w-3.5 h-3.5 text-gray-400" />
-                        )}
-                        <span className={isRefund ? 'text-orange-600' : 'text-gray-700'}>
-                          {t.description || (isRefund ? 'Erstattung' : `Zahlung`)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500">{formatDate(t.date)}</span>
-                        <span className={`font-medium ${isRefund ? 'text-orange-600' : 'text-green-700'}`}>
-                          {isRefund ? '-' : ''}{formatCurrency(t.amount)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Platform Fees */}
-              {((platformFees.platform_service_fee || 0) > 0 || (platformFees.payment_processing_fee || 0) > 0) && (
-                <div className="border-t border-blue-200 pt-2 mt-2 space-y-1">
-                  <h5 className="text-xs font-semibold text-gray-500 uppercase">Gebühren</h5>
-                  {(platformFees.platform_service_fee || 0) > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Service-Gebühr:</span>
-                      <span className="font-medium text-red-600">-{formatCurrency(platformFees.platform_service_fee || 0)}</span>
-                    </div>
-                  )}
-                  {(platformFees.payment_processing_fee || 0) > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Zahlungsabwicklung:</span>
-                      <span className="font-medium text-red-600">-{formatCurrency(platformFees.payment_processing_fee || 0)}</span>
-                    </div>
-                  )}
-                  {(platformFees.payout_amount || 0) > 0 && (
-                    <div className="flex items-center justify-between text-sm pt-2 border-t border-blue-100 mt-2">
-                      <span className="text-gray-700 font-medium">Nettoauszahlung:</span>
-                      <span className="font-bold text-green-600">{formatCurrency(platformFees.payout_amount || 0)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Notes */}
           {notes && (

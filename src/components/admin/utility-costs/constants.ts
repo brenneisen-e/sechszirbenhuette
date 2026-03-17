@@ -2,20 +2,13 @@ import { Sun, Snowflake } from 'lucide-react';
 import type { AdultsCount, WeeksCount } from './types';
 
 // Default pricing constants (can be overridden by settings)
-// Kurtaxe: 2,70€ bis 30.04.2026, ab 01.05.2026 dann 4,00€
+// Kurtaxe: 2,70€ bis 31.10.2026, ab 01.11.2026 dann 4,50€ pro Person/Nacht
 export const DEFAULT_PRICING = {
-  kurtaxe: 2.7, // € per day per adult (current rate until 30.04.2026)
-  // Kurtaxe rates: 2.70€ bis 30.04.2026, dann 4.00€ ab 01.05.2026
+  kurtaxe: 2.7, // € per day per adult (Fallback wenn keine Perioden greifen)
   kurtaxeRates: [
-    // 2024: Ganzjährig 2.70€
-    { from: '2024-01-01', to: '2024-12-31', rate: 2.7 },
-    // 2025: Ganzjährig 2.70€
-    { from: '2025-01-01', to: '2025-12-31', rate: 2.7 },
-    // 2026: 2.70€ bis 30.04., dann 4.00€ ab 01.05.
-    { from: '2026-01-01', to: '2026-04-30', rate: 2.7 },
-    { from: '2026-05-01', to: '2026-12-31', rate: 4.0 },
-    // 2027+: 4.00€
-    { from: '2027-01-01', to: '2099-12-31', rate: 4.0 },
+    { from: '2024-01-01', to: '2025-12-31', rate: 2.7 },
+    { from: '2026-01-01', to: '2026-10-31', rate: 2.7 },
+    { from: '2026-11-01', to: '2099-12-31', rate: 4.5 },
   ],
   holz: 10.0, // € per Bündel
   water: 7.0, // € per person per week
@@ -70,7 +63,7 @@ export const CONFIG = {
   },
 } as const;
 
-// Gerundete Nebenkosten pro Woche/Personenzahl (2-8 Personen, Kurtaxe aktuell 2,70€)
+// Gerundete Nebenkosten pro Woche/Personenzahl (2-8 Personen, Kurtaxe 2,70€ bis 31.10.2026, danach 4,50€)
 export const WALLI_VALUES: {
   [season in 'summer' | 'winter']: { [weeks in WeeksCount]: { [adults in AdultsCount]: number } };
 } = {

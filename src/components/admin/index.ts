@@ -2,10 +2,13 @@
 export { default as GuestDatabase } from './GuestDatabase';
 export { default as ExpensePanel } from './ExpensePanel';
 export { default as FinanceOverview } from './FinanceOverview';
+export { default as RentalCostsOverview } from './RentalCostsOverview';
+export { default as BankTransactions } from './BankTransactions';
+export { default as UtilityCostsCalculator } from './UtilityCostsCalculator';
 
-// Image and text management
-export { default as MediaManager } from './MediaManager';
-export { default as TextEditor } from './TextEditor';
+// Image management
+export { ImageManager } from './ImageManager';
+export { PasswordsPanel } from './PasswordsPanel';
 
 // Guest database exports (used by GuestDatabase internals)
 export * from './guest-database';

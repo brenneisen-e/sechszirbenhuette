@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import type {
-  Guest, Email, Task, Booking, GuestCost, RonaldPayment,
-  GuestsResponse, EmailsResponse, GuestResponse, BookingsResponse, SetupStatus
+  Guest, Task, Booking, GuestCost, BankPayment,
+  GuestsResponse, GuestResponse, BookingsResponse
 } from '../types';
 
 interface UseGuestDataOptions {
@@ -16,9 +16,6 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Setup status
-  const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null);
-
   // Load guests with optional filters
   const loadGuests = useCallback(async (filters?: { year?: string; status?: string; search?: string }) => {
     setLoading(true);
@@ -29,7 +26,9 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       if (filters?.status) params.append('status', filters.status);
       if (filters?.search) params.append('search', filters.search);
 
-      const response = await fetch(`/api/admin/guests?${params.toString()}`);
+      const response = await fetch(`/api/admin/guests?${params.toString()}`, {
+        headers: { 'x-admin-password': adminPassword }
+      });
       const data = await response.json() as GuestsResponse;
 
       if (data.error) {
@@ -183,54 +182,6 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
     }
   }, [adminPassword, guests]);
 
-  // Check setup status
-  const checkSetupStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/admin/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
-        body: JSON.stringify({ action: 'check_setup_status' })
-      });
-      const data = await response.json() as { success: boolean; status?: SetupStatus };
-      if (data.success && data.status) {
-        setSetupStatus(data.status);
-      }
-    } catch (err) {
-      console.error('Error checking setup status:', err);
-    }
-  }, [adminPassword]);
-
-  // Ensure tables exist
-  const ensureTablesExist = useCallback(async () => {
-    try {
-      const checkResponse = await fetch('/api/admin/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
-        body: JSON.stringify({ action: 'check_setup_status' })
-      });
-      const checkData = await checkResponse.json() as { success: boolean; status?: SetupStatus };
-
-      if (checkData.success && checkData.status && !checkData.status.guestsTableExists) {
-        await fetch('/api/admin/setup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-password': adminPassword
-          },
-          body: JSON.stringify({ action: 'migrate_guests_tables' })
-        });
-      }
-    } catch (err) {
-      console.error('Error ensuring tables exist:', err);
-    }
-  }, [adminPassword]);
-
   // Clear messages
   const clearMessages = useCallback(() => {
     setError('');
@@ -245,38 +196,14 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
     setError,
     success,
     setSuccess,
-    setupStatus,
     loadGuests,
     saveGuest,
     createGuest,
     deleteGuest,
     updateGuestStatus,
     togglePayment,
-    checkSetupStatus,
-    ensureTablesExist,
     clearMessages,
   };
-}
-
-// Hook for loading emails for a guest
-export function useGuestEmails({ adminPassword }: UseGuestDataOptions) {
-  const [emails, setEmails] = useState<Email[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const loadGuestEmails = useCallback(async (guestId: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/admin/emails?guest_id=${guestId}`);
-      const data = await response.json() as { emails?: Email[] };
-      setEmails(data.emails || []);
-    } catch (err) {
-      console.error('Error loading guest emails:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { emails, setEmails, loading, loadGuestEmails };
 }
 
 // Hook for loading tasks for a guest
@@ -287,7 +214,9 @@ export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
   const loadGuestTasks = useCallback(async (guestId: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}`);
+      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}`, {
+        headers: { 'x-admin-password': adminPassword }
+      });
       const data = await response.json() as { tasks?: Task[] };
       setTasks(data.tasks || []);
     } catch (err) {
@@ -356,15 +285,19 @@ export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
 // Hook for loading bookings for a guest
 export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
   const [bookings, setBookings] = useState<Record<number, Booking[]>>({});
-  const [ronaldPayments, setRonaldPayments] = useState<Record<number, RonaldPayment[]>>({});
+  const [bankPayments, setBankPayments] = useState<Record<number, BankPayment[]>>({});
   const [loadingIds, setLoadingIds] = useState<Set<number>>(new Set());
 
   const loadGuestBookings = useCallback(async (guestId: number) => {
     setLoadingIds(prev => new Set(prev).add(guestId));
     try {
       const [bookingsRes, paymentsRes] = await Promise.all([
-        fetch(`/api/admin/bookings?guest_id=${guestId}`),
-        fetch(`/api/admin/ronald-payments?guestId=${guestId}`)
+        fetch(`/api/admin/bookings?guest_id=${guestId}`, {
+          headers: { 'x-admin-password': adminPassword }
+        }),
+        fetch(`/api/admin/bank-transactions?guestId=${guestId}`, {
+          headers: { 'x-admin-password': adminPassword }
+        })
       ]);
 
       const bookingsData = await bookingsRes.json() as BookingsResponse;
@@ -372,9 +305,9 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
         setBookings(prev => ({ ...prev, [guestId]: bookingsData.bookings || [] }));
       }
 
-      const paymentsData = await paymentsRes.json() as { payments?: RonaldPayment[] };
+      const paymentsData = await paymentsRes.json() as { payments?: BankPayment[] };
       if (paymentsData.payments) {
-        setRonaldPayments(prev => ({ ...prev, [guestId]: paymentsData.payments || [] }));
+        setBankPayments(prev => ({ ...prev, [guestId]: paymentsData.payments || [] }));
       }
     } catch (err) {
       console.error('Error loading bookings:', err);
@@ -415,12 +348,12 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
 
   return {
     bookings,
-    ronaldPayments,
+    bankPayments,
     loadingIds,
     loadGuestBookings,
     createBooking,
     setBookings,
-    setRonaldPayments,
+    setBankPayments,
   };
 }
 

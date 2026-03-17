@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { calculateUtilityCostsForBooking } from '../../UtilityCostsCalculator';
+import type { PricingSettings, KurtaxeRatePeriod } from '../../utility-costs';
 import type { Guest, Booking } from '../types';
 
 interface YearlyBookingsListProps {
@@ -8,6 +10,7 @@ interface YearlyBookingsListProps {
   bookings: Booking[];
   year: number;
   onSelectBooking: (booking: Booking, guest: Guest) => void;
+  adminPassword: string;
 }
 
 // Combined display item
@@ -16,7 +19,45 @@ interface BookingDisplayItem {
   guest: Guest;
 }
 
-export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: YearlyBookingsListProps) {
+const DEFAULT_PRICING: PricingSettings = {
+  kurtaxe: 2.7,
+  holz: 10,
+  water: 7,
+  trash: 11,
+  electricity: 0.55,
+  reinigung: 100,
+};
+
+export function YearlyBookingsList({ guests, bookings, year, onSelectBooking, adminPassword }: YearlyBookingsListProps) {
+  // Load pricing settings from DB
+  const [pricing, setPricing] = useState<PricingSettings>(DEFAULT_PRICING);
+
+  useEffect(() => {
+    fetch('/api/admin/settings', {
+      headers: { 'x-admin-password': adminPassword }
+    })
+      .then(res => res.json() as Promise<{ settings?: Record<string, string> }>)
+      .then((data) => {
+        if (data.settings) {
+          let kurtaxeRates: KurtaxeRatePeriod[] | undefined;
+          if (data.settings.kurtaxe_rates) {
+            try {
+              kurtaxeRates = JSON.parse(data.settings.kurtaxe_rates) as KurtaxeRatePeriod[];
+            } catch { /* ignore */ }
+          }
+          setPricing({
+            kurtaxe: parseFloat(data.settings.kurtaxe_rate) || 2.7,
+            kurtaxeRates,
+            holz: parseFloat(data.settings.holz_rate) || 10,
+            water: parseFloat(data.settings.water_rate) || 7,
+            trash: parseFloat(data.settings.trash_rate) || 11,
+            electricity: parseFloat(data.settings.electricity_rate) || 0.55,
+            reinigung: parseFloat(data.settings.reinigung_rate) || 100,
+          });
+        }
+      })
+      .catch(() => { /* use defaults */ });
+  }, []);
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
@@ -42,7 +83,7 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
           const hasDog = booking.pets?.toLowerCase().includes('hund') ?? false;
           const costCalc =
             booking.arrival_date && booking.departure_date
-              ? calculateUtilityCostsForBooking(booking.arrival_date, booking.departure_date, booking.adults || 2, undefined, hasDog)
+              ? calculateUtilityCostsForBooking(booking.arrival_date, booking.departure_date, booking.adults || 2, pricing, hasDog)
               : null;
           return (
             <div

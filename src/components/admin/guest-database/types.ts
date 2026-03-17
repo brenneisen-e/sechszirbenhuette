@@ -2,7 +2,7 @@
 
 export type SortColumn = 'id' | 'guest_name' | 'platform' | 'arrival_date' | 'departure_date' | 'rental_price' | 'status' | null;
 export type SortDirection = 'asc' | 'desc';
-export type GuestProfileTab = 'overview' | 'bookings' | 'tasks' | 'communication' | 'documents' | 'notes';
+export type GuestProfileTab = 'overview' | 'bookings' | 'tasks' | 'documents' | 'notes';
 
 export interface Guest {
   id: number;
@@ -47,22 +47,6 @@ export interface Guest {
   updated_at: string;
 }
 
-export interface Email {
-  id: number;
-  message_id: string | null;
-  guest_id: number | null;
-  from_address: string | null;
-  to_address: string | null;
-  subject: string | null;
-  body_text: string | null;
-  body_html: string | null;
-  date_sent: string | null;
-  is_incoming: number;
-  is_read: number;
-  folder: string;
-  created_at: string;
-}
-
 export interface Task {
   id: number;
   guest_id: number;
@@ -76,6 +60,25 @@ export interface Task {
   completed_at: string | null;
 }
 
+/**
+ * Granulare Konfiguration für Privatbuchungen.
+ * Bestimmt, welche Kosten/Einnahmen bei einer privaten Buchung anfallen.
+ */
+export interface PrivateBookingConfig {
+  miete_zero: boolean;          // Miete = 0 EUR?
+  nk_paid: boolean;             // Nebenkosten werden bezahlt (kalkulatorische Höhe)?
+  kurtaxe_paid: boolean;        // Kurtaxe wird bezahlt?
+  provision_charged: boolean;   // Provision wird berechnet?
+}
+
+/** Default: Miete 0, keine NK, keine Kurtaxe, keine Provision */
+export const DEFAULT_PRIVATE_CONFIG: PrivateBookingConfig = {
+  miete_zero: true,
+  nk_paid: false,
+  kurtaxe_paid: false,
+  provision_charged: false,
+};
+
 export interface Booking {
   id: number;
   guest_id: number;
@@ -85,6 +88,7 @@ export interface Booking {
   departure_date: string | null;
   adults: number;
   children: number;
+  children_ages: string | null;
   pets: string | null;
   rental_price: number;
   deposit_amount: number;
@@ -105,6 +109,9 @@ export interface Booking {
   notes: string | null;
   cleaning_cash: number;
   utilities_cash: number;
+  kurtaxe_cash: number;
+  is_private: number;
+  private_config: string | null;  // JSON string of PrivateBookingConfig
   created_at: string;
   updated_at: string;
 }
@@ -120,7 +127,7 @@ export interface GuestCost {
   created_at: string;
 }
 
-export interface RonaldPayment {
+export interface BankPayment {
   id: number;
   guest_id: number | null;
   amount: number;
@@ -161,17 +168,6 @@ export interface FeratelBooking {
 // API Response types
 export interface GuestsResponse {
   guests?: Guest[];
-  error?: string;
-}
-
-export interface EmailsResponse {
-  emails?: Email[];
-  total?: number;
-  error?: string;
-}
-
-export interface MatchResponse {
-  matched?: number;
   error?: string;
 }
 
@@ -246,13 +242,6 @@ export interface ScreenshotAnalysisResponse {
     rawResponse?: string;
     imageSize?: number;
   };
-}
-
-export interface SetupStatus {
-  guestsTableExists: boolean;
-  emailsTableExists: boolean;
-  guestsCount: number;
-  emailsCount: number;
 }
 
 // Cost type definition

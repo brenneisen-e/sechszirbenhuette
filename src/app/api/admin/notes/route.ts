@@ -26,6 +26,14 @@ export async function GET(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const guestId = searchParams.get('guest_id');
 

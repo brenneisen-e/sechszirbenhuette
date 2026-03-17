@@ -1,31 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  all<T>(): Promise<{ results?: T[] }>;
-  first<T>(): Promise<T | null>;
-  run(): Promise<{ meta?: { last_row_id?: number } }>;
-}
-
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-}
-
-interface CloudflareEnv {
+interface Env {
   DB: D1Database;
+  ADMIN_PASSWORD?: string;
+  ADMIN_PWD?: string;
 }
 
-async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
-  try {
-    const ctx = await getCloudflareContext();
-    return ctx.env as CloudflareEnv;
-  } catch {
-    return null;
-  }
-}
-
-interface BookingRecord {
+interface Booking {
   id: number;
   guest_id: number;
   booking_number: string | null;
@@ -34,6 +16,7 @@ interface BookingRecord {
   departure_date: string | null;
   adults: number;
   children: number;
+  children_ages: string | null;
   pets: string | null;
   rental_price: number;
   deposit_amount: number;
@@ -48,181 +31,275 @@ interface BookingRecord {
   first_contact_date: string | null;
   offer_sent: number;
   contract_sent: number;
-  deposit_received: number;
-  balance_received: number;
   welcome_guide_sent: number;
-  utilities_cash: number;
-  cleaning_cash: number;
-  no_nebenkosten: number;
+  admin_briefed: number;
   status: string;
   notes: string | null;
+  cleaning_cash: number;
+  utilities_cash: number;
+  kurtaxe_cash: number;
+  is_private: number;
+  private_config: string | null;
+  briefing_notes: string | null;
+  preferred_language: string | null;
+  early_checkin: string | null;
+  late_checkout: string | null;
   created_at: string;
   updated_at: string;
 }
 
-// GET - Fetch all bookings or by guest_id
+function getAdminPassword(env: Env): string {
+  return env.ADMIN_PASSWORD || env.ADMIN_PWD || '';
+}
+
+// GET - List bookings for a guest
 export async function GET(request: NextRequest) {
   try {
-    const env = await getCloudflareEnv();
-    if (!env) {
-      return NextResponse.json({ error: 'Database not available', bookings: [] }, { status: 500 });
+    const ctx = await getCloudflareContext();
+    const env = (ctx as { env: Env }).env;
+    const db = env.DB;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const guestId = searchParams.get('guest_id');
+    const bookingId = searchParams.get('id');
 
-    let query = 'SELECT * FROM bookings';
-    const params: number[] = [];
+    if (bookingId) {
+      // Get single booking
+      const booking = await db.prepare(
+        'SELECT * FROM bookings WHERE id = ?'
+      ).bind(bookingId).first<Booking>();
 
-    if (guestId) {
-      query += ' WHERE guest_id = ?';
-      params.push(parseInt(guestId));
+      if (!booking) {
+        return NextResponse.json({ error: 'Buchung nicht gefunden' }, { status: 404 });
+      }
+
+      return NextResponse.json({ booking });
     }
 
-    query += ' ORDER BY arrival_date DESC, created_at DESC';
+    if (guestId) {
+      // Get bookings for a specific guest
+      const result = await db.prepare(
+        'SELECT * FROM bookings WHERE guest_id = ? ORDER BY arrival_date DESC'
+      ).bind(guestId).all<Booking>();
 
-    const stmt = params.length > 0
-      ? env.DB.prepare(query).bind(...params)
-      : env.DB.prepare(query);
+      return NextResponse.json({ bookings: result.results || [] });
+    }
 
-    const { results } = await stmt.all<BookingRecord>();
+    // Get all bookings with guest_name via JOIN
+    const result = await db.prepare(`
+      SELECT b.*, g.guest_name
+      FROM bookings b
+      LEFT JOIN guests g ON b.guest_id = g.id
+      ORDER BY b.arrival_date DESC
+    `).all<Booking & { guest_name?: string }>();
 
-    return NextResponse.json({ bookings: results || [] });
+    return NextResponse.json({ bookings: result.results || [] });
   } catch (error) {
-    console.error('GET /api/admin/bookings error:', error);
-    return NextResponse.json({ error: 'Failed to fetch bookings', bookings: [] }, { status: 500 });
+    console.error('Error fetching bookings:', error);
+    const message = error instanceof Error ? error.message : 'Fehler beim Laden der Buchungen';
+    // If table doesn't exist, return empty array instead of error
+    if (message.includes('no such table')) {
+      return NextResponse.json({ bookings: [], tableNotFound: true });
+    }
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 // POST - Create a new booking
 export async function POST(request: NextRequest) {
   try {
-    const env = await getCloudflareEnv();
-    if (!env) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    const ctx = await getCloudflareContext();
+    const env = (ctx as { env: Env }).env;
+    const db = env.DB;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    const body = await request.json() as Partial<BookingRecord>;
+    const data = await request.json() as Partial<Booking>;
 
-    if (!body.guest_id) {
-      return NextResponse.json({ error: 'guest_id is required' }, { status: 400 });
+    if (!data.guest_id) {
+      return NextResponse.json({ error: 'guest_id ist erforderlich' }, { status: 400 });
     }
 
-    const result = await env.DB.prepare(
-      'INSERT INTO bookings (guest_id, booking_number, platform, arrival_date, departure_date, adults, children, pets, rental_price, deposit_amount, deposit_paid, final_payment, final_payment_paid, electricity_flat, additional_payment, security_deposit, additional_costs, final_cleaning, first_contact_date, offer_sent, contract_sent, deposit_received, balance_received, welcome_guide_sent, utilities_cash, cleaning_cash, no_nebenkosten, status, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime("now"), datetime("now"))'
-    ).bind(
-      body.guest_id,
-      body.booking_number || null,
-      body.platform || null,
-      body.arrival_date || null,
-      body.departure_date || null,
-      body.adults || 2,
-      body.children || 0,
-      body.pets || null,
-      body.rental_price || 0,
-      body.deposit_amount || 0,
-      body.deposit_paid || 0,
-      body.final_payment || 0,
-      body.final_payment_paid || 0,
-      body.electricity_flat || 0,
-      body.additional_payment || 0,
-      body.security_deposit || 0,
-      body.additional_costs || null,
-      body.final_cleaning || null,
-      body.first_contact_date || null,
-      body.offer_sent || 0,
-      body.contract_sent || 0,
-      body.deposit_received || 0,
-      body.balance_received || 0,
-      body.welcome_guide_sent || 0,
-      body.utilities_cash || 0,
-      body.cleaning_cash || 0,
-      body.no_nebenkosten || 0,
-      body.status || 'confirmed',
-      body.notes || null
-    ).run();
+    // Define all possible columns with their defaults
+    const columnDefs: Array<{ name: string; value: string | number | null }> = [
+      { name: 'guest_id', value: data.guest_id! },
+      { name: 'booking_number', value: data.booking_number || null },
+      { name: 'platform', value: data.platform || null },
+      { name: 'arrival_date', value: data.arrival_date || null },
+      { name: 'departure_date', value: data.departure_date || null },
+      { name: 'adults', value: data.adults || 2 },
+      { name: 'children', value: data.children || 0 },
+      { name: 'children_ages', value: data.children_ages || null },
+      { name: 'pets', value: data.pets || null },
+      { name: 'rental_price', value: data.rental_price || 0 },
+      { name: 'deposit_amount', value: data.deposit_amount || 0 },
+      { name: 'deposit_paid', value: data.deposit_paid || 0 },
+      { name: 'final_payment', value: data.final_payment || 0 },
+      { name: 'final_payment_paid', value: data.final_payment_paid || 0 },
+      { name: 'electricity_flat', value: data.electricity_flat || 0 },
+      { name: 'additional_payment', value: data.additional_payment || 0 },
+      { name: 'security_deposit', value: data.security_deposit || 0 },
+      { name: 'additional_costs', value: data.additional_costs || null },
+      { name: 'final_cleaning', value: data.final_cleaning || null },
+      { name: 'first_contact_date', value: data.first_contact_date || null },
+      { name: 'offer_sent', value: data.offer_sent || 0 },
+      { name: 'contract_sent', value: data.contract_sent || 0 },
+      { name: 'welcome_guide_sent', value: data.welcome_guide_sent || 0 },
+      { name: 'admin_briefed', value: data.admin_briefed || 0 },
+      { name: 'status', value: data.status || 'active' },
+      { name: 'notes', value: data.notes || null },
+      { name: 'cleaning_cash', value: data.cleaning_cash || 0 },
+      { name: 'utilities_cash', value: data.utilities_cash || 0 },
+      { name: 'kurtaxe_cash', value: data.kurtaxe_cash || 0 },
+      { name: 'is_private', value: data.is_private || 0 },
+      { name: 'private_config', value: data.private_config || null },
+    ];
 
-    const bookingId = result.meta?.last_row_id;
+    // Check which columns exist in the table (handles pending migrations)
+    let filteredColumns = columnDefs;
+    try {
+      const tableInfo = await db.prepare('PRAGMA table_info(bookings)').all<{ name: string }>();
+      const existingColumns = new Set((tableInfo.results || []).map(col => col.name));
+      filteredColumns = columnDefs.filter(c => existingColumns.has(c.name));
+    } catch {
+      // If PRAGMA fails, try all columns
+    }
 
-    return NextResponse.json({ success: true, id: bookingId });
+    const colNames = filteredColumns.map(c => c.name).join(', ');
+    const placeholders = filteredColumns.map(() => '?').join(', ');
+    const colValues = filteredColumns.map(c => c.value);
+
+    const result = await db.prepare(
+      `INSERT INTO bookings (${colNames}) VALUES (${placeholders})`
+    ).bind(...colValues).run();
+
+    // Fetch the created booking
+    const booking = await db.prepare(
+      'SELECT * FROM bookings WHERE id = ?'
+    ).bind(result.meta.last_row_id).first<Booking>();
+
+    return NextResponse.json({ booking });
   } catch (error) {
-    console.error('POST /api/admin/bookings error:', error);
-    return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
+    console.error('Error creating booking:', error);
+    return NextResponse.json({ error: 'Fehler beim Erstellen der Buchung' }, { status: 500 });
   }
 }
 
 // PUT - Update a booking
 export async function PUT(request: NextRequest) {
   try {
-    const env = await getCloudflareEnv();
-    if (!env) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    const ctx = await getCloudflareContext();
+    const env = (ctx as { env: Env }).env;
+    const db = env.DB;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    const body = await request.json() as Partial<BookingRecord> & { id: number };
+    const data = await request.json() as Partial<Booking> & { id: number };
 
-    if (!body.id) {
-      return NextResponse.json({ error: 'Booking id is required' }, { status: 400 });
+    if (!data.id) {
+      return NextResponse.json({ error: 'Buchungs-ID ist erforderlich' }, { status: 400 });
+    }
+
+    // Build dynamic update query
+    const allFields = [
+      'booking_number', 'platform', 'arrival_date', 'departure_date',
+      'adults', 'children', 'children_ages', 'pets', 'rental_price', 'deposit_amount', 'deposit_paid',
+      'final_payment', 'final_payment_paid', 'electricity_flat', 'additional_payment',
+      'security_deposit', 'additional_costs', 'final_cleaning', 'first_contact_date',
+      'offer_sent', 'contract_sent', 'welcome_guide_sent', 'admin_briefed', 'status', 'notes',
+      'cleaning_cash', 'utilities_cash', 'kurtaxe_cash', 'is_private', 'private_config'
+    ];
+
+    // Check which columns actually exist in the table (handles pending migrations)
+    let availableFields = allFields;
+    try {
+      const tableInfo = await db.prepare('PRAGMA table_info(bookings)').all<{ name: string }>();
+      const existingColumns = new Set((tableInfo.results || []).map(col => col.name));
+      availableFields = allFields.filter(f => existingColumns.has(f));
+    } catch {
+      // If PRAGMA fails, try all fields
     }
 
     const updates: string[] = [];
-    const params: (string | number | null)[] = [];
+    const values: (string | number | null)[] = [];
 
-    const fields = [
-      'booking_number', 'platform', 'arrival_date', 'departure_date',
-      'adults', 'children', 'pets', 'rental_price', 'deposit_amount',
-      'deposit_paid', 'final_payment', 'final_payment_paid', 'electricity_flat',
-      'additional_payment', 'security_deposit', 'additional_costs', 'final_cleaning',
-      'first_contact_date', 'offer_sent', 'contract_sent', 'deposit_received',
-      'balance_received', 'welcome_guide_sent', 'utilities_cash', 'cleaning_cash',
-      'no_nebenkosten', 'status', 'notes'
-    ];
-
-    for (const field of fields) {
-      if (field in body) {
-        updates.push(field + ' = ?');
-        params.push((body as Record<string, unknown>)[field] as string | number | null);
+    for (const field of availableFields) {
+      if (field in data) {
+        updates.push(`${field} = ?`);
+        values.push((data as Record<string, string | number | null>)[field] ?? null);
       }
     }
 
     if (updates.length === 0) {
-      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+      return NextResponse.json({ error: 'Keine Felder zum Aktualisieren' }, { status: 400 });
     }
 
-    updates.push('updated_at = datetime("now")');
-    params.push(body.id);
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(data.id);
 
-    await env.DB.prepare(
-      'UPDATE bookings SET ' + updates.join(', ') + ' WHERE id = ?'
-    ).bind(...params).run();
+    await db.prepare(`
+      UPDATE bookings SET ${updates.join(', ')} WHERE id = ?
+    `).bind(...values).run();
 
-    return NextResponse.json({ success: true });
+    // Fetch updated booking
+    const booking = await db.prepare(
+      'SELECT * FROM bookings WHERE id = ?'
+    ).bind(data.id).first<Booking>();
+
+    return NextResponse.json({ booking });
   } catch (error) {
-    console.error('PUT /api/admin/bookings error:', error);
-    return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 });
+    console.error('Error updating booking:', error);
+    return NextResponse.json({ error: 'Fehler beim Aktualisieren der Buchung' }, { status: 500 });
   }
 }
 
 // DELETE - Delete a booking
 export async function DELETE(request: NextRequest) {
   try {
-    const env = await getCloudflareEnv();
-    if (!env) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    const ctx = await getCloudflareContext();
+    const env = (ctx as { env: Env }).env;
+    const db = env.DB;
+
+    // Verify admin password
+    const adminPassword = request.headers.get('x-admin-password');
+    const expectedPassword = getAdminPassword(env);
+
+    if (!expectedPassword || adminPassword !== expectedPassword) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'Booking id is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Buchungs-ID ist erforderlich' }, { status: 400 });
     }
 
-    await env.DB.prepare('DELETE FROM bookings WHERE id = ?').bind(parseInt(id)).run();
+    await db.prepare('DELETE FROM bookings WHERE id = ?').bind(id).run();
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE /api/admin/bookings error:', error);
-    return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
+    console.error('Error deleting booking:', error);
+    return NextResponse.json({ error: 'Fehler beim Löschen der Buchung' }, { status: 500 });
   }
 }

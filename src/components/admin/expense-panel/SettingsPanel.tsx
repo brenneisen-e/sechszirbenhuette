@@ -2,6 +2,7 @@
 
 import { Loader2, Save, Settings, Plus, Trash2 } from 'lucide-react';
 import type { PricingSettings } from './types';
+import { formatCurrency } from '@/lib/utils/formatting';
 
 interface SettingsPanelProps {
   settings: PricingSettings;
@@ -27,7 +28,7 @@ export function SettingsPanel({
   const addKurtaxePeriod = () => {
     onEditedSettingsChange({
       ...editedSettings,
-      kurtaxe_rates: [...editedSettings.kurtaxe_rates, { from: '', to: '', rate: 4.0 }],
+      kurtaxe_rates: [...editedSettings.kurtaxe_rates, { from: '', to: '', rate: 2.7 }],
     });
   };
 
@@ -199,10 +200,10 @@ export function SettingsPanel({
       <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
         <span className="font-medium text-gray-900">Aktuelle Werte: </span>
         <span className="text-gray-600">
-          Kurtaxe: {settings.kurtaxe_rate.toFixed(2)} € | Holz: {settings.holz_rate.toFixed(2)} € | Wasser:{' '}
-          {settings.water_rate.toFixed(2)} € | Müll: {settings.trash_rate.toFixed(2)} € | Strom:{' '}
-          {settings.electricity_rate.toFixed(2)} € | Provision: {(settings.commission_rate * 100).toFixed(0)}% |
-          Reinigung: {settings.reinigung_rate.toFixed(2)} €
+          Kurtaxe: {formatCurrency(settings.kurtaxe_rate)} | Holz: {formatCurrency(settings.holz_rate)} | Wasser:{' '}
+          {formatCurrency(settings.water_rate)} | Müll: {formatCurrency(settings.trash_rate)} | Strom:{' '}
+          {formatCurrency(settings.electricity_rate)} | Provision: {(settings.commission_rate * 100).toFixed(0)}% |
+          Reinigung: {formatCurrency(settings.reinigung_rate)}
         </span>
       </div>
 

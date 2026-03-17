@@ -14,7 +14,6 @@ interface GuestFiltersProps {
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Alle Status' },
-  { value: 'inquiry', label: 'Anfrage' },
   { value: 'active', label: 'Aktiv' },
   { value: 'completed', label: 'Abgeschlossen' },
   { value: 'cancelled', label: 'Storniert' },
