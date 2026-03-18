@@ -69,21 +69,6 @@ export default function RootLayout({
   return (
     <html lang="de" suppressHydrationWarning>
       <head>
-        {/* Preload critical custom fonts to prevent FOUT on slow connections */}
-        <link
-          rel="preload"
-          href="/fonts/Feeling Passionate Personal Use Only.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/Autography.otf"
-          as="font"
-          type="font/otf"
-          crossOrigin="anonymous"
-        />
         {/* Preconnect to font CDNs */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
