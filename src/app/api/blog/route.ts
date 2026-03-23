@@ -325,7 +325,17 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete blog post (admin only)
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  let id = searchParams.get('id');
+
+  // Also accept id from request body
+  if (!id) {
+    try {
+      const body = await request.json() as { id?: string };
+      id = body.id || null;
+    } catch {
+      // no body
+    }
+  }
 
   if (!id) {
     return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
@@ -340,7 +350,7 @@ export async function DELETE(request: NextRequest) {
     // Check authentication
     const sessionToken = request.cookies.get('admin_session')?.value;
     if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'No session cookie' }, { status: 401 });
     }
 
     const session = await env.DB.prepare(
@@ -348,10 +358,12 @@ export async function DELETE(request: NextRequest) {
     ).bind(sessionToken).first();
 
     if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+      return NextResponse.json({ error: 'Session expired' }, { status: 401 });
     }
 
-    // Delete post (images will be cascade deleted)
+    // Delete post images first (in case CASCADE is broken after table recreation)
+    await env.DB.prepare('DELETE FROM blog_post_images WHERE post_id = ?').bind(id).run();
+    // Delete the post
     await env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
 
     return NextResponse.json({ success: true });
