@@ -155,16 +155,25 @@ export async function POST() {
       steps.push('Recreated indexes');
     }
 
+    // Fetch available media images for cover images
+    const HERO_CATS = ['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p'];
+    const mediaResult = await db.prepare(
+      `SELECT url FROM media WHERE media_type != 'video' AND (category IS NULL OR category NOT IN (${HERO_CATS.map(() => '?').join(',')})) ORDER BY created_at DESC`
+    ).bind(...HERO_CATS).all<{ url: string }>();
+    const mediaUrls = mediaResult.results || [];
+    steps.push(`Found ${mediaUrls.length} media images for covers`);
+
     // Step 2: Migrate Article 1 (carousel)
     const slug1 = generateSlug(ARTICLE_1.title);
     const existing1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first();
     if (!existing1) {
       const id1 = crypto.randomUUID();
+      const cover1 = mediaUrls[0]?.url || null;
       await db.prepare(
-        `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, layout, status, author, published_at, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
-      ).bind(id1, slug1, ARTICLE_1.title, ARTICLE_1.subtitle, ARTICLE_1.excerpt, ARTICLE_1.content, ARTICLE_1.layout, now, now, now).run();
-      steps.push(`Article 1 inserted with id ${id1}`);
+        `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, cover_image_url, layout, status, author, published_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
+      ).bind(id1, slug1, ARTICLE_1.title, ARTICLE_1.subtitle, ARTICLE_1.excerpt, ARTICLE_1.content, cover1, ARTICLE_1.layout, now, now, now).run();
+      steps.push(`Article 1 inserted with id ${id1}, cover: ${cover1 ? 'yes' : 'none'}`);
 
       for (let i = 0; i < ARTICLE_1.slides.length; i++) {
         const slide = ARTICLE_1.slides[i];
@@ -176,7 +185,13 @@ export async function POST() {
       }
       steps.push(`Article 1: ${ARTICLE_1.slides.length} slides inserted`);
     } else {
-      steps.push('Article 1 already exists, skipped');
+      // Update cover image if missing
+      if (mediaUrls[0]?.url) {
+        await db.prepare(
+          'UPDATE blog_posts SET cover_image_url = ? WHERE slug = ? AND (cover_image_url IS NULL OR cover_image_url = ?)'
+        ).bind(mediaUrls[0].url, slug1, '').run();
+      }
+      steps.push('Article 1 already exists, updated cover if missing');
     }
 
     // Step 3: Migrate Article 2 (tabs)
@@ -185,13 +200,21 @@ export async function POST() {
     if (!existing2) {
       const id2 = crypto.randomUUID();
       const tabsContent = JSON.stringify(ARTICLE_2.content);
+      const cover2 = mediaUrls[1]?.url || mediaUrls[0]?.url || null;
       await db.prepare(
-        `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, layout, status, author, published_at, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
-      ).bind(id2, slug2, ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, tabsContent, ARTICLE_2.layout, now, now, now).run();
-      steps.push(`Article 2 inserted with id ${id2}`);
+        `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, cover_image_url, layout, status, author, published_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
+      ).bind(id2, slug2, ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, tabsContent, cover2, ARTICLE_2.layout, now, now, now).run();
+      steps.push(`Article 2 inserted with id ${id2}, cover: ${cover2 ? 'yes' : 'none'}`);
     } else {
-      steps.push('Article 2 already exists, skipped');
+      // Update cover image if missing
+      const cover2 = mediaUrls[1]?.url || mediaUrls[0]?.url || null;
+      if (cover2) {
+        await db.prepare(
+          'UPDATE blog_posts SET cover_image_url = ? WHERE slug = ? AND (cover_image_url IS NULL OR cover_image_url = ?)'
+        ).bind(cover2, slug2, '').run();
+      }
+      steps.push('Article 2 already exists, updated cover if missing');
     }
 
     return NextResponse.json({

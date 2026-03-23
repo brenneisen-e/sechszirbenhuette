@@ -166,7 +166,6 @@ export default function BlogEditor() {
             onDelete={handleDelete}
             onMigrate={handleMigrateBlog}
             migrating={migrating}
-            fallbackImages={availableMedia}
           />
         )}
 

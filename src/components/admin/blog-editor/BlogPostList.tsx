@@ -11,7 +11,7 @@ import {
   List,
   Layers,
 } from 'lucide-react';
-import type { BlogPost, MediaItem } from './types';
+import type { BlogPost } from './types';
 
 interface BlogPostListProps {
   posts: BlogPost[];
@@ -19,7 +19,6 @@ interface BlogPostListProps {
   onDelete: (postId: string) => void;
   onMigrate?: () => void;
   migrating?: boolean;
-  fallbackImages?: MediaItem[];
 }
 
 const formatDate = (dateString: string | null) => {
@@ -31,7 +30,7 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating, fallbackImages = [] }: BlogPostListProps) {
+export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating }: BlogPostListProps) {
   return (
     <div className="space-y-4">
       {/* Migrate button */}
@@ -59,18 +58,16 @@ export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating, fa
         </div>
       )}
 
-      {posts.map((post, postIndex) => {
-        const thumbUrl = post.cover_image_url || fallbackImages[postIndex]?.url || null;
-        return (
+      {posts.map((post) => (
         <div
           key={post.id}
           className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
         >
           {/* Thumbnail */}
           <div className="w-20 h-20 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
-            {thumbUrl ? (
+            {post.cover_image_url ? (
               <Image
-                src={thumbUrl}
+                src={post.cover_image_url}
                 alt={post.cover_image_alt || ''}
                 width={80}
                 height={80}
@@ -143,8 +140,7 @@ export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating, fa
             </button>
           </div>
         </div>
-        );
-      })}
+      ))}
     </div>
   );
 }
