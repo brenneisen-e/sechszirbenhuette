@@ -150,7 +150,7 @@ function AdminPageContent() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/admin/login');
+      const response = await fetch('/api/admin/login', { cache: 'no-store' });
       const data = await response.json() as { authenticated: boolean };
       setIsAuthenticated(data.authenticated);
       if (data.authenticated) {
