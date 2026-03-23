@@ -321,7 +321,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 px-2"
+              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 mx-auto px-2 max-w-2xl"
               style={getTextStyle('hero_description')}
             >
               {getText('hero_description')}
