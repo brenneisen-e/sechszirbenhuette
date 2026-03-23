@@ -94,9 +94,46 @@ export function useBlogEditor(): UseBlogEditorReturn {
   }, []);
 
   useEffect(() => {
-    loadPosts();
-    loadMedia();
-  }, [loadPosts, loadMedia]);
+    let cancelled = false;
+
+    const init = async () => {
+      try {
+        const [postsRes, mediaRes] = await Promise.all([
+          fetch(`/api/blog?_t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+          fetch('/api/admin/media'),
+        ]);
+        if (cancelled) return;
+
+        const postsData = await postsRes.json() as { posts?: BlogPost[]; error?: string };
+        const mediaData = await mediaRes.json() as { media: (MediaItem & { media_type?: string; category?: string })[] };
+
+        if (cancelled) return;
+
+        if (postsData.error) {
+          setError(postsData.error);
+          setPosts([]);
+        } else {
+          setPosts(postsData.posts || []);
+        }
+
+        const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+        const images = (mediaData.media || []).filter(m =>
+          m.media_type !== 'video' && !HERO_CATS.has(m.category || '')
+        );
+        setAvailableMedia(images);
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error loading blog data:', err);
+          setError('Fehler beim Laden der Beiträge');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    init();
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Setup blog database tables
   const handleSetupBlogDb = async () => {
