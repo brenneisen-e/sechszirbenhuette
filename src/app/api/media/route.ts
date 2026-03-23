@@ -117,12 +117,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Otherwise fall back to placeholder data
-    return getPlaceholderResponse(category, type, cacheMaxAge);
+    // No results - return empty with short cache so new uploads appear quickly
+    return NextResponse.json(
+      { media: [] },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=10, s-maxage=10',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error fetching from D1, using placeholders:', error);
-    // Fall back to placeholder data
-    return getPlaceholderResponse(category, type, cacheMaxAge);
+    // Error fallback - short cache
+    return NextResponse.json(
+      { media: [] },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=10, s-maxage=10',
+        },
+      }
+    );
   }
 }
 
