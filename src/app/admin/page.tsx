@@ -222,7 +222,7 @@ function AdminPageContent() {
 
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
-        <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6">
+        <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
           {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 
           {activeTab === 'finances' && (

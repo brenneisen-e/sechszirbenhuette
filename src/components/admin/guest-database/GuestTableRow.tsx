@@ -307,7 +307,7 @@ export function GuestTableRow({
             </div>
 
             {/* Tab Content */}
-            <div className="bg-white rounded-lg p-4">
+            <div className="bg-white rounded-lg p-4" key={guestProfileTab}>
               {/* Overview Tab */}
               {guestProfileTab === 'overview' && (
                 <GuestOverviewTab
