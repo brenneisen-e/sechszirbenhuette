@@ -138,7 +138,7 @@ export default function BlogPage() {
           </motion.div>
 
           {/* Dynamic Blog Posts */}
-          <BlogPostsGrid posts={blogPosts} />
+          <BlogPostsGrid posts={blogPosts} fallbackImages={images} />
 
           {/* Blog Article 1: Ganzjähriges Urlaubsziel */}
           <motion.article
