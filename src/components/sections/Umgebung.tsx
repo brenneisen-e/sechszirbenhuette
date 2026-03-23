@@ -18,7 +18,7 @@ export function Umgebung() {
   const { getText, getTextStyle } = useContentTexts();
 
   return (
-    <section id="umgebung" className="py-20 bg-transparent">
+    <section id="umgebung" className="py-20 bg-white">
       <div className="container">
         {/* Header */}
         <motion.div

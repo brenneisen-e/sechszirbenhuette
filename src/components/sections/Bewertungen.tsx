@@ -117,7 +117,7 @@ export function Bewertungen() {
   };
 
   return (
-    <section id="bewertungen" className="pt-20 pb-10 bg-transparent">
+    <section id="bewertungen" className="pt-20 pb-10 bg-white">
       <div className="container">
         {/* White background container for better readability */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-10 shadow-sm">
