@@ -46,7 +46,8 @@ export default function CloudflareSettings({ adminPassword }: CloudflareSettings
         setSavedToken(apiToken);
         setStatus({ ok: true, message: 'Token gespeichert' });
       } else {
-        setStatus({ ok: false, message: 'Fehler beim Speichern' });
+        const errData = await res.json() as { error?: string };
+        setStatus({ ok: false, message: errData.error || `Fehler ${res.status}` });
       }
     } catch {
       setStatus({ ok: false, message: 'Verbindungsfehler' });
