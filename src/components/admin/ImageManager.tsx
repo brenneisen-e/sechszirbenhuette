@@ -36,11 +36,6 @@ interface MediaRecord {
 
 const MEDIA_CATEGORIES = [
   { value: 'hero', label: 'Hero' },
-  { value: 'hero-thumbnail', label: 'Hero-Thumbnail' },
-  { value: 'hero-1080p', label: 'Hero 1080p' },
-  { value: 'hero-720p', label: 'Hero 720p' },
-  { value: 'hero-480p', label: 'Hero 480p' },
-  { value: 'hero-360p', label: 'Hero 360p' },
   { value: 'aussen', label: 'Außen' },
   { value: 'innen', label: 'Innen' },
   { value: 'wohnen', label: 'Wohnen' },
@@ -54,6 +49,19 @@ const MEDIA_CATEGORIES = [
   { value: 'gastgeber', label: 'Gastgeber' },
   { value: 'galerie', label: 'Galerie' },
   { value: 'blog', label: 'Blog' },
+];
+
+// All hero-related categories are grouped under a single "Hero" section
+const HERO_CATEGORIES = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+
+// Full list including hidden hero variants (for edit modal dropdown)
+const ALL_CATEGORIES = [
+  ...MEDIA_CATEGORIES,
+  { value: 'hero-thumbnail', label: 'Hero-Thumbnail' },
+  { value: 'hero-1080p', label: 'Hero 1080p' },
+  { value: 'hero-720p', label: 'Hero 720p' },
+  { value: 'hero-480p', label: 'Hero 480p' },
+  { value: 'hero-360p', label: 'Hero 360p' },
 ];
 
 // Auto-inherit parent categories: e.g. Küche also gets "Innen", Umgebung also gets "Außen"
@@ -142,15 +150,19 @@ export function ImageManager() {
 
   const handleCategoryFilter = (category: string) => {
     setFilterCategory(category);
-    if (category) {
+    if (category && category !== 'hero') {
       loadMedia(category);
     } else {
+      // Load all for "hero" (need all hero-* variants) or no filter
       loadMedia();
     }
   };
 
-  // Filtered media based on search
+  // Filtered media based on search and category
   const filteredMedia = media.filter((m) => {
+    // Category filter for hero includes all hero-* variants
+    if (filterCategory === 'hero' && !HERO_CATEGORIES.has(m.category)) return false;
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -471,6 +483,16 @@ export function ImageManager() {
     const presentCategories = new Set(filteredMedia.map((m) => m.category));
 
     for (const catValue of categoryOrder) {
+      if (catValue === 'hero') {
+        // Merge all hero-* categories into a single "Hero" group
+        const heroItems = filteredMedia
+          .filter((m) => HERO_CATEGORIES.has(m.category))
+          .sort((a, b) => a.display_order - b.display_order);
+        if (heroItems.length > 0) {
+          groups.push({ category: 'hero', label: 'Hero', items: heroItems });
+        }
+        continue;
+      }
       if (!presentCategories.has(catValue)) continue;
       const items = filteredMedia
         .filter((m) => m.category === catValue)
@@ -484,9 +506,9 @@ export function ImageManager() {
       }
     }
 
-    // Add any categories not in MEDIA_CATEGORIES at the end
+    // Add any categories not in MEDIA_CATEGORIES at the end (skip hero-* since already merged)
     for (const cat of presentCategories) {
-      if (!categoryOrder.includes(cat)) {
+      if (!categoryOrder.includes(cat) && !HERO_CATEGORIES.has(cat)) {
         const items = filteredMedia.filter((m) => m.category === cat);
         groups.push({ category: cat, label: cat, items });
       }
@@ -700,9 +722,9 @@ export function ImageManager() {
           Alle ({media.length})
         </button>
         {MEDIA_CATEGORIES.map((cat) => {
-          const count = media.filter(
-            (m) => m.category === cat.value || m.categories?.includes(cat.value)
-          ).length;
+          const count = cat.value === 'hero'
+            ? media.filter((m) => HERO_CATEGORIES.has(m.category) || m.categories?.includes('hero')).length
+            : media.filter((m) => m.category === cat.value || m.categories?.includes(cat.value)).length;
           return (
             <button
               key={cat.value}
@@ -837,8 +859,14 @@ export function ImageManager() {
                     <div className="p-2">
                       <p className="text-xs text-gray-600 truncate">{m.alt_text || m.title || '–'}</p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
+                        {/* Show hero sub-category badge when in merged Hero group */}
+                        {HERO_CATEGORIES.has(m.category) && m.category !== 'hero' && (
+                          <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                            {ALL_CATEGORIES.find((c) => c.value === m.category)?.label || m.category}
+                          </span>
+                        )}
                         {m.categories
-                          ?.filter((c) => c !== m.category)
+                          ?.filter((c) => c !== m.category && !HERO_CATEGORIES.has(c))
                           .map((c) => (
                             <span
                               key={c}

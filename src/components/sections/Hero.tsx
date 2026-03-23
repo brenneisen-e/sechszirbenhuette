@@ -118,10 +118,12 @@ export function Hero() {
       const p = video.play();
       if (p) {
         p.then(onPlaySuccess).catch(() => {
-          // Autoplay blocked — show play hint and wait for interaction
+          // Autoplay blocked — start from beginning on user interaction
           if (!cancelled) setShowPlayHint(true);
+          video.currentTime = 0;
           const playOnInteraction = () => {
             video.muted = true;
+            video.currentTime = 0;
             video.play().then(onPlaySuccess).catch(() => {});
           };
           document.addEventListener('click', playOnInteraction, { once: true });
