@@ -15,6 +15,7 @@ import {
   Check,
   Grid,
   List,
+  GripVertical,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -74,6 +75,8 @@ export function ImageManager() {
   const [editForm, setEditForm] = useState({ alt_text: '', category: '', categories: [] as string[] });
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [dragItem, setDragItem] = useState<string | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -289,6 +292,68 @@ export function ImageManager() {
   const getMediaUrl = (m: MediaRecord): string => {
     if (m.url && m.url.startsWith('http')) return m.url;
     return m.url || '';
+  };
+
+  // Drag & drop reorder
+  const handleDragStartItem = (e: React.DragEvent, id: string) => {
+    setDragItem(id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOverItem = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (id !== dragItem) {
+      setDragOverItem(id);
+    }
+  };
+
+  const handleDropItem = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    setDragOverItem(null);
+
+    if (!dragItem || dragItem === targetId) {
+      setDragItem(null);
+      return;
+    }
+
+    // Reorder in local state
+    const items = [...filteredMedia];
+    const fromIdx = items.findIndex((m) => m.id === dragItem);
+    const toIdx = items.findIndex((m) => m.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) { setDragItem(null); return; }
+
+    const [moved] = items.splice(fromIdx, 1);
+    items.splice(toIdx, 0, moved);
+
+    // Update display_order for affected items
+    const updates = items.map((item, idx) => ({ id: item.id, display_order: idx }));
+
+    // Optimistic update
+    setMedia((prev) => {
+      const updated = [...prev];
+      for (const u of updates) {
+        const item = updated.find((m) => m.id === u.id);
+        if (item) item.display_order = u.display_order;
+      }
+      return updated.sort((a, b) => a.display_order - b.display_order);
+    });
+
+    setDragItem(null);
+
+    // Persist to DB (fire and forget, update in background)
+    for (const u of updates) {
+      fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: u.id, display_order: u.display_order }),
+      }).catch(() => {});
+    }
+  };
+
+  const handleDragEndItem = () => {
+    setDragItem(null);
+    setDragOverItem(null);
   };
 
   const pendingCount = uploadItems.filter((f) => f.status === 'pending').length;
@@ -543,7 +608,18 @@ export function ImageManager() {
           {filteredMedia.map((m) => (
             <div
               key={m.id}
-              className="group relative bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              draggable
+              onDragStart={(e) => handleDragStartItem(e, m.id)}
+              onDragOver={(e) => handleDragOverItem(e, m.id)}
+              onDrop={(e) => handleDropItem(e, m.id)}
+              onDragEnd={handleDragEndItem}
+              className={`group relative bg-white rounded-lg border overflow-hidden hover:shadow-md transition-all cursor-grab active:cursor-grabbing ${
+                dragOverItem === m.id
+                  ? 'border-green-500 ring-2 ring-green-200'
+                  : dragItem === m.id
+                  ? 'opacity-50 border-gray-300'
+                  : 'border-gray-200'
+              }`}
             >
               <div className="relative aspect-square bg-gray-100">
                 {m.media_type === 'image' ? (
@@ -559,6 +635,13 @@ export function ImageManager() {
                     <span className="text-xs">Video</span>
                   </div>
                 )}
+
+                {/* Drag handle indicator */}
+                <div className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="p-1 bg-white/80 rounded shadow-sm">
+                    <GripVertical className="w-3 h-3 text-gray-500" />
+                  </div>
+                </div>
 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
@@ -604,7 +687,18 @@ export function ImageManager() {
         /* List View */
         <div className="divide-y border rounded-lg">
           {filteredMedia.map((m) => (
-            <div key={m.id} className="flex items-center gap-3 p-3 hover:bg-gray-50">
+            <div
+              key={m.id}
+              draggable
+              onDragStart={(e) => handleDragStartItem(e, m.id)}
+              onDragOver={(e) => handleDragOverItem(e, m.id)}
+              onDrop={(e) => handleDropItem(e, m.id)}
+              onDragEnd={handleDragEndItem}
+              className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-grab active:cursor-grabbing transition-all ${
+                dragOverItem === m.id ? 'bg-green-50 ring-1 ring-green-300' : dragItem === m.id ? 'opacity-50' : ''
+              }`}
+            >
+              <GripVertical className="w-4 h-4 text-gray-300 flex-shrink-0" />
               <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-gray-100">
                 {m.media_type === 'image' ? (
                   <Image
