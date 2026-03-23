@@ -195,8 +195,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       });
 
       if (response.status === 401) {
-        // Session expired — reload page to show login
-        window.location.reload();
+        setError('Sitzung abgelaufen — bitte neu einloggen');
         return;
       }
 
