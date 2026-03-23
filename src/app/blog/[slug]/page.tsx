@@ -41,6 +41,69 @@ interface BlogPostImage {
   display_order: number;
 }
 
+// Simple markdown-to-HTML converter for blog content that was saved as markdown
+function markdownToHtml(md: string): string {
+  // If content already looks like HTML (has tags), return as-is
+  if (/<[a-z][\s\S]*>/i.test(md) && !md.startsWith('#')) {
+    return md;
+  }
+
+  let html = md;
+
+  // Convert markdown links [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Split by double newlines for paragraphs, or by ## for headings
+  const lines = html.split(/\n/);
+  const result: string[] = [];
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (!line) {
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
+      continue;
+    }
+
+    // Headings
+    if (line.startsWith('### ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<h3>${line.slice(4)}</h3>`);
+    } else if (line.startsWith('## ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<h2>${line.slice(3)}</h2>`);
+    } else if (line.startsWith('# ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      // Skip h1 since the title is already displayed in the header
+      continue;
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (!inList) {
+        result.push('<ul>');
+        inList = true;
+      }
+      result.push(`<li>${line.slice(2)}</li>`);
+    } else if (line.startsWith('> ')) {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(`<blockquote><p>${line.slice(2)}</p></blockquote>`);
+    } else if (line === '---' || line === '***') {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push('<hr />');
+    } else {
+      if (inList) { result.push('</ul>'); inList = false; }
+      // Bold and italic
+      line = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      line = line.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      result.push(`<p>${line}</p>`);
+    }
+  }
+  if (inList) result.push('</ul>');
+
+  return result.join('\n');
+}
+
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;
@@ -315,7 +378,7 @@ export default function BlogPostPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="prose prose-lg prose-green max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
           />
 
           {/* Standard Layout Images (after content) */}

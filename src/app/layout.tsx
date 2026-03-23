@@ -94,7 +94,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
         {/* Immediate CSS-only loading indicator - shows before JS loads */}
-        <div id="initial-loader" className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white" suppressHydrationWarning>
+        <div id="initial-loader" className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white" suppressHydrationWarning>
           <style dangerouslySetInnerHTML={{ __html: `
             #initial-loader { transition: opacity 0.3s ease-out; }
             #initial-loader.loaded { opacity: 0; pointer-events: none; }
@@ -117,6 +117,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             var isHomepage = window.location.pathname === '/';
+            if (isHomepage) document.body.classList.add('is-loading');
             var delay = isHomepage ? 5000 : 100;
             setTimeout(function() {
               var el = document.getElementById('initial-loader');
