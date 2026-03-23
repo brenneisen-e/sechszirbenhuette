@@ -397,13 +397,23 @@ export default function BlogPostPage() {
           />
         </div>
       )}
-      {/* Blog content image styles */}
+      {/* Blog content styles matching TipTap editor output */}
       <style jsx global>{`
         .prose img[data-style="default"] { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
         .prose img[data-style="rounded"] { border-radius: 16px; max-width: 80%; height: auto; margin: 1.5rem auto; display: block; }
         .prose img[data-style="circle"] { border-radius: 50%; width: 250px; height: 250px; object-fit: cover; margin: 1.5rem auto; display: block; }
         .prose img[data-style="full"] { border-radius: 0; width: 100%; height: auto; margin: 2rem 0; display: block; }
         .prose img:not([data-style]) { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
+        .prose h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; margin-top: 2rem; color: #1e5631; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 1.5rem; color: #1e5631; }
+        .prose p { margin-bottom: 1rem; line-height: 1.75; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose blockquote { border-left: 4px solid #1e5631; padding-left: 1rem; font-style: italic; color: #6b7280; margin: 1.5rem 0; }
+        .prose hr { border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+        .prose a { color: #1e5631; text-decoration: underline; }
+        .prose a:hover { color: #163f24; }
       `}</style>
     </>
   );
