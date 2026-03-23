@@ -18,7 +18,6 @@ import {
   Database,
   CheckCircle,
   FileText,
-  Settings,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
@@ -59,25 +58,11 @@ const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => 
 
 
 
-const KurtaxeRatesEditor = dynamic(() => import('@/components/admin/KurtaxeRatesEditor'), {
-  loading: () => <LoadingSpinner text="Lade Kurtaxe-Sätze..." />,
-});
-
-const PositionCategoriesEditor = dynamic(() => import('@/components/admin/PositionCategoriesEditor'), {
-  loading: () => <LoadingSpinner text="Lade Kategorien..." />,
-});
-
-const PositionTemplatesEditor = dynamic(() => import('@/components/admin/PositionTemplatesEditor'), {
-  loading: () => <LoadingSpinner text="Lade Vorlagen..." />,
-});
 
 const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), {
   loading: () => <LoadingSpinner text="Lade Blog-Verwaltung..." />,
 });
 
-const CloudflareSettings = dynamic(() => import('@/components/admin/CloudflareSettings'), {
-  loading: () => <LoadingSpinner text="Lade Einstellungen..." />,
-});
 
 function FullScreenLoader() {
   return (
@@ -96,7 +81,7 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'images' | 'passwords' | 'blog' | 'system';
+type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'images' | 'passwords' | 'blog';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
@@ -106,7 +91,6 @@ const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.Compo
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
-  { id: 'system', label: 'System', shortLabel: 'System', icon: Settings },
 ];
 
 function AdminPageContent() {
@@ -256,20 +240,6 @@ function AdminPageContent() {
 
           {activeTab === 'blog' && <BlogEditor />}
 
-          {activeTab === 'system' && (
-            <div className="space-y-12">
-              <CloudflareSettings />
-              <div className="border-t border-gray-200 pt-8">
-                <KurtaxeRatesEditor />
-              </div>
-              <div className="border-t border-gray-200 pt-8">
-                <PositionCategoriesEditor />
-              </div>
-              <div className="border-t border-gray-200 pt-8">
-                <PositionTemplatesEditor />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
