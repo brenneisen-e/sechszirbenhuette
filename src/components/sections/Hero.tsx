@@ -56,7 +56,7 @@ export function Hero() {
       const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
       if (uidMatch && !thumbnailUrl) {
         const subdomain = url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
-        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=0s&width=1920&height=1080`);
+        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?width=1920&height=1080`);
       }
     };
 

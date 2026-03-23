@@ -103,7 +103,7 @@ function getVideoThumbnail(m: MediaRecord): string | null {
   // Extract stream UID from the HLS URL or cf_stream_uid
   const uid = m.cf_stream_uid || extractStreamUid(m.url);
   if (!uid) return null;
-  return `https://${STREAM_SUBDOMAIN}/${uid}/thumbnails/thumbnail.jpg?time=7s&width=400&height=225`;
+  return `https://${STREAM_SUBDOMAIN}/${uid}/thumbnails/thumbnail.jpg?width=400&height=225`;
 }
 
 function extractStreamUid(url: string): string | null {
