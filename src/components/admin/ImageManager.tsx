@@ -15,6 +15,7 @@ import {
   Check,
   Grid,
   List,
+  GripVertical,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -35,7 +36,13 @@ interface MediaRecord {
 
 const MEDIA_CATEGORIES = [
   { value: 'hero', label: 'Hero' },
+  { value: 'hero-thumbnail', label: 'Hero-Thumbnail' },
+  { value: 'hero-1080p', label: 'Hero 1080p' },
+  { value: 'hero-720p', label: 'Hero 720p' },
+  { value: 'hero-480p', label: 'Hero 480p' },
+  { value: 'hero-360p', label: 'Hero 360p' },
   { value: 'aussen', label: 'Außen' },
+  { value: 'innen', label: 'Innen' },
   { value: 'wohnen', label: 'Wohnen' },
   { value: 'schlafen', label: 'Schlafen' },
   { value: 'kueche', label: 'Küche' },
@@ -48,6 +55,42 @@ const MEDIA_CATEGORIES = [
   { value: 'galerie', label: 'Galerie' },
   { value: 'blog', label: 'Blog' },
 ];
+
+// Auto-inherit parent categories: e.g. Küche also gets "Innen", Umgebung also gets "Außen"
+const CATEGORY_PARENTS: Record<string, string[]> = {
+  wohnen: ['innen'],
+  schlafen: ['innen'],
+  kueche: ['innen'],
+  bad: ['innen'],
+  umgebung: ['aussen'],
+};
+
+/** Get categories including inherited parent categories */
+function withParentCategories(categories: string[]): string[] {
+  const result = new Set(categories);
+  for (const cat of categories) {
+    const parents = CATEGORY_PARENTS[cat];
+    if (parents) parents.forEach((p) => result.add(p));
+  }
+  return Array.from(result);
+}
+
+const STREAM_SUBDOMAIN = 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
+
+/** Build a thumbnail URL for a Cloudflare Stream video */
+function getVideoThumbnail(m: MediaRecord): string | null {
+  // Extract stream UID from the HLS URL or cf_stream_uid
+  const uid = m.cf_stream_uid || extractStreamUid(m.url);
+  if (!uid) return null;
+  return `https://${STREAM_SUBDOMAIN}/${uid}/thumbnails/thumbnail.jpg?time=7s&width=400&height=225`;
+}
+
+function extractStreamUid(url: string): string | null {
+  if (!url) return null;
+  // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
+  const match = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
+  return match ? match[1] : null;
+}
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -74,6 +117,8 @@ export function ImageManager() {
   const [editForm, setEditForm] = useState({ alt_text: '', category: '', categories: [] as string[] });
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [dragItem, setDragItem] = useState<string | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -193,16 +238,17 @@ export function ImageManager() {
 
         const data = await res.json() as { media?: MediaRecord[]; success?: boolean };
 
-        // If multi-category, update categories via PUT
-        if (data.media && data.media[0] && item.categories.length > 0) {
-          const additionalCats = item.categories.filter((c) => c !== item.category);
+        // Set categories (including auto-inherited parent categories) via PUT
+        if (data.media && data.media[0]) {
+          const allCategories = withParentCategories(item.categories);
+          const additionalCats = allCategories.filter((c) => c !== item.category);
           if (additionalCats.length > 0) {
             await fetch('/api/admin/media', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 id: data.media[0].id,
-                categories: item.categories,
+                categories: allCategories,
               }),
             });
           }
@@ -290,6 +336,164 @@ export function ImageManager() {
     if (m.url && m.url.startsWith('http')) return m.url;
     return m.url || '';
   };
+
+  // Drag & drop reorder (within category or between categories)
+  const handleDragStartItem = (e: React.DragEvent, id: string) => {
+    setDragItem(id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOverItem = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (id !== dragItem) {
+      setDragOverItem(id);
+    }
+  };
+
+  const handleDropItem = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    setDragOverItem(null);
+    setDragOverCategory(null);
+
+    if (!dragItem || dragItem === targetId) {
+      setDragItem(null);
+      return;
+    }
+
+    const draggedMedia = media.find((m) => m.id === dragItem);
+    const targetMedia = media.find((m) => m.id === targetId);
+    if (!draggedMedia || !targetMedia) { setDragItem(null); return; }
+
+    // If dropping into a different category section, change category
+    const categoryChanged = draggedMedia.category !== targetMedia.category;
+    const newCategory = targetMedia.category;
+
+    // Reorder within the target category
+    const categoryItems = media
+      .filter((m) => m.category === newCategory)
+      .sort((a, b) => a.display_order - b.display_order);
+
+    if (categoryChanged) {
+      // Remove from old position, add to new category
+      const targetIdx = categoryItems.findIndex((m) => m.id === targetId);
+      categoryItems.splice(targetIdx, 0, { ...draggedMedia, category: newCategory });
+    } else {
+      const fromIdx = categoryItems.findIndex((m) => m.id === dragItem);
+      const toIdx = categoryItems.findIndex((m) => m.id === targetId);
+      if (fromIdx === -1 || toIdx === -1) { setDragItem(null); return; }
+      const [moved] = categoryItems.splice(fromIdx, 1);
+      categoryItems.splice(toIdx, 0, moved);
+    }
+
+    // Update display_order for items in the target category
+    const updates = categoryItems.map((item, idx) => ({ id: item.id, display_order: idx, category: newCategory }));
+
+    // Optimistic update
+    setMedia((prev) => {
+      const updated = prev.map((m) => {
+        if (m.id === dragItem && categoryChanged) {
+          return { ...m, category: newCategory };
+        }
+        return m;
+      });
+      for (const u of updates) {
+        const item = updated.find((m) => m.id === u.id);
+        if (item) {
+          item.display_order = u.display_order;
+          item.category = u.category;
+        }
+      }
+      return updated.sort((a, b) => a.display_order - b.display_order);
+    });
+
+    setDragItem(null);
+
+    // Persist to DB
+    for (const u of updates) {
+      fetch('/api/admin/media', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: u.id, display_order: u.display_order, category: u.category }),
+      }).catch(() => {});
+    }
+  };
+
+  // Drop on category section header (empty area)
+  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+
+  const handleDropOnCategory = async (e: React.DragEvent, targetCategory: string) => {
+    e.preventDefault();
+    setDragOverItem(null);
+    setDragOverCategory(null);
+
+    if (!dragItem) return;
+
+    const draggedMedia = media.find((m) => m.id === dragItem);
+    if (!draggedMedia || draggedMedia.category === targetCategory) {
+      setDragItem(null);
+      return;
+    }
+
+    // Move to end of target category
+    const categoryItems = media.filter((m) => m.category === targetCategory);
+    const newOrder = categoryItems.length;
+
+    // Optimistic update
+    setMedia((prev) =>
+      prev.map((m) =>
+        m.id === dragItem ? { ...m, category: targetCategory, display_order: newOrder } : m
+      )
+    );
+
+    setDragItem(null);
+
+    // Persist
+    fetch('/api/admin/media', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: dragItem, category: targetCategory, display_order: newOrder }),
+    }).catch(() => {});
+  };
+
+  const handleDragEndItem = () => {
+    setDragItem(null);
+    setDragOverItem(null);
+    setDragOverCategory(null);
+  };
+
+  // Group media by category for the grouped view
+  const groupedMedia = (() => {
+    const groups: { category: string; label: string; items: MediaRecord[] }[] = [];
+    const categoryOrder = MEDIA_CATEGORIES.map((c) => c.value);
+
+    // Collect all unique categories present in the data
+    const presentCategories = new Set(filteredMedia.map((m) => m.category));
+
+    for (const catValue of categoryOrder) {
+      if (!presentCategories.has(catValue)) continue;
+      const items = filteredMedia
+        .filter((m) => m.category === catValue)
+        .sort((a, b) => a.display_order - b.display_order);
+      if (items.length > 0) {
+        groups.push({
+          category: catValue,
+          label: MEDIA_CATEGORIES.find((c) => c.value === catValue)?.label || catValue,
+          items,
+        });
+      }
+    }
+
+    // Add any categories not in MEDIA_CATEGORIES at the end
+    for (const cat of presentCategories) {
+      if (!categoryOrder.includes(cat)) {
+        const items = filteredMedia.filter((m) => m.category === cat);
+        groups.push({ category: cat, label: cat, items });
+      }
+    }
+
+    return groups;
+  })();
 
   const pendingCount = uploadItems.filter((f) => f.status === 'pending').length;
 
@@ -539,63 +743,114 @@ export function ImageManager() {
           <p className="font-medium">Keine Medien gefunden</p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {filteredMedia.map((m) => (
+        <div className="space-y-8">
+          {groupedMedia.map((group) => (
             <div
-              key={m.id}
-              className="group relative bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              key={group.category}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOverCategory(group.category);
+              }}
+              onDragLeave={() => setDragOverCategory(null)}
+              onDrop={(e) => handleDropOnCategory(e, group.category)}
+              className={`transition-all rounded-xl p-1 ${
+                dragOverCategory === group.category && dragItem
+                  ? 'bg-green-50 ring-2 ring-green-300 ring-dashed'
+                  : ''
+              }`}
             >
-              <div className="relative aspect-square bg-gray-100">
-                {m.media_type === 'image' ? (
-                  <Image
-                    src={getMediaUrl(m)}
-                    alt={m.alt_text || ''}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    <span className="text-xs">Video</span>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                {group.label}
+                <span className="text-xs font-normal text-gray-400">({group.items.length})</span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                {group.items.map((m) => (
+                  <div
+                    key={m.id}
+                    draggable
+                    onDragStart={(e) => handleDragStartItem(e, m.id)}
+                    onDragOver={(e) => { e.stopPropagation(); handleDragOverItem(e, m.id); }}
+                    onDrop={(e) => { e.stopPropagation(); handleDropItem(e, m.id); }}
+                    onDragEnd={handleDragEndItem}
+                    className={`group relative bg-white rounded-lg border overflow-hidden hover:shadow-md transition-all cursor-grab active:cursor-grabbing ${
+                      dragOverItem === m.id
+                        ? 'border-green-500 ring-2 ring-green-200'
+                        : dragItem === m.id
+                        ? 'opacity-50 border-gray-300'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <div className="relative aspect-square bg-gray-100">
+                      {m.media_type === 'image' ? (
+                        <Image
+                          src={getMediaUrl(m)}
+                          alt={m.alt_text || ''}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                        />
+                      ) : getVideoThumbnail(m) ? (
+                        <>
+                          <Image
+                            src={getVideoThumbnail(m)!}
+                            alt={m.alt_text || 'Video'}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                          />
+                          <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
+                            Video
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center h-full bg-gray-200 text-gray-500">
+                          <span className="text-xs font-medium">Video</span>
+                        </div>
+                      )}
+
+                      {/* Drag handle indicator */}
+                      <div className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="p-1 bg-white/80 rounded shadow-sm">
+                          <GripVertical className="w-3 h-3 text-gray-500" />
+                        </div>
+                      </div>
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                        <button
+                          onClick={() => openEdit(m)}
+                          className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+                          title="Bearbeiten"
+                        >
+                          <Edit3 className="w-4 h-4 text-gray-700" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(m.id)}
+                          className="p-2 bg-white rounded-full shadow-lg hover:bg-red-50"
+                          title="Löschen"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-2">
+                      <p className="text-xs text-gray-600 truncate">{m.alt_text || m.title || '–'}</p>
+                      <div className="flex flex-wrap gap-0.5 mt-1">
+                        {m.categories
+                          ?.filter((c) => c !== m.category)
+                          .map((c) => (
+                            <span
+                              key={c}
+                              className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full"
+                            >
+                              {MEDIA_CATEGORIES.find((cat) => cat.value === c)?.label || c}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                  <button
-                    onClick={() => openEdit(m)}
-                    className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
-                    title="Bearbeiten"
-                  >
-                    <Edit3 className="w-4 h-4 text-gray-700" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(m.id)}
-                    className="p-2 bg-white rounded-full shadow-lg hover:bg-red-50"
-                    title="Löschen"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-2">
-                <p className="text-xs text-gray-600 truncate">{m.alt_text || m.title || '–'}</p>
-                <div className="flex flex-wrap gap-0.5 mt-1">
-                  <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full">
-                    {MEDIA_CATEGORIES.find((c) => c.value === m.category)?.label || m.category}
-                  </span>
-                  {m.categories
-                    ?.filter((c) => c !== m.category)
-                    .map((c) => (
-                      <span
-                        key={c}
-                        className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full"
-                      >
-                        {MEDIA_CATEGORIES.find((cat) => cat.value === c)?.label || c}
-                      </span>
-                    ))}
-                </div>
+                ))}
               </div>
             </div>
           ))}
@@ -604,12 +859,31 @@ export function ImageManager() {
         /* List View */
         <div className="divide-y border rounded-lg">
           {filteredMedia.map((m) => (
-            <div key={m.id} className="flex items-center gap-3 p-3 hover:bg-gray-50">
+            <div
+              key={m.id}
+              draggable
+              onDragStart={(e) => handleDragStartItem(e, m.id)}
+              onDragOver={(e) => handleDragOverItem(e, m.id)}
+              onDrop={(e) => handleDropItem(e, m.id)}
+              onDragEnd={handleDragEndItem}
+              className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-grab active:cursor-grabbing transition-all ${
+                dragOverItem === m.id ? 'bg-green-50 ring-1 ring-green-300' : dragItem === m.id ? 'opacity-50' : ''
+              }`}
+            >
+              <GripVertical className="w-4 h-4 text-gray-300 flex-shrink-0" />
               <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-gray-100">
                 {m.media_type === 'image' ? (
                   <Image
                     src={getMediaUrl(m)}
                     alt={m.alt_text || ''}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                ) : getVideoThumbnail(m) ? (
+                  <Image
+                    src={getVideoThumbnail(m)!}
+                    alt={m.alt_text || 'Video'}
                     fill
                     className="object-cover"
                     sizes="48px"
@@ -675,6 +949,13 @@ export function ImageManager() {
                   <Image
                     src={getMediaUrl(editingMedia)}
                     alt={editForm.alt_text || ''}
+                    fill
+                    className="object-contain"
+                  />
+                ) : getVideoThumbnail(editingMedia) ? (
+                  <Image
+                    src={getVideoThumbnail(editingMedia)!}
+                    alt={editForm.alt_text || 'Video'}
                     fill
                     className="object-contain"
                   />
