@@ -12,8 +12,6 @@ import {
   Baby,
   ArrowLeft,
 } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { BlogPostsGrid } from './components/BlogPostsGrid';
 import { FeatureCarousel } from './components/FeatureCarousel';
 import { DogTripsCarousel } from './components/DogTripsCarousel';
@@ -111,8 +109,7 @@ export default function BlogPage() {
 
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
         <div className="container">
           {/* Back Link */}
           <Link
@@ -291,8 +288,7 @@ export default function BlogPage() {
             </div>
           </motion.article>
         </div>
-      </main>
-      <Footer />
+      </div>
 
       {/* Lightbox */}
       {selectedImage !== null && (
