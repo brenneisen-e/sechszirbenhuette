@@ -18,6 +18,7 @@ import {
   GripVertical,
 } from 'lucide-react';
 import Image from 'next/image';
+import { AmenityCardManager } from './AmenityCardManager';
 
 interface MediaRecord {
   id: string;
@@ -564,6 +565,9 @@ export function ImageManager() {
           </button>
         </div>
       )}
+
+      {/* Amenity Card Images */}
+      <AmenityCardManager />
 
       {/* Upload Area */}
       <div
