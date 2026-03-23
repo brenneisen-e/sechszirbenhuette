@@ -16,6 +16,7 @@ import {
   Grid,
   List,
   GripVertical,
+  Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -139,6 +140,10 @@ export function ImageManager() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [dragItem, setDragItem] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<string | null>(null);
+  const [isAutoCategorizingAll, setIsAutoCategorizingAll] = useState(false);
+  const [aiProgress, setAiProgress] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -529,6 +534,97 @@ export function ImageManager() {
     return groups;
   })();
 
+  // AI Auto-categorize
+  const runAutoCategorizeSingle = async (mediaId: string) => {
+    try {
+      const res = await fetch('/api/admin/media/auto-categorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ media_ids: [mediaId] }),
+      });
+      const data = await res.json() as { success?: boolean; results?: { new_category: string; alt_text: string }[]; error?: string };
+      if (data.success && data.results?.[0]) {
+        await loadMedia(filterCategory || undefined);
+      } else {
+        setError(data.error || 'KI-Kategorisierung fehlgeschlagen');
+      }
+    } catch {
+      setError('Verbindungsfehler bei KI-Kategorisierung');
+    }
+  };
+
+  const runAutoCategorizeAll = async () => {
+    if (!confirm('Alle Bilder mit KI neu kategorisieren? Dies kann einige Minuten dauern und verursacht API-Kosten (~$0.50 für 92 Bilder).')) return;
+
+    setIsAutoCategorizingAll(true);
+    setAiProgress('Starte KI-Kategorisierung...');
+    setError('');
+
+    try {
+      // Get all image IDs (skip videos and hero)
+      const imageMedia = media.filter(m => m.media_type === 'image' && !HERO_CATEGORIES.has(m.category));
+
+      if (imageMedia.length === 0) {
+        setError('Keine Bilder zum Kategorisieren gefunden');
+        setIsAutoCategorizingAll(false);
+        return;
+      }
+
+      // Process in batches of 5
+      const batchSize = 5;
+      let processed = 0;
+
+      for (let i = 0; i < imageMedia.length; i += batchSize) {
+        const batch = imageMedia.slice(i, i + batchSize);
+        const batchIds = batch.map(m => m.id);
+
+        setAiProgress(`Kategorisiere ${processed + 1}–${Math.min(processed + batchSize, imageMedia.length)} von ${imageMedia.length}...`);
+
+        const res = await fetch('/api/admin/media/auto-categorize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ media_ids: batchIds }),
+        });
+
+        const data = await res.json() as { success?: boolean; error?: string; summary?: { categorized: number; errors: number } };
+
+        if (!data.success) {
+          setError(data.error || 'KI-Fehler');
+          break;
+        }
+
+        processed += batch.length;
+      }
+
+      setAiProgress(`Fertig! ${processed} Bilder verarbeitet.`);
+      await loadMedia(filterCategory || undefined);
+
+      setTimeout(() => {
+        setAiProgress('');
+      }, 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'KI-Kategorisierung fehlgeschlagen');
+    } finally {
+      setIsAutoCategorizingAll(false);
+    }
+  };
+
+  const saveApiKey = async () => {
+    if (!apiKeyInput.trim()) return;
+    try {
+      await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'anthropic_api_key', value: apiKeyInput.trim() }),
+      });
+      setShowApiKeyInput(false);
+      setApiKeyInput('');
+      setError('');
+    } catch {
+      setError('Fehler beim Speichern des API-Keys');
+    }
+  };
+
   const pendingCount = uploadItems.filter((f) => f.status === 'pending').length;
 
   return (
@@ -540,6 +636,15 @@ export function ImageManager() {
           <p className="text-sm text-gray-500">{media.length} Medien</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={runAutoCategorizeAll}
+            disabled={isAutoCategorizingAll || media.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-xs font-medium"
+            title="Alle Bilder mit KI kategorisieren"
+          >
+            {isAutoCategorizingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            KI-Kategorisierung
+          </button>
           <button
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
             className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
@@ -561,8 +666,48 @@ export function ImageManager() {
         <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
+          {error.includes('API-Key') && (
+            <button
+              onClick={() => setShowApiKeyInput(true)}
+              className="ml-2 px-2 py-0.5 bg-red-100 hover:bg-red-200 rounded text-xs font-medium"
+            >
+              Key eintragen
+            </button>
+          )}
           <button onClick={() => setError('')} className="ml-auto">
             <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* AI Progress */}
+      {aiProgress && (
+        <div className="flex items-center gap-2 p-3 bg-purple-50 border border-purple-200 rounded-lg text-purple-700 text-sm">
+          <Sparkles className="w-4 h-4 flex-shrink-0" />
+          {aiProgress}
+          {isAutoCategorizingAll && <Loader2 className="w-4 h-4 animate-spin ml-auto" />}
+        </div>
+      )}
+
+      {/* API Key Input */}
+      {showApiKeyInput && (
+        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <input
+            type="password"
+            value={apiKeyInput}
+            onChange={(e) => setApiKeyInput(e.target.value)}
+            placeholder="sk-ant-... (Anthropic API-Key)"
+            className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500"
+          />
+          <button
+            onClick={saveApiKey}
+            disabled={!apiKeyInput.trim()}
+            className="px-3 py-1.5 bg-purple-600 text-white rounded text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
+          >
+            Speichern
+          </button>
+          <button onClick={() => setShowApiKeyInput(false)} className="p-1 hover:bg-gray-200 rounded">
+            <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
       )}
