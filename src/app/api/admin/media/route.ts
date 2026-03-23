@@ -45,6 +45,7 @@ interface CloudflareEnv {
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_STREAM_SUBDOMAIN?: string;
+  CLOUDFLARE_IMAGES_ACCOUNT_HASH?: string;
 }
 
 // Get Cloudflare environment
@@ -242,7 +243,7 @@ export async function POST(request: NextRequest) {
         });
         cfImageId = imgResult.id;
         // Use the first variant URL returned by Cloudflare Images
-        url = imgResult.variants[0] || buildImageDeliveryUrl('', imgResult.id, 'public');
+        url = imgResult.variants[0] || buildImageDeliveryUrl(env.CLOUDFLARE_IMAGES_ACCOUNT_HASH || 'VR8seCaTFFzHRDFZQKPkeQ', imgResult.id, 'public');
       } else {
         // Fallback to R2 when credentials are missing or file type is unknown
         await env.R2.put(fileKey, arrayBuffer, {
