@@ -180,7 +180,7 @@ export function BlogEditorForm({
         </div>
 
         {/* === STANDARD LAYOUT === */}
-        {!isCarousel && (
+        {!isCarousel && !isTabs && (
           <>
             {/* Content - Rich Text Editor */}
             <div>
@@ -462,6 +462,50 @@ export function BlogEditorForm({
                   {/* Active tab editor */}
                   {tabsData.tabs[activeTabIndex] && (
                     <div className="space-y-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                      {/* Tab type selector */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Tab-Typ</label>
+                        <div className="flex gap-2">
+                          {[
+                            { value: undefined, label: 'Standard' },
+                            { value: 'dog-carousel' as const, label: 'Hunde-Karussell' },
+                            { value: 'kids-accordion' as const, label: 'Kinder-Akkordeon' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.label}
+                              onClick={() => {
+                                const newTabs = [...tabsData.tabs];
+                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], type: opt.value };
+                                updateTabs(tabsData.intro, newTabs);
+                              }}
+                              className={`px-3 py-1.5 text-xs rounded-lg border transition ${
+                                tabsData.tabs[activeTabIndex].type === opt.value
+                                  ? 'border-logo-green bg-logo-green/10 text-logo-green font-medium'
+                                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Section title */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Abschnitts-Überschrift</label>
+                        <input
+                          type="text"
+                          value={tabsData.tabs[activeTabIndex].sectionTitle || ''}
+                          onChange={(e) => {
+                            const newTabs = [...tabsData.tabs];
+                            newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], sectionTitle: e.target.value };
+                            updateTabs(tabsData.intro, newTabs);
+                          }}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                          placeholder="z.B. Die 5 schönsten Ausflüge mit Hund in Kärnten"
+                        />
+                      </div>
+
                       {/* Tab title */}
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
@@ -489,6 +533,63 @@ export function BlogEditorForm({
                           <X className="w-4 h-4" />
                         </button>
                       </div>
+
+                      {/* Featured trip (for kids-accordion type) */}
+                      {tabsData.tabs[activeTabIndex].type === 'kids-accordion' && (
+                        <div className="border border-logo-green/30 rounded-lg bg-logo-green/5 p-3 space-y-2">
+                          <label className="block text-xs font-medium text-logo-green">Hervorgehobener Eintrag</label>
+                          <input
+                            type="text"
+                            value={tabsData.tabs[activeTabIndex].featured?.title || ''}
+                            onChange={(e) => {
+                              const newTabs = [...tabsData.tabs];
+                              const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
+                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, title: e.target.value } };
+                              updateTabs(tabsData.intro, newTabs);
+                            }}
+                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                            placeholder="Titel"
+                          />
+                          <textarea
+                            value={tabsData.tabs[activeTabIndex].featured?.description || ''}
+                            onChange={(e) => {
+                              const newTabs = [...tabsData.tabs];
+                              const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
+                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, description: e.target.value } };
+                              updateTabs(tabsData.intro, newTabs);
+                            }}
+                            rows={2}
+                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                            placeholder="Beschreibung"
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={tabsData.tabs[activeTabIndex].featured?.distance || ''}
+                              onChange={(e) => {
+                                const newTabs = [...tabsData.tabs];
+                                const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
+                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, distance: e.target.value } };
+                                updateTabs(tabsData.intro, newTabs);
+                              }}
+                              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                              placeholder="Entfernung"
+                            />
+                            <input
+                              type="text"
+                              value={tabsData.tabs[activeTabIndex].featured?.age || ''}
+                              onChange={(e) => {
+                                const newTabs = [...tabsData.tabs];
+                                const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
+                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, age: e.target.value } };
+                                updateTabs(tabsData.intro, newTabs);
+                              }}
+                              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                              placeholder="Altersgruppe"
+                            />
+                          </div>
+                        </div>
+                      )}
 
                       {/* Tab slides */}
                       <div>
@@ -570,6 +671,60 @@ export function BlogEditorForm({
                                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                                 placeholder="Tipp (optional)"
                               />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  value={slide.difficulty || ''}
+                                  onChange={(e) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex].slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx], difficulty: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Schwierigkeit (optional)"
+                                />
+                                <input
+                                  type="text"
+                                  value={slide.duration || ''}
+                                  onChange={(e) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex].slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx], duration: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Dauer (optional)"
+                                />
+                                <input
+                                  type="text"
+                                  value={slide.distance || ''}
+                                  onChange={(e) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex].slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx], distance: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Entfernung (optional)"
+                                />
+                                <input
+                                  type="text"
+                                  value={slide.age || ''}
+                                  onChange={(e) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex].slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx], age: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Altersgruppe (optional)"
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>

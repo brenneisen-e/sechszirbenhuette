@@ -11,10 +11,16 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   X,
   Loader2,
   Mountain,
   Globe,
+  Dog,
+  Baby,
+  Car,
+  Clock,
 } from 'lucide-react';
 
 interface BlogPost {
@@ -165,11 +171,242 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
   );
 }
 
+// Dog trip carousel categories
+const DOG_TRIP_CATEGORIES = [
+  'hund-falkert',
+  'hund-rodresnock',
+  'hund-drei-seen',
+  'hund-hochrindl',
+  'hund-millstaetter',
+];
+
+interface TabSlide {
+  title: string;
+  description: string;
+  tip?: string;
+  difficulty?: string;
+  duration?: string;
+  distance?: string;
+  age?: string;
+}
+
+interface TabData {
+  title: string;
+  type?: 'dog-carousel' | 'kids-accordion';
+  sectionTitle?: string;
+  imageCategories?: string[];
+  featured?: { title: string; description: string; distance: string; age: string };
+  slides: TabSlide[];
+}
+
+interface TabsData {
+  intro?: string;
+  tabs?: TabData[];
+}
+
+// Dog Trips Carousel - matches DogTripsCarousel.tsx exactly
+function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTripImages: Record<string, MediaItem[]> }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const itemCount = tab.slides.length;
+  const maxIndex = isMobile ? itemCount - 1 : Math.ceil(itemCount / 2) - 1;
+  const totalDots = isMobile ? itemCount : Math.ceil(itemCount / 2);
+  const translateValue = isMobile ? currentIndex * 100 : currentIndex * 50;
+  const categories = tab.imageCategories || DOG_TRIP_CATEGORIES;
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+      {/* Section Title */}
+      {tab.sectionTitle && (
+        <div className="flex flex-col items-center text-center mb-8">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl text-logo-green" style={{ fontFamily: 'FeelingPassionate, cursive' }}>
+            {tab.sectionTitle}
+          </h3>
+        </div>
+      )}
+
+      <div className="relative">
+        {/* Navigation Buttons */}
+        <button
+          onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+          disabled={currentIndex === 0}
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button
+          onClick={() => setCurrentIndex(Math.min(maxIndex, currentIndex + 1))}
+          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentIndex >= maxIndex ? 'opacity-30 cursor-not-allowed' : ''}`}
+          disabled={currentIndex >= maxIndex}
+        >
+          <ChevronRight size={24} />
+        </button>
+
+        {/* Carousel Track */}
+        <div className="overflow-hidden mx-4 md:mx-8">
+          <div className="flex transition-transform duration-300 ease-out" style={{ transform: `translateX(-${translateValue}%)` }}>
+            {tab.slides.map((trip, index) => {
+              const categoryKey = categories[index];
+              const tripImages = dogTripImages[categoryKey] || [];
+              const firstImage = tripImages[0];
+
+              return (
+                <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
+                  <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                    {/* Portrait Image */}
+                    <div className="relative aspect-[3/4] bg-gray-100">
+                      {firstImage ? (
+                        <Image
+                          src={firstImage.url}
+                          alt={firstImage.alt_text || trip.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
+                          <div className="text-center text-wood-600">
+                            <Dog size={48} className="mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">Bild im Admin hinzufügen</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* Number Badge */}
+                      <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-wood-600 flex items-center justify-center text-white font-bold shadow-lg">
+                        {index + 1}
+                      </div>
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="p-5">
+                      <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
+                      {trip.difficulty && <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>}
+                      <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
+                      <div className="flex flex-wrap gap-3 text-sm">
+                        {trip.duration && (
+                          <span className="flex items-center gap-1 text-gray-500">
+                            <Clock size={14} /> {trip.duration}
+                          </span>
+                        )}
+                        {trip.tip && (
+                          <span className="text-wood-600 font-medium">
+                            Hinweis: {trip.tip}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dots Indicator */}
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: totalDots }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                currentIndex === index ? 'bg-logo-green w-6' : 'bg-logo-green/30 hover:bg-logo-green/50'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// Kids Trips Section - matches KidsTripsSection.tsx exactly
+function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
+  const [expandedTrip, setExpandedTrip] = useState<number | null>(null);
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+      {/* Section Title */}
+      {tab.sectionTitle && (
+        <div className="flex flex-col items-center text-center mb-8">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl text-logo-green" style={{ fontFamily: 'FeelingPassionate, cursive' }}>
+            {tab.sectionTitle}
+          </h3>
+        </div>
+      )}
+
+      {/* Featured Trip */}
+      {tab.featured && (
+        <div className="mb-8">
+          <div className="bg-logo-green/15 rounded-2xl p-6 md:p-8 shadow-md border-2 border-logo-green/30">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-10 h-10 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold">
+                1
+              </span>
+              <div>
+                <h4 className="text-xl md:text-2xl font-bold text-logo-green">{tab.featured.title}</h4>
+                <p className="text-sm text-gray-500 font-medium">
+                  <Car className="inline w-4 h-4 mr-1" />
+                  {tab.featured.distance} | {tab.featured.age}
+                </p>
+              </div>
+            </div>
+            <p className="text-gray-700 leading-relaxed">{tab.featured.description}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Grid: Trips as expandable accordion */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {tab.slides.map((trip, index) => (
+          <div
+            key={index}
+            className="bg-gray-50 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-logo-green/20"
+          >
+            <button
+              onClick={() => setExpandedTrip(expandedTrip === index ? null : index)}
+              className="w-full p-4 md:p-5 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-logo-green/20 flex items-center justify-center text-logo-green font-bold text-sm flex-shrink-0">
+                  {index + 2}
+                </span>
+                <div>
+                  <h4 className="font-bold text-logo-green text-sm md:text-base">{trip.title}</h4>
+                  {(trip.distance || trip.age) && (
+                    <p className="text-xs text-gray-500">
+                      <Car className="inline w-3 h-3 mr-1" />
+                      {trip.distance}{trip.age ? ` | ${trip.age}` : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {expandedTrip === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </button>
+            {expandedTrip === index && (
+              <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-logo-green/20">
+                <p className="text-gray-600 text-sm leading-relaxed pt-4">{trip.description}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 // Tabs Content component for tabs layout blog posts
-function TabsContent({ content }: { content: string }) {
+function TabsContent({ content, dogTripImages }: { content: string; dogTripImages: Record<string, MediaItem[]> }) {
   const [activeTab, setActiveTab] = useState(0);
 
-  let data: { intro?: string; tabs?: { title: string; slides: { title: string; description: string; tip?: string; difficulty?: string; duration?: string; image_url?: string }[] }[] };
+  let data: TabsData;
   try {
     data = JSON.parse(content);
   } catch {
@@ -186,23 +423,25 @@ function TabsContent({ content }: { content: string }) {
     >
       {/* Intro */}
       {data.intro && (
-        <p className="text-gray-600 mb-8 max-w-3xl">{data.intro}</p>
+        <p className="text-gray-600 mb-10 max-w-3xl">{data.intro}</p>
       )}
 
       {/* Tab buttons */}
       {tabs.length > 0 && (
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-10">
           <div className="inline-flex bg-gray-100 rounded-xl p-1.5">
             {tabs.map((tab, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveTab(idx)}
-                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                   activeTab === idx
                     ? 'bg-logo-green text-white shadow-md'
                     : 'text-gray-500 hover:text-logo-green'
                 }`}
               >
+                {tab.type === 'dog-carousel' && <Dog size={18} />}
+                {tab.type === 'kids-accordion' && <Baby size={18} />}
                 {tab.title}
               </button>
             ))}
@@ -210,41 +449,19 @@ function TabsContent({ content }: { content: string }) {
         </div>
       )}
 
-      {/* Active tab content */}
-      {tabs[activeTab] && (
+      {/* Active tab content - render based on type */}
+      {tabs[activeTab] && tabs[activeTab].type === 'dog-carousel' && (
+        <DogTripsCarouselDynamic tab={tabs[activeTab]} dogTripImages={dogTripImages} />
+      )}
+      {tabs[activeTab] && tabs[activeTab].type === 'kids-accordion' && (
+        <KidsTripsSectionDynamic tab={tabs[activeTab]} />
+      )}
+      {tabs[activeTab] && !tabs[activeTab].type && (
         <div className="space-y-4">
           {tabs[activeTab].slides.map((slide, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
-            >
-              <div className="flex flex-col sm:flex-row">
-                {slide.image_url && (
-                  <div className="relative w-full sm:w-48 h-48 sm:h-auto shrink-0">
-                    <Image
-                      src={slide.image_url}
-                      alt={slide.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-5 flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{slide.description}</p>
-                  {(slide.difficulty || slide.duration) && (
-                    <div className="flex gap-3 mt-3 text-xs text-gray-400">
-                      {slide.difficulty && <span>Schwierigkeit: {slide.difficulty}</span>}
-                      {slide.duration && <span>Dauer: {slide.duration}</span>}
-                    </div>
-                  )}
-                  {slide.tip && (
-                    <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
-                      <span className="font-medium">Tipp:</span> {slide.tip}
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div key={idx} className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.title}</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">{slide.description}</p>
             </div>
           ))}
         </div>
@@ -323,6 +540,7 @@ export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [images, setImages] = useState<BlogPostImage[]>([]);
   const [mediaImages, setMediaImages] = useState<MediaItem[]>([]);
+  const [dogTripImages, setDogTripImages] = useState<Record<string, MediaItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -351,6 +569,22 @@ export default function BlogPostPage() {
             .then((mediaData) => {
               if (mediaData.media) {
                 setMediaImages(mediaData.media);
+              }
+            })
+            .catch(() => {});
+        }
+
+        // For tabs layout, load dog trip images by category
+        if (data.post.layout === 'tabs') {
+          fetch('/api/media')
+            .then((res) => res.json() as Promise<{ media?: (MediaItem & { category: string })[] }>)
+            .then((mediaData) => {
+              if (mediaData.media) {
+                const grouped: Record<string, MediaItem[]> = {};
+                DOG_TRIP_CATEGORIES.forEach(cat => {
+                  grouped[cat] = mediaData.media!.filter((m) => m.category === cat);
+                });
+                setDogTripImages(grouped);
               }
             })
             .catch(() => {});
@@ -551,7 +785,7 @@ export default function BlogPostPage() {
 
                 {/* Tabs Content */}
                 {post.layout === 'tabs' && (
-                  <TabsContent content={post.content} />
+                  <TabsContent content={post.content} dogTripImages={dogTripImages} />
                 )}
               </div>
             </motion.article>

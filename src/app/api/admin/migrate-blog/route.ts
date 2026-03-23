@@ -50,6 +50,15 @@ const ARTICLE_1 = {
   ],
 };
 
+// Dog trip category keys mapping to media categories
+const DOG_TRIP_CATEGORIES = [
+  'hund-falkert',
+  'hund-rodresnock',
+  'hund-drei-seen',
+  'hund-hochrindl',
+  'hund-millstaetter',
+];
+
 // Article 2: Ausflüge in Kärnten (tabs layout)
 const ARTICLE_2 = {
   title: 'Ausflüge in Kärnten',
@@ -61,8 +70,11 @@ const ARTICLE_2 = {
     tabs: [
       {
         title: 'Mit Hunden',
+        type: 'dog-carousel',
+        sectionTitle: 'Die 5 schönsten Ausflüge mit Hund in Kärnten',
+        imageCategories: DOG_TRIP_CATEGORIES,
         slides: [
-          { title: 'Falkert und Falkertsee', description: 'Ein Spaziergang um den Falkertsee ist fester Bestandteil unseres Aufenthalts am Berg und ist auch für ältere Hunde gut zu bewerkstelligen. Nicht wegzudenken ist natürlich eine Wanderung auf den Falkert. Je nach Fitness dauert es 1 bis 3 Stunden.', difficulty: 'leicht bis mittel', duration: '1-3 Stunden' },
+          { title: 'Falkert und Falkertsee', description: 'Ein Spaziergang um den Falkertsee ist fester Bestandteil unseres Aufenthalts am Berg und ist auch für ältere Hunde gut zu bewerkstelligen. Nicht wegzudenken ist natürlich eine Wanderung auf den Falkert. Je nach Fitness dauert es 1 bis 3 Stunden. Ein steiler oder ein gemäßigter Auf- und Abstieg sind möglich. Der Hund sollte bergerfahren und fit sein.', difficulty: 'leicht bis mittel', duration: '1-3 Stunden' },
           { title: 'Wanderung Rodresnock/Moschelitzen/Murmeltiertal', description: 'Eine ausgedehnte, teilweise sportliche und meistens recht windige Rundwanderung. Unser heimlicher Favorit – oftmals trifft man keine Menschenseele und hat die Nockberge für sich.', difficulty: 'anspruchsvoll', tip: 'Hundemantel für den Gipfel' },
           { title: 'Drei-Seen-Wanderung an der Turracher Höhe', description: 'Eine gemäßigte Wanderung entlang der Drei-Seen. Für alle Level geeignet. Gut mit dem Auto zu erreichen. Unbedingt in der Karl-Hütte vorbeischauen und Kaiserschmarrn essen.', difficulty: 'leicht', tip: 'Kaiserschmarrn in der Karl-Hütte' },
           { title: 'Panoramaweg Hochrindl', description: 'Von hier aus starten verschiedene Wanderwege, u.a. eine schöne Panoramawanderung mit vielen Frischwassermöglichkeiten. Für Hunde perfekt.', difficulty: 'leicht bis mittel' },
@@ -71,12 +83,21 @@ const ARTICLE_2 = {
       },
       {
         title: 'Mit Kindern',
+        type: 'kids-accordion',
+        sectionTitle: 'Die 7 schönsten Ausflüge mit Kindern in Kärnten',
+        featured: {
+          title: 'Die Heidi-Alm am Falkert',
+          description: 'Die Heidi-Alm am Falkert ist direkt ums Eck und bietet einen märchenhaften Spaziergang durch die Heidi-Welt mit Blick auf die umliegenden Berge. Eine große Rutsche und ein moderner Spielplatz runden den Ausflug ab. Auf dem See der Heidi-Alm gibt es außerdem die Möglichkeit zu angeln. Bitte sprechen Sie vorab das Team der Heidi-Alm an. Nach der Heidi-Alm kann sich in der direkt angrenzenden Gastronomie der Seehütte oder der Bogi Alm gestärkt werden. Erwachsene kommen bei einem Spaziergang um den Falkertsee auf ihre Kosten.',
+          distance: '5 Gehminuten',
+          age: 'Alle Altersgruppen',
+        },
         slides: [
-          { title: 'Heidi-Alm Falkert', description: 'Der Klassiker für Familien! Die Heidi-Alm auf dem Falkert bietet einen wunderschönen Erlebnisweg mit dem Thema der beliebten Heidi-Geschichte. Perfekt für Kinder jeden Alters.' },
-          { title: 'Turracher Höhe - Nocky Flitzer', description: 'Die Sommerrodelbahn Nocky Flitzer auf der Turracher Höhe ist ein Highlight für die ganze Familie. 1,6km rasante Abfahrt mit herrlichem Panorama.' },
-          { title: 'Ossiacher See', description: 'Der Ossiacher See bietet im Sommer wunderbares Badevergnügen für die ganze Familie. Flache Einstiege und angenehme Wassertemperaturen machen ihn ideal für Kinder.' },
-          { title: 'Panoramaweg für Familien', description: 'Leichte Wanderungen mit tollen Aussichtspunkten, die auch für kleinere Kinder gut machbar sind. Die Nockberge bieten unzählige familienfreundliche Wege.' },
-          { title: 'Tierpark Rosegg', description: 'Der älteste Tierpark Kärntens beherbergt über 35 heimische und exotische Tierarten. Ein tolles Ausflugsziel für die ganze Familie.' },
+          { title: 'Turracher Höhe und Nocky-Flitzer', description: 'Die Turracher Höhe ist ein wunderschönes Skigebiet für Anfänger und Profis. Die malerische Landschaft zwischen Tannen und Bergspitzen, die Schneesicherheit und ihre 43 Pistenkilometer sind für Familien perfekt. Außerhalb der Wintersaison ist die Alpen-Achterbahn Nockyflitzer ein absolutes Ausflugs-Highlight. Ab 3 Jahren geht\'s rasant den Berg herunter, natürlich in Begleitung eines Erwachsenen. Die Nockyflitzer öffnet ab Juni seine Tore. Tolle Spielplätze und Nockys Almzeit (eine kindgerechte Entdeckungs-Wanderung mit Stempelkarte) lassen den Tag wie im Flug vergehen. Bei uns vergeht kein Urlaub in der Sechszirbenhütte ohne einen Besuch der Turracher Höhe.', distance: '15 Autominuten', age: 'Ab 3 Jahren' },
+          { title: 'Ossiacher See und Familywald', description: 'Der Ossiacher See liegt ca. 30 Fahrminuten von der Sechszirbenhütte entfernt. Direkt daran gelegen ist der Abenteuer- und Kletterwald Familywald. Hier kommen kleine und große Kinder voll auf ihre Kosten. Das Gelände ist liebevoll gestaltet, in jedem Baum gibt es etwas zu entdecken, Klangreisen, Balancier-Parks, eine Fly-Line und ein Hochseilgarten - hier lassen sich wirklich Stunden verbringen. Mit dem Tree-Net hat der Familywald ein absolutes Highlight geschaffen. Hier können Kleine und Große auf Netzen durch die Baumwipfel laufen, von Baum zu Baum rutschen und sind dabei absolut fallsicher.', distance: '30 Autominuten', age: 'Ab 4 Jahren' },
+          { title: 'Panoramaweg St. Oswald (mit Brunnachbahn)', description: 'Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil, um z.B. auch kleinere Kandidaten mit einer Kraxel zu transportieren. Der Ausblick ist traumhaft und es gibt zahlreiche Abzweigungen für ausgedehntere Wanderungen, wenn z.B. ein Elternteil alleine weiterziehen möchte. Auf halber Strecke liegt die Bockhütte, eine perfekte Rast und wie im Bilderbuch. Wieder an der Biosphärenparkbahn Brunnachbahn angekommen wartet ein Aktiv Park und Wasserspielplatz auf euch, hier können sich müde Beine abkühlen, die Kinder Floß fahren und die Erwachsenen auf den Sonnenbänken eine Pause einlegen.', distance: '16 Autominuten', age: 'Alle Altersgruppen' },
+          { title: 'Tierpark Feld am See', description: 'Der Alpen Tierpark Feld am See ist ein Wildpark am Fuße eines Berges. Hier gibt es diverse heimische Tiere zu beobachten sowie einen kleinen Streichelzoo. Zwei Spielplätze sorgen für Abwechslung. Die Tour ist kinderwagen-geeignet, es gibt nur ein paar kleine Steigungen.', distance: '25 Autominuten', age: 'Alle Altersgruppen' },
+          { title: 'Bergbahn Gerlitzen-Alpe', description: 'Die Gerlitzen-Alpe ist ein bekannter Startpunkt für Paraglider. Hier gibt es bei guten Bedingungen also immer viel zu bestaunen. An den einzelnen Stationen der Bergbahnen (ganz oben und Mitte) warten verschiedene Spielplätze. Ganz oben auf dem Berg können die Kinder mit tollstem Panorama schaukeln und dank super geringer Steigungen auch entspannt eine kleine Wanderung mit ihren Eltern machen.', distance: '40 Autominuten', age: 'Alle Altersgruppen' },
+          { title: 'Panoramastraße Nockalm', description: 'Die Nockberge haben eine einzigartige Schönheit. Wie warme grüne Riesen liegen die Naturwunder in der Landschaft. Besonders eindrucksvoll lassen sie sich auf der Panoramastraße Nockalm bestaunen. Eltern planen das optimalerweise rund um den Mittagsschlaf und genießen dabei die Ruhe und den Ausblick. Aber Achtung: Es ist kurvig, schwache Mägen könnten sich bemerkbar machen.', distance: '15 Autominuten', age: 'Alle Altersgruppen' },
         ],
       },
     ],
