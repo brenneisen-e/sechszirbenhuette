@@ -26,6 +26,7 @@ export function FlagIcon({ code, size = 'small', round = false }: FlagIconProps)
         alt={code}
         className="inline-block rounded-full object-cover border border-gray-300"
         style={{ verticalAlign: 'middle' }}
+        loading="eager"
         onError={(e) => {
           (e.target as HTMLImageElement).style.display = 'none';
         }}
@@ -46,6 +47,7 @@ export function FlagIcon({ code, size = 'small', round = false }: FlagIconProps)
       alt={code}
       className="inline-block rounded-sm shadow-sm"
       style={{ verticalAlign: 'middle' }}
+      loading="eager"
       onError={(e) => {
         (e.target as HTMLImageElement).style.display = 'none';
       }}

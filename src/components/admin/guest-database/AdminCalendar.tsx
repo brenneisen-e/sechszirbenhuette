@@ -508,6 +508,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                                       src={`https://flagcdn.com/w20/${entry.nationality.split(',')[0]?.toLowerCase()}.png`}
                                       alt=""
                                       className="w-4 h-3 rounded-sm flex-shrink-0"
+                                      loading="eager"
                                     />
                                   )}
                                   {entry.isPortal && <span className="text-cyan-300 flex-shrink-0">[Portal]</span>}

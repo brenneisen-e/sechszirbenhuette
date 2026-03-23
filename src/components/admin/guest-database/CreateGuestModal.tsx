@@ -209,7 +209,7 @@ export function CreateGuestModal({
                 </label>
                 {screenshotPreview && (
                   <div className="relative w-16 h-16 mt-2 rounded-lg overflow-hidden border border-blue-300">
-                    <img src={screenshotPreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={screenshotPreview} alt="Preview" className="w-full h-full object-cover" loading="eager" />
                     <button
                       onClick={() => setScreenshotPreview(null)}
                       className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl"
