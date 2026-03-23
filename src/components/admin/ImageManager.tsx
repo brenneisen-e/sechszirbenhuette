@@ -738,7 +738,7 @@ export function ImageManager() {
 
       {/* Gallery Order Modal */}
       {showGalleryOrder && (
-        <GalleryOrderManager onClose={() => { setShowGalleryOrder(false); fetchMedia(); }} />
+        <GalleryOrderManager onClose={() => { setShowGalleryOrder(false); loadMedia(); }} />
       )}
 
       {/* Category Filter */}
