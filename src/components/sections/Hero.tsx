@@ -32,7 +32,8 @@ export function Hero() {
   useEffect(() => {
     if (!isMounted) return;
 
-    const win = window as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = window as any;
 
     // Check for preloaded thumbnail from LoadingScreen
     if (win.__heroThumbnailUrl) {
@@ -272,98 +273,96 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
+      <div className="relative z-10 flex flex-col h-full text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-5">
 
-        {/* Upper Third - Headline and Subtitle */}
-        <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
+        {/* Upper area - Left-aligned headline with green accent */}
+        <div className="flex-1 flex items-end md:items-center pb-4 md:pb-0 pt-20 sm:pt-24 md:pt-8">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="w-full"
+            className="flex items-stretch gap-4 md:gap-6 max-w-3xl"
           >
-            <motion.p
-              data-text-key="hero_title"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
-              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
-            >
-              {getText('hero_title')}
-            </motion.p>
-            <motion.p
-              data-text-key="hero_subtitle"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-[clamp(1.75rem,5vw,3rem)] leading-snug mt-2 text-white drop-shadow-md px-2"
-              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_subtitle') }}
-            >
-              {getText('hero_subtitle')}
-            </motion.p>
+            {/* Green accent line */}
+            <motion.div
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="w-1 md:w-1.5 rounded-full origin-top"
+              style={{ backgroundColor: LOGO_GREEN }}
+            />
+
+            <div>
+              <motion.p
+                data-text-key="hero_title"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.1] text-white drop-shadow-lg text-left"
+                style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
+              >
+                {getText('hero_title')}
+              </motion.p>
+              <motion.p
+                data-text-key="hero_subtitle"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="text-[clamp(1.5rem,4vw,2.5rem)] leading-snug mt-1 md:mt-2 text-white/90 drop-shadow-md text-left"
+                style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_subtitle') }}
+              >
+                {getText('hero_subtitle')}
+              </motion.p>
+              <motion.p
+                data-text-key="hero_description"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="text-[clamp(0.8rem,1.8vw,1.1rem)] leading-relaxed text-white/80 drop-shadow-sm mt-3 md:mt-4 max-w-xl text-left"
+                style={getTextStyle('hero_description')}
+              >
+                {getText('hero_description')}
+              </motion.p>
+            </div>
           </motion.div>
         </div>
 
-        {/* Middle Third - Flexible space */}
-        <div className="flex-[0.5] sm:flex-1" />
-
-        {/* Lower Third - Text and Icons */}
-        <div className="flex-1 flex flex-col items-center justify-center pb-20 sm:pb-16">
+        {/* Lower area - Feature icons */}
+        <div className="pb-20 sm:pb-16">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-5xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: videoLoaded ? 0 : 1.0 }}
+            className="grid grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 max-w-4xl"
           >
-            {/* Description */}
-            <motion.p
-              data-text-key="hero_description"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              className="text-[clamp(0.75rem,2vw,1.25rem)] leading-relaxed text-white/90 max-w-3xl mx-auto drop-shadow-sm mb-6 sm:mb-8 px-2"
-              style={getTextStyle('hero_description')}
-            >
-              {getText('hero_description')}
-            </motion.p>
-
-            {/* 6 Icons Row - 2 cols on xs, 3 on sm, 6 on md+ */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: videoLoaded ? 0 : 1.0 }}
-              className="grid grid-cols-2 min-[400px]:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 px-2"
-            >
-              {features.map((feature, index) => (
-                <motion.button
-                  key={index}
-                  onClick={feature.onClick}
-                  initial={{ opacity: 0, y: 30, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: videoLoaded ? 0.4 : 0.8,
-                    delay: videoLoaded ? index * 0.05 : 1.2 + index * 0.15,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center group cursor-pointer"
+            {features.map((feature, index) => (
+              <motion.button
+                key={index}
+                onClick={feature.onClick}
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: videoLoaded ? 0.4 : 0.8,
+                  delay: videoLoaded ? index * 0.05 : 1.2 + index * 0.15,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex flex-col items-center group cursor-pointer"
+              >
+                <motion.div
+                  className="w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
+                  style={{ backgroundColor: LOGO_GREEN }}
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <motion.div
-                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
-                    style={{ backgroundColor: LOGO_GREEN }}
-                    whileHover={{ scale: 1.15, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
-                  </motion.div>
-                  <span className="text-[clamp(0.625rem,1.5vw,0.875rem)] font-semibold text-white drop-shadow-sm leading-tight">
-                    {feature.label}
-                  </span>
-                </motion.button>
-              ))}
-            </motion.div>
+                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+                </motion.div>
+                <span className="text-[clamp(0.6rem,1.4vw,0.8rem)] font-semibold text-white drop-shadow-sm leading-tight">
+                  {feature.label}
+                </span>
+              </motion.button>
+            ))}
           </motion.div>
         </div>
       </div>
