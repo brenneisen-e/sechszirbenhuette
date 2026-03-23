@@ -8,7 +8,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useCallback, useState, useRef } from 'react';
 import {
   Bold,
   Italic,
@@ -101,9 +101,15 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
   });
 
   // Explicitly destroy editor on unmount to prevent orphaned DOM nodes
-  useEffect(() => {
+  // Use useLayoutEffect so cleanup runs BEFORE React tries to remove DOM nodes
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
     return () => {
-      if (editor) {
+      if (editor && !editor.isDestroyed) {
+        // Remove the editor DOM before React tries to reconcile
+        if (editorContainerRef.current) {
+          editorContainerRef.current.innerHTML = '';
+        }
         editor.destroy();
       }
     };
@@ -293,8 +299,10 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
         </div>
       )}
 
-      {/* Editor content */}
-      <EditorContent editor={editor} />
+      {/* Editor content - wrapped in ref div to handle DOM cleanup before React */}
+      <div ref={editorContainerRef}>
+        <EditorContent editor={editor} />
+      </div>
 
       {/* Bubble menu for images - appears when clicking on an image */}
       {editor && !editor.isDestroyed && (
