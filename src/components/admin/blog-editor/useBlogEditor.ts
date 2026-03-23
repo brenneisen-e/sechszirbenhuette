@@ -81,9 +81,12 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const loadMedia = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/media');
-      const data = await res.json() as { media: (MediaItem & { media_type?: string })[] };
-      // Only show images, not videos
-      const images = (data.media || []).filter(m => m.media_type !== 'video');
+      const data = await res.json() as { media: (MediaItem & { media_type?: string; category?: string })[] };
+      const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+      // Filter out videos and hero images
+      const images = (data.media || []).filter(m =>
+        m.media_type !== 'video' && !HERO_CATS.has(m.category || '')
+      );
       setAvailableMedia(images);
     } catch (err) {
       console.error('Error loading media:', err);

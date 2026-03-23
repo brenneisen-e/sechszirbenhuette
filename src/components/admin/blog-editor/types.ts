@@ -31,6 +31,7 @@ export interface MediaItem {
   url: string;
   alt_text: string;
   title: string;
+  category?: string;
 }
 
 export type EditorTab = 'list' | 'edit' | 'preview';
