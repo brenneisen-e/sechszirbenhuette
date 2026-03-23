@@ -75,7 +75,10 @@ export function Hero() {
     }
 
     const initHls = async () => {
-      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      const nativeHls = video.canPlayType('application/vnd.apple.mpegurl');
+      console.log('[Hero] Native HLS support:', nativeHls || 'none');
+
+      if (nativeHls) {
         // Safari supports HLS natively
         video.src = videoUrl;
         return;
@@ -83,7 +86,9 @@ export function Hero() {
 
       // Chrome, Firefox, etc. - use HLS.js
       try {
+        console.log('[Hero] Loading HLS.js...');
         const Hls = (await import('hls.js')).default;
+        console.log('[Hero] HLS.js loaded, supported:', Hls.isSupported());
         if (!Hls.isSupported() || cancelled) {
           if (!cancelled) video.src = videoUrl;
           return;
