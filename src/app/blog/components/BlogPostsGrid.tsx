@@ -20,8 +20,15 @@ interface BlogPost {
   created_at: string;
 }
 
+interface MediaItem {
+  id: number;
+  url: string;
+  alt_text: string;
+}
+
 interface BlogPostsGridProps {
   posts: BlogPost[];
+  fallbackImages?: MediaItem[];
 }
 
 function formatDate(dateString: string | null) {
@@ -33,7 +40,7 @@ function formatDate(dateString: string | null) {
   });
 }
 
-export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
+export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps) {
   if (posts.length === 0) return null;
 
   return (
@@ -55,9 +62,9 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
           >
             {/* Cover Image */}
             <div className="relative aspect-video bg-gray-100 shrink-0">
-              {post.cover_image_url ? (
+              {(post.cover_image_url || fallbackImages[0]) ? (
                 <Image
-                  src={post.cover_image_url}
+                  src={post.cover_image_url || fallbackImages[0]?.url || ''}
                   alt={post.cover_image_alt || post.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
