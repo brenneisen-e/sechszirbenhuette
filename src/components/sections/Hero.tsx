@@ -61,6 +61,15 @@ export function Hero() {
       });
   }, [isMounted]);
 
+  // Ensure video element is muted before anything else
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.volume = 0;
+      videoRef.current.defaultMuted = true;
+    }
+  }, []);
+
   // Set up HLS.js or native HLS playback
   useEffect(() => {
     if (!videoRef.current || !videoUrl) return;
@@ -68,15 +77,45 @@ export function Hero() {
     const video = videoRef.current;
     let cancelled = false;
 
+    // Force muted state before any source attachment
+    video.muted = true;
+    video.volume = 0;
+    video.defaultMuted = true;
+
     // Clean up previous HLS instance
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
+    const tryPlay = () => {
+      if (cancelled) return;
+      video.muted = true;
+      video.volume = 0;
+      const p = video.play();
+      if (p) {
+        p.then(() => {
+          if (!cancelled) {
+            setVideoLoaded(true);
+            setTimeout(() => setShowPlaceholder(false), 300);
+          }
+        }).catch(() => {
+          // Autoplay still blocked — start on any user interaction
+          const playOnInteraction = () => {
+            video.muted = true;
+            video.play().then(() => {
+              setVideoLoaded(true);
+              setTimeout(() => setShowPlaceholder(false), 300);
+            }).catch(() => {});
+          };
+          document.addEventListener('click', playOnInteraction, { once: true });
+          document.addEventListener('touchstart', playOnInteraction, { once: true });
+          document.addEventListener('scroll', playOnInteraction, { once: true });
+        });
+      }
+    };
+
     const initHls = async () => {
-      // iOS (all browsers use WebKit) and macOS Safari support native HLS
-      // Edge/Chrome falsely return "maybe" for canPlayType but can't play HLS
       const ua = navigator.userAgent;
       const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
@@ -84,15 +123,13 @@ export function Hero() {
 
       if (useNativeHls) {
         video.src = videoUrl;
-        video.play().catch(() => { /* autoplay blocked */ });
+        tryPlay();
         return;
       }
 
-      // All other browsers (Chrome, Edge, Firefox, Android) - use HLS.js
       try {
         const Hls = (await import('hls.js')).default;
         if (!Hls.isSupported() || cancelled) {
-          // Last resort: try direct src (won't work for HLS but handles mp4 fallback)
           if (!cancelled) video.src = videoUrl;
           return;
         }
@@ -102,14 +139,12 @@ export function Hero() {
           enableWorker: false,
           maxBufferLength: isMobile ? 15 : 30,
           maxMaxBufferLength: isMobile ? 30 : 60,
-          startLevel: isMobile ? 0 : -1, // Start with lowest quality on mobile
+          startLevel: isMobile ? 0 : -1,
         });
 
         hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
           if (data.fatal) {
-            console.error('[Hero] HLS fatal error:', data.type, data.details);
             if (data.type === 'networkError') {
-              // Try to recover from network errors once
               hls.startLoad();
             } else {
               hls.destroy();
@@ -120,14 +155,13 @@ export function Hero() {
         });
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => { /* autoplay blocked */ });
+          tryPlay();
         });
 
         hls.loadSource(videoUrl);
         hls.attachMedia(video);
         hlsRef.current = hls;
       } catch {
-        // HLS.js failed to load — try direct src as last resort
         if (!cancelled) video.src = videoUrl;
       }
     };
@@ -143,32 +177,15 @@ export function Hero() {
     };
   }, [videoUrl]);
 
-  // Handle video ready to play
+  // Also try play when video reports it can play (belt and suspenders)
   const handleVideoCanPlay = () => {
     if (videoRef.current && !videoLoaded) {
-      const video = videoRef.current;
-      // Ensure muted attribute is set (some browsers need this for autoplay)
-      video.muted = true;
-      video.currentTime = 0;
-      video.play().then(() => {
+      videoRef.current.muted = true;
+      videoRef.current.volume = 0;
+      videoRef.current.play().then(() => {
         setVideoLoaded(true);
         setTimeout(() => setShowPlaceholder(false), 300);
-      }).catch((err) => {
-        console.warn('[Hero] Autoplay blocked:', err.name);
-        // Still show video frame even if autoplay is blocked
-        setVideoLoaded(true);
-        setTimeout(() => setShowPlaceholder(false), 300);
-        // Retry play on first user interaction
-        const playOnInteraction = () => {
-          video.play().catch(() => {});
-          document.removeEventListener('click', playOnInteraction);
-          document.removeEventListener('touchstart', playOnInteraction);
-          document.removeEventListener('scroll', playOnInteraction);
-        };
-        document.addEventListener('click', playOnInteraction, { once: true });
-        document.addEventListener('touchstart', playOnInteraction, { once: true });
-        document.addEventListener('scroll', playOnInteraction, { once: true });
-      });
+      }).catch(() => {});
     }
   };
 
