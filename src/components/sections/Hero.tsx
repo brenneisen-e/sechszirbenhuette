@@ -312,7 +312,7 @@ export function Hero() {
       <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
 
         {/* Upper Third - Headline centered */}
-        <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
+        <div className="flex-1 flex items-center justify-center pt-20 sm:pt-24 md:pt-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

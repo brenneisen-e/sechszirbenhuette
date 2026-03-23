@@ -76,20 +76,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for admin session
-    const sessionId = request.cookies.get('admin_session')?.value;
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await env.DB.prepare(
-      'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")'
-    ).bind(sessionId).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json() as { settings?: Record<string, string> };
     const { settings } = body;
 

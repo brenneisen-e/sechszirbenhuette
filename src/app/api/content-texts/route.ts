@@ -161,34 +161,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for admin session
-    const sessionId = request.cookies.get('admin_session')?.value;
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Ensure admin_sessions table exists
-    try {
-      await env.DB.prepare(`
-        CREATE TABLE IF NOT EXISTS admin_sessions (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          session_id TEXT NOT NULL UNIQUE,
-          expires_at DATETIME NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-      `).run();
-    } catch (tableError) {
-      console.error('Error creating admin_sessions table:', tableError);
-    }
-
-    const session = await env.DB.prepare(
-      'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")'
-    ).bind(sessionId).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json() as {
       text_key?: string;
       content?: string;
