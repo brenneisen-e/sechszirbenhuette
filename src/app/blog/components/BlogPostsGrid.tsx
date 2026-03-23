@@ -54,7 +54,7 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
         Neueste Beiträge
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((post) => (
+        {posts.map((post, postIndex) => (
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
@@ -62,9 +62,9 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
           >
             {/* Cover Image */}
             <div className="relative aspect-video bg-gray-100 shrink-0">
-              {(post.cover_image_url || fallbackImages[0]) ? (
+              {(post.cover_image_url || fallbackImages[postIndex]) ? (
                 <Image
-                  src={post.cover_image_url || fallbackImages[0]?.url || ''}
+                  src={post.cover_image_url || fallbackImages[postIndex]?.url || ''}
                   alt={post.cover_image_alt || post.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
