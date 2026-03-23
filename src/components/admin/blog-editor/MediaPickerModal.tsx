@@ -95,7 +95,7 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
         {/* Media grid */}
         <div className="p-4 overflow-y-auto max-h-[55vh]">
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-            {availableMedia.filter(m => m.url).map((media) => (
+            {availableMedia.filter(m => m.url && m.url.startsWith('https://')).map((media) => (
               <button
                 key={media.id}
                 onClick={() => onSelect(media)}

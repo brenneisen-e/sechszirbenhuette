@@ -154,6 +154,9 @@ function AdminPageContent() {
       const data = await response.json() as { authenticated: boolean };
       setIsAuthenticated(data.authenticated);
       if (data.authenticated) {
+        // Restore password from sessionStorage after page refresh
+        const savedPw = sessionStorage.getItem('_admin_pw');
+        if (savedPw) setAdminPassword(savedPw);
         setIsInitialLoading(false);
       }
     } catch {
@@ -175,6 +178,7 @@ function AdminPageContent() {
       if (response.ok) {
         setIsAuthenticated(true);
         setAdminPassword(loginPassword);
+        sessionStorage.setItem('_admin_pw', loginPassword);
         setLoginPassword('');
         setIsInitialLoading(false);
       } else {
@@ -192,6 +196,8 @@ function AdminPageContent() {
       await fetch('/api/admin/login', { method: 'DELETE' });
     } catch { /* ignore */ }
     setIsAuthenticated(false);
+    setAdminPassword('');
+    sessionStorage.removeItem('_admin_pw');
   };
 
   const toggleDemoMode = () => {
