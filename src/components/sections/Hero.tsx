@@ -49,10 +49,14 @@ export function Hero() {
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]?.url) {
+          console.log('[Hero] Video URL:', data.media[0].url);
           setVideoUrl(data.media[0].url);
+        } else {
+          console.warn('[Hero] No hero video found in API response');
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('[Hero] Failed to fetch video URL:', err);
         setVideoError(true);
       });
   }, [isMounted]);
@@ -62,6 +66,7 @@ export function Hero() {
     if (!videoRef.current || !videoUrl) return;
 
     const video = videoRef.current;
+    let cancelled = false;
 
     // Clean up previous HLS instance
     if (hlsRef.current) {
@@ -69,31 +74,56 @@ export function Hero() {
       hlsRef.current = null;
     }
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari supports HLS natively
-      video.src = videoUrl;
-    } else {
+    const initHls = async () => {
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari supports HLS natively
+        video.src = videoUrl;
+        return;
+      }
+
       // Chrome, Firefox, etc. - use HLS.js
-      (async () => {
-        try {
-          const Hls = (await import('hls.js')).default;
-          if (Hls.isSupported()) {
-            const hls = new Hls({ enableWorker: false });
-            hls.loadSource(videoUrl);
-            hls.attachMedia(video);
-            hlsRef.current = hls;
-          } else {
-            // Fallback: try setting src directly (unlikely to work for HLS)
-            video.src = videoUrl;
-          }
-        } catch {
-          // hls.js failed to load, try direct src as last resort
-          video.src = videoUrl;
+      try {
+        const Hls = (await import('hls.js')).default;
+        if (!Hls.isSupported() || cancelled) {
+          if (!cancelled) video.src = videoUrl;
+          return;
         }
-      })();
-    }
+
+        const hls = new Hls({
+          enableWorker: false,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+        });
+
+        hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
+          console.error('[Hero] HLS error:', data.type, data.details, 'fatal:', data.fatal);
+          if (data.fatal) {
+            hls.destroy();
+            hlsRef.current = null;
+            if (!cancelled) setVideoError(true);
+          }
+        });
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('[Hero] HLS manifest parsed, starting playback');
+          video.play().catch(() => {
+            // Autoplay blocked
+          });
+        });
+
+        hls.loadSource(videoUrl);
+        hls.attachMedia(video);
+        hlsRef.current = hls;
+      } catch (err) {
+        console.error('[Hero] Failed to init HLS.js:', err);
+        if (!cancelled) video.src = videoUrl;
+      }
+    };
+
+    initHls();
 
     return () => {
+      cancelled = true;
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
