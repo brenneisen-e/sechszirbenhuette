@@ -12,6 +12,7 @@ interface GalleryImage {
   title: string;
   description: string;
   category: string;
+  tags?: string[]; // meta-flags like 'innen', 'aussen'
 }
 
 interface MediaItem {
@@ -20,6 +21,7 @@ interface MediaItem {
   alt_text: string;
   title: string;
   category: string;
+  categories?: string[];
 }
 
 // Map database categories to gallery categories
@@ -112,6 +114,7 @@ export function Galerie() {
   const [isMounted, setIsMounted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
   // Start with empty images to prevent hydration mismatch
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,7 +170,7 @@ export function Galerie() {
     setCurrentPage(0);
     setIsExpanded(false);
     setMobileIndex(0);
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedSubCategory]);
 
   // Fetch images from API on mount (only after client mount to prevent hydration mismatch)
   useEffect(() => {
@@ -199,6 +202,7 @@ export function Galerie() {
                 title,
                 description,
                 category: categoryMap[img.category] || img.category,
+                tags: img.categories || [],
               };
             });
 
@@ -249,18 +253,64 @@ export function Galerie() {
     'hund-millstaetter': { de: 'Millstätter See', en: 'Millstätter See' },
   };
 
-  // Build categories dynamically - only show main gallery categories
-  const categoryIds = ['all', 'aussen', 'wohnen', 'schlafen', 'kueche', 'bad', 'umgebung', 'extras'];
+  // Top-level categories: Alle, Innen, Außen, Extras
+  const topCategories = [
+    { id: 'all', label: categoryLabels.all?.[language as 'de' | 'en'] || 'Alle', count: images.length },
+    {
+      id: 'innen',
+      label: language === 'de' ? 'Innen' : 'Interior',
+      count: images.filter(img => ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) || img.tags?.includes('innen')).length,
+    },
+    {
+      id: 'aussen',
+      label: language === 'de' ? 'Außen' : 'Exterior',
+      count: images.filter(img => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen')).length,
+    },
+    {
+      id: 'extras',
+      label: categoryLabels.extras?.[language as 'de' | 'en'] || 'Extras',
+      count: images.filter(img => img.category === 'extras').length,
+    },
+  ];
 
-  const categories = categoryIds.map(id => ({
-    id,
-    label: categoryLabels[id]?.[language as 'de' | 'en'] || id,
-    count: id === 'all' ? images.length : images.filter(img => img.category === id).length,
-  }));
+  // Sub-categories for Innen and Außen
+  const innenSubCategories = ['wohnen', 'schlafen', 'kueche', 'bad'].filter(
+    id => images.some(img => img.category === id)
+  );
+  const aussenSubCategories = ['aussen', 'umgebung'].filter(
+    id => images.some(img => img.category === id)
+  );
 
-  const filteredImages = selectedCategory === 'all'
-    ? images
-    : images.filter(img => img.category === selectedCategory);
+  const showSubFilters = selectedCategory === 'innen' || selectedCategory === 'aussen';
+  const subCategories = selectedCategory === 'innen' ? innenSubCategories : selectedCategory === 'aussen' ? aussenSubCategories : [];
+
+  // Filter images
+  const filteredImages = (() => {
+    if (selectedCategory === 'all') return images;
+    if (selectedCategory === 'extras') return images.filter(img => img.category === 'extras');
+
+    if (selectedCategory === 'innen') {
+      const innenImages = images.filter(
+        img => ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) || img.tags?.includes('innen')
+      );
+      if (selectedSubCategory) {
+        return innenImages.filter(img => img.category === selectedSubCategory);
+      }
+      return innenImages;
+    }
+
+    if (selectedCategory === 'aussen') {
+      const aussenImages = images.filter(
+        img => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen')
+      );
+      if (selectedSubCategory) {
+        return aussenImages.filter(img => img.category === selectedSubCategory);
+      }
+      return aussenImages;
+    }
+
+    return images.filter(img => img.category === selectedCategory);
+  })();
 
   // Calculate paginated images
   const totalPages = Math.ceil(filteredImages.length / imagesPerPage);
@@ -292,12 +342,15 @@ export function Galerie() {
         </div>
 
         {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map((category) => (
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
+          {topCategories.map((category) => (
             <button
               key={category.id}
               data-category={category.id}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => {
+                setSelectedCategory(category.id);
+                setSelectedSubCategory(null);
+              }}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 selectedCategory === category.id
                   ? 'bg-logo-green text-white shadow-md'
@@ -308,6 +361,40 @@ export function Galerie() {
             </button>
           ))}
         </div>
+
+        {/* Sub-category Filter (for Innen / Außen) */}
+        {showSubFilters && subCategories.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            <button
+              onClick={() => setSelectedSubCategory(null)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                !selectedSubCategory
+                  ? 'bg-logo-green/20 text-logo-green border border-logo-green/30'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              {language === 'de' ? 'Alle' : 'All'}
+            </button>
+            {subCategories.map((subCat) => {
+              const count = images.filter(img => img.category === subCat).length;
+              return (
+                <button
+                  key={subCat}
+                  onClick={() => setSelectedSubCategory(subCat)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    selectedSubCategory === subCat
+                      ? 'bg-logo-green/20 text-logo-green border border-logo-green/30'
+                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  {categoryLabels[subCat]?.[language as 'de' | 'en'] || subCat}
+                  {count > 0 && <span className="text-xs opacity-75 ml-1">({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!showSubFilters && <div className="mb-4" />}
 
         {/* Loading State */}
         {isLoading && (

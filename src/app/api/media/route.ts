@@ -8,9 +8,15 @@ interface MediaRecord {
   alt_text: string;
   title: string;
   category: string;
+  categories?: string[];
   media_type: 'image' | 'video';
   display_order: number;
   created_at: string;
+}
+
+interface MediaCategoryRecord {
+  media_id: string;
+  category: string;
 }
 
 // Cloudflare types
@@ -105,10 +111,33 @@ export async function GET(request: NextRequest) {
     const stmt = env.DB.prepare(query);
     const result = await (params.length > 0 ? stmt.bind(...params) : stmt).all<MediaRecord>();
 
-    // If we have data from D1, return it with cache headers
+    // If we have data from D1, also fetch junction table categories
     if (result.results && result.results.length > 0) {
+      const mediaList = result.results;
+
+      // Fetch additional categories from junction table
+      try {
+        const mediaIds = mediaList.map(m => m.id);
+        const placeholders = mediaIds.map(() => '?').join(',');
+        const catResult = await env.DB.prepare(
+          `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`
+        ).bind(...mediaIds).all<MediaCategoryRecord>();
+
+        const categoriesMap: Record<string, string[]> = {};
+        (catResult.results || []).forEach(row => {
+          if (!categoriesMap[row.media_id]) categoriesMap[row.media_id] = [];
+          categoriesMap[row.media_id].push(row.category);
+        });
+
+        mediaList.forEach(m => {
+          m.categories = categoriesMap[m.id] || [];
+        });
+      } catch {
+        // Junction table might not exist yet — continue without categories
+      }
+
       return NextResponse.json(
-        { media: result.results },
+        { media: mediaList },
         {
           headers: {
             'Cache-Control': `public, max-age=${cacheMaxAge}, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,

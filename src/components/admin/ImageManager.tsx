@@ -34,14 +34,13 @@ interface MediaRecord {
   cf_stream_uid?: string | null;
 }
 
+// Main categories visible in admin (Innen/Außen are auto-flags, not standalone)
 const MEDIA_CATEGORIES = [
   { value: 'hero', label: 'Hero' },
-  { value: 'aussen', label: 'Außen' },
-  { value: 'innen', label: 'Innen' },
-  { value: 'wohnen', label: 'Wohnen' },
-  { value: 'schlafen', label: 'Schlafen' },
+  { value: 'wohnen', label: 'Wohnzimmer' },
+  { value: 'schlafen', label: 'Schlafzimmer' },
   { value: 'kueche', label: 'Küche' },
-  { value: 'bad', label: 'Bad' },
+  { value: 'bad', label: 'Bad & Sauna' },
   { value: 'umgebung', label: 'Umgebung' },
   { value: 'sommer', label: 'Sommer' },
   { value: 'winter', label: 'Winter' },
@@ -51,12 +50,23 @@ const MEDIA_CATEGORIES = [
   { value: 'blog', label: 'Blog' },
 ];
 
+// Meta-flags: auto-applied based on main category, used for gallery filtering
+// "innen" = all indoor rooms, "aussen" = all outdoor/surroundings
+const META_FLAGS = ['innen', 'aussen'];
+
+const META_FLAG_LABELS: Record<string, string> = {
+  innen: 'Innen',
+  aussen: 'Außen',
+};
+
 // All hero-related categories are grouped under a single "Hero" section
 const HERO_CATEGORIES = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
 
-// Full list including hidden hero variants (for edit modal dropdown)
+// Full list including hidden hero variants and meta-flags (for edit modal dropdown)
 const ALL_CATEGORIES = [
   ...MEDIA_CATEGORIES,
+  { value: 'innen', label: 'Innen (Flag)' },
+  { value: 'aussen', label: 'Außen (Flag)' },
   { value: 'hero-thumbnail', label: 'Hero-Thumbnail' },
   { value: 'hero-1080p', label: 'Hero 1080p' },
   { value: 'hero-720p', label: 'Hero 720p' },
@@ -64,13 +74,15 @@ const ALL_CATEGORIES = [
   { value: 'hero-360p', label: 'Hero 360p' },
 ];
 
-// Auto-inherit parent categories: e.g. Küche also gets "Innen", Umgebung also gets "Außen"
+// Auto-inherit meta-flags based on main category
 const CATEGORY_PARENTS: Record<string, string[]> = {
   wohnen: ['innen'],
   schlafen: ['innen'],
   kueche: ['innen'],
   bad: ['innen'],
   umgebung: ['aussen'],
+  sommer: ['aussen'],
+  winter: ['aussen'],
 };
 
 /** Get categories including inherited parent categories */
@@ -865,8 +877,21 @@ export function ImageManager() {
                             {ALL_CATEGORIES.find((c) => c.value === m.category)?.label || m.category}
                           </span>
                         )}
+                        {/* Show Innen/Außen meta-flag badges */}
                         {m.categories
-                          ?.filter((c) => c !== m.category && !HERO_CATEGORIES.has(c))
+                          ?.filter((c) => META_FLAGS.includes(c))
+                          .map((c) => (
+                            <span
+                              key={c}
+                              className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                                c === 'innen' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'
+                              }`}
+                            >
+                              {META_FLAG_LABELS[c] || c}
+                            </span>
+                          ))}
+                        {m.categories
+                          ?.filter((c) => c !== m.category && !HERO_CATEGORIES.has(c) && !META_FLAGS.includes(c))
                           .map((c) => (
                             <span
                               key={c}
