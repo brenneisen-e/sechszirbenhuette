@@ -1,8 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Loader2, X, ImageIcon, Check } from 'lucide-react';
 import Image from 'next/image';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  aussen: 'Außen',
+  wohnen: 'Wohnzimmer',
+  schlafen: 'Schlafzimmer',
+  kueche: 'Küche',
+  bad: 'Bad & Sauna',
+  umgebung: 'Umgebung',
+  sommer: 'Sommer',
+  winter: 'Winter',
+  gastgeber: 'Gastgeber',
+  galerie: 'Galerie',
+  blog: 'Blog',
+  innen: 'Innen',
+};
 
 interface MediaRecord {
   id: string;
@@ -53,7 +68,10 @@ export function AmenityCardManager() {
       const assignData = await assignRes.json() as { assignments?: Assignment[] };
       const mediaData = await mediaRes.json() as { media?: MediaRecord[] };
       setAssignments(assignData.assignments || []);
-      setAllMedia((mediaData.media || []).filter((m: MediaRecord) => m.url && !m.url.includes('video')));
+      const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+      setAllMedia((mediaData.media || []).filter((m: MediaRecord) =>
+        m.url && !m.url.includes('video') && !HERO_CATS.has(m.category || '')
+      ));
     } catch {
       // ignore
     } finally {
@@ -92,14 +110,28 @@ export function AmenityCardManager() {
 
   const getAssignment = (cardKey: string) => assignments.find((a) => a.card_key === cardKey);
 
-  // Filter media by suggested category for the card being selected
-  const getFilteredMedia = (cardKey: string) => {
+  // Group media by category for picker modal
+  const groupedMedia = useMemo(() => {
+    const grp: Record<string, MediaRecord[]> = {};
+    for (const m of allMedia) {
+      const cat = m.category || 'sonstige';
+      if (!grp[cat]) grp[cat] = [];
+      grp[cat].push(m);
+    }
+    return grp;
+  }, [allMedia]);
+
+  // Get ordered categories: suggested first, then rest alphabetically
+  const getOrderedCategories = (cardKey: string) => {
     const card = CARD_KEYS.find((c) => c.key === cardKey);
-    if (!card?.suggestedCategory) return allMedia;
-    // Show suggested category first, then all others
-    const suggested = allMedia.filter((m) => m.category === card.suggestedCategory);
-    const others = allMedia.filter((m) => m.category !== card.suggestedCategory);
-    return [...suggested, ...others];
+    const suggested = card?.suggestedCategory || '';
+    const cats = Object.keys(groupedMedia).sort((a, b) =>
+      (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b)
+    );
+    if (suggested && groupedMedia[suggested]) {
+      return [suggested, ...cats.filter(c => c !== suggested)];
+    }
+    return cats;
   };
 
   if (loading) {
@@ -188,33 +220,48 @@ export function AmenityCardManager() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {getFilteredMedia(selectingFor).map((m) => {
-                  const isAssigned = assignments.some((a) => a.card_key === selectingFor && a.media_id === m.id);
+              <div className="space-y-5">
+                {getOrderedCategories(selectingFor).map((cat) => {
+                  const items = groupedMedia[cat] || [];
+                  if (items.length === 0) return null;
+                  const card = CARD_KEYS.find((c) => c.key === selectingFor);
+                  const isSuggested = card?.suggestedCategory === cat;
                   return (
-                    <button
-                      key={m.id}
-                      onClick={() => assignImage(selectingFor, m.id)}
-                      className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition ${
-                        isAssigned ? 'border-green-500 ring-2 ring-green-200' : 'border-transparent hover:border-gray-300'
-                      }`}
-                    >
-                      <Image
-                        src={m.url}
-                        alt={m.alt_text || m.title || ''}
-                        fill
-                        className="object-cover"
-                        sizes="150px"
-                      />
-                      {isAssigned && (
-                        <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-1 py-0.5">
-                        <p className="text-[9px] text-white truncate">{m.alt_text || m.title || m.category}</p>
+                    <div key={cat}>
+                      <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+                        isSuggested ? 'text-green-600' : 'text-gray-500'
+                      }`}>
+                        {CATEGORY_LABELS[cat] || cat} ({items.length})
+                        {isSuggested && <span className="ml-1 normal-case text-green-500">— empfohlen</span>}
+                      </h4>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                        {items.map((m) => {
+                          const isAssigned = assignments.some((a) => a.card_key === selectingFor && a.media_id === m.id);
+                          return (
+                            <button
+                              key={m.id}
+                              onClick={() => assignImage(selectingFor, m.id)}
+                              className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition ${
+                                isAssigned ? 'border-green-500 ring-2 ring-green-200' : 'border-transparent hover:border-gray-300'
+                              }`}
+                            >
+                              <Image
+                                src={m.url}
+                                alt={m.alt_text || m.title || ''}
+                                fill
+                                className="object-cover"
+                                sizes="150px"
+                              />
+                              {isAssigned && (
+                                <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                  <Check className="w-3 h-3 text-white" />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

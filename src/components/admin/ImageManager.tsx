@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { AmenityCardManager } from './AmenityCardManager';
+import { GalleryOrderManager } from './GalleryOrderManager';
 
 interface MediaRecord {
   id: string;
@@ -444,6 +445,7 @@ export function ImageManager() {
 
   // Drop on category section header (empty area)
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+  const [showGalleryOrder, setShowGalleryOrder] = useState(false);
 
   const handleDropOnCategory = async (e: React.DragEvent, targetCategory: string) => {
     e.preventDefault();
@@ -721,6 +723,22 @@ export function ImageManager() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Gallery Order Button */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-600">Kategorien</span>
+        <button
+          onClick={() => setShowGalleryOrder(true)}
+          className="text-xs px-3 py-1.5 bg-logo-green/10 text-logo-green rounded-lg hover:bg-logo-green/20 transition font-medium"
+        >
+          Homepage-Reihenfolge
+        </button>
+      </div>
+
+      {/* Gallery Order Modal */}
+      {showGalleryOrder && (
+        <GalleryOrderManager onClose={() => { setShowGalleryOrder(false); fetchMedia(); }} />
       )}
 
       {/* Category Filter */}

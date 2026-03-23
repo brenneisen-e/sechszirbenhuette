@@ -24,7 +24,7 @@ interface BlogPost {
   content: string;
   cover_image_url: string | null;
   cover_image_alt: string | null;
-  layout: 'standard' | 'carousel';
+  layout: 'standard' | 'carousel' | 'tabs';
   status: 'draft' | 'published';
   author: string;
   meta_title: string | null;
@@ -39,6 +39,180 @@ interface BlogPostImage {
   image_alt: string | null;
   caption: string | null;
   display_order: number;
+}
+
+// Carousel Cards component for carousel layout blog posts
+function CarouselCards({ images, onImageClick }: { images: BlogPostImage[]; onImageClick: (index: number) => void }) {
+  const [offset, setOffset] = useState(0);
+  const visibleDesktop = 2;
+  const maxOffset = Math.max(0, images.length - visibleDesktop);
+
+  return (
+    <div className="relative">
+      {/* Navigation */}
+      {images.length > visibleDesktop && (
+        <>
+          <button
+            onClick={() => setOffset(Math.max(0, offset - 1))}
+            disabled={offset === 0}
+            className="absolute left-0 top-1/3 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 -translate-x-1/2 disabled:opacity-30 transition"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={() => setOffset(Math.min(maxOffset, offset + 1))}
+            disabled={offset >= maxOffset}
+            className="absolute right-0 top-1/3 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 translate-x-1/2 disabled:opacity-30 transition"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
+
+      {/* Cards */}
+      <div className="overflow-hidden">
+        <div
+          className="flex gap-4 transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${offset * (100 / visibleDesktop + 2)}%)` }}
+        >
+          {images.map((slide, index) => (
+            <div
+              key={index}
+              className="shrink-0 w-full sm:w-[calc(50%-8px)] rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-md hover:shadow-lg transition-shadow"
+            >
+              {slide.image_url && (
+                <div
+                  className="relative aspect-[4/3] cursor-pointer"
+                  onClick={() => onImageClick(index)}
+                >
+                  <Image
+                    src={slide.image_url}
+                    alt={slide.image_alt || ''}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform"
+                  />
+                  <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-logo-green text-white flex items-center justify-center text-sm font-bold shadow">
+                    {index + 1}
+                  </div>
+                </div>
+              )}
+              <div className="p-5">
+                {slide.image_alt && (
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.image_alt}</h3>
+                )}
+                {slide.caption && (
+                  <p className="text-gray-600 text-sm leading-relaxed">{slide.caption}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dots */}
+      {images.length > visibleDesktop && (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: maxOffset + 1 }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setOffset(i)}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                i === offset ? 'bg-logo-green w-6' : 'bg-logo-green/30 hover:bg-logo-green/50'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Tabs Content component for tabs layout blog posts
+function TabsContent({ content }: { content: string }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  let data: { intro?: string; tabs?: { title: string; slides: { title: string; description: string; tip?: string; difficulty?: string; duration?: string; image_url?: string }[] }[] };
+  try {
+    data = JSON.parse(content);
+  } catch {
+    return <p className="text-gray-600">{content}</p>;
+  }
+
+  const tabs = data.tabs || [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      {/* Intro */}
+      {data.intro && (
+        <p className="text-gray-600 mb-8 max-w-3xl">{data.intro}</p>
+      )}
+
+      {/* Tab buttons */}
+      {tabs.length > 0 && (
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-gray-100 rounded-xl p-1.5">
+            {tabs.map((tab, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveTab(idx)}
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  activeTab === idx
+                    ? 'bg-logo-green text-white shadow-md'
+                    : 'text-gray-500 hover:text-logo-green'
+                }`}
+              >
+                {tab.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active tab content */}
+      {tabs[activeTab] && (
+        <div className="space-y-4">
+          {tabs[activeTab].slides.map((slide, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
+            >
+              <div className="flex flex-col sm:flex-row">
+                {slide.image_url && (
+                  <div className="relative w-full sm:w-48 h-48 sm:h-auto shrink-0">
+                    <Image
+                      src={slide.image_url}
+                      alt={slide.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-5 flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{slide.description}</p>
+                  {(slide.difficulty || slide.duration) && (
+                    <div className="flex gap-3 mt-3 text-xs text-gray-400">
+                      {slide.difficulty && <span>Schwierigkeit: {slide.difficulty}</span>}
+                      {slide.duration && <span>Dauer: {slide.duration}</span>}
+                    </div>
+                  )}
+                  {slide.tip && (
+                    <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+                      <span className="font-medium">Tipp:</span> {slide.tip}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
 }
 
 // Simple markdown-to-HTML converter for blog content that was saved as markdown
@@ -307,7 +481,7 @@ export default function BlogPostPage() {
             </div>
           </motion.header>
 
-          {/* Image Carousel (if carousel layout) */}
+          {/* Carousel Cards (if carousel layout) */}
           {post.layout === 'carousel' && images.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -315,71 +489,28 @@ export default function BlogPostPage() {
               transition={{ delay: 0.2 }}
               className="mb-10"
             >
-              <div className="relative">
-                {/* Main Image */}
-                <div
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer"
-                  onClick={() => setLightboxOpen(true)}
-                >
-                  <Image
-                    src={images[currentImageIndex].image_url}
-                    alt={images[currentImageIndex].image_alt || ''}
-                    fill
-                    className="object-cover"
-                  />
-                  {images[currentImageIndex].caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <p className="text-white text-sm">{images[currentImageIndex].caption}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Navigation */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition"
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                    <button
-                      onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition"
-                    >
-                      <ChevronRight size={24} />
-                    </button>
-                  </>
-                )}
-
-                {/* Dots */}
-                {images.length > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    {images.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all ${
-                          currentImageIndex === index
-                            ? 'bg-logo-green w-6'
-                            : 'bg-logo-green/30 hover:bg-logo-green/50'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <CarouselCards
+                images={images}
+                onImageClick={(index) => {
+                  setCurrentImageIndex(index);
+                  setLightboxOpen(true);
+                }}
+              />
             </motion.div>
           )}
 
           {/* Post Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="prose prose-lg prose-green max-w-none"
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
-          />
+          {post.layout === 'tabs' ? (
+            <TabsContent content={post.content} />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="prose prose-lg prose-green max-w-none"
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
+            />
+          )}
 
           {/* Standard Layout Images (after content) */}
           {post.layout === 'standard' && images.length > 0 && (
