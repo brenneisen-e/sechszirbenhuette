@@ -93,6 +93,48 @@ export async function POST() {
     const results: string[] = [];
     const now = new Date().toISOString();
 
+    // First: ensure the layout column supports 'tabs'
+    // SQLite CHECK constraints can't be altered, so recreate table if needed
+    try {
+      // Test if 'tabs' is allowed by doing a dry check
+      await db.prepare(
+        "INSERT INTO blog_posts (id, slug, title, content, layout) VALUES ('__test_tabs__', '__test_tabs__', 'test', 'test', 'tabs')"
+      ).run();
+      // If it worked, delete the test row
+      await db.prepare("DELETE FROM blog_posts WHERE id = '__test_tabs__'").run();
+    } catch {
+      // 'tabs' not allowed — recreate table without CHECK or with updated CHECK
+      results.push('Layout-Constraint wird aktualisiert...');
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS blog_posts_new (
+          id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+          slug TEXT UNIQUE NOT NULL,
+          title TEXT NOT NULL,
+          subtitle TEXT,
+          excerpt TEXT,
+          content TEXT NOT NULL,
+          cover_image_url TEXT,
+          cover_image_alt TEXT,
+          layout TEXT DEFAULT 'standard' CHECK(layout IN ('standard', 'carousel', 'tabs')),
+          status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'published')),
+          author TEXT DEFAULT 'Sechszirbenhütte',
+          meta_title TEXT,
+          meta_description TEXT,
+          meta_keywords TEXT,
+          published_at TEXT,
+          created_at TEXT DEFAULT (datetime('now')),
+          updated_at TEXT DEFAULT (datetime('now'))
+        )
+      `).run();
+      await db.prepare('INSERT INTO blog_posts_new SELECT * FROM blog_posts').run();
+      await db.prepare('DROP TABLE blog_posts').run();
+      await db.prepare('ALTER TABLE blog_posts_new RENAME TO blog_posts').run();
+      await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug)').run();
+      await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status)').run();
+      await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at)').run();
+      results.push('Layout-Constraint aktualisiert');
+    }
+
     // Migrate Article 1 (carousel)
     const slug1 = generateSlug(ARTICLE_1.title);
     const existing1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first();
