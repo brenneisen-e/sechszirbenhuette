@@ -38,7 +38,8 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
         if (!videoUrl) return;
 
         // Store for Hero component to use immediately
-        (window as Record<string, unknown>).__heroVideoUrl = videoUrl;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).__heroVideoUrl = videoUrl;
 
         // 2. Preconnect to Stream domain
         const url = new URL(videoUrl);
@@ -54,7 +55,8 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
         const thumbRes = await fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' });
         const thumbData = await thumbRes.json() as { media?: { url: string }[] };
         if (thumbData.media?.[0]?.url) {
-          (window as Record<string, unknown>).__heroThumbnailUrl = thumbData.media[0].url;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).__heroThumbnailUrl = thumbData.media[0].url;
         }
       } catch {
         // Preload failed, Hero component will fetch as fallback
