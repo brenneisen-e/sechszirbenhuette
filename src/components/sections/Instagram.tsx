@@ -8,7 +8,7 @@ const LOGO_GREEN = '#1e5631';
 
 export function Instagram() {
   return (
-    <section className="py-16 bg-white">
+    <section className="pt-10 pb-6 bg-white">
       <div className="container mx-auto px-4">
         <motion.a
           href={INSTAGRAM_URL}
