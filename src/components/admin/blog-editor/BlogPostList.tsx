@@ -9,6 +9,7 @@ import {
   Calendar,
   LayoutGrid,
   List,
+  Layers,
 } from 'lucide-react';
 import type { BlogPost } from './types';
 
@@ -16,6 +17,8 @@ interface BlogPostListProps {
   posts: BlogPost[];
   onEdit: (post: BlogPost) => void;
   onDelete: (postId: string) => void;
+  onMigrate?: () => void;
+  migrating?: boolean;
 }
 
 const formatDate = (dateString: string | null) => {
@@ -27,7 +30,7 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
+export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating }: BlogPostListProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -40,6 +43,23 @@ export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
 
   return (
     <div className="space-y-4">
+      {/* Migrate button */}
+      {onMigrate && (
+        <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div>
+            <p className="text-sm font-medium text-amber-800">Statische Artikel migrieren</p>
+            <p className="text-xs text-amber-600">Die zwei Hauptartikel (Urlaubsziel + Ausflüge) als Blog-Posts anlegen</p>
+          </div>
+          <button
+            onClick={onMigrate}
+            disabled={migrating}
+            className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 font-medium"
+          >
+            {migrating ? 'Migriere...' : 'Migrieren'}
+          </button>
+        </div>
+      )}
+
       {posts.map((post) => (
         <div
           key={post.id}
@@ -85,12 +105,10 @@ export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
                 {formatDate(post.published_at || post.created_at)}
               </span>
               <span className="flex items-center gap-1">
-                {post.layout === 'carousel' ? (
-                  <LayoutGrid className="w-3 h-3" />
-                ) : (
-                  <List className="w-3 h-3" />
-                )}
-                {post.layout === 'carousel' ? 'Karussell' : 'Standard'}
+                {post.layout === 'carousel' ? <LayoutGrid className="w-3 h-3" /> :
+                 post.layout === 'tabs' ? <Layers className="w-3 h-3" /> :
+                 <List className="w-3 h-3" />}
+                {post.layout === 'carousel' ? 'Karussell' : post.layout === 'tabs' ? 'Tabs' : 'Standard'}
               </span>
             </div>
           </div>

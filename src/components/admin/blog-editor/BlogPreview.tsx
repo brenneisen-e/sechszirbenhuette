@@ -21,6 +21,8 @@ export function BlogPreview({
   onChangePreviewImage,
 }: BlogPreviewProps) {
   const isCarousel = currentPost.layout === 'carousel';
+  const isTabs = currentPost.layout === 'tabs';
+  const [activePreviewTab, setActivePreviewTab] = useState(0);
   const [carouselOffset, setCarouselOffset] = useState(0);
   const visibleSlides = 2;
   const maxOffset = Math.max(0, postImages.length - visibleSlides);
@@ -70,7 +72,7 @@ export function BlogPreview({
           </div>
 
           {/* Content / Intro text */}
-          {currentPost.content && (
+          {currentPost.content && !isTabs && (
             <div
               className={`prose prose-sm max-w-none ${isCarousel ? 'mb-4' : ''}`}
               dangerouslySetInnerHTML={{
@@ -176,6 +178,48 @@ export function BlogPreview({
               ))}
             </div>
           )}
+
+          {/* Tabs Layout Preview */}
+          {isTabs && (() => {
+            let tabsData: { intro?: string; tabs?: { title: string; slides: { title: string; description: string; tip?: string }[] }[] };
+            try { tabsData = JSON.parse(currentPost.content || '{}'); } catch { tabsData = {}; }
+            const tabs = tabsData.tabs || [];
+            return (
+              <>
+                {tabsData.intro && <p className="text-xs text-gray-600 mb-3">{tabsData.intro}</p>}
+                {tabs.length > 0 && (
+                  <div>
+                    <div className="flex gap-1 mb-3">
+                      {tabs.map((tab, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActivePreviewTab(idx)}
+                          className={`px-2 py-1 text-[10px] rounded-lg transition ${
+                            activePreviewTab === idx ? 'bg-logo-green text-white' : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {tab.title}
+                        </button>
+                      ))}
+                    </div>
+                    {tabs[activePreviewTab] && (
+                      <div className="space-y-2">
+                        {tabs[activePreviewTab].slides.map((slide, idx) => (
+                          <div key={idx} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
+                            <h5 className="text-xs font-bold text-gray-800">{slide.title}</h5>
+                            <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">{slide.description}</p>
+                            {slide.tip && (
+                              <p className="text-[10px] text-amber-600 mt-1">Tipp: {slide.tip}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>

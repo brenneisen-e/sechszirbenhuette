@@ -7,7 +7,7 @@ export interface BlogPost {
   content: string;
   cover_image_url: string | null;
   cover_image_alt: string | null;
-  layout: 'standard' | 'carousel';
+  layout: 'standard' | 'carousel' | 'tabs';
   status: 'draft' | 'published';
   author: string;
   meta_title: string | null;
@@ -32,6 +32,21 @@ export interface MediaItem {
   alt_text: string;
   title: string;
   category?: string;
+}
+
+export interface BlogTab {
+  title: string;
+  icon?: string;
+  slides: BlogTabSlide[];
+}
+
+export interface BlogTabSlide {
+  title: string;
+  description: string;
+  image_url?: string;
+  tip?: string;
+  difficulty?: string;
+  duration?: string;
 }
 
 export type EditorTab = 'list' | 'edit' | 'preview';

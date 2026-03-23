@@ -33,7 +33,7 @@ interface BlogPost {
   excerpt: string | null;
   cover_image_url: string | null;
   cover_image_alt: string | null;
-  layout: 'standard' | 'carousel';
+  layout: 'standard' | 'carousel' | 'tabs';
   status: 'draft' | 'published';
   author: string;
   published_at: string | null;

@@ -24,7 +24,7 @@ interface BlogPost {
   content: string;
   cover_image_url: string | null;
   cover_image_alt: string | null;
-  layout: 'standard' | 'carousel';
+  layout: 'standard' | 'carousel' | 'tabs';
   status: 'draft' | 'published';
   author: string;
   meta_title: string | null;
@@ -124,6 +124,94 @@ function CarouselCards({ images, onImageClick }: { images: BlogPostImage[]; onIm
         </div>
       )}
     </div>
+  );
+}
+
+// Tabs Content component for tabs layout blog posts
+function TabsContent({ content }: { content: string }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  let data: { intro?: string; tabs?: { title: string; slides: { title: string; description: string; tip?: string; difficulty?: string; duration?: string; image_url?: string }[] }[] };
+  try {
+    data = JSON.parse(content);
+  } catch {
+    return <p className="text-gray-600">{content}</p>;
+  }
+
+  const tabs = data.tabs || [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      {/* Intro */}
+      {data.intro && (
+        <p className="text-gray-600 mb-8 max-w-3xl">{data.intro}</p>
+      )}
+
+      {/* Tab buttons */}
+      {tabs.length > 0 && (
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-gray-100 rounded-xl p-1.5">
+            {tabs.map((tab, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveTab(idx)}
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  activeTab === idx
+                    ? 'bg-logo-green text-white shadow-md'
+                    : 'text-gray-500 hover:text-logo-green'
+                }`}
+              >
+                {tab.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active tab content */}
+      {tabs[activeTab] && (
+        <div className="space-y-4">
+          {tabs[activeTab].slides.map((slide, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
+            >
+              <div className="flex flex-col sm:flex-row">
+                {slide.image_url && (
+                  <div className="relative w-full sm:w-48 h-48 sm:h-auto shrink-0">
+                    <Image
+                      src={slide.image_url}
+                      alt={slide.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-5 flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{slide.description}</p>
+                  {(slide.difficulty || slide.duration) && (
+                    <div className="flex gap-3 mt-3 text-xs text-gray-400">
+                      {slide.difficulty && <span>Schwierigkeit: {slide.difficulty}</span>}
+                      {slide.duration && <span>Dauer: {slide.duration}</span>}
+                    </div>
+                  )}
+                  {slide.tip && (
+                    <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+                      <span className="font-medium">Tipp:</span> {slide.tip}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
   );
 }
 
@@ -412,13 +500,17 @@ export default function BlogPostPage() {
           )}
 
           {/* Post Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="prose prose-lg prose-green max-w-none"
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
-          />
+          {post.layout === 'tabs' ? (
+            <TabsContent content={post.content} />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="prose prose-lg prose-green max-w-none"
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
+            />
+          )}
 
           {/* Standard Layout Images (after content) */}
           {post.layout === 'standard' && images.length > 0 && (

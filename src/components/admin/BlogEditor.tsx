@@ -164,6 +164,8 @@ export default function BlogEditor() {
             posts={posts}
             onEdit={handleEditPost}
             onDelete={handleDelete}
+            onMigrate={handleMigrateBlog}
+            migrating={migrating}
           />
         )}
 

@@ -11,11 +11,12 @@ import {
   Plus,
   List,
   LayoutGrid,
+  Layers,
   GripVertical,
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import type { BlogPost, BlogPostImage } from './types';
+import type { BlogPost, BlogPostImage, BlogTab } from './types';
 import { RichTextEditor } from './RichTextEditor';
 
 interface BlogEditorFormProps {
@@ -50,7 +51,25 @@ export function BlogEditorForm({
   onMediaUploaded,
 }: BlogEditorFormProps) {
   const isCarousel = currentPost.layout === 'carousel';
+  const isTabs = currentPost.layout === 'tabs';
   const [expandedSlide, setExpandedSlide] = useState<number | null>(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+  // Parse tabs data from content JSON
+  const parseTabs = (): { intro: string; tabs: BlogTab[] } => {
+    try {
+      const data = JSON.parse(currentPost.content || '{}');
+      return { intro: data.intro || '', tabs: data.tabs || [] };
+    } catch {
+      return { intro: currentPost.content || '', tabs: [] };
+    }
+  };
+
+  const updateTabs = (intro: string, tabs: BlogTab[]) => {
+    onUpdatePost({ content: JSON.stringify({ intro, tabs }) });
+  };
+
+  const tabsData = isTabs ? parseTabs() : { intro: '', tabs: [] };
 
   return (
     <div className={activeTab === 'preview' ? 'hidden lg:block' : ''}>
@@ -80,6 +99,17 @@ export function BlogEditorForm({
             >
               <LayoutGrid className="w-5 h-5" />
               Karussell
+            </button>
+            <button
+              onClick={() => onUpdatePost({ layout: 'tabs' })}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition ${
+                currentPost.layout === 'tabs'
+                  ? 'border-logo-green bg-logo-green/10 text-logo-green'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <Layers className="w-5 h-5" />
+              Tabs
             </button>
           </div>
         </div>
@@ -367,6 +397,187 @@ export function BlogEditorForm({
                   );
                 })}
               </div>
+            </div>
+          </>
+        )}
+
+        {/* === TABS LAYOUT === */}
+        {isTabs && (
+          <>
+            {/* Intro Text */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Einleitungstext</label>
+              <textarea
+                value={tabsData.intro}
+                onChange={(e) => updateTabs(e.target.value, tabsData.tabs)}
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                placeholder="Einleitender Text über den Tabs..."
+              />
+            </div>
+
+            {/* Tab Management */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Tabs ({tabsData.tabs.length})
+                </label>
+                <button
+                  onClick={() => {
+                    const newTabs = [...tabsData.tabs, { title: `Tab ${tabsData.tabs.length + 1}`, slides: [] }];
+                    updateTabs(tabsData.intro, newTabs);
+                    setActiveTabIndex(newTabs.length - 1);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Tab hinzufügen
+                </button>
+              </div>
+
+              {tabsData.tabs.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl text-gray-400">
+                  <Layers className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Noch keine Tabs</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Tab selector */}
+                  <div className="flex gap-1 border-b border-gray-200">
+                    {tabsData.tabs.map((tab, tabIdx) => (
+                      <button
+                        key={tabIdx}
+                        onClick={() => setActiveTabIndex(tabIdx)}
+                        className={`px-3 py-2 text-sm border-b-2 transition ${
+                          activeTabIndex === tabIdx
+                            ? 'border-logo-green text-logo-green font-medium'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {tab.title || `Tab ${tabIdx + 1}`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Active tab editor */}
+                  {tabsData.tabs[activeTabIndex] && (
+                    <div className="space-y-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                      {/* Tab title */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Tab-Titel</label>
+                          <input
+                            type="text"
+                            value={tabsData.tabs[activeTabIndex].title}
+                            onChange={(e) => {
+                              const newTabs = [...tabsData.tabs];
+                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], title: e.target.value };
+                              updateTabs(tabsData.intro, newTabs);
+                            }}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            const newTabs = tabsData.tabs.filter((_, i) => i !== activeTabIndex);
+                            updateTabs(tabsData.intro, newTabs);
+                            setActiveTabIndex(Math.max(0, activeTabIndex - 1));
+                          }}
+                          className="mt-5 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                          title="Tab löschen"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Tab slides */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs font-medium text-gray-600">
+                            Einheiten ({tabsData.tabs[activeTabIndex].slides.length})
+                          </label>
+                          <button
+                            onClick={() => {
+                              const newTabs = [...tabsData.tabs];
+                              newTabs[activeTabIndex] = {
+                                ...newTabs[activeTabIndex],
+                                slides: [...newTabs[activeTabIndex].slides, { title: '', description: '' }],
+                              };
+                              updateTabs(tabsData.intro, newTabs);
+                            }}
+                            className="flex items-center gap-1 px-2 py-1 text-[10px] bg-gray-200 text-gray-600 rounded hover:bg-gray-300"
+                          >
+                            <Plus className="w-3 h-3" />
+                            Einheit
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          {tabsData.tabs[activeTabIndex].slides.map((slide, slideIdx) => (
+                            <div key={slideIdx} className="border border-gray-200 rounded-lg bg-white p-3 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-gray-500">Einheit {slideIdx + 1}</span>
+                                <button
+                                  onClick={() => {
+                                    const newTabs = [...tabsData.tabs];
+                                    newTabs[activeTabIndex] = {
+                                      ...newTabs[activeTabIndex],
+                                      slides: newTabs[activeTabIndex].slides.filter((_, i) => i !== slideIdx),
+                                    };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="p-0.5 text-red-400 hover:text-red-600"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <input
+                                type="text"
+                                value={slide.title}
+                                onChange={(e) => {
+                                  const newTabs = [...tabsData.tabs];
+                                  const newSlides = [...newTabs[activeTabIndex].slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx], title: e.target.value };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  updateTabs(tabsData.intro, newTabs);
+                                }}
+                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                placeholder="Titel"
+                              />
+                              <textarea
+                                value={slide.description}
+                                onChange={(e) => {
+                                  const newTabs = [...tabsData.tabs];
+                                  const newSlides = [...newTabs[activeTabIndex].slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx], description: e.target.value };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  updateTabs(tabsData.intro, newTabs);
+                                }}
+                                rows={2}
+                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                placeholder="Beschreibung..."
+                              />
+                              <input
+                                type="text"
+                                value={slide.tip || ''}
+                                onChange={(e) => {
+                                  const newTabs = [...tabsData.tabs];
+                                  const newSlides = [...newTabs[activeTabIndex].slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx], tip: e.target.value };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  updateTabs(tabsData.intro, newTabs);
+                                }}
+                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                placeholder="Tipp (optional)"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </>
         )}

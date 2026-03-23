@@ -193,13 +193,25 @@ export function useBlogEditor(): UseBlogEditorReturn {
       setError('Titel ist erforderlich');
       return;
     }
-    if (currentPost.layout !== 'carousel' && !currentPost.content) {
+    if (currentPost.layout === 'standard' && !currentPost.content) {
       setError('Inhalt ist erforderlich');
       return;
     }
     if (currentPost.layout === 'carousel' && postImages.length === 0) {
       setError('Mindestens eine Karussell-Einheit ist erforderlich');
       return;
+    }
+    if (currentPost.layout === 'tabs') {
+      try {
+        const tabsData = JSON.parse(currentPost.content || '{}');
+        if (!tabsData.tabs || tabsData.tabs.length === 0) {
+          setError('Mindestens ein Tab ist erforderlich');
+          return;
+        }
+      } catch {
+        setError('Tab-Daten sind ungültig');
+        return;
+      }
     }
 
     setSaving(true);
