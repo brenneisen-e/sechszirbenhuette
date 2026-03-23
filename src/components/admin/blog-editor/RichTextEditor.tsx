@@ -408,6 +408,7 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
                       src={media.url}
                       alt={media.alt_text || ''}
                       className="w-full h-full object-cover"
+                      loading="eager"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   </button>

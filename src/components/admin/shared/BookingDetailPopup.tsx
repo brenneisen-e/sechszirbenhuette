@@ -193,6 +193,7 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                 src={`https://flagcdn.com/w40/${data.nationality.split(',')[0]?.toLowerCase()}.png`}
                 alt=""
                 className="w-8 h-6 rounded shadow-sm"
+                loading="eager"
               />
             )}
             <div>

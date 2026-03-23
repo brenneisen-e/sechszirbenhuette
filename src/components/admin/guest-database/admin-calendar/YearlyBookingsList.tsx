@@ -95,6 +95,7 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
                       src={`https://flagcdn.com/w20/${guest.nationality.split(',')[0]?.toLowerCase()}.png`}
                       alt=""
                       className="w-5 h-4 rounded-sm shadow-sm"
+                      loading="eager"
                     />
                   )}
                   <span className="font-medium text-gray-900">{guest.guest_name}</span>

@@ -160,6 +160,7 @@ export function BlogEditorForm({
                 src={currentPost.cover_image_url}
                 alt={currentPost.cover_image_alt || ''}
                 className="w-full h-full object-cover"
+                loading="eager"
               />
               <button
                 onClick={() => onUpdatePost({ cover_image_url: null, cover_image_alt: null })}
@@ -206,6 +207,7 @@ export function BlogEditorForm({
                       src={img.image_url}
                       alt={img.image_alt || ''}
                       className="w-full h-full object-cover"
+                      loading="eager"
                     />
                     <button
                       onClick={() => onRemoveImage(index)}
@@ -289,6 +291,7 @@ export function BlogEditorForm({
                               src={slide.image_url}
                               alt=""
                               className="w-full h-full object-cover"
+                              loading="eager"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
@@ -349,6 +352,7 @@ export function BlogEditorForm({
                                   src={slide.image_url}
                                   alt={slide.image_alt || ''}
                                   className="w-full h-full object-cover"
+                                  loading="eager"
                                 />
                                 <button
                                   onClick={() => onOpenMediaPicker(index)}
