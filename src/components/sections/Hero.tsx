@@ -33,7 +33,7 @@ export function Hero() {
     if (!isMounted) return;
 
     // Fetch thumbnail
-    fetch('/api/media?category=hero-thumbnail&type=image')
+    fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]?.url) {
@@ -45,7 +45,7 @@ export function Hero() {
       });
 
     // Fetch hero video (expects an HLS manifest URL from Cloudflare Stream)
-    fetch('/api/media?category=hero&type=video')
+    fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
       .then((data) => {
         if (data.media?.[0]?.url) {
