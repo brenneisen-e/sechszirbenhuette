@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { Cloud, Check, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 interface CloudflareSettingsProps {
-  adminPassword: string;
 }
 
-export default function CloudflareSettings({ adminPassword }: CloudflareSettingsProps) {
+export default function CloudflareSettings({}: CloudflareSettingsProps) {
   const [apiToken, setApiToken] = useState('');
   const [savedToken, setSavedToken] = useState('');
   const [saving, setSaving] = useState(false);
@@ -17,9 +16,7 @@ export default function CloudflareSettings({ adminPassword }: CloudflareSettings
 
   // Load existing token
   useEffect(() => {
-    fetch('/api/admin/settings?key=cloudflare_api_token', {
-      headers: { 'x-admin-password': adminPassword },
-    })
+    fetch('/api/admin/settings?key=cloudflare_api_token')
       .then(res => res.json() as Promise<{ value?: string }>)
       .then((data) => {
         if (data.value) {
@@ -28,7 +25,7 @@ export default function CloudflareSettings({ adminPassword }: CloudflareSettings
         }
       })
       .catch(() => {});
-  }, [adminPassword]);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -36,10 +33,7 @@ export default function CloudflareSettings({ adminPassword }: CloudflareSettings
     try {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'cloudflare_api_token', value: apiToken }),
       });
       if (res.ok) {
@@ -62,9 +56,7 @@ export default function CloudflareSettings({ adminPassword }: CloudflareSettings
     setStatus(null);
     try {
       // Test by fetching CF Images usage
-      const res = await fetch('/api/admin/settings?action=test-cloudflare', {
-        headers: { 'x-admin-password': adminPassword },
-      });
+      const res = await fetch('/api/admin/settings?action=test-cloudflare');
       const data = await res.json() as { success?: boolean; message?: string; error?: string };
       if (data.success) {
         setStatus({ ok: true, message: data.message || 'Verbindung erfolgreich!' });

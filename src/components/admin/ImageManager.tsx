@@ -45,7 +45,7 @@ import { SeasonImageReplaceModal } from './image-manager/SeasonImageReplaceModal
 import { DuplicatesModal } from './image-manager/DuplicatesModal';
 import { HeroImageManager } from './image-manager/HeroImageManager';
 
-export function ImageManager({ adminPassword }: ImageManagerProps) {
+export function ImageManager({}: ImageManagerProps) {
   const [error, setError] = useState('');
   const [images, setImages] = useState<ImageRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -134,8 +134,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
       if (replacingSeasonImage.existingImage) {
         await fetch(`/api/admin/images?id=${replacingSeasonImage.existingImage.id}`, {
           method: 'DELETE',
-          headers: { 'x-admin-password': adminPassword },
-        });
+          });
       }
 
       const formData = new FormData();
@@ -146,7 +145,6 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
 
       const response = await fetch('/api/admin/images', {
         method: 'POST',
-        headers: { 'x-admin-password': adminPassword },
         body: formData,
       });
 
@@ -291,8 +289,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
       try {
         await fetch(`/api/admin/images?id=${imageId}`, {
           method: 'DELETE',
-          headers: { 'x-admin-password': adminPassword },
-        });
+          });
       } catch (err) {
         console.error('Delete error:', err);
       }
@@ -435,7 +432,6 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
 
         const response = await fetch('/api/admin/images', {
           method: 'POST',
-          headers: { 'x-admin-password': adminPassword },
           body: formData,
         });
 
@@ -463,8 +459,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       const response = await fetch(`/api/admin/images?id=${imageId}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword },
-      });
+        });
       if (!response.ok) throw new Error('Löschen fehlgeschlagen');
       await loadImages(selectedCategory || undefined);
     } catch (err) {
@@ -477,7 +472,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       const response = await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: image.id, is_hero: !image.is_hero }),
       });
       if (!response.ok) throw new Error('Update fehlgeschlagen');
@@ -508,7 +503,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       const response = await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: editingImage.id, alt_text: editAltText, category: editCategory, display_order: editDisplayOrder }),
       });
       if (!response.ok) throw new Error('Update fehlgeschlagen');
@@ -533,12 +528,12 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: image.id, display_order: prevImage.display_order }),
       });
       await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: prevImage.id, display_order: image.display_order }),
       });
       await loadImages(selectedCategory || undefined, showHeroOnly);
@@ -555,12 +550,12 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: image.id, display_order: nextImage.display_order }),
       });
       await fetch('/api/admin/images', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: nextImage.id, display_order: image.display_order }),
       });
       await loadImages(selectedCategory || undefined, showHeroOnly);
@@ -580,7 +575,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
     try {
       const response = await fetch('/api/admin/migrate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
       const data = (await response.json()) as { results?: string[]; error?: string };
@@ -671,7 +666,7 @@ export function ImageManager({ adminPassword }: ImageManagerProps) {
 
         {showHeroPanel && (
           <div className="mt-4">
-            <HeroImageManager adminPassword={adminPassword} />
+            <HeroImageManager />
           </div>
         )}
       </div>

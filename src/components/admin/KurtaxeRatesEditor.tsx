@@ -13,10 +13,9 @@ interface KurtaxeRate {
 }
 
 interface KurtaxeRatesEditorProps {
-  adminPassword: string;
 }
 
-export default function KurtaxeRatesEditor({ adminPassword }: KurtaxeRatesEditorProps) {
+export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
   const [rates, setRates] = useState<KurtaxeRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableExists, setTableExists] = useState(true);
@@ -34,9 +33,7 @@ export default function KurtaxeRatesEditor({ adminPassword }: KurtaxeRatesEditor
 
   const fetchRates = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/kurtaxe-rates', {
-        headers: { 'x-admin-password': adminPassword },
-      });
+      const res = await fetch('/api/admin/kurtaxe-rates');
       const data = await res.json() as { rates?: KurtaxeRate[]; tableExists?: boolean };
       setRates(data.rates || []);
       setTableExists(data.tableExists !== false);
@@ -45,7 +42,7 @@ export default function KurtaxeRatesEditor({ adminPassword }: KurtaxeRatesEditor
     } finally {
       setLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   useEffect(() => {
     fetchRates();
@@ -92,10 +89,7 @@ export default function KurtaxeRatesEditor({ adminPassword }: KurtaxeRatesEditor
       const method = editingId ? 'PUT' : 'POST';
       await fetch('/api/admin/kurtaxe-rates', {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -113,8 +107,7 @@ export default function KurtaxeRatesEditor({ adminPassword }: KurtaxeRatesEditor
     try {
       await fetch(`/api/admin/kurtaxe-rates?id=${id}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword },
-      });
+        });
       await fetchRates();
     } catch (err) {
       console.error('Failed to delete kurtaxe rate:', err);

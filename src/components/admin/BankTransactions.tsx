@@ -68,7 +68,6 @@ interface BookingWithTransactions {
 }
 
 interface BankTransactionsProps {
-  adminPassword: string;
   demoMode?: boolean;
 }
 
@@ -77,7 +76,7 @@ const MONTHS = [
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
 ];
 
-export default function BankTransactions({ adminPassword, demoMode = false }: BankTransactionsProps) {
+export default function BankTransactions({ demoMode = false }: BankTransactionsProps) {
   // Demo mode helpers
   const formatCurrency = (amount: number): string => {
     if (demoMode) return `~${roundDemoAmount(amount).toLocaleString('de-DE')} €`;
@@ -102,12 +101,8 @@ export default function BankTransactions({ adminPassword, demoMode = false }: Ba
     setLoading(true);
     try {
       const [guestsRes, bookingsRes] = await Promise.all([
-        fetch('/api/admin/guests', {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch('/api/admin/bookings', {
-          headers: { 'x-admin-password': adminPassword }
-        }),
+        fetch('/api/admin/guests'),
+        fetch('/api/admin/bookings'),
       ]);
 
       const guestsData = (await guestsRes.json()) as { guests?: { id: number; guest_name: string }[] };

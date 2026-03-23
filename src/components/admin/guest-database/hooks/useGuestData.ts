@@ -7,10 +7,9 @@ import type {
 } from '../types';
 
 interface UseGuestDataOptions {
-  adminPassword: string;
 }
 
-export function useGuestData({ adminPassword }: UseGuestDataOptions) {
+export function useGuestData({}: UseGuestDataOptions) {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,9 +25,7 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       if (filters?.status) params.append('status', filters.status);
       if (filters?.search) params.append('search', filters.search);
 
-      const response = await fetch(`/api/admin/guests?${params.toString()}`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/guests?${params.toString()}`);
       const data = await response.json() as GuestsResponse;
 
       if (data.error) {
@@ -49,10 +46,7 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
     try {
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(guest)
       });
 
@@ -69,17 +63,14 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       setError(`Fehler: ${err instanceof Error ? err.message : 'Unbekannt'}`);
       return false;
     }
-  }, [adminPassword]);
+  }, []);
 
   // Create new guest
   const createGuest = useCallback(async (guestData: Partial<Guest>): Promise<Guest | null> => {
     try {
       const response = await fetch('/api/admin/guests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(guestData)
       });
 
@@ -95,15 +86,14 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       console.error(err);
       return null;
     }
-  }, [adminPassword]);
+  }, []);
 
   // Delete guest
   const deleteGuest = useCallback(async (guestId: number): Promise<boolean> => {
     try {
       const response = await fetch(`/api/admin/guests?id=${guestId}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword }
-      });
+        });
 
       const data = await response.json() as { error?: string; success?: boolean };
       if (data.error) {
@@ -117,17 +107,14 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       console.error(err);
       return false;
     }
-  }, [adminPassword]);
+  }, []);
 
   // Update guest status
   const updateGuestStatus = useCallback(async (guestId: number, newStatus: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: guestId, status: newStatus })
       });
 
@@ -142,7 +129,7 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       console.error(err);
       return false;
     }
-  }, [adminPassword]);
+  }, []);
 
   // Toggle payment status
   const togglePayment = useCallback(async (
@@ -155,10 +142,7 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
 
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: guestId, [updateField]: isPaid ? 1 : 0 })
       });
 
@@ -180,7 +164,7 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
       console.error(err);
       return false;
     }
-  }, [adminPassword, guests]);
+  }, [guests]);
 
   // Clear messages
   const clearMessages = useCallback(() => {
@@ -207,16 +191,14 @@ export function useGuestData({ adminPassword }: UseGuestDataOptions) {
 }
 
 // Hook for loading tasks for a guest
-export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
+export function useGuestTasks({}: UseGuestDataOptions) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadGuestTasks = useCallback(async (guestId: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}`);
       const data = await response.json() as { tasks?: Task[] };
       setTasks(data.tasks || []);
     } catch (err) {
@@ -230,10 +212,7 @@ export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
     try {
       const response = await fetch('/api/admin/tasks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskData)
       });
       const data = await response.json() as { task?: Task };
@@ -242,16 +221,13 @@ export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
       console.error('Error creating task:', err);
       return null;
     }
-  }, [adminPassword]);
+  }, []);
 
   const updateTask = useCallback(async (taskData: Partial<Task> & { id: number }): Promise<Task | null> => {
     try {
       const response = await fetch('/api/admin/tasks', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskData)
       });
       const data = await response.json() as { task?: Task };
@@ -263,27 +239,26 @@ export function useGuestTasks({ adminPassword }: UseGuestDataOptions) {
       console.error('Error updating task:', err);
       return null;
     }
-  }, [adminPassword, tasks]);
+  }, [tasks]);
 
   const deleteTask = useCallback(async (taskId: number): Promise<boolean> => {
     try {
       await fetch(`/api/admin/tasks?id=${taskId}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword }
-      });
+        });
       setTasks(tasks.filter(t => t.id !== taskId));
       return true;
     } catch (err) {
       console.error('Error deleting task:', err);
       return false;
     }
-  }, [adminPassword, tasks]);
+  }, [tasks]);
 
   return { tasks, setTasks, loading, loadGuestTasks, createTask, updateTask, deleteTask };
 }
 
 // Hook for loading bookings for a guest
-export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
+export function useGuestBookings({}: UseGuestDataOptions) {
   const [bookings, setBookings] = useState<Record<number, Booking[]>>({});
   const [bankPayments, setBankPayments] = useState<Record<number, BankPayment[]>>({});
   const [loadingIds, setLoadingIds] = useState<Set<number>>(new Set());
@@ -292,12 +267,8 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
     setLoadingIds(prev => new Set(prev).add(guestId));
     try {
       const [bookingsRes, paymentsRes] = await Promise.all([
-        fetch(`/api/admin/bookings?guest_id=${guestId}`, {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch(`/api/admin/bank-transactions?guestId=${guestId}`, {
-          headers: { 'x-admin-password': adminPassword }
-        })
+        fetch(`/api/admin/bookings?guest_id=${guestId}`),
+        fetch(`/api/admin/bank-transactions?guestId=${guestId}`)
       ]);
 
       const bookingsData = await bookingsRes.json() as BookingsResponse;
@@ -324,10 +295,7 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
     try {
       const response = await fetch('/api/admin/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...bookingData, guest_id: guestId })
       });
 
@@ -344,7 +312,7 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
       console.error('Error creating booking:', err);
       return null;
     }
-  }, [adminPassword]);
+  }, []);
 
   return {
     bookings,
@@ -358,7 +326,7 @@ export function useGuestBookings({ adminPassword }: UseGuestDataOptions) {
 }
 
 // Hook for loading guest costs
-export function useGuestCosts({ adminPassword }: UseGuestDataOptions) {
+export function useGuestCosts({}: UseGuestDataOptions) {
   const [costs, setCosts] = useState<GuestCost[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -379,10 +347,7 @@ export function useGuestCosts({ adminPassword }: UseGuestDataOptions) {
     try {
       const response = await fetch('/api/admin/guest-costs', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(costData)
       });
       const data = await response.json() as { cost?: GuestCost };
@@ -394,21 +359,20 @@ export function useGuestCosts({ adminPassword }: UseGuestDataOptions) {
       console.error('Error creating cost:', err);
       return null;
     }
-  }, [adminPassword]);
+  }, []);
 
   const deleteCost = useCallback(async (costId: number): Promise<boolean> => {
     try {
       await fetch(`/api/admin/guest-costs?id=${costId}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword }
-      });
+        });
       setCosts(costs.filter(c => c.id !== costId));
       return true;
     } catch (err) {
       console.error('Error deleting cost:', err);
       return false;
     }
-  }, [adminPassword, costs]);
+  }, [costs]);
 
   return { costs, setCosts, loading, loadGuestCosts, createCost, deleteCost };
 }

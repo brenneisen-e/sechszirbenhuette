@@ -38,12 +38,11 @@ import type { PricingSettings } from './utility-costs';
 import { DEFAULT_PRICING } from './utility-costs';
 
 interface FinanceOverviewProps {
-  adminPassword: string;
   onNavigateToGuest?: (guestId: number) => void;
   demoMode?: boolean;
 }
 
-export default function FinanceOverview({ adminPassword, onNavigateToGuest, demoMode = false }: FinanceOverviewProps) {
+export default function FinanceOverview({ onNavigateToGuest, demoMode = false }: FinanceOverviewProps) {
   const [loading, setLoading] = useState(true);
   // Default to 2026 as we're almost there
   const [selectedYear, setSelectedYear] = useState(2026);
@@ -166,18 +165,10 @@ export default function FinanceOverview({ adminPassword, onNavigateToGuest, demo
     setLoading(true);
     try {
       const [guestsRes, expensesRes, settingsRes, bookingsRes] = await Promise.all([
-        fetch('/api/admin/guests', {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch(`/api/admin/expenses?year=${selectedYear}`, {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch('/api/admin/settings', {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch('/api/admin/bookings', {
-          headers: { 'x-admin-password': adminPassword }
-        }),
+        fetch('/api/admin/guests'),
+        fetch(`/api/admin/expenses?year=${selectedYear}`),
+        fetch('/api/admin/settings'),
+        fetch('/api/admin/bookings'),
       ]);
       const guestsData = (await guestsRes.json()) as { guests?: FinanceGuest[] };
       const expensesData = (await expensesRes.json()) as { expenses?: ExpenseRecord[] };

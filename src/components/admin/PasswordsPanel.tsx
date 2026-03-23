@@ -64,8 +64,7 @@ export function PasswordsPanel() {
     try {
       const response = await fetch('/api/admin/import-guests', {
         method: 'POST',
-        headers: {
-          'x-admin-password': ADMIN_PASSWORD,
+        headers: {ADMIN_PASSWORD,
           'Content-Type': 'application/json',
         },
       });

@@ -10,7 +10,6 @@ interface YearlyBookingsListProps {
   bookings: Booking[];
   year: number;
   onSelectBooking: (booking: Booking, guest: Guest) => void;
-  adminPassword: string;
 }
 
 // Combined display item
@@ -28,14 +27,12 @@ const DEFAULT_PRICING: PricingSettings = {
   reinigung: 100,
 };
 
-export function YearlyBookingsList({ guests, bookings, year, onSelectBooking, adminPassword }: YearlyBookingsListProps) {
+export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: YearlyBookingsListProps) {
   // Load pricing settings from DB
   const [pricing, setPricing] = useState<PricingSettings>(DEFAULT_PRICING);
 
   useEffect(() => {
-    fetch('/api/admin/settings', {
-      headers: { 'x-admin-password': adminPassword }
-    })
+    fetch('/api/admin/settings')
       .then(res => res.json() as Promise<{ settings?: Record<string, string> }>)
       .then((data) => {
         if (data.settings) {

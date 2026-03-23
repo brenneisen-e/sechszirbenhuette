@@ -158,18 +158,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check authentication
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
 
     const results: { slug: string; status: 'created' | 'exists' | 'error'; message?: string }[] = [];
 

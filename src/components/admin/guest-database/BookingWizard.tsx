@@ -37,7 +37,6 @@ interface BookingWizardProps {
   onClose: () => void;
   guestId: number;
   guestName: string;
-  adminPassword: string;
   onBookingCreated?: () => void;
   onBookingUpdated?: () => void;
   booking?: Booking;
@@ -151,7 +150,6 @@ export function BookingWizard({
   onClose,
   guestId,
   guestName,
-  adminPassword,
   onBookingCreated,
   onBookingUpdated,
   booking,
@@ -232,9 +230,7 @@ export function BookingWizard({
 
   useEffect(() => {
     // Load pricing settings (kurtaxeRates etc.) from DB
-    fetch('/api/admin/settings', {
-      headers: { 'x-admin-password': adminPassword }
-    })
+    fetch('/api/admin/settings')
       .then(res => res.json() as Promise<{ settings?: Record<string, string> }>)
       .then((data) => {
         if (data.settings) {
@@ -502,10 +498,7 @@ export function BookingWizard({
       const isNew = !bookingData.id || bookingData.id === 0;
       const response = await fetch('/api/admin/bookings', {
         method: isNew ? 'POST' : 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isNew ? { ...bookingData, guest_id: guestId } : bookingData),
       });
       const data = await response.json() as { booking?: Booking; error?: string };
@@ -522,11 +515,8 @@ export function BookingWizard({
           try {
             const posRes = await fetch('/api/admin/booking-positions', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-admin-password': adminPassword,
-              },
-              body: JSON.stringify({ ...pos, booking_id: data.booking.id }),
+              headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...pos, booking_id: data.booking.id }),
             });
             if (!posRes.ok) {
               const posData = await posRes.json().catch(() => ({ error: 'Unbekannt' }));

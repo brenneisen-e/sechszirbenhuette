@@ -13,10 +13,9 @@ interface PositionCategory {
 }
 
 interface PositionCategoriesEditorProps {
-  adminPassword: string;
 }
 
-export default function PositionCategoriesEditor({ adminPassword }: PositionCategoriesEditorProps) {
+export default function PositionCategoriesEditor({}: PositionCategoriesEditorProps) {
   const [categories, setCategories] = useState<PositionCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableExists, setTableExists] = useState(true);
@@ -34,9 +33,7 @@ export default function PositionCategoriesEditor({ adminPassword }: PositionCate
 
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/position-categories', {
-        headers: { 'x-admin-password': adminPassword },
-      });
+      const res = await fetch('/api/admin/position-categories');
       const data = await res.json() as { categories?: PositionCategory[]; tableExists?: boolean };
       setCategories(data.categories || []);
       setTableExists(data.tableExists !== false);
@@ -45,7 +42,7 @@ export default function PositionCategoriesEditor({ adminPassword }: PositionCate
     } finally {
       setLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   useEffect(() => {
     fetchCategories();
@@ -90,10 +87,7 @@ export default function PositionCategoriesEditor({ adminPassword }: PositionCate
       const method = editingId ? 'PUT' : 'POST';
       await fetch('/api/admin/position-categories', {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -111,8 +105,7 @@ export default function PositionCategoriesEditor({ adminPassword }: PositionCate
     try {
       await fetch(`/api/admin/position-categories?id=${id}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword },
-      });
+        });
       await fetchCategories();
     } catch (err) {
       console.error('Failed to delete position category:', err);

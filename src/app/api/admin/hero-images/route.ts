@@ -118,10 +118,6 @@ export async function POST(request: NextRequest) {
   try {
     const { env } = await getCloudflareContext() as { env: Env };
 
-    const adminPassword = request.headers.get('x-admin-password');
-    if (!env.ADMIN_PASSWORD || adminPassword !== env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -246,10 +242,6 @@ export async function DELETE(request: NextRequest) {
   try {
     const { env } = await getCloudflareContext() as { env: Env };
 
-    const adminPassword = request.headers.get('x-admin-password');
-    if (!env.ADMIN_PASSWORD || adminPassword !== env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const side = searchParams.get('side');

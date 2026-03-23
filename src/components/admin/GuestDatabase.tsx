@@ -45,12 +45,11 @@ import {
 import { BookingWizard } from './guest-database/BookingWizard';
 
 interface GuestDatabaseProps {
-  adminPassword: string;
   onDataLoaded?: () => void;
   demoMode?: boolean;
 }
 
-export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = false }: GuestDatabaseProps) {
+export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestDatabaseProps) {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -190,9 +189,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       if (yearFilter) params.append('year', yearFilter);
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(url + params.toString(), {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(url + params.toString());
 
       if (response.status === 401) {
         setError('Sitzung abgelaufen — bitte neu einloggen');
@@ -227,9 +224,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   // Load all bookings at once (for display in table)
   const loadAllBookings = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/bookings', {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch('/api/admin/bookings');
       const data = await response.json() as { bookings: Booking[]; error?: string };
 
       if (data.bookings) {
@@ -283,9 +278,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   const loadAllTasks = useCallback(async () => {
     setLoadingAllTasks(true);
     try {
-      const response = await fetch('/api/admin/tasks', {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch('/api/admin/tasks');
       const data = await response.json() as { tasks: Task[]; error?: string };
 
       if (data.error) {
@@ -303,9 +296,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   // Load pricing settings for consistent financial calculations
   const loadPricingSettings = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/settings', {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch('/api/admin/settings');
       const data = await response.json() as { settings?: Record<string, string> };
       if (data.settings) {
         // Parse kurtaxeRates from database (same as ExpensePanel)
@@ -363,12 +354,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       // Load bookings and bank payments in parallel
       const [bookingsRes, paymentsRes] = await Promise.all([
-        fetch(`/api/admin/bookings?guest_id=${guestId}`, {
-          headers: { 'x-admin-password': adminPassword }
-        }),
-        fetch(`/api/admin/bank-transactions?guestId=${guestId}`, {
-          headers: { 'x-admin-password': adminPassword }
-        })
+        fetch(`/api/admin/bookings?guest_id=${guestId}`),
+        fetch(`/api/admin/bank-transactions?guestId=${guestId}`)
       ]);
 
       const bookingsData = await bookingsRes.json() as BookingsResponse;
@@ -403,10 +390,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       // Create or update booking in bookings table
       const response = await fetch('/api/admin/bookings', {
         method: isNewBooking ? 'POST' : 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isNewBooking ? { ...bookingData, guest_id: addingBookingForGuest } : bookingData)
       });
 
@@ -429,7 +413,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
             const docResponse = await fetch('/api/admin/guest-documents', {
               method: 'POST',
-              headers: { 'x-admin-password': adminPassword },
               body: formData
             });
             const docResult = await docResponse.json() as { success?: boolean; r2_key?: string; id?: number };
@@ -446,11 +429,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
               // Update booking with document info
               await fetch('/api/admin/bookings', {
                 method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-admin-password': adminPassword
-                },
-                body: JSON.stringify({
+                headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                   id: data.booking.id,
                   additional_costs: JSON.stringify(additionalCosts)
                 })
@@ -468,11 +448,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
           try {
             await fetch('/api/admin/guests', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-admin-password': adminPassword
-              },
-              body: JSON.stringify({ id: guestId, ...guestUpdates })
+              headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: guestId, ...guestUpdates })
             });
 
             // Update local guest state if address was updated
@@ -531,10 +508,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/bookings', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: bookingId, status })
       });
 
@@ -572,10 +546,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/bookings?id=${bookingId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { success?: boolean; error?: string };
       if (data.error) {
@@ -610,10 +581,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/bookings', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: bookingId, cleaning_cash: isCash ? 1 : 0 })
       });
 
@@ -650,10 +618,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/bookings', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: bookingId, [field]: value })
       });
 
@@ -718,10 +683,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
       const response = await fetch('/api/admin/bookings', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: bookingId, additional_costs: JSON.stringify(updatedCosts) })
       });
 
@@ -759,10 +721,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/tasks', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: taskId, is_completed: isCompleted ? 1 : 0 })
       });
 
@@ -837,10 +796,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingGuest)
       });
 
@@ -871,10 +827,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/guests?id=${guestId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { error?: string; success?: boolean };
       if (data.error) {
@@ -896,10 +849,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       // Update guest record
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: guestId, status: newStatus })
       });
 
@@ -917,11 +867,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       await Promise.all(bookingsToUpdate.map(booking =>
         fetch('/api/admin/bookings', {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-password': adminPassword
-          },
-          body: JSON.stringify({ id: booking.id, status: newStatus })
+          headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: booking.id, status: newStatus })
         })
       ));
 
@@ -942,10 +889,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: guestId, [updateField]: isPaid ? 1 : 0 })
       });
 
@@ -964,11 +908,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
           const newTaskStatus = isPaid ? 1 : 0; // 1 = completed, 0 = pending
           const taskResponse = await fetch('/api/admin/tasks', {
             method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-admin-password': adminPassword
-            },
-            body: JSON.stringify({
+            headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
               id: correspondingTask.id,
               is_completed: newTaskStatus
             })
@@ -995,10 +936,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/guests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: guestId, ...updates })
       });
 
@@ -1041,11 +979,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
         // Create booking for existing guest
         const bookingResponse = await fetch('/api/admin/bookings', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-password': adminPassword
-          },
-          body: JSON.stringify({
+          headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             guest_id: selectedExistingGuestId,
             booking_number: newGuest.booking_number,
             platform: newGuest.platform,
@@ -1080,9 +1015,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
               await fetch('/api/admin/guest-documents', {
                 method: 'POST',
-                headers: {
-                  'x-admin-password': adminPassword
-                },
                 body: formData
               });
             } catch (e) {
@@ -1121,10 +1053,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
       const response = await fetch('/api/admin/guests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(guestToCreate)
       });
 
@@ -1155,11 +1084,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
             try {
               const taskResponse = await fetch('/api/admin/tasks', {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-admin-password': adminPassword
-                },
-                body: JSON.stringify({
+                headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                   guest_id: data.guest.id,
                   title: st.title,
                   description: `[STANDARD:${st.key}]`
@@ -1178,11 +1104,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
                   if (taskData.task?.id) {
                     await fetch('/api/admin/tasks', {
                       method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-password': adminPassword
-                      },
-                      body: JSON.stringify({
+                      headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                         id: taskData.task.id,
                         is_completed: 2 // N/A status
                       })
@@ -1204,11 +1127,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
             try {
               await fetch('/api/admin/guests', {
                 method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-admin-password': adminPassword
-                },
-                body: JSON.stringify({
+                headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                   id: data.guest.id,
                   deposit_paid: 1,
                   final_payment_paid: 1
@@ -1231,9 +1151,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
               await fetch('/api/admin/guest-documents', {
                 method: 'POST',
-                headers: {
-                  'x-admin-password': adminPassword
-                },
                 body: formData
               });
             } catch (e) {
@@ -1282,11 +1199,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
         const response = await fetch('/api/admin/tasks', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-password': adminPassword
-          },
-          body: JSON.stringify({
+          headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             guest_id: guestId,
             title: st.title,
             description: `[STANDARD:${st.key}]` // Mark as standard task
@@ -1298,11 +1212,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
           if (isCompleted) {
             const updateResponse = await fetch('/api/admin/tasks', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-admin-password': adminPassword
-              },
-              body: JSON.stringify({
+              headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                 id: data.task.id,
                 is_completed: 1
               })
@@ -1329,9 +1240,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   const loadGuestTasks = async (guestId: number, guest?: Guest) => {
     setLoadingTasks(true);
     try {
-      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}&show_completed=true`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/tasks?guest_id=${guestId}&show_completed=true`);
       const data = await response.json() as { tasks?: Task[]; error?: string };
       let tasks = data.tasks || [];
 
@@ -1380,10 +1289,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
       const response = await fetch('/api/admin/tasks', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: taskId,
           is_completed: newStatus
@@ -1406,11 +1312,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
             // Update via API
             await fetch('/api/admin/guests', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-admin-password': adminPassword
-              },
-              body: JSON.stringify({
+              headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                 id: task.guest_id,
                 [guestField]: fieldValue
               })
@@ -1444,10 +1347,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/tasks?id=${taskId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { success?: boolean; error?: string };
       if (data.error) {
@@ -1466,9 +1366,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   const loadGuestCosts = async (guestId: number) => {
     setLoadingCosts(true);
     try {
-      const response = await fetch(`/api/admin/costs?guest_id=${guestId}`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/costs?guest_id=${guestId}`);
       const data = await response.json() as { costs?: GuestCost[]; error?: string };
       setGuestCosts(data.costs || []);
     } catch (err) {
@@ -1485,10 +1383,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/costs?id=${costId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { success?: boolean; error?: string };
       if (data.error) {
@@ -1507,9 +1402,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
   const loadGuestDocuments = async (guestId: number) => {
     setLoadingDocuments(true);
     try {
-      const response = await fetch(`/api/admin/guest-documents?guestId=${guestId}`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/guest-documents?guestId=${guestId}`);
       const data = await response.json() as { documents?: GuestDocument[]; error?: string };
       setGuestDocuments(data.documents || []);
     } catch (err) {
@@ -1533,9 +1426,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
       const response = await fetch('/api/admin/guest-documents', {
         method: 'POST',
-        headers: {
-          'x-admin-password': adminPassword
-        },
         body: formData
       });
 
@@ -1561,10 +1451,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/guest-documents?id=${documentId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { success?: boolean; error?: string };
       if (data.error) {
@@ -1585,9 +1472,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
     setLoadingNotes(prev => new Set(prev).add(guestId));
     try {
-      const response = await fetch(`/api/admin/notes?guest_id=${guestId}`, {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const response = await fetch(`/api/admin/notes?guest_id=${guestId}`);
       const data = await response.json() as { notes?: GuestNote[]; error?: string; tableNotFound?: boolean };
 
       if (data.tableNotFound) {
@@ -1613,10 +1498,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/notes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ guest_id: guestId, content })
       });
 
@@ -1641,10 +1523,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch('/api/admin/notes', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: noteId, content })
       });
 
@@ -1669,10 +1548,7 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
     try {
       const response = await fetch(`/api/admin/notes?id=${noteId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-password': adminPassword
-        }
-      });
+        });
 
       const data = await response.json() as { success?: boolean; error?: string };
       if (data.error) {
@@ -2059,7 +1935,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
                       loadingBookings={loadingBookings.has(guest.id)}
                       loadingTasks={loadingTasks}
                       guestProfileTab={guestProfileTab}
-                      adminPassword={adminPassword}
                       onToggleRow={() => toggleRow(guest.id)}
                       onEditGuest={() => openEditModal(guest)}
                       onDeleteGuest={() => deleteGuest(guest.id)}
@@ -2084,7 +1959,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
 
                         const response = await fetch('/api/admin/guest-documents', {
                           method: 'POST',
-                          headers: { 'x-admin-password': adminPassword },
                           body: formData
                         });
 
@@ -2101,11 +1975,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
                       onCreateTask={async (title, assignee, dueDate) => {
                         const response = await fetch('/api/admin/tasks', {
                           method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-password': adminPassword
-                          },
-                          body: JSON.stringify({
+                          headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
                             guest_id: guest.id,
                             title: title.trim(),
                             assigned_to: assignee || null,
@@ -2123,11 +1994,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
                       onUpdateTask={async (taskId, updates) => {
                         const response = await fetch('/api/admin/tasks', {
                           method: 'PUT',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-password': adminPassword
-                          },
-                          body: JSON.stringify({ id: taskId, ...updates })
+                          headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: taskId, ...updates })
                         });
                         const data = await response.json() as { task?: Task; error?: string };
                         if (data.error) {
@@ -2187,7 +2055,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       {activeView === 'calendar' && (
         <AdminCalendar
           guests={guests}
-          adminPassword={adminPassword}
           onSwitchToGuests={() => setActiveView('guests')}
           onSelectGuest={(guestId) => {
             setActiveView('guests');
@@ -2223,11 +2090,8 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
             try {
               const response = await fetch('/api/admin/guests', {
                 method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-admin-password': adminPassword
-                },
-                body: JSON.stringify(guest)
+                headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(guest)
               });
               const data = await response.json() as GuestResponse;
               if (data.error) {
@@ -2270,7 +2134,6 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
             booking={editingBooking || undefined}
             guestId={wizardGuestId}
             guestName={wizardGuest?.guest_name || ''}
-            adminPassword={adminPassword}
             isSubmitting={isSavingBooking}
             onClose={() => {
               setEditingBooking(null);

@@ -29,7 +29,6 @@ interface HeroImageRecord {
 }
 
 interface HeroImageManagerProps {
-  adminPassword: string;
 }
 
 interface AspectRatioSlot {
@@ -129,7 +128,7 @@ async function compressForAspectRatio(file: File, targetWidth: number, targetHei
   });
 }
 
-export function HeroImageManager({ adminPassword }: HeroImageManagerProps) {
+export function HeroImageManager({}: HeroImageManagerProps) {
   const [heroImages, setHeroImages] = useState<HeroImageRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<string | null>(null); // "nord-21:9" format
@@ -178,7 +177,6 @@ export function HeroImageManager({ adminPassword }: HeroImageManagerProps) {
 
       const response = await fetch('/api/admin/hero-images', {
         method: 'POST',
-        headers: { 'x-admin-password': adminPassword },
         body: formData,
       });
 
@@ -207,8 +205,7 @@ export function HeroImageManager({ adminPassword }: HeroImageManagerProps) {
     try {
       const response = await fetch(`/api/admin/hero-images?side=${side}&ratio=${encodeURIComponent(ratio)}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword },
-      });
+        });
 
       if (!response.ok) throw new Error('Löschen fehlgeschlagen');
       await loadHeroImages();

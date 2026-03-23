@@ -397,6 +397,14 @@ export default function BlogPostPage() {
           />
         </div>
       )}
+      {/* Blog content image styles */}
+      <style jsx global>{`
+        .prose img[data-style="default"] { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
+        .prose img[data-style="rounded"] { border-radius: 16px; max-width: 80%; height: auto; margin: 1.5rem auto; display: block; }
+        .prose img[data-style="circle"] { border-radius: 50%; width: 250px; height: 250px; object-fit: cover; margin: 1.5rem auto; display: block; }
+        .prose img[data-style="full"] { border-radius: 0; width: 100%; height: auto; margin: 2rem 0; display: block; }
+        .prose img:not([data-style]) { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
+      `}</style>
     </>
   );
 }
