@@ -213,13 +213,24 @@ export async function POST() {
       }
       steps.push(`Article 1: ${ARTICLE_1.slides.length} slides inserted`);
     } else {
-      // Update cover image if missing
-      if (cover1Url) {
-        await db.prepare(
-          'UPDATE blog_posts SET cover_image_url = ? WHERE slug = ? AND (cover_image_url IS NULL OR cover_image_url = ?)'
-        ).bind(cover1Url, slug1, '').run();
+      // Always update content, cover, and metadata to latest version
+      await db.prepare(
+        `UPDATE blog_posts SET title = ?, subtitle = ?, excerpt = ?, content = ?, cover_image_url = COALESCE(NULLIF(cover_image_url, ''), ?), layout = ?, updated_at = ? WHERE slug = ?`
+      ).bind(ARTICLE_1.title, ARTICLE_1.subtitle, ARTICLE_1.excerpt, ARTICLE_1.content, cover1Url, ARTICLE_1.layout, now, slug1).run();
+
+      // Re-create slides: delete old ones, insert new
+      const existingPost1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first<{ id: string }>();
+      if (existingPost1) {
+        await db.prepare('DELETE FROM blog_post_images WHERE post_id = ?').bind(existingPost1.id).run();
+        for (let i = 0; i < ARTICLE_1.slides.length; i++) {
+          const slide = ARTICLE_1.slides[i];
+          const imgId = crypto.randomUUID();
+          await db.prepare(
+            `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order) VALUES (?, ?, '', ?, ?, ?)`
+          ).bind(imgId, existingPost1.id, slide.title, slide.description, i).run();
+        }
       }
-      steps.push('Article 1 already exists, updated cover if missing');
+      steps.push('Article 1 already exists, updated content and slides');
     }
 
     // Step 3: Migrate Article 2 (tabs)
@@ -234,13 +245,12 @@ export async function POST() {
       ).bind(id2, slug2, ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, tabsContent, cover2Url, ARTICLE_2.layout, now, now, now).run();
       steps.push(`Article 2 inserted with id ${id2}, cover: ${cover2Url ? 'yes' : 'none'}`);
     } else {
-      // Update cover image if missing
-      if (cover2Url) {
-        await db.prepare(
-          'UPDATE blog_posts SET cover_image_url = ? WHERE slug = ? AND (cover_image_url IS NULL OR cover_image_url = ?)'
-        ).bind(cover2Url, slug2, '').run();
-      }
-      steps.push('Article 2 already exists, updated cover if missing');
+      // Always update content, cover, and metadata to latest version
+      const tabsContentUpdate = JSON.stringify(ARTICLE_2.content);
+      await db.prepare(
+        `UPDATE blog_posts SET title = ?, subtitle = ?, excerpt = ?, content = ?, cover_image_url = COALESCE(NULLIF(cover_image_url, ''), ?), layout = ?, updated_at = ? WHERE slug = ?`
+      ).bind(ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, tabsContentUpdate, cover2Url, ARTICLE_2.layout, now, slug2).run();
+      steps.push('Article 2 already exists, updated content');
     }
 
     return NextResponse.json({
