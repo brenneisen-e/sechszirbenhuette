@@ -17,17 +17,49 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   // Hide the initial CSS-only loader when this component mounts
-  // Use CSS opacity to hide instead of DOM removal to prevent hydration errors
   useEffect(() => {
     const initialLoader = document.getElementById('initial-loader');
     if (initialLoader) {
       initialLoader.classList.add('loaded');
-      // Hide with CSS instead of removing from DOM to prevent React hydration issues
-      // The element will be hidden via CSS (opacity: 0, visibility: hidden)
       setTimeout(() => {
         initialLoader.style.display = 'none';
       }, 300);
     }
+  }, []);
+
+  // Preload video URL and HLS manifest during loading animation
+  useEffect(() => {
+    (async () => {
+      try {
+        // 1. Fetch video URL from API
+        const res = await fetch('/api/media?category=hero&type=video', { cache: 'no-store' });
+        const data = await res.json() as { media?: { url: string }[] };
+        const videoUrl = data.media?.[0]?.url;
+        if (!videoUrl) return;
+
+        // Store for Hero component to use immediately
+        (window as Record<string, unknown>).__heroVideoUrl = videoUrl;
+
+        // 2. Preconnect to Stream domain
+        const url = new URL(videoUrl);
+        const link = document.createElement('link');
+        link.rel = 'preconnect';
+        link.href = url.origin;
+        document.head.appendChild(link);
+
+        // 3. Prefetch the HLS manifest so it's cached by the browser
+        fetch(videoUrl, { mode: 'cors' }).catch(() => {});
+
+        // 4. Also preload thumbnail
+        const thumbRes = await fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' });
+        const thumbData = await thumbRes.json() as { media?: { url: string }[] };
+        if (thumbData.media?.[0]?.url) {
+          (window as Record<string, unknown>).__heroThumbnailUrl = thumbData.media[0].url;
+        }
+      } catch {
+        // Preload failed, Hero component will fetch as fallback
+      }
+    })();
   }, []);
 
   // Minimum display time for the loading screen
@@ -40,22 +72,15 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
 
   // Listen for video load event - wait for actual playback to start
   useEffect(() => {
-    // Check if video is ready to play
     const checkVideoReady = () => {
       const video = document.querySelector('#hero-video') as HTMLVideoElement;
       if (video) {
-        // If video is already playing, we're done
         if (!video.paused && video.currentTime > 0) {
           setVideoLoaded(true);
           return true;
         }
 
-        // Listen for the video to actually start playing (not just buffered)
-        const handlePlaying = () => {
-          setVideoLoaded(true);
-        };
-
-        // Also listen for timeupdate as a fallback (some browsers)
+        const handlePlaying = () => setVideoLoaded(true);
         const handleTimeUpdate = () => {
           if (video.currentTime > 0.1) {
             setVideoLoaded(true);
@@ -66,12 +91,8 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
         video.addEventListener('playing', handlePlaying, { once: true });
         video.addEventListener('timeupdate', handleTimeUpdate);
 
-        // If video is ready but paused, try to play it
         if (video.readyState >= 3 && video.paused) {
-          video.play().catch(() => {
-            // Autoplay blocked, show content anyway
-            setVideoLoaded(true);
-          });
+          video.play().catch(() => setVideoLoaded(true));
         }
 
         return () => {
@@ -79,31 +100,24 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
           video.removeEventListener('timeupdate', handleTimeUpdate);
         };
       } else {
-        // No video element yet, use fallback timeout
         setTimeout(() => setVideoLoaded(true), 3000);
       }
       return false;
     };
 
-    // Try to find video immediately
     const cleanup = checkVideoReady();
     if (cleanup === true) return;
 
-    // Also listen for DOM changes in case video is added later
-    // Use a more targeted observer to avoid interfering with React hydration
     const observer = new MutationObserver(() => {
-      // Only check if the video element exists now
       const video = document.querySelector('#hero-video');
       if (video) {
         checkVideoReady();
-        observer.disconnect(); // Stop observing once video is found
+        observer.disconnect();
       }
     });
-    // Observe the main content area, not the entire body, to minimize hydration interference
     const mainContent = document.getElementById('__next') || document.body;
     observer.observe(mainContent, { childList: true, subtree: true });
 
-    // Fallback: max wait time of 6 seconds
     const fallbackTimer = setTimeout(() => setVideoLoaded(true), 6000);
 
     return () => {

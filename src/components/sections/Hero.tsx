@@ -28,37 +28,39 @@ export function Hero() {
     setIsMounted(true);
   }, []);
 
-  // Fetch video and thumbnail URLs from API
+  // Use preloaded URLs from LoadingScreen, or fetch as fallback
   useEffect(() => {
     if (!isMounted) return;
 
-    // Fetch thumbnail
-    fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
-      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-      .then((data) => {
-        if (data.media?.[0]?.url) {
-          setThumbnailUrl(data.media[0].url);
-        }
-      })
-      .catch(() => {
-        // Thumbnail fetch failed, will use gradient fallback
-      });
+    const win = window as Record<string, unknown>;
 
-    // Fetch hero video (expects an HLS manifest URL from Cloudflare Stream)
-    fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
-      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-      .then((data) => {
-        if (data.media?.[0]?.url) {
-          console.log('[Hero] Video URL:', data.media[0].url);
-          setVideoUrl(data.media[0].url);
-        } else {
-          console.warn('[Hero] No hero video found in API response');
-        }
-      })
-      .catch((err) => {
-        console.error('[Hero] Failed to fetch video URL:', err);
-        setVideoError(true);
-      });
+    // Check for preloaded thumbnail from LoadingScreen
+    if (win.__heroThumbnailUrl) {
+      setThumbnailUrl(win.__heroThumbnailUrl as string);
+    } else {
+      fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
+        .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+        .then((data) => {
+          if (data.media?.[0]?.url) setThumbnailUrl(data.media[0].url);
+        })
+        .catch(() => {});
+    }
+
+    // Check for preloaded video URL from LoadingScreen
+    if (win.__heroVideoUrl) {
+      setVideoUrl(win.__heroVideoUrl as string);
+    } else {
+      fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
+        .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+        .then((data) => {
+          if (data.media?.[0]?.url) {
+            setVideoUrl(data.media[0].url);
+          }
+        })
+        .catch(() => {
+          setVideoError(true);
+        });
+    }
   }, [isMounted]);
 
   // Ensure video element is muted before anything else
