@@ -35,6 +35,7 @@ export default function BlogEditor() {
     previewImageIndex,
     setActiveTab,
     setCurrentPost,
+    setPostImages,
     setShowMediaPicker,
     setMediaPickerTarget,
     setPreviewImageIndex,
@@ -48,6 +49,8 @@ export default function BlogEditor() {
     handleDelete,
     addImageToGallery,
     removeImageFromGallery,
+    updateImageInGallery,
+    reorderImages,
   } = useBlogEditor();
 
   const handleMediaSelect = (media: MediaItem) => {
@@ -58,12 +61,19 @@ export default function BlogEditor() {
         cover_image_alt: media.alt_text,
       }));
       setShowMediaPicker(false);
+    } else if (typeof mediaPickerTarget === 'number') {
+      // Selecting image for a specific carousel slide
+      updateImageInGallery(mediaPickerTarget, {
+        image_url: media.url,
+        image_alt: postImages[mediaPickerTarget]?.image_alt || media.alt_text,
+      });
+      setShowMediaPicker(false);
     } else if (mediaPickerTarget === 'gallery') {
       addImageToGallery(media);
     }
   };
 
-  const handleOpenMediaPicker = (target: 'cover' | 'gallery') => {
+  const handleOpenMediaPicker = (target: 'cover' | 'gallery' | number) => {
     setMediaPickerTarget(target);
     setShowMediaPicker(true);
   };
@@ -168,6 +178,8 @@ export default function BlogEditor() {
               availableMedia={availableMedia}
               onUpdatePost={(updates) => setCurrentPost(prev => ({ ...prev, ...updates }))}
               onRemoveImage={removeImageFromGallery}
+              onUpdateImage={updateImageInGallery}
+              onReorderImages={reorderImages}
               onOpenMediaPicker={handleOpenMediaPicker}
               onSave={handleSave}
               onTogglePreview={handleTogglePreview}

@@ -14,13 +14,13 @@ interface UseBlogEditorReturn {
   postImages: BlogPostImage[];
   availableMedia: MediaItem[];
   showMediaPicker: boolean;
-  mediaPickerTarget: 'cover' | 'gallery' | null;
+  mediaPickerTarget: 'cover' | 'gallery' | number | null;
   previewImageIndex: number;
   setActiveTab: (tab: EditorTab) => void;
   setCurrentPost: React.Dispatch<React.SetStateAction<Partial<BlogPost> | null>>;
   setPostImages: React.Dispatch<React.SetStateAction<BlogPostImage[]>>;
   setShowMediaPicker: (show: boolean) => void;
-  setMediaPickerTarget: (target: 'cover' | 'gallery' | null) => void;
+  setMediaPickerTarget: (target: 'cover' | 'gallery' | number | null) => void;
   setPreviewImageIndex: React.Dispatch<React.SetStateAction<number>>;
   loadPosts: () => Promise<void>;
   loadMedia: () => Promise<void>;
@@ -32,6 +32,8 @@ interface UseBlogEditorReturn {
   handleDelete: (postId: string) => Promise<void>;
   addImageToGallery: (media: MediaItem) => void;
   removeImageFromGallery: (index: number) => void;
+  updateImageInGallery: (index: number, updates: Partial<BlogPostImage>) => void;
+  reorderImages: (fromIndex: number, toIndex: number) => void;
 }
 
 export function useBlogEditor(): UseBlogEditorReturn {
@@ -47,7 +49,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const [postImages, setPostImages] = useState<BlogPostImage[]>([]);
   const [availableMedia, setAvailableMedia] = useState<MediaItem[]>([]);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<'cover' | 'gallery' | null>(null);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<'cover' | 'gallery' | number | null>(null);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
 
   // Load posts
@@ -184,8 +186,16 @@ export function useBlogEditor(): UseBlogEditorReturn {
 
   // Save post
   const handleSave = async (publish = false) => {
-    if (!currentPost?.title || !currentPost?.content) {
-      setError('Titel und Inhalt sind erforderlich');
+    if (!currentPost?.title) {
+      setError('Titel ist erforderlich');
+      return;
+    }
+    if (currentPost.layout !== 'carousel' && !currentPost.content) {
+      setError('Inhalt ist erforderlich');
+      return;
+    }
+    if (currentPost.layout === 'carousel' && postImages.length === 0) {
+      setError('Mindestens eine Karussell-Einheit ist erforderlich');
       return;
     }
 
@@ -264,6 +274,22 @@ export function useBlogEditor(): UseBlogEditorReturn {
     setPostImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Update image properties (for carousel slides)
+  const updateImageInGallery = (index: number, updates: Partial<BlogPostImage>) => {
+    setPostImages(prev => prev.map((img, i) => i === index ? { ...img, ...updates } : img));
+  };
+
+  // Reorder images (for carousel slides)
+  const reorderImages = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= postImages.length) return;
+    setPostImages(prev => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated.map((img, i) => ({ ...img, display_order: i }));
+    });
+  };
+
   return {
     posts,
     loading,
@@ -295,5 +321,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
     handleDelete,
     addImageToGallery,
     removeImageFromGallery,
+    updateImageInGallery,
+    reorderImages,
   };
 }

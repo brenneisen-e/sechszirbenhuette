@@ -51,10 +51,10 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
-            className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+            className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full"
           >
             {/* Cover Image */}
-            <div className="relative aspect-video bg-gray-100">
+            <div className="relative aspect-video bg-gray-100 shrink-0">
               {post.cover_image_url ? (
                 <Image
                   src={post.cover_image_url}
@@ -70,7 +70,7 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
             </div>
 
             {/* Content */}
-            <div className="p-5">
+            <div className="p-5 flex flex-col flex-1">
               <h3
                 className="text-xl text-logo-green mb-2 group-hover:text-logo-green/80 transition-colors"
                 style={{ fontFamily: 'FeelingPassionate, cursive' }}
@@ -87,7 +87,7 @@ export function BlogPostsGrid({ posts }: BlogPostsGridProps) {
                   {post.excerpt}
                 </p>
               )}
-              <div className="flex items-center gap-3 text-xs text-gray-400">
+              <div className="flex items-center gap-3 text-xs text-gray-400 mt-auto pt-2">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {formatDate(post.published_at)}

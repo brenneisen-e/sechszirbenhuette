@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Calendar, User } from 'lucide-react';
 import type { BlogPost, BlogPostImage } from './types';
@@ -19,6 +20,11 @@ export function BlogPreview({
   previewImageIndex,
   onChangePreviewImage,
 }: BlogPreviewProps) {
+  const isCarousel = currentPost.layout === 'carousel';
+  const [carouselOffset, setCarouselOffset] = useState(0);
+  const visibleSlides = 2;
+  const maxOffset = Math.max(0, postImages.length - visibleSlides);
+
   return (
     <div className={`bg-gray-50 rounded-xl p-6 ${activeTab === 'edit' ? 'hidden lg:block' : ''}`}>
       <h3 className="text-sm font-medium text-gray-500 mb-4">Live-Vorschau</h3>
@@ -63,41 +69,102 @@ export function BlogPreview({
             </span>
           </div>
 
-          {/* Carousel Preview */}
-          {currentPost.layout === 'carousel' && postImages.length > 0 && (
-            <div className="relative mb-4">
-              <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
-                <Image
-                  src={postImages[previewImageIndex]?.image_url || ''}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              {postImages.length > 1 && (
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-2">
+          {/* Content / Intro text */}
+          {currentPost.content && (
+            <div
+              className={`prose prose-sm max-w-none ${isCarousel ? 'mb-4' : ''}`}
+              dangerouslySetInnerHTML={{
+                __html: isCarousel
+                  ? `<p>${currentPost.content}</p>`
+                  : currentPost.content || '<p class="text-gray-400">Ihr Inhalt erscheint hier...</p>',
+              }}
+            />
+          )}
+
+          {/* === CAROUSEL PREVIEW === */}
+          {isCarousel && postImages.length > 0 && (
+            <div className="relative">
+              {/* Navigation arrows */}
+              {postImages.length > visibleSlides && (
+                <>
                   <button
-                    onClick={() => onChangePreviewImage((previewImageIndex - 1 + postImages.length) % postImages.length)}
-                    className="p-1 bg-white/80 rounded-full"
+                    onClick={() => setCarouselOffset(Math.max(0, carouselOffset - 1))}
+                    disabled={carouselOffset === 0}
+                    className="absolute left-0 top-1/3 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 -translate-x-1/2 disabled:opacity-30"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => onChangePreviewImage((previewImageIndex + 1) % postImages.length)}
-                    className="p-1 bg-white/80 rounded-full"
+                    onClick={() => setCarouselOffset(Math.min(maxOffset, carouselOffset + 1))}
+                    disabled={carouselOffset >= maxOffset}
+                    className="absolute right-0 top-1/3 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:bg-gray-50 translate-x-1/2 disabled:opacity-30"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
+                </>
+              )}
+
+              {/* Cards container */}
+              <div className="overflow-hidden">
+                <div
+                  className="flex gap-3 transition-transform duration-300"
+                  style={{ transform: `translateX(-${carouselOffset * (100 / visibleSlides + 2)}%)` }}
+                >
+                  {postImages.map((slide, index) => (
+                    <div
+                      key={index}
+                      className="shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
+                      style={{ width: `calc(${100 / visibleSlides}% - ${(visibleSlides - 1) * 12 / visibleSlides}px)` }}
+                    >
+                      {/* Slide image */}
+                      {slide.image_url && (
+                        <div className="relative aspect-[4/3]">
+                          <Image
+                            src={slide.image_url}
+                            alt={slide.image_alt || ''}
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-logo-green text-white flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Slide text */}
+                      <div className="p-3">
+                        {slide.image_alt && (
+                          <h4 className="text-sm font-bold text-gray-900 mb-1">
+                            {slide.image_alt}
+                          </h4>
+                        )}
+                        {slide.caption && (
+                          <p className="text-xs text-gray-600 line-clamp-3">
+                            {slide.caption}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dots */}
+              {postImages.length > visibleSlides && (
+                <div className="flex justify-center gap-1.5 mt-3">
+                  {Array.from({ length: maxOffset + 1 }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCarouselOffset(i)}
+                      className={`w-2 h-2 rounded-full transition ${
+                        i === carouselOffset ? 'bg-logo-green w-4' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           )}
-
-          {/* Content */}
-          <div
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: currentPost.content || '<p class="text-gray-400">Ihr Inhalt erscheint hier...</p>' }}
-          />
 
           {/* Standard Layout Images */}
           {currentPost.layout === 'standard' && postImages.length > 0 && (
