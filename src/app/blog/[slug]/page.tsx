@@ -184,7 +184,6 @@ export default function BlogPostPage() {
 
   return (
     <>
-      <Header />
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
         <article className="container max-w-4xl">
           {/* Back Link */}
