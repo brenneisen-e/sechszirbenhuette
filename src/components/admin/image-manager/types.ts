@@ -32,7 +32,6 @@ export interface DuplicateGroup {
 }
 
 export interface ImageManagerProps {
-  adminPassword: string;
 }
 
 export interface CategoryOption {

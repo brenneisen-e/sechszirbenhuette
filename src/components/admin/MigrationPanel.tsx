@@ -30,10 +30,9 @@ interface LegacyMigrationDetail {
 }
 
 interface MigrationPanelProps {
-  adminPassword: string;
 }
 
-export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
+export default function MigrationPanel({}: MigrationPanelProps) {
   const [migrations, setMigrations] = useState<MigrationRecord[]>([]);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
@@ -53,9 +52,7 @@ export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
 
   const fetchMigrations = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/migrations', {
-        headers: { 'x-admin-password': adminPassword },
-      });
+      const res = await fetch('/api/admin/migrations');
       const data = await res.json() as { migrations?: MigrationRecord[]; currentVersion?: number; pendingCount?: number };
       setMigrations(data.migrations || []);
       setCurrentVersion(data.currentVersion || 0);
@@ -65,14 +62,12 @@ export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   const fetchLegacyPreview = useCallback(async () => {
     setLegacyLoading(true);
     try {
-      const res = await fetch('/api/admin/migrate-legacy-guests', {
-        headers: { 'x-admin-password': adminPassword },
-      });
+      const res = await fetch('/api/admin/migrate-legacy-guests');
       const data = await res.json() as { count?: number; guests?: LegacyGuestPreview[]; error?: string };
       if (data.error) {
         console.error('Legacy preview error:', data.error);
@@ -85,7 +80,7 @@ export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
     } finally {
       setLegacyLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   useEffect(() => {
     fetchMigrations();
@@ -100,10 +95,7 @@ export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
     try {
       const res = await fetch('/api/admin/migrations', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(migrationId ? { migrationId } : {}),
       });
       const data = await res.json() as { results?: Array<{ id: string; status: string; error?: string }> };
@@ -125,10 +117,7 @@ export default function MigrationPanel({ adminPassword }: MigrationPanelProps) {
     try {
       const res = await fetch('/api/admin/migrate-legacy-guests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json() as { success?: boolean; migrated?: number; details?: LegacyMigrationDetail[]; error?: string };
       if (data.error) {

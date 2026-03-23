@@ -41,7 +41,6 @@ interface GuestTableRowProps {
   loadingBookings: boolean;
   loadingTasks: boolean;
   guestProfileTab: GuestProfileTab;
-  adminPassword: string;
   // Row handlers
   onToggleRow: () => void;
   onEditGuest: () => void;
@@ -97,7 +96,6 @@ export function GuestTableRow({
   loadingBookings,
   loadingTasks,
   guestProfileTab,
-  adminPassword,
   onToggleRow,
   onEditGuest,
   onDeleteGuest,
@@ -316,7 +314,6 @@ export function GuestTableRow({
                   guest={guest}
                   bookings={bookings}
                   bankPayments={bankPayments}
-                  adminPassword={adminPassword}
                   notes={notes}
                   notesLoading={notesLoading}
                   onAddNote={onAddNote}

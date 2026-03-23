@@ -7,11 +7,10 @@ import type { PricingSettings } from './types';
 
 interface PricingEditorProps {
   pricing: PricingSettings;
-  adminPassword?: string;
   onSave: (newPricing: PricingSettings) => Promise<void>;
 }
 
-export function PricingEditor({ pricing, adminPassword, onSave }: PricingEditorProps) {
+export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPricing, setEditedPricing] = useState<PricingSettings>(pricing);
   const [saving, setSaving] = useState(false);
@@ -30,10 +29,6 @@ export function PricingEditor({ pricing, adminPassword, onSave }: PricingEditorP
   };
 
   const handleSave = async () => {
-    if (!adminPassword) {
-      setSaveError('Keine Admin-Berechtigung');
-      return;
-    }
 
     setSaving(true);
     setSaveError('');
@@ -52,7 +47,7 @@ export function PricingEditor({ pricing, adminPassword, onSave }: PricingEditorP
     <div className="bg-white rounded-lg p-4 border border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-gray-900">Preise</h3>
-        {adminPassword && !isEditing && (
+        {!isEditing && (
           <button
             onClick={startEditing}
             className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 print:hidden"

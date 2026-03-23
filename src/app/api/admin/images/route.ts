@@ -215,16 +215,6 @@ export async function POST(request: NextRequest) {
   try {
     const { env } = await getCloudflareContext() as { env: Env };
 
-    // Check admin password
-    const adminPassword = request.headers.get('x-admin-password');
-
-    if (!env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -330,16 +320,6 @@ export async function PUT(request: NextRequest) {
   try {
     const { env } = await getCloudflareContext() as { env: Env };
 
-    // Check admin password
-    const adminPassword = request.headers.get('x-admin-password');
-
-    if (!env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const body = await request.json() as { id?: string; alt_text?: string; category?: string; display_order?: number; is_hero?: boolean };
     const { id, alt_text, category, display_order, is_hero } = body;
@@ -417,16 +397,6 @@ export async function DELETE(request: NextRequest) {
   try {
     const { env } = await getCloudflareContext() as { env: Env };
 
-    // Check admin password
-    const adminPassword = request.headers.get('x-admin-password');
-
-    if (!env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== env.ADMIN_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('id');

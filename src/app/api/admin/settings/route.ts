@@ -116,10 +116,6 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Verify admin auth (password header or session cookie)
-    if (!(await isAuthenticated(request, env))) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
 
     if (!env.DB) {
       return NextResponse.json({
@@ -204,10 +200,6 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Verify admin auth (password header or session cookie)
-    if (!(await isAuthenticated(request, env))) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });

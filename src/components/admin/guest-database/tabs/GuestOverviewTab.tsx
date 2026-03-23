@@ -14,7 +14,6 @@ interface GuestOverviewTabProps {
   guest: Guest;
   bookings: Booking[];
   bankPayments: BankPayment[];
-  adminPassword: string;
   notes: GuestNote[];
   notesLoading: boolean;
   onAddNote: (content: string) => Promise<void>;

@@ -25,7 +25,7 @@ interface MigrationResponse {
   results: MigrationResult[];
 }
 
-export default function ImageMigrationPanel({ adminPassword }: { adminPassword: string }) {
+export default function ImageMigrationPanel() {
   const [status, setStatus] = useState<MigrationStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [migrating, setMigrating] = useState(false);

@@ -65,9 +65,6 @@ const ImageMigrationPanel = dynamic(() => import('@/components/admin/ImageMigrat
   loading: () => <LoadingSpinner text="Lade Migration..." />,
 });
 
-const BriefingGenerator = dynamic(() => import('@/components/admin/BriefingGenerator'), {
-  loading: () => <LoadingSpinner text="Lade Briefing..." />,
-});
 
 const KurtaxeRatesEditor = dynamic(() => import('@/components/admin/KurtaxeRatesEditor'), {
   loading: () => <LoadingSpinner text="Lade Kurtaxe-Sätze..." />,
@@ -106,14 +103,13 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'briefing' | 'images' | 'passwords' | 'blog' | 'system';
+type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'images' | 'passwords' | 'blog' | 'system';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'bank', label: 'Kontoauszug', shortLabel: 'Konto', icon: Wallet },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
-  { id: 'briefing', label: 'Briefing', shortLabel: 'Brief.', icon: FileText },
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
@@ -126,19 +122,9 @@ function AdminPageContent() {
 
   const activeTab = (searchParams.get('tab') || 'guests') as AdminTab;
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginError, setLoginError] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
-
-  // Check authentication on mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   // Load demo mode state
   useEffect(() => {
@@ -147,58 +133,6 @@ function AdminPageContent() {
       if (saved === 'true') setIsDemoMode(true);
     } catch { /* ignore */ }
   }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/admin/login', { cache: 'no-store' });
-      const data = await response.json() as { authenticated: boolean };
-      setIsAuthenticated(data.authenticated);
-      if (data.authenticated) {
-        // Restore password from sessionStorage after page refresh
-        const savedPw = sessionStorage.getItem('_admin_pw');
-        if (savedPw) setAdminPassword(savedPw);
-        setIsInitialLoading(false);
-      }
-    } catch {
-      setIsAuthenticated(false);
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    setLoginError('');
-    try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: loginPassword }),
-      });
-      const data = await response.json() as { error?: string };
-      if (response.ok) {
-        setIsAuthenticated(true);
-        setAdminPassword(loginPassword);
-        sessionStorage.setItem('_admin_pw', loginPassword);
-        setLoginPassword('');
-        setIsInitialLoading(false);
-      } else {
-        setLoginError(data.error || 'Login fehlgeschlagen');
-      }
-    } catch {
-      setLoginError('Verbindungsfehler');
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/admin/login', { method: 'DELETE' });
-    } catch { /* ignore */ }
-    setIsAuthenticated(false);
-    setAdminPassword('');
-    sessionStorage.removeItem('_admin_pw');
-  };
 
   const toggleDemoMode = () => {
     const newValue = !isDemoMode;
@@ -219,54 +153,6 @@ function AdminPageContent() {
     setIsInitialLoading(false);
   };
 
-  // Loading auth check
-  if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  // Login screen
-  if (!isAuthenticated) {
-    return (
-      <div className="fixed inset-0 bg-white flex items-center justify-center">
-        <form onSubmit={handleLogin} className="w-full max-w-sm mx-4">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-green-600" />
-            </div>
-            <h1 className="text-xl font-semibold text-gray-900">Admin Center</h1>
-            <p className="text-sm text-gray-500 mt-1">Sechszirbenhütte</p>
-          </div>
-          <div className="space-y-3">
-            <input
-              type="password"
-              value={loginPassword}
-              onChange={e => setLoginPassword(e.target.value)}
-              placeholder="Admin-Passwort"
-              autoFocus
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-            {loginError && (
-              <div className="flex items-center gap-2 text-sm text-red-600">
-                <AlertCircle className="w-4 h-4" />
-                {loginError}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={isLoggingIn || !loginPassword}
-              className="w-full py-3 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoggingIn ? 'Prüfe...' : 'Anmelden'}
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
 
   // Full screen loader
   if (isInitialLoading) {
@@ -274,7 +160,7 @@ function AdminPageContent() {
       <>
         <FullScreenLoader />
         <div className="hidden">
-          <GuestDatabase adminPassword={adminPassword} onDataLoaded={handleDataLoaded} />
+          <GuestDatabase onDataLoaded={handleDataLoaded} />
         </div>
       </>
     );
@@ -296,9 +182,6 @@ function AdminPageContent() {
             <a href="/" className="p-1 text-gray-400 hover:text-gray-600">
               <Home className="w-5 h-5" />
             </a>
-            <button onClick={handleLogout} className="p-1 text-gray-400 hover:text-red-600">
-              <LogOut className="w-5 h-5" />
-            </button>
           </div>
           <h1 className="text-sm font-medium text-gray-900">
             {TABS.find(t => t.id === activeTab)?.label}
@@ -320,13 +203,6 @@ function AdminPageContent() {
             </div>
             <div className="flex items-center gap-3">
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-red-600 transition rounded-lg hover:bg-gray-100"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Abmelden</span>
-              </button>
             </div>
           </div>
 
@@ -357,13 +233,12 @@ function AdminPageContent() {
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
         <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6">
-          {activeTab === 'guests' && <GuestDatabase adminPassword={adminPassword} demoMode={isDemoMode} />}
+          {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 
           {activeTab === 'finances' && (
             <FinanceOverview
               key={financeRefreshKey}
-              adminPassword={adminPassword}
-              demoMode={isDemoMode}
+                           demoMode={isDemoMode}
               onNavigateToGuest={(guestId) => {
                 setActiveTab('guests');
                 setTimeout(() => {
@@ -377,35 +252,34 @@ function AdminPageContent() {
             />
           )}
 
-          {activeTab === 'bank' && <BankTransactions adminPassword={adminPassword} demoMode={isDemoMode} />}
+          {activeTab === 'bank' && <BankTransactions demoMode={isDemoMode} />}
 
-          {activeTab === 'utilities' && <UtilityCostsCalculator adminPassword={adminPassword} demoMode={isDemoMode} />}
+          {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
 
           {activeTab === 'passwords' && <PasswordsPanel />}
 
-          {activeTab === 'briefing' && <BriefingGenerator adminPassword={adminPassword} />}
 
-          {activeTab === 'images' && <ImageManager adminPassword={adminPassword} />}
+          {activeTab === 'images' && <ImageManager />}
 
           {activeTab === 'blog' && <BlogEditor />}
 
           {activeTab === 'system' && (
             <div className="space-y-12">
-              <CloudflareSettings adminPassword={adminPassword} />
+              <CloudflareSettings />
               <div className="border-t border-gray-200 pt-8">
-                <ImageMigrationPanel adminPassword={adminPassword} />
+                <ImageMigrationPanel />
               </div>
               <div className="border-t border-gray-200 pt-8">
-                <MigrationPanel adminPassword={adminPassword} />
+                <MigrationPanel />
               </div>
               <div className="border-t border-gray-200 pt-8">
-                <KurtaxeRatesEditor adminPassword={adminPassword} />
+                <KurtaxeRatesEditor />
               </div>
               <div className="border-t border-gray-200 pt-8">
-                <PositionCategoriesEditor adminPassword={adminPassword} />
+                <PositionCategoriesEditor />
               </div>
               <div className="border-t border-gray-200 pt-8">
-                <PositionTemplatesEditor adminPassword={adminPassword} />
+                <PositionTemplatesEditor />
               </div>
             </div>
           )}

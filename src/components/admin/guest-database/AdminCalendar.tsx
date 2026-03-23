@@ -12,7 +12,6 @@ interface AdminCalendarProps {
   guests: Guest[];
   onSwitchToGuests: () => void;
   onSelectGuest?: (guestId: number) => void;
-  adminPassword: string;
 }
 
 // Combined booking type for calendar display
@@ -26,7 +25,7 @@ interface CalendarBooking {
   isAdditionalBooking?: boolean; // true if from bookings table
 }
 
-export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest, adminPassword }: AdminCalendarProps) {
+export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: AdminCalendarProps) {
   const [calendarYear, setCalendarYear] = useState(2026);
   const [externalBookings, setExternalBookings] = useState<FeratelBooking[]>([]);
   const [additionalBookings, setAdditionalBookings] = useState<Booking[]>([]);
@@ -46,9 +45,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest, adminPa
   // Fetch additional bookings from the bookings table
   const fetchAdditionalBookings = async () => {
     try {
-      const res = await fetch('/api/admin/bookings', {
-        headers: { 'x-admin-password': adminPassword }
-      });
+      const res = await fetch('/api/admin/bookings');
       const data = (await res.json()) as { bookings?: Booking[]; error?: string };
       if (data.bookings) {
         setAdditionalBookings(data.bookings);
@@ -64,9 +61,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest, adminPa
       setCalendarError('');
 
       try {
-        const res = await fetch('/api/admin/feratel-calendar', {
-          headers: { 'x-admin-password': adminPassword }
-        });
+        const res = await fetch('/api/admin/feratel-calendar');
         const data = (await res.json()) as {
           success: boolean;
           bookedPeriods: FeratelBooking[];
@@ -540,7 +535,6 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest, adminPa
           guests={guests}
           bookings={additionalBookings}
           year={calendarYear}
-          adminPassword={adminPassword}
           onSelectBooking={(booking, guest) => {
             setSelectedBooking(booking);
             setSelectedGuest(guest);

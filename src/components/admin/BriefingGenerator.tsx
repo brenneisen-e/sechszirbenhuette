@@ -92,7 +92,6 @@ interface BarItem {
 }
 
 interface BriefingGeneratorProps {
-  adminPassword: string;
 }
 
 // ── Formatting helpers ──
@@ -174,7 +173,7 @@ function MiniMonth({ year, month, calBookings }: { year: number; month: number; 
   );
 }
 
-export default function BriefingGenerator({ adminPassword }: BriefingGeneratorProps) {
+export default function BriefingGenerator({}: BriefingGeneratorProps) {
   const [bookings, setBookings] = useState<BriefingBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBookings, setSelectedBookings] = useState<Set<number>>(new Set());
@@ -183,8 +182,8 @@ export default function BriefingGenerator({ adminPassword }: BriefingGeneratorPr
   const fetchBookings = useCallback(async () => {
     try {
       const [guestsRes, bookingsRes] = await Promise.all([
-        fetch('/api/admin/guests', { headers: { 'x-admin-password': adminPassword } }),
-        fetch('/api/admin/bookings', { headers: { 'x-admin-password': adminPassword } }),
+        fetch('/api/admin/guests', { }),
+        fetch('/api/admin/bookings', { }),
       ]);
       const guestsData = await guestsRes.json() as { guests?: GuestInfo[] };
       const bookingsData = await bookingsRes.json() as { bookings?: BriefingBooking[] };
@@ -218,7 +217,7 @@ export default function BriefingGenerator({ adminPassword }: BriefingGeneratorPr
     } finally {
       setLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   useEffect(() => { fetchBookings(); }, [fetchBookings]);
 

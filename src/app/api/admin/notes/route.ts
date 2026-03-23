@@ -26,14 +26,6 @@ export async function GET(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const guestId = searchParams.get('guest_id');
 
@@ -66,14 +58,6 @@ export async function POST(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
     const data = await request.json() as { guest_id: number; content: string };
 
     if (!data.guest_id || !data.content) {
@@ -103,14 +87,6 @@ export async function PUT(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
-
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
 
     const data = await request.json() as { id: number; content: string };
 
@@ -142,14 +118,6 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
-
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

@@ -33,14 +33,6 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
 
     if (!env?.DB) {

@@ -28,7 +28,6 @@ interface PositionCategory {
 }
 
 interface PositionTemplatesEditorProps {
-  adminPassword: string;
 }
 
 const PAID_BY_OPTIONS: { value: string; label: string }[] = [
@@ -50,7 +49,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   custom: 'Sonstige',
 };
 
-export default function PositionTemplatesEditor({ adminPassword }: PositionTemplatesEditorProps) {
+export default function PositionTemplatesEditor({}: PositionTemplatesEditorProps) {
   const [templates, setTemplates] = useState<PositionTemplate[]>([]);
   const [categories, setCategories] = useState<PositionCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,8 +78,8 @@ export default function PositionTemplatesEditor({ adminPassword }: PositionTempl
   const fetchData = useCallback(async () => {
     try {
       const [templatesRes, categoriesRes] = await Promise.all([
-        fetch('/api/admin/position-templates', { headers: { 'x-admin-password': adminPassword } }),
-        fetch('/api/admin/position-categories', { headers: { 'x-admin-password': adminPassword } }),
+        fetch('/api/admin/position-templates', { }),
+        fetch('/api/admin/position-categories', { }),
       ]);
       const templatesData = await templatesRes.json() as { templates?: PositionTemplate[]; tableExists?: boolean };
       const categoriesData = await categoriesRes.json() as { categories?: PositionCategory[] };
@@ -96,7 +95,7 @@ export default function PositionTemplatesEditor({ adminPassword }: PositionTempl
     } finally {
       setLoading(false);
     }
-  }, [adminPassword]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -177,10 +176,7 @@ export default function PositionTemplatesEditor({ adminPassword }: PositionTempl
       const method = editingId ? 'PUT' : 'POST';
       await fetch('/api/admin/position-templates', {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -198,8 +194,7 @@ export default function PositionTemplatesEditor({ adminPassword }: PositionTempl
     try {
       await fetch(`/api/admin/position-templates?id=${id}`, {
         method: 'DELETE',
-        headers: { 'x-admin-password': adminPassword },
-      });
+        });
       await fetchData();
     } catch (err) {
       console.error('Failed to delete template:', err);

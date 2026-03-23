@@ -18,7 +18,6 @@ export { WALLI_VALUES, calculateUtilityCostsForBooking };
 export type { CostBreakdownDetailed } from './utility-costs';
 
 interface UtilityCostsCalculatorProps {
-  adminPassword?: string;
   demoMode?: boolean;
 }
 
@@ -26,7 +25,7 @@ interface UtilityCostsCalculatorProps {
 const KURTAXE_ALT = 2.7;  // bis 31.10.2026
 const KURTAXE_NEU = 4.5;  // ab 01.11.2026
 
-export default function UtilityCostsCalculator({ adminPassword, demoMode = false }: UtilityCostsCalculatorProps) {
+export default function UtilityCostsCalculator({ demoMode = false }: UtilityCostsCalculatorProps) {
   const [selectedSeason, setSelectedSeason] = useState<Season>('summer');
   const [selectedWeeks, setSelectedWeeks] = useState<WeeksCount>(1);
   const [viewMode, setViewMode] = useState<'weeks' | 'days'>('weeks');
@@ -46,7 +45,7 @@ export default function UtilityCostsCalculator({ adminPassword, demoMode = false
     const loadSettings = async () => {
       try {
         const res = await fetch('/api/admin/settings', {
-          headers: adminPassword ? { 'x-admin-password': adminPassword } : {}
+          
         });
         const data = (await res.json()) as { settings?: Record<string, string> };
         if (data.settings) {
@@ -85,7 +84,7 @@ export default function UtilityCostsCalculator({ adminPassword, demoMode = false
   };
 
   const handleSavePricing = async (newPricing: PricingSettings) => {
-    if (!adminPassword) {
+    if (false) {
       throw new Error('Keine Admin-Berechtigung');
     }
 
@@ -101,10 +100,7 @@ export default function UtilityCostsCalculator({ adminPassword, demoMode = false
     for (const setting of settingsToSave) {
       await fetch('/api/admin/settings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(setting),
       });
     }
@@ -145,7 +141,7 @@ export default function UtilityCostsCalculator({ adminPassword, demoMode = false
         </div>
 
         {/* Pricing Info Card */}
-        <PricingEditor pricing={pricing} adminPassword={adminPassword} onSave={handleSavePricing} />
+        <PricingEditor pricing={pricing} onSave={handleSavePricing} />
       </div>
 
       {/* Season/Week Selector */}

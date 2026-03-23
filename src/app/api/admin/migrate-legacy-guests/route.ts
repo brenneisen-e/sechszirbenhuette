@@ -60,13 +60,6 @@ export async function GET(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
     const { results } = await db.prepare(LEGACY_GUEST_QUERY).all<LegacyGuest>();
 
     const guests = (results || []).map(g => ({
@@ -93,13 +86,6 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
-
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
-      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
-    }
 
     const { results: legacyGuests } = await db.prepare(LEGACY_GUEST_QUERY).all<LegacyGuest>();
 

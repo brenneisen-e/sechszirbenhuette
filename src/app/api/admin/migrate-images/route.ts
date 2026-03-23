@@ -50,18 +50,6 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = ctx.env as unknown as CloudflareEnv;
 
-    // Verify admin session
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-    if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
-
     // Count images that need migration (R2-based URLs)
     const r2Images = await env.DB.prepare(
       "SELECT COUNT(*) as count FROM media WHERE media_type = 'image' AND url LIKE '/api/%'"
@@ -98,18 +86,6 @@ export async function POST(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();
     const env = ctx.env as unknown as CloudflareEnv;
-
-    // Verify admin session
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-    if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
 
     // Get Cloudflare credentials
     const creds = await getCredentialsWithDb(env);
