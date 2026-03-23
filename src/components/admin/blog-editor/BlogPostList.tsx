@@ -31,16 +31,6 @@ const formatDate = (dateString: string | null) => {
 };
 
 export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating }: BlogPostListProps) {
-  if (posts.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-        <p className="text-lg">Noch keine Blog-Beiträge</p>
-        <p className="text-sm">Erstellen Sie Ihren ersten Beitrag</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       {/* Migrate button */}
@@ -57,6 +47,14 @@ export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating }: 
           >
             {migrating ? 'Migriere...' : 'Migrieren'}
           </button>
+        </div>
+      )}
+
+      {posts.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+          <p className="text-lg">Noch keine Blog-Beiträge</p>
+          <p className="text-sm">Erstellen Sie Ihren ersten Beitrag</p>
         </div>
       )}
 

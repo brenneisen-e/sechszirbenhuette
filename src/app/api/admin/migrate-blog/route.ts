@@ -84,29 +84,41 @@ const ARTICLE_2 = {
 };
 
 export async function POST() {
+  const steps: string[] = [];
   try {
     const db = await getDb();
     if (!db) {
       return NextResponse.json({ error: 'DB not available' }, { status: 500 });
     }
 
-    const results: string[] = [];
     const now = new Date().toISOString();
 
-    // First: ensure the layout column supports 'tabs'
-    // SQLite CHECK constraints can't be altered, so recreate table if needed
+    // Step 1: Ensure blog_posts table supports 'tabs' layout
+    // Clean up any leftover temp table from previous failed attempts
     try {
-      // Test if 'tabs' is allowed by doing a dry check
+      await db.prepare('DROP TABLE IF EXISTS blog_posts_new').run();
+      steps.push('Cleanup: blog_posts_new dropped');
+    } catch {
+      // fine if it doesn't exist
+    }
+
+    // Test if 'tabs' is allowed
+    let needsRecreate = false;
+    try {
       await db.prepare(
         "INSERT INTO blog_posts (id, slug, title, content, layout) VALUES ('__test_tabs__', '__test_tabs__', 'test', 'test', 'tabs')"
       ).run();
-      // If it worked, delete the test row
       await db.prepare("DELETE FROM blog_posts WHERE id = '__test_tabs__'").run();
+      steps.push('Tabs layout already supported');
     } catch {
-      // 'tabs' not allowed — recreate table without CHECK or with updated CHECK
-      results.push('Layout-Constraint wird aktualisiert...');
+      needsRecreate = true;
+      steps.push('Tabs layout NOT supported, need table recreation');
+    }
+
+    if (needsRecreate) {
+      // Recreate blog_posts with updated CHECK constraint
       await db.prepare(`
-        CREATE TABLE IF NOT EXISTS blog_posts_new (
+        CREATE TABLE blog_posts_new (
           id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
           slug TEXT UNIQUE NOT NULL,
           title TEXT NOT NULL,
@@ -126,16 +138,24 @@ export async function POST() {
           updated_at TEXT DEFAULT (datetime('now'))
         )
       `).run();
+      steps.push('Created blog_posts_new');
+
       await db.prepare('INSERT INTO blog_posts_new SELECT * FROM blog_posts').run();
+      steps.push('Copied data to blog_posts_new');
+
       await db.prepare('DROP TABLE blog_posts').run();
+      steps.push('Dropped old blog_posts');
+
       await db.prepare('ALTER TABLE blog_posts_new RENAME TO blog_posts').run();
+      steps.push('Renamed blog_posts_new -> blog_posts');
+
       await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug)').run();
       await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status)').run();
       await db.prepare('CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at)').run();
-      results.push('Layout-Constraint aktualisiert');
+      steps.push('Recreated indexes');
     }
 
-    // Migrate Article 1 (carousel)
+    // Step 2: Migrate Article 1 (carousel)
     const slug1 = generateSlug(ARTICLE_1.title);
     const existing1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first();
     if (!existing1) {
@@ -144,8 +164,8 @@ export async function POST() {
         `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, layout, status, author, published_at, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
       ).bind(id1, slug1, ARTICLE_1.title, ARTICLE_1.subtitle, ARTICLE_1.excerpt, ARTICLE_1.content, ARTICLE_1.layout, now, now, now).run();
+      steps.push(`Article 1 inserted with id ${id1}`);
 
-      // Add slides as blog_post_images
       for (let i = 0; i < ARTICLE_1.slides.length; i++) {
         const slide = ARTICLE_1.slides[i];
         const imgId = crypto.randomUUID();
@@ -154,28 +174,37 @@ export async function POST() {
            VALUES (?, ?, '', ?, ?, ?)`
         ).bind(imgId, id1, slide.title, slide.description, i).run();
       }
-      results.push(`Artikel 1 "${ARTICLE_1.title}" migriert als Karussell`);
+      steps.push(`Article 1: ${ARTICLE_1.slides.length} slides inserted`);
     } else {
-      results.push(`Artikel 1 "${ARTICLE_1.title}" existiert bereits`);
+      steps.push('Article 1 already exists, skipped');
     }
 
-    // Migrate Article 2 (tabs)
+    // Step 3: Migrate Article 2 (tabs)
     const slug2 = generateSlug(ARTICLE_2.title);
     const existing2 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug2).first();
     if (!existing2) {
       const id2 = crypto.randomUUID();
+      const tabsContent = JSON.stringify(ARTICLE_2.content);
       await db.prepare(
         `INSERT INTO blog_posts (id, slug, title, subtitle, excerpt, content, layout, status, author, published_at, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, 'published', 'Sechszirbenhütte', ?, ?, ?)`
-      ).bind(id2, slug2, ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, JSON.stringify(ARTICLE_2.content), ARTICLE_2.layout, now, now, now).run();
-      results.push(`Artikel 2 "${ARTICLE_2.title}" migriert als Tabs`);
+      ).bind(id2, slug2, ARTICLE_2.title, ARTICLE_2.subtitle, ARTICLE_2.excerpt, tabsContent, ARTICLE_2.layout, now, now, now).run();
+      steps.push(`Article 2 inserted with id ${id2}`);
     } else {
-      results.push(`Artikel 2 "${ARTICLE_2.title}" existiert bereits`);
+      steps.push('Article 2 already exists, skipped');
     }
 
-    return NextResponse.json({ success: true, message: results.join('. ') });
+    return NextResponse.json({
+      success: true,
+      message: 'Blog-Artikel erfolgreich migriert!',
+      steps,
+    });
   } catch (error) {
-    console.error('Migration error:', error);
-    return NextResponse.json({ error: 'Migration fehlgeschlagen' }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('Migration error:', errMsg, 'Steps completed:', steps);
+    return NextResponse.json({
+      error: `Migration fehlgeschlagen: ${errMsg}`,
+      steps,
+    }, { status: 500 });
   }
 }

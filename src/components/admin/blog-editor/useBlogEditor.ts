@@ -125,18 +125,20 @@ export function useBlogEditor(): UseBlogEditorReturn {
   // Migrate static blog articles
   const handleMigrateBlog = async () => {
     setMigrating(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/migrate-blog', { method: 'POST' });
-      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      const data = await res.json() as { success?: boolean; message?: string; error?: string; steps?: string[] };
+      console.log('[BlogEditor] Migration result:', data);
       if (res.ok && data.success) {
         setSuccess(data.message || 'Blog-Artikel migriert!');
         await loadPosts();
       } else {
-        setError(data.error || 'Migration fehlgeschlagen');
+        setError(data.error || `Migration fehlgeschlagen (${res.status})`);
       }
     } catch (err) {
       console.error('Error migrating blog:', err);
-      setError('Fehler bei der Migration');
+      setError(`Fehler bei der Migration: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setMigrating(false);
     }
