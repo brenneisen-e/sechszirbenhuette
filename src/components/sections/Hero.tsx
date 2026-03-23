@@ -252,28 +252,20 @@ export function Hero() {
           </div>
         )}
 
-        {/* Video layer - single element, HLS.js handles adaptive bitrate */}
-        {isMounted && videoUrl && !videoError && (
-          <video
-            ref={videoRef}
-            id="hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            disablePictureInPicture
-            preload="auto"
-            {...(thumbnailUrl ? { poster: thumbnailUrl } : {})}
-            className="h-full w-full object-cover"
-            onCanPlay={handleVideoCanPlay}
-            onError={handleVideoError}
-          />
-        )}
-
-        {/* Fallback gradient when not mounted */}
-        {!isMounted && (
-          <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
-        )}
+        {/* Video layer - always in DOM with autoPlay muted for browser autoplay policy */}
+        <video
+          ref={videoRef}
+          id="hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          disablePictureInPicture
+          preload="auto"
+          className={`h-full w-full object-cover ${videoError ? 'hidden' : ''}`}
+          onCanPlay={handleVideoCanPlay}
+          onError={handleVideoError}
+        />
       </div>
 
       {/* Overlay - leichter Gradient für Lesbarkeit */}
