@@ -7,6 +7,7 @@ import {
   Location,
   Umgebung,
   Galerie,
+  Instagram,
   Buchung,
 } from '@/components/sections';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
@@ -15,11 +16,12 @@ import { LoadingScreen } from '@/components/ui/LoadingScreen';
 export default function HomePage() {
   return (
     <>
-      <LoadingScreen minDisplayTime={1500} />
+      <LoadingScreen minDisplayTime={1000} />
       <Hero />
       <IntroText />
       <Ferienhaus />
       <Galerie />
+      <Instagram />
       <Bewertungen />
       <Location />
       <Umgebung />

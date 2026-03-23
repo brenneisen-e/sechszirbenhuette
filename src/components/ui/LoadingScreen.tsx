@@ -102,7 +102,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
           video.removeEventListener('timeupdate', handleTimeUpdate);
         };
       } else {
-        setTimeout(() => setVideoLoaded(true), 3000);
+        setTimeout(() => setVideoLoaded(true), 2000);
       }
       return false;
     };
@@ -120,7 +120,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
     const mainContent = document.getElementById('__next') || document.body;
     observer.observe(mainContent, { childList: true, subtree: true });
 
-    const fallbackTimer = setTimeout(() => setVideoLoaded(true), 6000);
+    const fallbackTimer = setTimeout(() => setVideoLoaded(true), 2500);
 
     return () => {
       observer.disconnect();
