@@ -61,6 +61,10 @@ const MigrationPanel = dynamic(() => import('@/components/admin/MigrationPanel')
   loading: () => <LoadingSpinner text="Lade System..." />,
 });
 
+const ImageMigrationPanel = dynamic(() => import('@/components/admin/ImageMigrationPanel'), {
+  loading: () => <LoadingSpinner text="Lade Migration..." />,
+});
+
 const BriefingGenerator = dynamic(() => import('@/components/admin/BriefingGenerator'), {
   loading: () => <LoadingSpinner text="Lade Briefing..." />,
 });
@@ -382,6 +386,9 @@ function AdminPageContent() {
           {activeTab === 'system' && (
             <div className="space-y-12">
               <CloudflareSettings adminPassword={adminPassword} />
+              <div className="border-t border-gray-200 pt-8">
+                <ImageMigrationPanel adminPassword={adminPassword} />
+              </div>
               <div className="border-t border-gray-200 pt-8">
                 <MigrationPanel adminPassword={adminPassword} />
               </div>
