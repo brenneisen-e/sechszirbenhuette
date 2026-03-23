@@ -49,14 +49,25 @@ export function Hero() {
     }
 
     // Check for preloaded video URL from LoadingScreen
+    const resolveVideoUrl = (url: string) => {
+      setVideoUrl(url);
+      // Generate a thumbnail from the Stream video at 7s to match the start frame
+      // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
+      const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
+      if (uidMatch && !thumbnailUrl) {
+        const subdomain = url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
+        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=7s&width=1920&height=1080`);
+      }
+    };
+
     if (win.__heroVideoUrl) {
-      setVideoUrl(win.__heroVideoUrl as string);
+      resolveVideoUrl(win.__heroVideoUrl as string);
     } else {
       fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
         .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
         .then((data) => {
           if (data.media?.[0]?.url) {
-            setVideoUrl(data.media[0].url);
+            resolveVideoUrl(data.media[0].url);
           }
         })
         .catch(() => {
