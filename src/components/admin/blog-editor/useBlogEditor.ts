@@ -253,8 +253,8 @@ export function useBlogEditor(): UseBlogEditorReturn {
     if (!confirm('Beitrag wirklich löschen?')) return;
 
     try {
-      const res = await fetch('/api/blog', {
-        method: 'DELETE',
+      const res = await fetch('/api/admin/blog-delete', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: postId }),
       });
