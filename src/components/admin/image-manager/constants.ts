@@ -7,19 +7,19 @@ export const MAX_HEIGHT = 1080;
 export const HASH_SIZE = 16;
 
 export const CATEGORIES: CategoryOption[] = [
-  { value: 'hero', label: 'Hero Slider' },
-  { value: 'exterior', label: 'Außenansichten' },
-  { value: 'living', label: 'Wohnbereich' },
-  { value: 'bedrooms', label: 'Schlafzimmer' },
-  { value: 'kitchen', label: 'Küche' },
-  { value: 'bathroom', label: 'Badezimmer' },
-  { value: 'wellness', label: 'Sauna & Wellness' },
-  { value: 'surroundings', label: 'Umgebung' },
-  { value: 'summer', label: 'Sommer' },
+  { value: 'hero', label: 'Hero' },
+  { value: 'aussen', label: 'Außen' },
+  { value: 'wohnen', label: 'Wohnbereich' },
+  { value: 'schlafen', label: 'Schlafzimmer' },
+  { value: 'kueche', label: 'Küche' },
+  { value: 'bad', label: 'Bad & Sauna' },
+  { value: 'umgebung', label: 'Umgebung' },
+  { value: 'sommer', label: 'Sommer' },
   { value: 'winter', label: 'Winter' },
   { value: 'extras', label: 'Extras' },
-  { value: 'hosts', label: 'Gastgeber' },
-  { value: 'gallery', label: 'Galerie' },
+  { value: 'gastgeber', label: 'Gastgeber' },
+  { value: 'galerie', label: 'Galerie' },
+  { value: 'blog', label: 'Blog' },
 ];
 
 export const SUMMER_ACTIVITY_NAMES = [

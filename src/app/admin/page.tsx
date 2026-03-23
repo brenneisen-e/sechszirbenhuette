@@ -17,6 +17,7 @@ import {
   Database,
   CheckCircle,
   FileText,
+  Star,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
@@ -59,6 +60,10 @@ const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), {
   loading: () => <LoadingSpinner text="Lade Blog-Verwaltung..." />,
 });
 
+const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), {
+  loading: () => <LoadingSpinner text="Lade Bewertungen..." />,
+});
+
 
 function FullScreenLoader() {
   return (
@@ -77,7 +82,7 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog';
+type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
@@ -86,6 +91,7 @@ const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.Compo
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
+  { id: 'reviews', label: 'Bewertungen', shortLabel: 'Reviews', icon: Star },
 ];
 
 function AdminPageContent() {
@@ -241,12 +247,14 @@ function AdminPageContent() {
 
           {activeTab === 'blog' && <BlogEditor />}
 
+          {activeTab === 'reviews' && <ReviewsManager />}
+
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-11 h-14">
+        <div className="grid grid-cols-7 h-14">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

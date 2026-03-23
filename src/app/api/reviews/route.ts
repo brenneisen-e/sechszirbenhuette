@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+interface ReviewRecord {
+  id: number;
+  gast_name: string;
+  bewertung: number;
+  titel: string | null;
+  text: string | null;
+  aufenthalt_von: string | null;
+  quelle: string | null;
+}
 
-// Placeholder reviews - in production this would come from Cloudflare D1
-const PLACEHOLDER_REVIEWS = [
+// Fallback reviews when DB is not available
+const FALLBACK_REVIEWS: ReviewRecord[] = [
   {
     id: 1,
     gast_name: 'Familie M.',
@@ -39,26 +49,26 @@ const PLACEHOLDER_REVIEWS = [
     aufenthalt_von: '2024-07-05',
     quelle: 'Google',
   },
-  {
-    id: 5,
-    gast_name: 'Thomas W.',
-    bewertung: 5,
-    titel: 'Wintertraum',
-    text: 'Perfekte Lage für Skifahrer und Langläufer. Die Pisten sind schnell erreichbar und nach einem aktiven Tag gibt es nichts Besseres als die private Sauna. Top Ausstattung, sehr sauber!',
-    aufenthalt_von: '2024-01-28',
-    quelle: 'Booking.com',
-  },
-  {
-    id: 6,
-    gast_name: 'Maria & Peter',
-    bewertung: 5,
-    titel: 'Romantischer Rückzugsort',
-    text: 'Der perfekte Ort für eine Auszeit zu zweit. Die Alleinlage ist wunderbar ruhig, die Ausstattung hochwertig. Besonders der Pelletofen sorgt für eine tolle Atmosphäre.',
-    aufenthalt_von: '2024-03-15',
-    quelle: 'FeWo-direkt',
-  },
 ];
 
 export async function GET() {
-  return NextResponse.json({ reviews: PLACEHOLDER_REVIEWS });
+  try {
+    const ctx = await getCloudflareContext();
+    const env = ctx.env as unknown as { DB: { prepare: (q: string) => { all: <T>() => Promise<{ results?: T[] }> } } };
+
+    if (env?.DB) {
+      const result = await env.DB.prepare(
+        'SELECT id, gast_name, bewertung, titel, text, aufenthalt_von, quelle FROM reviews WHERE sichtbar = 1 ORDER BY created_at DESC'
+      ).all<ReviewRecord>();
+
+      const reviews = result.results || [];
+      if (reviews.length > 0) {
+        return NextResponse.json({ reviews });
+      }
+    }
+  } catch {
+    // Fall through to fallback
+  }
+
+  return NextResponse.json({ reviews: FALLBACK_REVIEWS });
 }
