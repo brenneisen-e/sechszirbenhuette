@@ -7,7 +7,6 @@ import {
   Image as ImageIcon,
   Users,
   Euro,
-  Wallet,
   Calculator,
   Key,
   Loader2,
@@ -41,9 +40,6 @@ const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview
   loading: () => <LoadingSpinner text="Lade Finanzen..." />,
 });
 
-const BankTransactions = dynamic(() => import('@/components/admin/BankTransactions'), {
-  loading: () => <LoadingSpinner text="Lade Kontoauszug..." />,
-});
 
 const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), {
   loading: () => <LoadingSpinner text="Lade Nebenkosten..." />,
@@ -86,12 +82,11 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews';
+type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
-  { id: 'bank', label: 'Kontoauszug', shortLabel: 'Konto', icon: Wallet },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
@@ -186,6 +181,13 @@ function AdminPageContent() {
             </div>
             <div className="flex items-center gap-3">
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
+              <a
+                href="/"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
+              >
+                <Home className="w-4 h-4" />
+                <span>Zur Homepage</span>
+              </a>
             </div>
           </div>
 
@@ -235,7 +237,6 @@ function AdminPageContent() {
             />
           )}
 
-          {activeTab === 'bank' && <BankTransactions demoMode={isDemoMode} />}
 
           {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
 
@@ -253,7 +254,7 @@ function AdminPageContent() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-8 h-14">
+        <div className="grid grid-cols-7 h-14">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
