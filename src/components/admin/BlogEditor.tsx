@@ -5,8 +5,6 @@ import {
   X,
   Loader2,
   RefreshCw,
-  Database,
-  Upload,
   AlertCircle,
   Check,
 } from 'lucide-react';
@@ -112,24 +110,6 @@ export default function BlogEditor() {
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
                 <button
-                  onClick={handleSetupBlogDb}
-                  disabled={settingUpDb}
-                  className="flex items-center gap-2 px-3 py-2 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition disabled:opacity-50"
-                  title="Blog-Datenbank einrichten (D1 Tabellen erstellen)"
-                >
-                  {settingUpDb ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-                  <span className="hidden sm:inline">DB einrichten</span>
-                </button>
-                <button
-                  onClick={handleMigrateBlog}
-                  disabled={migrating}
-                  className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
-                  title="Statische Blog-Artikel in Datenbank migrieren"
-                >
-                  {migrating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  <span className="hidden sm:inline">Artikel importieren</span>
-                </button>
-                <button
                   onClick={handleNewPost}
                   className="flex items-center gap-2 px-4 py-2 bg-logo-green text-white rounded-lg hover:bg-logo-green/90 transition"
                 >
@@ -137,6 +117,16 @@ export default function BlogEditor() {
                   Neuer Beitrag
                 </button>
               </div>
+            )}
+            {activeTab !== 'list' && currentPost?.slug && (
+              <a
+                href={`/blog/${currentPost.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-logo-green hover:underline"
+              >
+                /blog/{currentPost.slug}
+              </a>
             )}
           </div>
         </div>
@@ -175,11 +165,13 @@ export default function BlogEditor() {
               postImages={postImages}
               saving={saving}
               activeTab={activeTab}
+              availableMedia={availableMedia}
               onUpdatePost={(updates) => setCurrentPost(prev => ({ ...prev, ...updates }))}
               onRemoveImage={removeImageFromGallery}
               onOpenMediaPicker={handleOpenMediaPicker}
               onSave={handleSave}
               onTogglePreview={handleTogglePreview}
+              onMediaUploaded={loadMedia}
             />
             <BlogPreview
               currentPost={currentPost}

@@ -19,11 +19,13 @@ interface BlogEditorFormProps {
   postImages: BlogPostImage[];
   saving: boolean;
   activeTab: 'edit' | 'preview';
+  availableMedia?: { id: string; url: string; alt_text: string; title: string }[];
   onUpdatePost: (updates: Partial<BlogPost>) => void;
   onRemoveImage: (index: number) => void;
   onOpenMediaPicker: (target: 'cover' | 'gallery') => void;
   onSave: (publish?: boolean) => void;
   onTogglePreview: () => void;
+  onMediaUploaded?: () => void;
 }
 
 export function BlogEditorForm({
@@ -31,11 +33,13 @@ export function BlogEditorForm({
   postImages,
   saving,
   activeTab,
+  availableMedia,
   onUpdatePost,
   onRemoveImage,
   onOpenMediaPicker,
   onSave,
   onTogglePreview,
+  onMediaUploaded,
 }: BlogEditorFormProps) {
   return (
     <div className={activeTab === 'preview' ? 'hidden lg:block' : ''}>
@@ -140,6 +144,8 @@ export function BlogEditorForm({
           <RichTextEditor
             value={currentPost.content || ''}
             onChange={(html) => onUpdatePost({ content: html })}
+            availableMedia={availableMedia}
+            onMediaUploaded={onMediaUploaded}
           />
         </div>
 
