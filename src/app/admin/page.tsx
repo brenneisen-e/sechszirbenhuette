@@ -20,6 +20,7 @@ import {
   Star,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
+import { DomErrorBoundary } from '@/components/admin/DomErrorBoundary';
 
 // Loading component
 function LoadingSpinner({ text }: { text: string }) {
@@ -31,38 +32,16 @@ function LoadingSpinner({ text }: { text: string }) {
   );
 }
 
-// Lazy load heavy components
-const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), {
-  loading: () => <LoadingSpinner text="Lade Gästedatenbank..." />,
-});
-
-const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), {
-  loading: () => <LoadingSpinner text="Lade Finanzen..." />,
-});
-
-
-const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), {
-  loading: () => <LoadingSpinner text="Lade Nebenkosten..." />,
-});
-
-const ImageManager = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.ImageManager })), {
-  loading: () => <LoadingSpinner text="Lade Bilderverwaltung..." />,
-});
-
-const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.PasswordsPanel })), {
-  loading: () => <LoadingSpinner text="Lade Passwörter..." />,
-});
-
-
-
-
-const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), {
-  loading: () => <LoadingSpinner text="Lade Blog-Verwaltung..." />,
-});
-
-const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), {
-  loading: () => <LoadingSpinner text="Lade Bewertungen..." />,
-});
+// Lazy load heavy components — no per-component loading/Suspense to avoid
+// nested Suspense boundaries conflicting with useSearchParams() during tab switches.
+// A single Suspense boundary wraps the content area instead.
+const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), { ssr: false });
+const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), { ssr: false });
+const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), { ssr: false });
+const ImageManager = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.ImageManager })), { ssr: false });
+const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.PasswordsPanel })), { ssr: false });
+const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), { ssr: false });
+const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), { ssr: false });
 
 
 function FullScreenLoader() {
@@ -222,39 +201,40 @@ function AdminPageContent() {
 
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
-        <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
-          {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
+        <DomErrorBoundary>
+        <Suspense fallback={<LoadingSpinner text="Laden..." />}>
+          <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
+            {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 
-          {activeTab === 'finances' && (
-            <FinanceOverview
-              key={financeRefreshKey}
-                           demoMode={isDemoMode}
-              onNavigateToGuest={(guestId) => {
-                setActiveTab('guests');
-                setTimeout(() => {
-                  const guestElement = document.getElementById(`guest-${guestId}`);
-                  if (guestElement) {
-                    guestElement.scrollIntoView({ behavior: 'smooth' });
-                    guestElement.click();
-                  }
-                }, 100);
-              }}
-            />
-          )}
+            {activeTab === 'finances' && (
+              <FinanceOverview
+                key={financeRefreshKey}
+                demoMode={isDemoMode}
+                onNavigateToGuest={(guestId) => {
+                  setActiveTab('guests');
+                  setTimeout(() => {
+                    const guestElement = document.getElementById(`guest-${guestId}`);
+                    if (guestElement) {
+                      guestElement.scrollIntoView({ behavior: 'smooth' });
+                      guestElement.click();
+                    }
+                  }, 100);
+                }}
+              />
+            )}
 
+            {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
 
-          {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
+            {activeTab === 'passwords' && <PasswordsPanel />}
 
-          {activeTab === 'passwords' && <PasswordsPanel />}
+            {activeTab === 'images' && <ImageManager />}
 
+            {activeTab === 'blog' && <BlogEditor />}
 
-          {activeTab === 'images' && <ImageManager />}
-
-          {activeTab === 'blog' && <BlogEditor />}
-
-          {activeTab === 'reviews' && <ReviewsManager />}
-
-        </div>
+            {activeTab === 'reviews' && <ReviewsManager />}
+          </div>
+        </Suspense>
+        </DomErrorBoundary>
       </div>
 
       {/* Mobile Bottom Navigation */}
