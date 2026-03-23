@@ -100,6 +100,15 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
     },
   });
 
+  // Explicitly destroy editor on unmount to prevent orphaned DOM nodes
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
+
   // Sync external value changes
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
@@ -288,7 +297,7 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
       <EditorContent editor={editor} />
 
       {/* Bubble menu for images - appears when clicking on an image */}
-      {editor && (
+      {editor && !editor.isDestroyed && (
         <BubbleMenu
           editor={editor}
           shouldShow={({ editor: ed }: { editor: ReturnType<typeof useEditor> }) => ed?.isActive('image') ?? false}
