@@ -97,11 +97,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching bookings:', error);
     const message = error instanceof Error ? error.message : 'Fehler beim Laden der Buchungen';
-    // If table doesn't exist, return empty array instead of error
-    if (message.includes('no such table')) {
+    // If table doesn't exist or columns are missing, return empty array instead of error
+    if (message.includes('no such table') || message.includes('no such column')) {
       return NextResponse.json({ bookings: [], tableNotFound: true });
     }
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Return empty bookings on any DB error to prevent UI breakage
+    return NextResponse.json({ bookings: [], error: message }, { status: 200 });
   }
 }
 
