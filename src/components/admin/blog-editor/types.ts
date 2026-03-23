@@ -37,6 +37,10 @@ export interface MediaItem {
 export interface BlogTab {
   title: string;
   icon?: string;
+  type?: 'dog-carousel' | 'kids-accordion';
+  sectionTitle?: string;
+  imageCategories?: string[];
+  featured?: { title: string; description: string; distance: string; age: string };
   slides: BlogTabSlide[];
 }
 
@@ -47,6 +51,8 @@ export interface BlogTabSlide {
   tip?: string;
   difficulty?: string;
   duration?: string;
+  distance?: string;
+  age?: string;
 }
 
 export type EditorTab = 'list' | 'edit' | 'preview';
