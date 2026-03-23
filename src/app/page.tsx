@@ -7,6 +7,7 @@ import {
   Location,
   Umgebung,
   Galerie,
+  Instagram,
   Buchung,
 } from '@/components/sections';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
@@ -20,6 +21,7 @@ export default function HomePage() {
       <IntroText />
       <Ferienhaus />
       <Galerie />
+      <Instagram />
       <Bewertungen />
       <Location />
       <Umgebung />
