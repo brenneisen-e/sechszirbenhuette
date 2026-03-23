@@ -138,6 +138,8 @@ export async function uploadVideo(
 ): Promise<CFStreamUploadResult> {
   const formData = new FormData();
   formData.append('file', new Blob([file as BlobPart]), filename);
+  // Make video publicly accessible (no signed URLs required)
+  formData.append('requireSignedURLs', 'false');
 
   if (metadata) {
     formData.append('meta', JSON.stringify(metadata));
