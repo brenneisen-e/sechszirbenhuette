@@ -36,7 +36,7 @@ export default function ImageMigrationPanel({ adminPassword }: { adminPassword: 
     setLoading(true);
     try {
       const res = await fetch('/api/admin/migrate-images');
-      const data = await res.json();
+      const data = await res.json() as MigrationStatus & { success?: boolean; error?: string };
       if (data.success) {
         setStatus(data);
       } else {
@@ -59,7 +59,7 @@ export default function ImageMigrationPanel({ adminPassword }: { adminPassword: 
     setResult(null);
     try {
       const res = await fetch('/api/admin/migrate-images', { method: 'POST' });
-      const data = await res.json();
+      const data = await res.json() as MigrationResponse & { error?: string };
       if (data.success) {
         setResult(data);
         fetchStatus();
