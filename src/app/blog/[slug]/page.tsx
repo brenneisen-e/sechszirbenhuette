@@ -13,6 +13,8 @@ import {
   ChevronRight,
   X,
   Loader2,
+  Mountain,
+  Globe,
 } from 'lucide-react';
 
 interface BlogPost {
@@ -41,88 +43,124 @@ interface BlogPostImage {
   display_order: number;
 }
 
-// Carousel Cards component for carousel layout blog posts
-function CarouselCards({ images, onImageClick }: { images: BlogPostImage[]; onImageClick: (index: number) => void }) {
-  const [offset, setOffset] = useState(0);
-  const visibleDesktop = 2;
-  const maxOffset = Math.max(0, images.length - visibleDesktop);
+interface MediaItem {
+  id: number;
+  url: string;
+  alt_text: string;
+  category?: string;
+}
+
+// Carousel Cards component matching the original FeatureCarousel style
+function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPostImage[]; mediaImages: MediaItem[]; onImageClick: (index: number) => void }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const itemCount = images.length;
+  const maxIndex = isMobile ? itemCount - 1 : Math.ceil(itemCount / 2) - 1;
+  const totalDots = isMobile ? itemCount : Math.ceil(itemCount / 2);
+  const translateValue = isMobile ? currentIndex * 100 : currentIndex * 50;
+
+  const prev = () => setCurrentIndex(Math.max(0, currentIndex - 1));
+  const next = () => setCurrentIndex(Math.min(maxIndex, currentIndex + 1));
 
   return (
     <div className="relative">
-      {/* Navigation */}
-      {images.length > visibleDesktop && (
-        <>
-          <button
-            onClick={() => setOffset(Math.max(0, offset - 1))}
-            disabled={offset === 0}
-            className="absolute left-0 top-1/3 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 -translate-x-1/2 disabled:opacity-30 transition"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button
-            onClick={() => setOffset(Math.min(maxOffset, offset + 1))}
-            disabled={offset >= maxOffset}
-            className="absolute right-0 top-1/3 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 translate-x-1/2 disabled:opacity-30 transition"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </>
-      )}
+      {/* Navigation Buttons */}
+      <button
+        onClick={prev}
+        className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''}`}
+        disabled={currentIndex === 0}
+      >
+        <ChevronLeft size={24} />
+      </button>
+      <button
+        onClick={next}
+        className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${currentIndex >= maxIndex ? 'opacity-30 cursor-not-allowed' : ''}`}
+        disabled={currentIndex >= maxIndex}
+      >
+        <ChevronRight size={24} />
+      </button>
 
-      {/* Cards */}
-      <div className="overflow-hidden">
+      {/* Carousel Track */}
+      <div className="overflow-hidden mx-4 md:mx-8">
         <div
-          className="flex gap-4 transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${offset * (100 / visibleDesktop + 2)}%)` }}
+          className="flex transition-transform duration-300 ease-out"
+          style={{ transform: `translateX(-${translateValue}%)` }}
         >
-          {images.map((slide, index) => (
-            <div
-              key={index}
-              className="shrink-0 w-full sm:w-[calc(50%-8px)] rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-md hover:shadow-lg transition-shadow"
-            >
-              {slide.image_url && (
-                <div
-                  className="relative aspect-[4/3] cursor-pointer"
-                  onClick={() => onImageClick(index)}
-                >
-                  <Image
-                    src={slide.image_url}
-                    alt={slide.image_alt || ''}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform"
-                  />
-                  <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-logo-green text-white flex items-center justify-center text-sm font-bold shadow">
-                    {index + 1}
+          {images.map((slide, index) => {
+            const mediaImage = mediaImages[index] || null;
+            const imageUrl = slide.image_url || (mediaImage ? mediaImage.url : '');
+
+            return (
+              <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
+                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                  {/* Portrait Image or Placeholder */}
+                  <div className="relative aspect-[3/4] bg-gray-100">
+                    {imageUrl ? (
+                      <button
+                        onClick={() => onImageClick(index)}
+                        className="w-full h-full"
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={slide.image_alt || ''}
+                          fill
+                          className="object-cover hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </button>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-logo-green/10 to-logo-green/20">
+                        <Mountain size={80} className="text-logo-green/40" />
+                      </div>
+                    )}
+                    {/* Number Badge */}
+                    <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-logo-green flex items-center justify-center text-white font-bold shadow-lg">
+                      {index + 1}
+                    </div>
+                    {/* Icon Badge */}
+                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-logo-green shadow-lg">
+                      <Mountain size={20} />
+                    </div>
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="p-5">
+                    {slide.image_alt && (
+                      <h4 className="text-lg font-bold text-logo-green mb-3">{slide.image_alt}</h4>
+                    )}
+                    {slide.caption && (
+                      <p className="text-gray-600 text-sm leading-relaxed">{slide.caption}</p>
+                    )}
                   </div>
                 </div>
-              )}
-              <div className="p-5">
-                {slide.image_alt && (
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{slide.image_alt}</h3>
-                )}
-                {slide.caption && (
-                  <p className="text-gray-600 text-sm leading-relaxed">{slide.caption}</p>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Dots */}
-      {images.length > visibleDesktop && (
-        <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: maxOffset + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setOffset(i)}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
-                i === offset ? 'bg-logo-green w-6' : 'bg-logo-green/30 hover:bg-logo-green/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
+      {/* Dots Indicator */}
+      <div className="flex justify-center gap-2 mt-6">
+        {Array.from({ length: totalDots }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${
+              currentIndex === index
+                ? 'bg-logo-green w-6'
+                : 'bg-logo-green/30 hover:bg-logo-green/50'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -284,6 +322,7 @@ export default function BlogPostPage() {
 
   const [post, setPost] = useState<BlogPost | null>(null);
   const [images, setImages] = useState<BlogPostImage[]>([]);
+  const [mediaImages, setMediaImages] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -304,6 +343,18 @@ export default function BlogPostPage() {
         }
         setPost(data.post);
         setImages(data.images || []);
+
+        // For carousel layout, load media images as fallback for empty image_urls
+        if (data.post.layout === 'carousel') {
+          fetch('/api/media?category=aussen&type=image')
+            .then((res) => res.json() as Promise<{ media?: MediaItem[] }>)
+            .then((mediaData) => {
+              if (mediaData.media) {
+                setMediaImages(mediaData.media);
+              }
+            })
+            .catch(() => {});
+        }
       })
       .catch((err) => {
         setError(err.message);
@@ -386,6 +437,15 @@ export default function BlogPostPage() {
     });
   };
 
+  // Get the image URL for lightbox (prefer blog image, fallback to media)
+  const getLightboxImageUrl = (index: number): string => {
+    const blogImage = images[index];
+    if (blogImage?.image_url) return blogImage.image_url;
+    const mediaImage = mediaImages[index];
+    if (mediaImage?.url) return mediaImage.url;
+    return '';
+  };
+
   if (loading) {
     return (
       <>
@@ -419,6 +479,134 @@ export default function BlogPostPage() {
     );
   }
 
+  // Article-style layout for carousel and tabs posts (matches original static articles)
+  const isArticleLayout = post.layout === 'carousel' || post.layout === 'tabs';
+  const ArticleIcon = post.layout === 'carousel' ? Mountain : Globe;
+
+  if (isArticleLayout) {
+    return (
+      <>
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+          <div className="container">
+            {/* Back Link */}
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-logo-green hover:text-logo-green/80 mb-8 transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span>Zurück zum Blog</span>
+            </Link>
+
+            {/* Article Card */}
+            <motion.article
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-3xl shadow-lg overflow-hidden"
+            >
+              <div className="p-8 md:p-12">
+                {/* Article Header */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-logo-green/10 flex items-center justify-center">
+                    <ArticleIcon className="w-6 h-6 text-logo-green" />
+                  </div>
+                  <span className="text-sm text-gray-500 uppercase tracking-wide font-medium">
+                    Blogartikel
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h1
+                  className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
+                  style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                >
+                  {post.title}
+                </h1>
+
+                {/* Subtitle */}
+                {post.subtitle && (
+                  <p className="text-lg md:text-xl text-logo-green font-medium mb-4">
+                    {post.subtitle}
+                  </p>
+                )}
+
+                {/* Content / Intro text */}
+                {post.layout === 'carousel' && post.content && (
+                  <p className="text-gray-600 mb-10 max-w-3xl">
+                    {post.content}
+                  </p>
+                )}
+
+                {/* Carousel */}
+                {post.layout === 'carousel' && images.length > 0 && (
+                  <CarouselCards
+                    images={images}
+                    mediaImages={mediaImages}
+                    onImageClick={(index) => {
+                      setCurrentImageIndex(index);
+                      setLightboxOpen(true);
+                    }}
+                  />
+                )}
+
+                {/* Tabs Content */}
+                {post.layout === 'tabs' && (
+                  <TabsContent content={post.content} />
+                )}
+              </div>
+            </motion.article>
+          </div>
+        </div>
+
+        {/* Lightbox */}
+        {lightboxOpen && images.length > 0 && getLightboxImageUrl(currentImageIndex) && (
+          <div
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full"
+            >
+              <X size={32} />
+            </button>
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+                  }}
+                  className="absolute left-4 text-white p-2 hover:bg-white/10 rounded-full"
+                >
+                  <ChevronLeft size={40} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                  }}
+                  className="absolute right-4 text-white p-2 hover:bg-white/10 rounded-full"
+                >
+                  <ChevronRight size={40} />
+                </button>
+              </>
+            )}
+            <Image
+              src={getLightboxImageUrl(currentImageIndex)}
+              alt={images[currentImageIndex].image_alt || ''}
+              width={1200}
+              height={800}
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // Standard blog post layout
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
@@ -481,39 +669,17 @@ export default function BlogPostPage() {
             </div>
           </motion.header>
 
-          {/* Carousel Cards (if carousel layout) */}
-          {post.layout === 'carousel' && images.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-10"
-            >
-              <CarouselCards
-                images={images}
-                onImageClick={(index) => {
-                  setCurrentImageIndex(index);
-                  setLightboxOpen(true);
-                }}
-              />
-            </motion.div>
-          )}
-
           {/* Post Content */}
-          {post.layout === 'tabs' ? (
-            <TabsContent content={post.content} />
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="prose prose-lg prose-green max-w-none"
-              dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
-            />
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="prose prose-lg prose-green max-w-none"
+            dangerouslySetInnerHTML={{ __html: markdownToHtml(post.content) }}
+          />
 
           {/* Standard Layout Images (after content) */}
-          {post.layout === 'standard' && images.length > 0 && (
+          {images.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
