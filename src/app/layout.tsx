@@ -113,6 +113,20 @@ export default function RootLayout({
             <div className="init-dot" />
           </div>
         </div>
+        {/* Auto-dismiss initial loader for non-homepage routes (admin, blog, etc.) */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var isHomepage = window.location.pathname === '/';
+            var delay = isHomepage ? 5000 : 100;
+            setTimeout(function() {
+              var el = document.getElementById('initial-loader');
+              if (el && !el.classList.contains('loaded')) {
+                el.classList.add('loaded');
+                setTimeout(function() { el.remove(); }, 500);
+              }
+            }, delay);
+          })();
+        `}} />
         <SiteSettingsProvider>
           <LanguageProvider>
             <ContentTextsProvider>
