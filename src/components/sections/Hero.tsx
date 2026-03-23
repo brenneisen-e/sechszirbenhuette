@@ -285,8 +285,8 @@ export function Hero() {
               }
             }}
           >
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white/80 ml-1" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: LOGO_GREEN }}>
+              <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white ml-1" />
             </div>
           </motion.div>
         )}
@@ -321,8 +321,8 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 mx-auto px-2"
-              style={{ maxWidth: 'min(90vw, 42ch)', ...getTextStyle('hero_description') }}
+              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 px-2"
+              style={getTextStyle('hero_description')}
             >
               {getText('hero_description')}
             </motion.p>

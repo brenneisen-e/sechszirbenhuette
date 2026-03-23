@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import {
   Bold,
   Italic,
@@ -21,15 +21,30 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const isInternalChange = useRef(false);
+
+  // Only set innerHTML on mount or when value changes externally
+  useEffect(() => {
+    if (editorRef.current && !isInternalChange.current) {
+      if (editorRef.current.innerHTML !== value) {
+        editorRef.current.innerHTML = value || '<p><br></p>';
+      }
+    }
+    isInternalChange.current = false;
+  }, [value]);
+
+  const handleInput = useCallback(() => {
+    if (editorRef.current) {
+      isInternalChange.current = true;
+      onChange(editorRef.current.innerHTML);
+    }
+  }, [onChange]);
 
   const exec = useCallback((command: string, val?: string) => {
     document.execCommand(command, false, val);
-    // Update parent with new HTML
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+    handleInput();
     editorRef.current?.focus();
-  }, [onChange]);
+  }, [handleInput]);
 
   const handleFormat = (tag: string) => {
     exec('formatBlock', tag);
@@ -79,15 +94,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         ref={editorRef}
         contentEditable
         className="min-h-[250px] max-h-[500px] overflow-y-auto px-4 py-3 prose prose-sm max-w-none focus:outline-none [&>p]:mb-3 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600"
-        dangerouslySetInnerHTML={{ __html: value || '<p></p>' }}
-        onInput={() => {
-          if (editorRef.current) {
-            onChange(editorRef.current.innerHTML);
-          }
-        }}
+        onInput={handleInput}
         onPaste={(e) => {
           e.preventDefault();
-          // Paste as plain text to avoid formatting issues
           const text = e.clipboardData.getData('text/plain');
           document.execCommand('insertText', false, text);
         }}

@@ -193,6 +193,13 @@ export default function GuestDatabase({ adminPassword, onDataLoaded, demoMode = 
       const response = await fetch(url + params.toString(), {
         headers: { 'x-admin-password': adminPassword }
       });
+
+      if (response.status === 401) {
+        // Session expired — reload page to show login
+        window.location.reload();
+        return;
+      }
+
       const data = await response.json() as GuestsResponse;
 
       if (data.error) {

@@ -79,8 +79,10 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const loadMedia = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/media');
-      const data = await res.json() as { media: MediaItem[] };
-      setAvailableMedia(data.media || []);
+      const data = await res.json() as { media: (MediaItem & { media_type?: string })[] };
+      // Only show images, not videos
+      const images = (data.media || []).filter(m => m.media_type !== 'video');
+      setAvailableMedia(images);
     } catch (err) {
       console.error('Error loading media:', err);
     }
