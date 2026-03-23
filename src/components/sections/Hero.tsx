@@ -75,16 +75,17 @@ export function Hero() {
     }
 
     const initHls = async () => {
-      const nativeHls = video.canPlayType('application/vnd.apple.mpegurl');
-      console.log('[Hero] Native HLS support:', nativeHls || 'none');
+      // Only trust native HLS on Safari — Edge/Chrome return "maybe" but can't actually play HLS
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const nativeHls = isSafari && !!video.canPlayType('application/vnd.apple.mpegurl');
+      console.log('[Hero] Native HLS:', nativeHls, '| Safari:', isSafari);
 
       if (nativeHls) {
-        // Safari supports HLS natively
         video.src = videoUrl;
         return;
       }
 
-      // Chrome, Firefox, etc. - use HLS.js
+      // All other browsers - use HLS.js
       try {
         console.log('[Hero] Loading HLS.js...');
         const Hls = (await import('hls.js')).default;
