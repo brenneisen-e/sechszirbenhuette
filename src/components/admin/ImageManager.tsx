@@ -180,6 +180,9 @@ export function ImageManager() {
     // Category filter for hero includes all hero-* variants
     if (filterCategory === 'hero' && !HERO_CATEGORIES.has(m.category)) return false;
 
+    // Hide hero videos from the general image listing (they are managed in the Hero tab)
+    if (filterCategory !== 'hero' && m.media_type === 'video' && HERO_CATEGORIES.has(m.category)) return false;
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
