@@ -148,7 +148,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
         >
           {/* Animated Mountain SVG */}
           <motion.div
