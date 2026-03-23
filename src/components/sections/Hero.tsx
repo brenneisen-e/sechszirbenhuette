@@ -75,53 +75,59 @@ export function Hero() {
     }
 
     const initHls = async () => {
-      // Only trust native HLS on Safari — Edge/Chrome return "maybe" but can't actually play HLS
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      const nativeHls = isSafari && !!video.canPlayType('application/vnd.apple.mpegurl');
-      console.log('[Hero] Native HLS:', nativeHls, '| Safari:', isSafari);
+      // iOS (all browsers use WebKit) and macOS Safari support native HLS
+      // Edge/Chrome falsely return "maybe" for canPlayType but can't play HLS
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
+      const useNativeHls = (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
 
-      if (nativeHls) {
+      if (useNativeHls) {
         video.src = videoUrl;
+        video.play().catch(() => { /* autoplay blocked */ });
         return;
       }
 
-      // All other browsers - use HLS.js
+      // All other browsers (Chrome, Edge, Firefox, Android) - use HLS.js
       try {
-        console.log('[Hero] Loading HLS.js...');
         const Hls = (await import('hls.js')).default;
-        console.log('[Hero] HLS.js loaded, supported:', Hls.isSupported());
         if (!Hls.isSupported() || cancelled) {
+          // Last resort: try direct src (won't work for HLS but handles mp4 fallback)
           if (!cancelled) video.src = videoUrl;
           return;
         }
 
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
         const hls = new Hls({
           enableWorker: false,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
+          maxBufferLength: isMobile ? 15 : 30,
+          maxMaxBufferLength: isMobile ? 30 : 60,
+          startLevel: isMobile ? 0 : -1, // Start with lowest quality on mobile
         });
 
         hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
-          console.error('[Hero] HLS error:', data.type, data.details, 'fatal:', data.fatal);
           if (data.fatal) {
-            hls.destroy();
-            hlsRef.current = null;
-            if (!cancelled) setVideoError(true);
+            console.error('[Hero] HLS fatal error:', data.type, data.details);
+            if (data.type === 'networkError') {
+              // Try to recover from network errors once
+              hls.startLoad();
+            } else {
+              hls.destroy();
+              hlsRef.current = null;
+              if (!cancelled) setVideoError(true);
+            }
           }
         });
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('[Hero] HLS manifest parsed, starting playback');
-          video.play().catch(() => {
-            // Autoplay blocked
-          });
+          video.play().catch(() => { /* autoplay blocked */ });
         });
 
         hls.loadSource(videoUrl);
         hls.attachMedia(video);
         hlsRef.current = hls;
-      } catch (err) {
-        console.error('[Hero] Failed to init HLS.js:', err);
+      } catch {
+        // HLS.js failed to load — try direct src as last resort
         if (!cancelled) video.src = videoUrl;
       }
     };
@@ -140,14 +146,28 @@ export function Hero() {
   // Handle video ready to play
   const handleVideoCanPlay = () => {
     if (videoRef.current && !videoLoaded) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().then(() => {
+      const video = videoRef.current;
+      // Ensure muted attribute is set (some browsers need this for autoplay)
+      video.muted = true;
+      video.currentTime = 0;
+      video.play().then(() => {
         setVideoLoaded(true);
         setTimeout(() => setShowPlaceholder(false), 300);
-      }).catch(() => {
-        // Autoplay blocked - keep showing placeholder
+      }).catch((err) => {
+        console.warn('[Hero] Autoplay blocked:', err.name);
+        // Still show video frame even if autoplay is blocked
         setVideoLoaded(true);
         setTimeout(() => setShowPlaceholder(false), 300);
+        // Retry play on first user interaction
+        const playOnInteraction = () => {
+          video.play().catch(() => {});
+          document.removeEventListener('click', playOnInteraction);
+          document.removeEventListener('touchstart', playOnInteraction);
+          document.removeEventListener('scroll', playOnInteraction);
+        };
+        document.addEventListener('click', playOnInteraction, { once: true });
+        document.addEventListener('touchstart', playOnInteraction, { once: true });
+        document.addEventListener('scroll', playOnInteraction, { once: true });
       });
     }
   };
@@ -218,11 +238,13 @@ export function Hero() {
           <video
             ref={videoRef}
             id="hero-video"
+            autoPlay
             muted
             loop
             playsInline
             disablePictureInPicture
             preload="auto"
+            {...(thumbnailUrl ? { poster: thumbnailUrl } : {})}
             className="h-full w-full object-cover"
             onCanPlay={handleVideoCanPlay}
             onError={handleVideoError}
