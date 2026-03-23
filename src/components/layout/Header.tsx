@@ -402,6 +402,16 @@ export function Header() {
 // Separate Mobile Booking Button Component - rendered outside Header
 export function MobileBookingButton() {
   const pathname = usePathname();
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Don't render on admin pages
   if (pathname?.startsWith('/admin')) {
@@ -418,7 +428,11 @@ export function MobileBookingButton() {
   };
 
   return (
-    <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-[60] pointer-events-none">
+    <div
+      className={`md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-[60] pointer-events-none transition-all duration-300 ${
+        hasScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}
+    >
       <button
         onClick={() => scrollToSection('#buchung')}
         className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
