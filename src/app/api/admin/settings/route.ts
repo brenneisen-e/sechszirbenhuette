@@ -13,6 +13,28 @@ function getAdminPassword(env: Env): string | undefined {
   return env.ADMIN_PASSWORD || env.ADMIN_PWD;
 }
 
+async function isAuthenticated(request: NextRequest, env: Env): Promise<boolean> {
+  // Method 1: x-admin-password header
+  const adminPassword = request.headers.get('x-admin-password');
+  const expectedPassword = getAdminPassword(env);
+  if (expectedPassword && adminPassword === expectedPassword) {
+    return true;
+  }
+
+  // Method 2: Cookie-based session auth
+  const sessionToken = request.cookies.get('admin_session')?.value;
+  if (sessionToken && env.DB) {
+    try {
+      const session = await env.DB.prepare(
+        "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
+      ).bind(sessionToken).first();
+      if (session) return true;
+    } catch { /* table might not exist */ }
+  }
+
+  return false;
+}
+
 interface Setting {
   key: string;
   value: string;
@@ -94,11 +116,8 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Verify admin password
-    const adminPassword = request.headers.get('x-admin-password');
-    const expectedPassword = getAdminPassword(env);
-
-    if (!expectedPassword || adminPassword !== expectedPassword) {
+    // Verify admin auth (password header or session cookie)
+    if (!(await isAuthenticated(request, env))) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
@@ -185,15 +204,9 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Verify admin auth (password header or session cookie)
+    if (!(await isAuthenticated(request, env))) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
     if (!env.DB) {
