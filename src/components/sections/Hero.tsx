@@ -103,6 +103,7 @@ export function Hero() {
       if (cancelled) return;
       video.muted = true;
       video.volume = 0;
+      video.currentTime = 7;
       const p = video.play();
       if (p) {
         p.then(onPlaySuccess).catch(() => {
