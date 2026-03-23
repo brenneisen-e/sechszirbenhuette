@@ -7,11 +7,9 @@ import {
   Image as ImageIcon,
   Users,
   Euro,
-  TrendingDown,
   Wallet,
   Calculator,
   Key,
-  Tag,
   Loader2,
   Home,
   Lock,
@@ -43,10 +41,6 @@ const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview
   loading: () => <LoadingSpinner text="Lade Finanzen..." />,
 });
 
-const ExpensePanel = dynamic(() => import('@/components/admin/ExpensePanel'), {
-  loading: () => <LoadingSpinner text="Lade Ausgaben..." />,
-});
-
 const BankTransactions = dynamic(() => import('@/components/admin/BankTransactions'), {
   loading: () => <LoadingSpinner text="Lade Kontoauszug..." />,
 });
@@ -61,10 +55,6 @@ const ImageManager = dynamic(() => import('@/components/admin').then((mod) => ({
 
 const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.PasswordsPanel })), {
   loading: () => <LoadingSpinner text="Lade Passwörter..." />,
-});
-
-const RentalCostsOverview = dynamic(() => import('@/components/admin/RentalCostsOverview'), {
-  loading: () => <LoadingSpinner text="Lade Mietkosten..." />,
 });
 
 const MigrationPanel = dynamic(() => import('@/components/admin/MigrationPanel'), {
@@ -112,15 +102,13 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'expenses' | 'bank' | 'utilities' | 'rental' | 'briefing' | 'images' | 'passwords' | 'blog' | 'system';
+type AdminTab = 'guests' | 'finances' | 'bank' | 'utilities' | 'briefing' | 'images' | 'passwords' | 'blog' | 'system';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
-  { id: 'expenses', label: 'Ausgaben', shortLabel: 'Ausgaben', icon: TrendingDown },
   { id: 'bank', label: 'Kontoauszug', shortLabel: 'Konto', icon: Wallet },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
-  { id: 'rental', label: 'Mietkosten', shortLabel: 'Miete', icon: Tag },
   { id: 'briefing', label: 'Briefing', shortLabel: 'Brief.', icon: FileText },
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
@@ -379,15 +367,11 @@ function AdminPageContent() {
             />
           )}
 
-          {activeTab === 'expenses' && <ExpensePanel adminPassword={adminPassword} demoMode={isDemoMode} />}
-
           {activeTab === 'bank' && <BankTransactions adminPassword={adminPassword} demoMode={isDemoMode} />}
 
           {activeTab === 'utilities' && <UtilityCostsCalculator adminPassword={adminPassword} demoMode={isDemoMode} />}
 
           {activeTab === 'passwords' && <PasswordsPanel />}
-
-          {activeTab === 'rental' && <RentalCostsOverview adminPassword={adminPassword} demoMode={isDemoMode} />}
 
           {activeTab === 'briefing' && <BriefingGenerator adminPassword={adminPassword} />}
 
