@@ -57,13 +57,6 @@ const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => 
   loading: () => <LoadingSpinner text="Lade Passwörter..." />,
 });
 
-const MigrationPanel = dynamic(() => import('@/components/admin/MigrationPanel'), {
-  loading: () => <LoadingSpinner text="Lade System..." />,
-});
-
-const ImageMigrationPanel = dynamic(() => import('@/components/admin/ImageMigrationPanel'), {
-  loading: () => <LoadingSpinner text="Lade Migration..." />,
-});
 
 
 const KurtaxeRatesEditor = dynamic(() => import('@/components/admin/KurtaxeRatesEditor'), {
@@ -266,12 +259,6 @@ function AdminPageContent() {
           {activeTab === 'system' && (
             <div className="space-y-12">
               <CloudflareSettings />
-              <div className="border-t border-gray-200 pt-8">
-                <ImageMigrationPanel />
-              </div>
-              <div className="border-t border-gray-200 pt-8">
-                <MigrationPanel />
-              </div>
               <div className="border-t border-gray-200 pt-8">
                 <KurtaxeRatesEditor />
               </div>
