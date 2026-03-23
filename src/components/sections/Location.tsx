@@ -49,7 +49,7 @@ export function Location() {
   const lng = SITE_CONFIG.coordinates.lng;
 
   return (
-    <section id="lage" className="py-20 bg-transparent">
+    <section id="lage" className="py-20 bg-stone-50">
       <div className="container mx-auto px-4">
         {/* White background container for better readability */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-10 shadow-sm">

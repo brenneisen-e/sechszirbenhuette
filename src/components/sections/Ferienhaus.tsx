@@ -210,7 +210,7 @@ export function Ferienhaus() {
   };
 
   return (
-    <section id="ferienhaus" className="py-20 bg-transparent">
+    <section id="ferienhaus" className="py-20 bg-white">
       <div className="container">
         {/* Header */}
         <motion.div
