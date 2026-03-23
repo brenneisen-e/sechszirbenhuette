@@ -146,14 +146,28 @@ export function Hero() {
   // Handle video ready to play
   const handleVideoCanPlay = () => {
     if (videoRef.current && !videoLoaded) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().then(() => {
+      const video = videoRef.current;
+      // Ensure muted attribute is set (some browsers need this for autoplay)
+      video.muted = true;
+      video.currentTime = 0;
+      video.play().then(() => {
         setVideoLoaded(true);
         setTimeout(() => setShowPlaceholder(false), 300);
-      }).catch(() => {
-        // Autoplay blocked - keep showing placeholder
+      }).catch((err) => {
+        console.warn('[Hero] Autoplay blocked:', err.name);
+        // Still show video frame even if autoplay is blocked
         setVideoLoaded(true);
         setTimeout(() => setShowPlaceholder(false), 300);
+        // Retry play on first user interaction
+        const playOnInteraction = () => {
+          video.play().catch(() => {});
+          document.removeEventListener('click', playOnInteraction);
+          document.removeEventListener('touchstart', playOnInteraction);
+          document.removeEventListener('scroll', playOnInteraction);
+        };
+        document.addEventListener('click', playOnInteraction, { once: true });
+        document.addEventListener('touchstart', playOnInteraction, { once: true });
+        document.addEventListener('scroll', playOnInteraction, { once: true });
       });
     }
   };
@@ -224,11 +238,12 @@ export function Hero() {
           <video
             ref={videoRef}
             id="hero-video"
+            autoPlay
             muted
             loop
             playsInline
             disablePictureInPicture
-            preload="metadata"
+            preload="auto"
             {...(thumbnailUrl ? { poster: thumbnailUrl } : {})}
             className="h-full w-full object-cover"
             onCanPlay={handleVideoCanPlay}
