@@ -75,53 +75,59 @@ export function Hero() {
     }
 
     const initHls = async () => {
-      // Only trust native HLS on Safari — Edge/Chrome return "maybe" but can't actually play HLS
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      const nativeHls = isSafari && !!video.canPlayType('application/vnd.apple.mpegurl');
-      console.log('[Hero] Native HLS:', nativeHls, '| Safari:', isSafari);
+      // iOS (all browsers use WebKit) and macOS Safari support native HLS
+      // Edge/Chrome falsely return "maybe" for canPlayType but can't play HLS
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
+      const useNativeHls = (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
 
-      if (nativeHls) {
+      if (useNativeHls) {
         video.src = videoUrl;
+        video.play().catch(() => { /* autoplay blocked */ });
         return;
       }
 
-      // All other browsers - use HLS.js
+      // All other browsers (Chrome, Edge, Firefox, Android) - use HLS.js
       try {
-        console.log('[Hero] Loading HLS.js...');
         const Hls = (await import('hls.js')).default;
-        console.log('[Hero] HLS.js loaded, supported:', Hls.isSupported());
         if (!Hls.isSupported() || cancelled) {
+          // Last resort: try direct src (won't work for HLS but handles mp4 fallback)
           if (!cancelled) video.src = videoUrl;
           return;
         }
 
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
         const hls = new Hls({
           enableWorker: false,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
+          maxBufferLength: isMobile ? 15 : 30,
+          maxMaxBufferLength: isMobile ? 30 : 60,
+          startLevel: isMobile ? 0 : -1, // Start with lowest quality on mobile
         });
 
         hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
-          console.error('[Hero] HLS error:', data.type, data.details, 'fatal:', data.fatal);
           if (data.fatal) {
-            hls.destroy();
-            hlsRef.current = null;
-            if (!cancelled) setVideoError(true);
+            console.error('[Hero] HLS fatal error:', data.type, data.details);
+            if (data.type === 'networkError') {
+              // Try to recover from network errors once
+              hls.startLoad();
+            } else {
+              hls.destroy();
+              hlsRef.current = null;
+              if (!cancelled) setVideoError(true);
+            }
           }
         });
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('[Hero] HLS manifest parsed, starting playback');
-          video.play().catch(() => {
-            // Autoplay blocked
-          });
+          video.play().catch(() => { /* autoplay blocked */ });
         });
 
         hls.loadSource(videoUrl);
         hls.attachMedia(video);
         hlsRef.current = hls;
-      } catch (err) {
-        console.error('[Hero] Failed to init HLS.js:', err);
+      } catch {
+        // HLS.js failed to load — try direct src as last resort
         if (!cancelled) video.src = videoUrl;
       }
     };
@@ -222,7 +228,8 @@ export function Hero() {
             loop
             playsInline
             disablePictureInPicture
-            preload="auto"
+            preload="metadata"
+            {...(thumbnailUrl ? { poster: thumbnailUrl } : {})}
             className="h-full w-full object-cover"
             onCanPlay={handleVideoCanPlay}
             onError={handleVideoError}
