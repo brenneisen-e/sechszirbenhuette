@@ -62,7 +62,7 @@ export function FeatureCarousel({ features, images, isMobile, onImageClick }: Fe
       {/* Carousel Track */}
       <div className="overflow-hidden mx-4 md:mx-8">
         <div
-          className="flex transition-transform duration-300 ease-out"
+          className="flex items-stretch transition-transform duration-300 ease-out"
           style={{ transform: `translateX(-${translateValue}%)` }}
         >
           {featureKeys.map((key, index) => {
@@ -72,7 +72,7 @@ export function FeatureCarousel({ features, images, isMobile, onImageClick }: Fe
 
             return (
               <div key={key} className="w-full md:w-1/2 flex-shrink-0 px-2">
-                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
                   {/* Portrait Image or Icon Placeholder */}
                   <div className="relative aspect-[3/4] bg-gray-100">
                     {featureImage ? (
@@ -104,7 +104,7 @@ export function FeatureCarousel({ features, images, isMobile, onImageClick }: Fe
                   </div>
 
                   {/* Text Content */}
-                  <div className="p-5">
+                  <div className="p-5 flex-1">
                     <h4 className="text-lg font-bold text-logo-green mb-3">{feature.title}</h4>
                     <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
                     {key === 'kaerntenCard' && (

@@ -63,7 +63,7 @@ export function DogTripsCarousel({
       {/* Carousel Track */}
       <div className="overflow-hidden mx-4 md:mx-8">
         <div
-          className="flex transition-transform duration-300 ease-out"
+          className="flex items-stretch transition-transform duration-300 ease-out"
           style={{ transform: `translateX(-${translateValue}%)` }}
         >
           {trips.map((trip, index) => {
@@ -73,7 +73,7 @@ export function DogTripsCarousel({
 
             return (
               <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
-                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden">
+                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
                   {/* Portrait Image */}
                   <div className="relative aspect-[3/4] bg-gray-100">
                     {firstImage ? (
@@ -99,7 +99,7 @@ export function DogTripsCarousel({
                   </div>
 
                   {/* Text Content */}
-                  <div className="p-5">
+                  <div className="p-5 flex-1">
                     <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
                     <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>
                     <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
