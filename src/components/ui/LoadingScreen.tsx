@@ -135,6 +135,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
       // Small delay for smooth transition
       const timer = setTimeout(() => {
         setIsLoading(false);
+        document.body.classList.remove('is-loading');
         onLoadComplete?.();
       }, 100);
       return () => clearTimeout(timer);
