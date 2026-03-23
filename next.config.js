@@ -6,7 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'imagedelivery.net' },
       { protocol: 'https', hostname: '*.cloudflarestream.com' },
       { protocol: 'https', hostname: 'videodelivery.net' },
-      { protocol: 'https', hostname: 'customer-0p71mv70kmvniiuy.cloudflarestream.com' },
+      { protocol: 'https', hostname: 'customer-0p71nv70kmvniiuy.cloudflarestream.com' },
     ],
   },
 
