@@ -250,9 +250,7 @@ function AdminPageContent() {
 
           {activeTab === 'images' && <ImageManager />}
 
-          <div style={{ display: activeTab === 'blog' ? 'block' : 'none' }}>
-            <BlogEditor />
-          </div>
+          {activeTab === 'blog' && <BlogEditor />}
 
           {activeTab === 'reviews' && <ReviewsManager />}
 
