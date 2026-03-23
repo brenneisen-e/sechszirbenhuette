@@ -128,20 +128,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    // Check authentication
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
-
     const body = await request.json() as Partial<BlogPost> & { images?: Partial<BlogPostImage>[] };
 
     if (!body.title || !body.content) {
@@ -212,20 +198,6 @@ export async function PUT(request: NextRequest) {
     const env = await getCloudflareEnv();
     if (!env?.DB) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
-    }
-
-    // Check authentication
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
     const body = await request.json() as Partial<BlogPost> & { id: string; images?: Partial<BlogPostImage>[] };
@@ -345,20 +317,6 @@ export async function DELETE(request: NextRequest) {
     const env = await getCloudflareEnv();
     if (!env?.DB) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
-    }
-
-    // Check authentication
-    const sessionToken = request.cookies.get('admin_session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'No session cookie' }, { status: 401 });
-    }
-
-    const session = await env.DB.prepare(
-      "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-    ).bind(sessionToken).first();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Session expired' }, { status: 401 });
     }
 
     // Delete post images first (in case CASCADE is broken after table recreation)

@@ -104,27 +104,6 @@ function AdminPageContent() {
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // Auto-create session on admin load (Zero Trust handles actual auth)
-  useEffect(() => {
-    // Check if we already have a valid session
-    fetch('/api/admin/login')
-      .then((res) => res.json() as Promise<{ authenticated: boolean }>)
-      .then((data) => {
-        if (!data.authenticated) {
-          // Auto-login since Zero Trust already verified the user
-          const adminPw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-          if (adminPw) {
-            return fetch('/api/admin/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ password: adminPw }),
-            });
-          }
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   // Auto-migrate database on admin load (adds missing columns/tables)
   useEffect(() => {
     fetch('/api/admin/auto-migrate', { method: 'POST' }).catch(() => {});

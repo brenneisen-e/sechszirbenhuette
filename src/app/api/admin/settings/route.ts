@@ -13,26 +13,9 @@ function getAdminPassword(env: Env): string | undefined {
   return env.ADMIN_PASSWORD || env.ADMIN_PWD;
 }
 
-async function isAuthenticated(request: NextRequest, env: Env): Promise<boolean> {
-  // Method 1: x-admin-password header
-  const adminPassword = request.headers.get('x-admin-password');
-  const expectedPassword = getAdminPassword(env);
-  if (expectedPassword && adminPassword === expectedPassword) {
-    return true;
-  }
-
-  // Method 2: Cookie-based session auth
-  const sessionToken = request.cookies.get('admin_session')?.value;
-  if (sessionToken && env.DB) {
-    try {
-      const session = await env.DB.prepare(
-        "SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime('now')"
-      ).bind(sessionToken).first();
-      if (session) return true;
-    } catch { /* table might not exist */ }
-  }
-
-  return false;
+// Auth handled by Cloudflare Zero Trust
+async function isAuthenticated(_request: NextRequest, _env: Env): Promise<boolean> {
+  return true;
 }
 
 interface Setting {
