@@ -14,8 +14,6 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 
 interface BlogPost {
   id: string;
@@ -154,14 +152,12 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <>
-        <Header />
-        <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
           <div className="container flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-logo-green" />
             <span className="ml-3 text-gray-600">Wird geladen...</span>
           </div>
-        </main>
-        <Footer />
+        </div>
       </>
     );
   }
@@ -169,8 +165,7 @@ export default function BlogPostPage() {
   if (error || !post) {
     return (
       <>
-        <Header />
-        <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
           <div className="container text-center py-20">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Beitrag nicht gefunden</h1>
             <p className="text-gray-600 mb-8">Der gesuchte Blogbeitrag existiert nicht oder wurde entfernt.</p>
@@ -182,8 +177,7 @@ export default function BlogPostPage() {
               Zurück zum Blog
             </Link>
           </div>
-        </main>
-        <Footer />
+        </div>
       </>
     );
   }
@@ -191,7 +185,7 @@ export default function BlogPostPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
         <article className="container max-w-4xl">
           {/* Back Link */}
           <Link
@@ -358,8 +352,7 @@ export default function BlogPostPage() {
             </motion.div>
           )}
         </article>
-      </main>
-      <Footer />
+      </div>
 
       {/* Lightbox */}
       {lightboxOpen && images.length > 0 && (
