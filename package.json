@@ -49,5 +49,13 @@
     "@aws-sdk/client-s3": "^3.971.0",
     "@cloudflare/workers-types": "^4.20260116.0",
     "@opennextjs/cloudflare": "^1.14.8"
+  },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "15.5.14",
+    "@next/swc-linux-x64-musl": "15.5.14"
+  },
+  "overrides": {
+    "glob@<13": "13.0.6",
+    "formdata-node": "6.0.3"
   }
 }
