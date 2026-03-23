@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import {
   Save,
   Eye,
@@ -13,6 +12,7 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 import type { BlogPost, BlogPostImage } from './types';
+import { RichTextEditor } from './RichTextEditor';
 
 interface BlogEditorFormProps {
   currentPost: Partial<BlogPost>;
@@ -110,11 +110,11 @@ export function BlogEditorForm({
           <label className="block text-sm font-medium text-gray-700 mb-2">Titelbild</label>
           {currentPost.cover_image_url ? (
             <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={currentPost.cover_image_url}
                 alt={currentPost.cover_image_alt || ''}
-                fill
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
               <button
                 onClick={() => onUpdatePost({ cover_image_url: null, cover_image_alt: null })}
@@ -134,19 +134,13 @@ export function BlogEditorForm({
           )}
         </div>
 
-        {/* Content */}
+        {/* Content - Rich Text Editor */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Inhalt * (HTML)</label>
-          <textarea
+          <label className="block text-sm font-medium text-gray-700 mb-1">Inhalt *</label>
+          <RichTextEditor
             value={currentPost.content || ''}
-            onChange={(e) => onUpdatePost({ content: e.target.value })}
-            rows={10}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green font-mono text-sm"
-            placeholder="<p>Ihr Beitragstext...</p>"
+            onChange={(html) => onUpdatePost({ content: html })}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Unterstützt HTML-Tags wie &lt;p&gt;, &lt;h2&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, etc.
-          </p>
         </div>
 
         {/* Gallery Images */}
@@ -157,11 +151,11 @@ export function BlogEditorForm({
           <div className="grid grid-cols-3 gap-2 mb-2">
             {postImages.map((img, index) => (
               <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={img.image_url}
                   alt={img.image_alt || ''}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
                 <button
                   onClick={() => onRemoveImage(index)}
