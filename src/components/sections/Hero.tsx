@@ -56,7 +56,7 @@ export function Hero() {
       const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
       if (uidMatch && !thumbnailUrl) {
         const subdomain = url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
-        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=7s&width=1920&height=1080`);
+        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=0s&width=1920&height=1080`);
       }
     };
 
@@ -247,25 +247,23 @@ export function Hero() {
       {/* Video/Image Background */}
       <div className="absolute inset-0 bg-gray-900">
         {/* Placeholder layer - shows thumbnail or gradient while video loads */}
-        {showPlaceholder && (
-          <div
-            className={`absolute inset-0 z-10 transition-opacity duration-500 ${videoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-            style={{ zIndex: videoLoaded ? -1 : 10 }}
-          >
-            {thumbnailUrl && !videoError ? (
-              <Image
-                src={thumbnailUrl}
-                alt="Sechszirbenhütte"
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
-              />
-            ) : (
-              <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
-            )}
-          </div>
-        )}
+        <div
+          className={`absolute inset-0 transition-opacity duration-500 ${!showPlaceholder || videoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          style={{ zIndex: !showPlaceholder || videoLoaded ? -1 : 10 }}
+        >
+          {thumbnailUrl && !videoError ? (
+            <Image
+              src={thumbnailUrl}
+              alt="Sechszirbenhütte"
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
+          )}
+        </div>
 
         {/* Video layer - always in DOM with autoPlay muted for browser autoplay policy */}
         <video
@@ -277,6 +275,7 @@ export function Hero() {
           playsInline
           disablePictureInPicture
           preload="auto"
+          poster={thumbnailUrl || undefined}
           className={`h-full w-full object-cover ${videoError ? 'hidden' : ''}`}
           onCanPlay={handleVideoCanPlay}
           onError={handleVideoError}
