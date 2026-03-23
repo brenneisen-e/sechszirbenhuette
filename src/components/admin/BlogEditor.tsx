@@ -41,6 +41,7 @@ export default function BlogEditor() {
     setMediaPickerTarget,
     setPreviewImageIndex,
     loadPosts,
+    loadMedia,
     handleSetupBlogDb,
     handleMigrateBlog,
     handleNewPost,
@@ -197,6 +198,7 @@ export default function BlogEditor() {
           availableMedia={availableMedia}
           onSelect={handleMediaSelect}
           onClose={() => setShowMediaPicker(false)}
+          onMediaUploaded={loadMedia}
         />
       )}
     </div>

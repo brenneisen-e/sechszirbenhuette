@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame } from 'lucide-react';
+import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame, Play } from 'lucide-react';
 import Image from 'next/image';
 
 // Logo green color (matches the logo)
@@ -20,6 +20,7 @@ export function Hero() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
+  const [showPlayHint, setShowPlayHint] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<{ destroy: () => void } | null>(null);
 
@@ -91,29 +92,28 @@ export function Hero() {
       hlsRef.current = null;
     }
 
+    const onPlaySuccess = () => {
+      if (cancelled) return;
+      setVideoLoaded(true);
+      setShowPlayHint(false);
+      setTimeout(() => setShowPlaceholder(false), 300);
+    };
+
     const tryPlay = () => {
       if (cancelled) return;
       video.muted = true;
       video.volume = 0;
       const p = video.play();
       if (p) {
-        p.then(() => {
-          if (!cancelled) {
-            setVideoLoaded(true);
-            setTimeout(() => setShowPlaceholder(false), 300);
-          }
-        }).catch(() => {
-          // Autoplay still blocked — start on any user interaction
+        p.then(onPlaySuccess).catch(() => {
+          // Autoplay blocked — show play hint and wait for interaction
+          if (!cancelled) setShowPlayHint(true);
           const playOnInteraction = () => {
             video.muted = true;
-            video.play().then(() => {
-              setVideoLoaded(true);
-              setTimeout(() => setShowPlaceholder(false), 300);
-            }).catch(() => {});
+            video.play().then(onPlaySuccess).catch(() => {});
           };
           document.addEventListener('click', playOnInteraction, { once: true });
           document.addEventListener('touchstart', playOnInteraction, { once: true });
-          document.addEventListener('scroll', playOnInteraction, { once: true });
         });
       }
     };
@@ -267,73 +267,78 @@ export function Hero() {
           onCanPlay={handleVideoCanPlay}
           onError={handleVideoError}
         />
+        {/* Play hint - shown when autoplay is blocked */}
+        {showPlayHint && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.95, 1.05, 0.95] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
+            onClick={() => {
+              if (videoRef.current) {
+                videoRef.current.muted = true;
+                videoRef.current.play().then(() => {
+                  setVideoLoaded(true);
+                  setShowPlayHint(false);
+                  setTimeout(() => setShowPlaceholder(false), 300);
+                }).catch(() => {});
+              }
+            }}
+          >
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white/80 ml-1" />
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Overlay - leichter Gradient für Lesbarkeit */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col h-full text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-5">
+      <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
 
-        {/* Upper area - Left-aligned headline with green accent */}
-        <div className="flex-1 flex items-end md:items-center pb-4 md:pb-0 pt-20 sm:pt-24 md:pt-8">
+        {/* Upper Third - Headline centered */}
+        <div className="flex-1 flex items-center justify-center pt-16 sm:pt-20 md:pt-8">
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex items-stretch gap-4 md:gap-6 max-w-3xl"
+            className="w-full"
           >
-            {/* Green accent line */}
-            <motion.div
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="w-1 md:w-1.5 rounded-full origin-top"
-              style={{ backgroundColor: LOGO_GREEN }}
-            />
-
-            <div>
-              <motion.p
-                data-text-key="hero_title"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.1] text-white drop-shadow-lg text-left"
-                style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
-              >
-                {getText('hero_title')}
-              </motion.p>
-              <motion.p
-                data-text-key="hero_subtitle"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-[clamp(1.5rem,4vw,2.5rem)] leading-snug mt-1 md:mt-2 text-white/90 drop-shadow-md text-left"
-                style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_subtitle') }}
-              >
-                {getText('hero_subtitle')}
-              </motion.p>
-              <motion.p
-                data-text-key="hero_description"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="text-[clamp(0.8rem,1.8vw,1.1rem)] leading-relaxed text-white/80 drop-shadow-sm mt-3 md:mt-4 max-w-xl text-left"
-                style={getTextStyle('hero_description')}
-              >
-                {getText('hero_description')}
-              </motion.p>
-            </div>
+            <motion.p
+              data-text-key="hero_title"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
+              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
+            >
+              {getText('hero_title')}
+            </motion.p>
+            <motion.p
+              data-text-key="hero_description"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 mx-auto px-2"
+              style={{ maxWidth: 'min(90vw, 42ch)', ...getTextStyle('hero_description') }}
+            >
+              {getText('hero_description')}
+            </motion.p>
           </motion.div>
         </div>
 
-        {/* Lower area - Feature icons */}
-        <div className="pb-20 sm:pb-16">
+        {/* Middle Third - Flexible space */}
+        <div className="flex-[0.5] sm:flex-1" />
+
+        {/* Lower Third - Feature icons */}
+        <div className="flex-1 flex flex-col items-center justify-center pb-20 sm:pb-16">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: videoLoaded ? 0 : 1.0 }}
-            className="grid grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 max-w-4xl"
+            className="grid grid-cols-2 min-[400px]:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 px-2"
           >
             {features.map((feature, index) => (
               <motion.button
@@ -351,14 +356,14 @@ export function Hero() {
                 className="flex flex-col items-center group cursor-pointer"
               >
                 <motion.div
-                  className="w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
+                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
                   style={{ backgroundColor: LOGO_GREEN }}
                   whileHover={{ scale: 1.15, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+                  <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </motion.div>
-                <span className="text-[clamp(0.6rem,1.4vw,0.8rem)] font-semibold text-white drop-shadow-sm leading-tight">
+                <span className="text-[clamp(0.625rem,1.5vw,0.875rem)] font-semibold text-white drop-shadow-sm leading-tight">
                   {feature.label}
                 </span>
               </motion.button>

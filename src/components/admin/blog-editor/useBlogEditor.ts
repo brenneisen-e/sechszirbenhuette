@@ -23,6 +23,7 @@ interface UseBlogEditorReturn {
   setMediaPickerTarget: (target: 'cover' | 'gallery' | null) => void;
   setPreviewImageIndex: React.Dispatch<React.SetStateAction<number>>;
   loadPosts: () => Promise<void>;
+  loadMedia: () => Promise<void>;
   handleSetupBlogDb: () => Promise<void>;
   handleMigrateBlog: () => Promise<void>;
   handleNewPost: () => void;
@@ -283,6 +284,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
     setMediaPickerTarget,
     setPreviewImageIndex,
     loadPosts,
+    loadMedia,
     handleSetupBlogDb,
     handleMigrateBlog,
     handleNewPost,
