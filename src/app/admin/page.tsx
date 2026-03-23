@@ -104,6 +104,11 @@ function AdminPageContent() {
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
+  // Auto-migrate database on admin load (adds missing columns/tables)
+  useEffect(() => {
+    fetch('/api/admin/auto-migrate', { method: 'POST' }).catch(() => {});
+  }, []);
+
   // Load demo mode state
   useEffect(() => {
     try {
