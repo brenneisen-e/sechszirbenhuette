@@ -3,7 +3,6 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
 import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
 import { Header, Footer, MobileBookingButton } from '@/components/layout';
-import { PineBackground } from '@/components/ui/PineBackground';
 import { MobileScrollProgress } from '@/components/ui/MobileScrollProgress';
 import '@/styles/globals.css';
 
@@ -117,7 +116,7 @@ export default function RootLayout({
         <SiteSettingsProvider>
           <LanguageProvider>
             <ContentTextsProvider>
-              <PineBackground />
+
               <MobileScrollProgress />
               <Header />
               <MobileBookingButton />
