@@ -95,7 +95,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
       </button>
 
       {/* Carousel Track */}
-      <div className="overflow-hidden mx-4 md:mx-8">
+      <div className="overflow-hidden mx-4 md:mx-8 pb-2">
         <div
           className="flex items-stretch transition-transform duration-300 ease-out"
           style={{ transform: `translateX(-${translateValue}%)` }}
