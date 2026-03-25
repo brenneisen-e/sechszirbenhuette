@@ -326,15 +326,15 @@ export function Bewertungen() {
           </div>
 
           {/* Google Review CTA */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-12">
             <a
               href="https://g.page/r/CSYqzFakCmSsEBM/review"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-logo-green/10 text-logo-green rounded-xl hover:bg-logo-green/20 transition font-medium text-sm"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-logo-green text-white rounded-2xl hover:bg-logo-green/90 hover:scale-105 transition-all duration-200 font-semibold text-lg shadow-lg shadow-logo-green/25"
             >
               Bewerten Sie uns auf Google
-              <ExternalLink size={16} />
+              <ExternalLink size={22} />
             </a>
           </div>
         </div>
