@@ -231,8 +231,6 @@ function AdminPageContent() {
 
             {activeTab === 'guestapp' && <GuestAppEditor />}
           </div>
-        </Suspense>
-        </DomErrorBoundary>
       </div>
 
       {/* Mobile Bottom Navigation */}
