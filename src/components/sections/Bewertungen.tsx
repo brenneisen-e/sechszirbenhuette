@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
-import { Star, MessageSquare, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, MessageSquare, Quote, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface Review {
   id: number;
@@ -323,6 +323,19 @@ export function Bewertungen() {
             <p className="md:hidden text-center text-xs text-gray-400 mt-4">
               ← Wischen zum Blättern →
             </p>
+          </div>
+
+          {/* Google Review CTA */}
+          <div className="text-center mt-10">
+            <a
+              href="https://g.page/r/CSYqzFakCmSsEBM/review"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-logo-green/10 text-logo-green rounded-xl hover:bg-logo-green/20 transition font-medium text-sm"
+            >
+              Bewerten Sie uns auf Google
+              <ExternalLink size={16} />
+            </a>
           </div>
         </div>
       </div>

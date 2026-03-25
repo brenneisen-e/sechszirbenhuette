@@ -15,6 +15,7 @@ const LOGO_GREEN = '#1e5631';
 // Navigation links - split for left and right of logo
 const leftNavItems = [
   { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus', isExternal: false },
+  { key: 'bewertungen', href: '#bewertungen', sectionId: 'bewertungen', isExternal: false },
   { key: 'blog', href: '/blog', sectionId: 'blog', isExternal: true },
 ] as const;
 
