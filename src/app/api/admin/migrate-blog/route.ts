@@ -176,20 +176,20 @@ export async function POST() {
       steps.push('Recreated indexes');
     }
 
-    // Fetch cover images from the correct categories matching the static articles
-    // Article 1 uses 'aussen' category images (outdoor/nature)
+    // Fetch images from 'aussen' category for Article 1 carousel slides + cover
     const aussenResult = await db.prepare(
-      "SELECT url FROM media WHERE category = 'aussen' AND media_type != 'video' ORDER BY created_at ASC LIMIT 1"
-    ).all<{ url: string }>();
-    const cover1Url = aussenResult.results?.[0]?.url || null;
+      "SELECT url, alt_text FROM media WHERE category = 'aussen' AND media_type != 'video' ORDER BY display_order ASC, created_at ASC LIMIT ?"
+    ).bind(ARTICLE_1.slides.length).all<{ url: string; alt_text: string }>();
+    const aussenImages = aussenResult.results || [];
+    const cover1Url = aussenImages[0]?.url || null;
 
     // Article 2 uses 'hund-falkert' category images (dog trips)
     const hundResult = await db.prepare(
-      "SELECT url FROM media WHERE category = 'hund-falkert' AND media_type != 'video' ORDER BY created_at ASC LIMIT 1"
+      "SELECT url FROM media WHERE category = 'hund-falkert' AND media_type != 'video' ORDER BY display_order ASC, created_at ASC LIMIT 1"
     ).all<{ url: string }>();
     const cover2Url = hundResult.results?.[0]?.url || null;
 
-    steps.push(`Cover images: article1=${cover1Url ? 'aussen' : 'none'}, article2=${cover2Url ? 'hund-falkert' : 'none'}`);
+    steps.push(`Cover images: article1=${cover1Url ? 'aussen' : 'none'} (${aussenImages.length} images), article2=${cover2Url ? 'hund-falkert' : 'none'}`);
 
     // Step 2: Migrate Article 1 (carousel)
     const slug1 = generateSlug(ARTICLE_1.title);
@@ -206,12 +206,13 @@ export async function POST() {
       for (let i = 0; i < ARTICLE_1.slides.length; i++) {
         const slide = ARTICLE_1.slides[i];
         const imgId = crypto.randomUUID();
+        const slideImageUrl = aussenImages[i]?.url || '';
         await db.prepare(
           `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order)
-           VALUES (?, ?, '', ?, ?, ?)`
-        ).bind(imgId, id1, slide.title, slide.description, i).run();
+           VALUES (?, ?, ?, ?, ?, ?)`
+        ).bind(imgId, id1, slideImageUrl, slide.title, slide.description, i).run();
       }
-      steps.push(`Article 1: ${ARTICLE_1.slides.length} slides inserted`);
+      steps.push(`Article 1: ${ARTICLE_1.slides.length} slides inserted (${aussenImages.length} with images)`);
     } else {
       // Always update content, cover, and metadata to latest version
       await db.prepare(
@@ -225,9 +226,10 @@ export async function POST() {
         for (let i = 0; i < ARTICLE_1.slides.length; i++) {
           const slide = ARTICLE_1.slides[i];
           const imgId = crypto.randomUUID();
+          const slideImageUrl = aussenImages[i]?.url || '';
           await db.prepare(
-            `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order) VALUES (?, ?, '', ?, ?, ?)`
-          ).bind(imgId, existingPost1.id, slide.title, slide.description, i).run();
+            `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order) VALUES (?, ?, ?, ?, ?, ?)`
+          ).bind(imgId, existingPost1.id, slideImageUrl, slide.title, slide.description, i).run();
         }
       }
       steps.push('Article 1 already exists, updated content and slides');
