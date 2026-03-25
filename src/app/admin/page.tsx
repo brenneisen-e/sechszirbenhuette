@@ -18,6 +18,7 @@ import {
   CheckCircle,
   FileText,
   Star,
+  Smartphone,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 import { DomErrorBoundary } from '@/components/admin/DomErrorBoundary';
@@ -42,6 +43,7 @@ const ImageManager = dynamic(() => import('@/components/admin').then((mod) => ({
 const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.PasswordsPanel })), { ssr: false });
 const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), { ssr: false });
 const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), { ssr: false });
+const GuestAppEditor = dynamic(() => import('@/components/admin/GuestAppEditor'), { ssr: false });
 
 
 function FullScreenLoader() {
@@ -61,7 +63,7 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews';
+type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews' | 'guestapp';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
@@ -71,6 +73,7 @@ const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.Compo
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
   { id: 'reviews', label: 'Bewertungen', shortLabel: 'Reviews', icon: Star },
+  { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
 ];
 
 function AdminPageContent() {
@@ -232,6 +235,8 @@ function AdminPageContent() {
             {activeTab === 'blog' && <BlogEditor />}
 
             {activeTab === 'reviews' && <ReviewsManager />}
+
+            {activeTab === 'guestapp' && <GuestAppEditor />}
           </div>
         </Suspense>
         </DomErrorBoundary>

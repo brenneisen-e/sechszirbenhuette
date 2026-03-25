@@ -195,6 +195,63 @@ export async function POST() {
       )
     `, 'blog_post_images');
 
+    // =============================================
+    // GUEST APP — categories, cards, access tokens, sessions
+    // =============================================
+    await createTable(`
+      CREATE TABLE IF NOT EXISTS guest_app_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        icon TEXT DEFAULT 'info',
+        display_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, 'guest_app_categories');
+
+    await createTable(`
+      CREATE TABLE IF NOT EXISTS guest_app_cards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL DEFAULT '',
+        image_url TEXT,
+        image_alt TEXT,
+        display_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES guest_app_categories(id) ON DELETE CASCADE
+      )
+    `, 'guest_app_cards');
+
+    await createTable(`
+      CREATE TABLE IF NOT EXISTS guest_access_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        booking_id INTEGER NOT NULL,
+        access_code TEXT NOT NULL UNIQUE,
+        guest_name TEXT,
+        valid_from TEXT,
+        valid_until TEXT,
+        is_active INTEGER DEFAULT 1,
+        last_login TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+      )
+    `, 'guest_access_tokens');
+
+    await createTable(`
+      CREATE TABLE IF NOT EXISTS guest_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id TEXT NOT NULL UNIQUE,
+        token_id INTEGER NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (token_id) REFERENCES guest_access_tokens(id) ON DELETE CASCADE
+      )
+    `, 'guest_sessions');
+
     return NextResponse.json({
       success: true,
       migrated,
