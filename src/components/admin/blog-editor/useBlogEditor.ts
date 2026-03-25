@@ -5,7 +5,6 @@ interface UseBlogEditorReturn {
   posts: BlogPost[];
   loading: boolean;
   saving: boolean;
-  migrating: boolean;
   settingUpDb: boolean;
   error: string;
   success: string;
@@ -25,7 +24,6 @@ interface UseBlogEditorReturn {
   loadPosts: () => Promise<void>;
   loadMedia: () => Promise<void>;
   handleSetupBlogDb: () => Promise<void>;
-  handleMigrateBlog: () => Promise<void>;
   handleNewPost: () => void;
   handleEditPost: (post: BlogPost) => Promise<void>;
   handleSave: (publish?: boolean) => Promise<void>;
@@ -40,7 +38,6 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [migrating, setMigrating] = useState(false);
   const [settingUpDb, setSettingUpDb] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -156,28 +153,6 @@ export function useBlogEditor(): UseBlogEditorReturn {
       setError('Fehler bei der Datenbank-Einrichtung');
     } finally {
       setSettingUpDb(false);
-    }
-  };
-
-  // Migrate static blog articles
-  const handleMigrateBlog = async () => {
-    setMigrating(true);
-    setError('');
-    try {
-      const res = await fetch('/api/admin/migrate-blog', { method: 'POST' });
-      const data = await res.json() as { success?: boolean; message?: string; error?: string; steps?: string[] };
-      console.log('[BlogEditor] Migration result:', data);
-      if (res.ok && data.success) {
-        setSuccess(data.message || 'Blog-Artikel migriert!');
-        await loadPosts();
-      } else {
-        setError(data.error || `Migration fehlgeschlagen (${res.status})`);
-      }
-    } catch (err) {
-      console.error('Error migrating blog:', err);
-      setError(`Fehler bei der Migration: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setMigrating(false);
     }
   };
 
@@ -352,7 +327,6 @@ export function useBlogEditor(): UseBlogEditorReturn {
     posts,
     loading,
     saving,
-    migrating,
     settingUpDb,
     error,
     success,
@@ -372,7 +346,6 @@ export function useBlogEditor(): UseBlogEditorReturn {
     loadPosts,
     loadMedia,
     handleSetupBlogDb,
-    handleMigrateBlog,
     handleNewPost,
     handleEditPost,
     handleSave,

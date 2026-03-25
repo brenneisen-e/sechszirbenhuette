@@ -17,8 +17,6 @@ interface BlogPostListProps {
   posts: BlogPost[];
   onEdit: (post: BlogPost) => void;
   onDelete: (postId: string) => void;
-  onMigrate?: () => void;
-  migrating?: boolean;
 }
 
 const formatDate = (dateString: string | null) => {
@@ -30,25 +28,9 @@ const formatDate = (dateString: string | null) => {
   });
 };
 
-export function BlogPostList({ posts, onEdit, onDelete, onMigrate, migrating }: BlogPostListProps) {
+export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
   return (
     <div className="space-y-4">
-      {/* Migrate button */}
-      {onMigrate && (
-        <div className="flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <div>
-            <p className="text-sm font-medium text-amber-800">Statische Artikel migrieren</p>
-            <p className="text-xs text-amber-600">Die zwei Hauptartikel (Urlaubsziel + Ausflüge) als Blog-Posts anlegen</p>
-          </div>
-          <button
-            onClick={onMigrate}
-            disabled={migrating}
-            className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 font-medium"
-          >
-            {migrating ? 'Migriere...' : 'Migrieren'}
-          </button>
-        </div>
-      )}
 
       {posts.length === 0 && (
         <div className="text-center py-12 text-gray-500">

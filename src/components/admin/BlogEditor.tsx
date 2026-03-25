@@ -22,7 +22,6 @@ export default function BlogEditor() {
     posts,
     loading,
     saving,
-    migrating,
     settingUpDb,
     error,
     success,
@@ -42,7 +41,6 @@ export default function BlogEditor() {
     loadPosts,
     loadMedia,
     handleSetupBlogDb,
-    handleMigrateBlog,
     handleNewPost,
     handleEditPost,
     handleSave,
@@ -164,8 +162,6 @@ export default function BlogEditor() {
             posts={posts}
             onEdit={handleEditPost}
             onDelete={handleDelete}
-            onMigrate={handleMigrateBlog}
-            migrating={migrating}
           />
         )}
 
