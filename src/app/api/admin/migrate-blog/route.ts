@@ -109,8 +109,10 @@ export async function POST() {
   try {
     const db = await getDb();
     if (!db) {
+      console.error('[migrate-blog] DB not available');
       return NextResponse.json({ error: 'DB not available' }, { status: 500 });
     }
+    console.log('[migrate-blog] Starting migration...');
 
     const now = new Date().toISOString();
 
@@ -182,6 +184,7 @@ export async function POST() {
     ).bind(ARTICLE_1.slides.length).all<{ url: string; alt_text: string }>();
     const aussenImages = aussenResult.results || [];
     const cover1Url = aussenImages[0]?.url || null;
+    console.log(`[migrate-blog] Found ${aussenImages.length} aussen images:`, aussenImages.map(img => img.url));
 
     // Article 2 uses 'hund-falkert' category images (dog trips)
     const hundResult = await db.prepare(
@@ -207,6 +210,7 @@ export async function POST() {
         const slide = ARTICLE_1.slides[i];
         const imgId = crypto.randomUUID();
         const slideImageUrl = aussenImages[i]?.url || '';
+        console.log(`[migrate-blog] Inserting slide ${i + 1}/${ARTICLE_1.slides.length}: "${slide.title}" image=${slideImageUrl ? 'yes' : 'none'}`);
         await db.prepare(
           `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order)
            VALUES (?, ?, ?, ?, ?, ?)`
@@ -222,11 +226,13 @@ export async function POST() {
       // Re-create slides: delete old ones, insert new
       const existingPost1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first<{ id: string }>();
       if (existingPost1) {
+        console.log(`[migrate-blog] Deleting old slides for post ${existingPost1.id}`);
         await db.prepare('DELETE FROM blog_post_images WHERE post_id = ?').bind(existingPost1.id).run();
         for (let i = 0; i < ARTICLE_1.slides.length; i++) {
           const slide = ARTICLE_1.slides[i];
           const imgId = crypto.randomUUID();
           const slideImageUrl = aussenImages[i]?.url || '';
+          console.log(`[migrate-blog] Re-inserting slide ${i + 1}/${ARTICLE_1.slides.length}: "${slide.title}" image=${slideImageUrl ? 'yes' : 'none'}`);
           await db.prepare(
             `INSERT INTO blog_post_images (id, post_id, image_url, image_alt, caption, display_order) VALUES (?, ?, ?, ?, ?, ?)`
           ).bind(imgId, existingPost1.id, slideImageUrl, slide.title, slide.description, i).run();
@@ -255,6 +261,15 @@ export async function POST() {
       steps.push('Article 2 already exists, updated content');
     }
 
+    // Verify: count slides for article 1
+    const post1 = await db.prepare('SELECT id FROM blog_posts WHERE slug = ?').bind(slug1).first<{ id: string }>();
+    if (post1) {
+      const slideCount = await db.prepare('SELECT COUNT(*) as count FROM blog_post_images WHERE post_id = ?').bind(post1.id).first<{ count: number }>();
+      console.log(`[migrate-blog] Verification: Article 1 has ${slideCount?.count || 0} slides in DB`);
+      steps.push(`Verification: Article 1 has ${slideCount?.count || 0} slides`);
+    }
+
+    console.log('[migrate-blog] Migration completed. Steps:', steps);
     return NextResponse.json({
       success: true,
       message: 'Blog-Artikel erfolgreich migriert!',
