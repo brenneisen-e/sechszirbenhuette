@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import {
   Image as ImageIcon,
@@ -9,33 +8,14 @@ import {
   Euro,
   Calculator,
   Key,
-  Loader2,
   Home,
-  Lock,
-  LogOut,
-  AlertCircle,
-  Database,
-  CheckCircle,
   FileText,
   Star,
   Smartphone,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
-import { DomErrorBoundary } from '@/components/admin/DomErrorBoundary';
 
-// Loading component
-function LoadingSpinner({ text }: { text: string }) {
-  return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-      <span className="ml-3 text-sm text-gray-500">{text}</span>
-    </div>
-  );
-}
-
-// Lazy load heavy components — no per-component loading/Suspense to avoid
-// nested Suspense boundaries conflicting with useSearchParams() during tab switches.
-// A single Suspense boundary wraps the content area instead.
+// Lazy load heavy components with ssr:false (admin is client-only)
 const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), { ssr: false });
 const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), { ssr: false });
 const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), { ssr: false });
@@ -76,12 +56,14 @@ const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.Compo
   { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
 ];
 
+function getInitialTab(): AdminTab {
+  if (typeof window === 'undefined') return 'guests';
+  const params = new URLSearchParams(window.location.search);
+  return (params.get('tab') as AdminTab) || 'guests';
+}
+
 function AdminPageContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const activeTab = (searchParams.get('tab') || 'guests') as AdminTab;
-
+  const [activeTab, setActiveTabState] = useState<AdminTab>(getInitialTab);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -99,6 +81,16 @@ function AdminPageContent() {
     } catch { /* ignore */ }
   }, []);
 
+  // Sync browser back/forward with tab state
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setActiveTabState((params.get('tab') as AdminTab) || 'guests');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
   const toggleDemoMode = () => {
     const newValue = !isDemoMode;
     setIsDemoMode(newValue);
@@ -107,12 +99,15 @@ function AdminPageContent() {
     } catch { /* ignore */ }
   };
 
-  const setActiveTab = (tab: AdminTab) => {
+  // Switch tabs using local state + pushState — bypasses Next.js router entirely
+  // to avoid Suspense/fiber reconciliation conflicts that cause DOM errors
+  const setActiveTab = useCallback((tab: AdminTab) => {
     if (tab === 'finances') {
       setFinanceRefreshKey(prev => prev + 1);
     }
-    router.push(`/admin?tab=${tab}`);
-  };
+    setActiveTabState(tab);
+    window.history.pushState(null, '', `/admin?tab=${tab}`);
+  }, []);
 
   const handleDataLoaded = () => {
     setIsInitialLoading(false);
@@ -204,35 +199,33 @@ function AdminPageContent() {
 
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
-        <DomErrorBoundary>
-        <Suspense fallback={<LoadingSpinner text="Laden..." />}>
-          <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
-            {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
+        <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
+          {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 
-            {activeTab === 'finances' && (
-              <FinanceOverview
-                key={financeRefreshKey}
-                demoMode={isDemoMode}
-                onNavigateToGuest={(guestId) => {
-                  setActiveTab('guests');
-                  setTimeout(() => {
-                    const guestElement = document.getElementById(`guest-${guestId}`);
-                    if (guestElement) {
-                      guestElement.scrollIntoView({ behavior: 'smooth' });
-                      guestElement.click();
-                    }
-                  }, 100);
-                }}
-              />
-            )}
+          {activeTab === 'finances' && (
+            <FinanceOverview
+              key={financeRefreshKey}
+              demoMode={isDemoMode}
+              onNavigateToGuest={(guestId) => {
+                setActiveTab('guests');
+                setTimeout(() => {
+                  const guestElement = document.getElementById(`guest-${guestId}`);
+                  if (guestElement) {
+                    guestElement.scrollIntoView({ behavior: 'smooth' });
+                    guestElement.click();
+                  }
+                }, 100);
+              }}
+            />
+          )}
 
-            {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
+          {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
 
-            {activeTab === 'passwords' && <PasswordsPanel />}
+          {activeTab === 'passwords' && <PasswordsPanel />}
 
-            {activeTab === 'images' && <ImageManager />}
+          {activeTab === 'images' && <ImageManager />}
 
-            {activeTab === 'blog' && <BlogEditor />}
+          {activeTab === 'blog' && <BlogEditor />}
 
             {activeTab === 'reviews' && <ReviewsManager />}
 
@@ -270,9 +263,5 @@ function AdminPageContent() {
 }
 
 export default function AdminPage() {
-  return (
-    <Suspense fallback={<FullScreenLoader />}>
-      <AdminPageContent />
-    </Suspense>
-  );
+  return <AdminPageContent />;
 }
