@@ -123,7 +123,6 @@ export default function RootLayout({
               var el = document.getElementById('initial-loader');
               if (el && !el.classList.contains('loaded')) {
                 el.classList.add('loaded');
-                setTimeout(function() { el.remove(); }, 500);
               }
             }, delay);
           })();
