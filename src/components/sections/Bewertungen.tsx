@@ -333,6 +333,13 @@ export function Bewertungen() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-10 py-5 bg-logo-green text-white rounded-2xl hover:bg-logo-green/90 hover:scale-105 transition-all duration-200 font-semibold text-lg shadow-lg shadow-logo-green/25"
             >
+              <img
+                src="https://img.logo.dev/google.com?token=pk_H7vb5Y2lTsW47U4Xq-w3HA&format=png&size=64"
+                alt="Google"
+                width={28}
+                height={28}
+                className="rounded-sm"
+              />
               Bewerten Sie uns auf Google
               <ExternalLink size={22} />
             </a>

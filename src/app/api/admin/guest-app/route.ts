@@ -26,56 +26,58 @@ async function getDb(): Promise<D1Database | null> {
 }
 
 async function ensureTables(db: D1Database): Promise<void> {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS guest_app_categories (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      icon TEXT DEFAULT 'info',
-      display_order INTEGER DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS guest_app_cards (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL DEFAULT '',
-      image_url TEXT,
-      image_alt TEXT,
-      display_order INTEGER DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (category_id) REFERENCES guest_app_categories(id) ON DELETE CASCADE
-    )
-  `).run();
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS guest_access_tokens (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      booking_id INTEGER NOT NULL,
-      access_code TEXT NOT NULL UNIQUE,
-      guest_name TEXT,
-      valid_from TEXT,
-      valid_until TEXT,
-      is_active INTEGER DEFAULT 1,
-      last_login TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
-    )
-  `).run();
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS guest_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id TEXT NOT NULL UNIQUE,
-      token_id INTEGER NOT NULL,
-      expires_at DATETIME NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (token_id) REFERENCES guest_access_tokens(id) ON DELETE CASCADE
-    )
-  `).run();
+  try {
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS guest_app_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        icon TEXT DEFAULT 'info',
+        display_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS guest_app_cards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL DEFAULT '',
+        image_url TEXT,
+        image_alt TEXT,
+        display_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES guest_app_categories(id) ON DELETE CASCADE
+      )
+    `).run();
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS guest_access_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        booking_id INTEGER NOT NULL,
+        access_code TEXT NOT NULL UNIQUE,
+        guest_name TEXT,
+        valid_from TEXT,
+        valid_until TEXT,
+        is_active INTEGER DEFAULT 1,
+        last_login TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS guest_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id TEXT NOT NULL UNIQUE,
+        token_id INTEGER NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+  } catch (e) {
+    console.error('[guest-app] ensureTables error:', e);
+  }
 }
 
 // GET — list categories with their cards
@@ -237,14 +239,23 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'list_tokens') {
-      const tokens = await db.prepare(`
-        SELECT t.*, b.arrival_date, b.departure_date, g.guest_name as booking_guest_name
-        FROM guest_access_tokens t
-        LEFT JOIN bookings b ON t.booking_id = b.id
-        LEFT JOIN guests g ON b.guest_id = g.id
-        ORDER BY t.created_at DESC
-      `).all<Record<string, unknown>>();
-      return NextResponse.json({ tokens: tokens.results || [] });
+      try {
+        // Try with JOINs first (bookings/guests tables may exist)
+        const tokens = await db.prepare(`
+          SELECT t.*, b.arrival_date, b.departure_date, g.guest_name as booking_guest_name
+          FROM guest_access_tokens t
+          LEFT JOIN bookings b ON t.booking_id = b.id
+          LEFT JOIN guests g ON b.guest_id = g.id
+          ORDER BY t.created_at DESC
+        `).all<Record<string, unknown>>();
+        return NextResponse.json({ tokens: tokens.results || [] });
+      } catch {
+        // Fallback without JOINs
+        const tokens = await db.prepare(
+          'SELECT * FROM guest_access_tokens ORDER BY created_at DESC'
+        ).all<Record<string, unknown>>();
+        return NextResponse.json({ tokens: tokens.results || [] });
+      }
     }
 
     if (action === 'delete_token') {
@@ -264,7 +275,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error) {
-    console.error('Guest app POST error:', error);
-    return NextResponse.json({ error: 'Fehler' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Guest app POST error:', msg, error);
+    return NextResponse.json({ error: `Fehler: ${msg}` }, { status: 500 });
   }
 }

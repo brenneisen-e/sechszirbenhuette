@@ -194,13 +194,24 @@ export function Ferienhaus() {
     }
   };
 
+  // Map detail categories to the top-level gallery filter categories
+  const categoryToFilter: Record<string, string> = {
+    wohnen: 'innen',
+    schlafen: 'innen',
+    kueche: 'innen',
+    bad: 'innen',
+    aussen: 'aussen',
+    umgebung: 'aussen',
+  };
+
   const scrollToGalleryCategory = (category: string | null) => {
     const galerie = document.querySelector('#galerie');
     if (galerie) {
       galerie.scrollIntoView({ behavior: 'smooth' });
       if (category) {
+        const filterCategory = categoryToFilter[category] || category;
         setTimeout(() => {
-          const categoryButton = document.querySelector(`#galerie button[data-category="${category}"]`) as HTMLButtonElement;
+          const categoryButton = document.querySelector(`#galerie button[data-category="${filterCategory}"]`) as HTMLButtonElement;
           if (categoryButton) {
             categoryButton.click();
           }
