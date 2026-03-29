@@ -542,20 +542,37 @@ export default function GuestAppEditor() {
 
                               {/* Content (HTML) */}
                               <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Inhalt (HTML)</label>
-                                <textarea
-                                  value={card.content}
-                                  onChange={(e) => {
-                                    setCategories(prev => prev.map(c => ({
-                                      ...c,
-                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: e.target.value } : cd),
-                                    })));
-                                  }}
-                                  onBlur={(e) => handleUpdateCard(card.id, { content: e.target.value })}
-                                  rows={8}
-                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono"
-                                  placeholder="<p>Hier kommt der Inhalt hin...</p>"
-                                />
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block text-xs font-medium text-gray-500">Inhalt</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCard(editingCard === card.id ? null : card.id)}
+                                    className="text-xs text-logo-green hover:underline"
+                                  >
+                                    {editingCard === card.id ? 'Vorschau' : 'HTML bearbeiten'}
+                                  </button>
+                                </div>
+                                {editingCard === card.id ? (
+                                  <textarea
+                                    value={card.content}
+                                    onChange={(e) => {
+                                      setCategories(prev => prev.map(c => ({
+                                        ...c,
+                                        cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: e.target.value } : cd),
+                                      })));
+                                    }}
+                                    onBlur={(e) => handleUpdateCard(card.id, { content: e.target.value })}
+                                    rows={8}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono"
+                                    placeholder="<p>Hier kommt der Inhalt hin...</p>"
+                                  />
+                                ) : (
+                                  <div
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm prose prose-sm max-w-none min-h-[80px] bg-white cursor-pointer hover:border-gray-300 transition"
+                                    onClick={() => setEditingCard(card.id)}
+                                    dangerouslySetInnerHTML={{ __html: card.content || '<span class="text-gray-400">Klicken zum Bearbeiten...</span>' }}
+                                  />
+                                )}
                               </div>
 
                               {/* Save button */}
