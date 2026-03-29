@@ -98,6 +98,7 @@ export default function GuestAppEditor() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
@@ -117,6 +118,28 @@ export default function GuestAppEditor() {
 
   // Bookings for token creation
   const [bookings, setBookings] = useState<{ id: number; guest_name: string; arrival_date: string }[]>([]);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/admin/guest-app/seed', { method: 'POST' });
+      const data = await res.json() as { success?: boolean; message?: string; skipped?: boolean };
+      if (data.success) {
+        setSuccess(data.message || 'Inhalte erfolgreich eingefügt!');
+        await loadData();
+      } else if (data.skipped) {
+        setError(data.message || 'Inhalte existieren bereits.');
+      } else {
+        setError('Fehler beim Einfügen der Inhalte');
+      }
+    } catch {
+      setError('Verbindungsfehler beim Seeding');
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -372,7 +395,18 @@ export default function GuestAppEditor() {
             <div className="text-center py-12 text-gray-400">
               <Info className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Noch keine Kategorien angelegt</p>
-              <p className="text-sm">Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die Reise&quot;</p>
+              <p className="text-sm mb-4">Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die Reise&quot;</p>
+              <button
+                onClick={handleSeed}
+                disabled={seeding}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-logo-green text-white rounded-xl font-medium hover:bg-logo-green/90 disabled:opacity-50 transition"
+              >
+                {seeding ? (
+                  <><Loader2 size={16} className="animate-spin" /> Wird eingefügt...</>
+                ) : (
+                  <><Upload size={16} /> Welcome Guide Inhalte einfügen</>
+                )}
+              </button>
             </div>
           )}
 
