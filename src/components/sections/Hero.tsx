@@ -305,8 +305,6 @@ export function Hero() {
         )}
       </div>
 
-      {/* Overlay - leichter Gradient für Lesbarkeit */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
       {/* Content Container - Full height with flex column */}
       <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
