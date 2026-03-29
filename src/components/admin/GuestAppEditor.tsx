@@ -51,12 +51,7 @@ function getIconComponent(iconName: string): LucideIcon {
   return ICON_OPTIONS.find(o => o.value === iconName)?.Icon || Info;
 }
 
-const GROUP_OPTIONS = [
-  { value: '', label: 'Keine Gruppe' },
-  { value: 'Vor der Reise', label: 'Vor der Reise' },
-  { value: 'Während der Reise', label: 'Während der Reise' },
-  { value: 'Nach der Reise', label: 'Nach der Reise' },
-];
+const DEFAULT_GROUPS = ['Vor der Reise', 'Während der Reise', 'Nach der Reise'];
 
 interface Category {
   id: number;
@@ -116,6 +111,12 @@ export default function GuestAppEditor() {
   const [availableMedia, setAvailableMedia] = useState<MediaItem[]>([]);
   const [showMediaPicker, setShowMediaPicker] = useState<number | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Compute available groups from existing categories + defaults
+  const availableGroups = Array.from(new Set([
+    ...DEFAULT_GROUPS,
+    ...categories.map(c => c.group_name).filter(Boolean),
+  ]));
 
   // New category form
   const [newCatTitle, setNewCatTitle] = useState('');
@@ -342,7 +343,17 @@ export default function GuestAppEditor() {
     <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Gäste-App Inhalte</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-gray-800">Gäste-App Inhalte</h2>
+          <a
+            href="/gaeste"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-logo-green hover:underline"
+          >
+            App öffnen ↗
+          </a>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setSubTab('content')}
@@ -399,15 +410,18 @@ export default function GuestAppEditor() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Gruppe</label>
-              <select
+              <input
+                list="group-options-new"
                 value={newCatGroup}
                 onChange={(e) => setNewCatGroup(e.target.value)}
+                placeholder="Keine Gruppe"
                 className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
-              >
-                {GROUP_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+              />
+              <datalist id="group-options-new">
+                {availableGroups.map(g => (
+                  <option key={g} value={g} />
                 ))}
-              </select>
+              </datalist>
             </div>
             <button
               onClick={handleAddCategory}
@@ -438,7 +452,26 @@ export default function GuestAppEditor() {
             </div>
           )}
 
-          {categories.map((cat) => {
+          {(() => {
+            // Group categories by group_name
+            const groups: { name: string; cats: Category[] }[] = [];
+            const seen = new Set<string>();
+            for (const cat of categories) {
+              const g = cat.group_name || '';
+              if (!seen.has(g)) {
+                seen.add(g);
+                groups.push({ name: g, cats: [] });
+              }
+              groups.find(gr => gr.name === g)!.cats.push(cat);
+            }
+            return groups.map((group) => (
+              <div key={group.name || '__none'} className="space-y-4">
+                {group.name && (
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-logo-green/60 mt-6 mb-2 px-1">
+                    {group.name}
+                  </h3>
+                )}
+                {group.cats.map((cat) => {
             const isExpanded = expandedCategory === cat.id;
             const CatIcon = getIconComponent(cat.icon);
 
@@ -495,18 +528,23 @@ export default function GuestAppEditor() {
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
-                      <select
+                      <input
+                        list={`group-options-${cat.id}`}
                         value={cat.group_name || ''}
                         onChange={(e) => {
                           setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, group_name: e.target.value } : c));
+                        }}
+                        onBlur={(e) => {
                           handleUpdateCategory(cat.id, { group_name: e.target.value } as Partial<Category>);
                         }}
+                        placeholder="Keine Gruppe"
                         className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
-                      >
-                        {GROUP_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      />
+                      <datalist id={`group-options-${cat.id}`}>
+                        {availableGroups.map(g => (
+                          <option key={g} value={g} />
                         ))}
-                      </select>
+                      </datalist>
                     </div>
 
                     {/* Cards */}
@@ -626,6 +664,9 @@ export default function GuestAppEditor() {
               </div>
             );
           })}
+              </div>
+            ));
+          })()}
 
           {/* Delete All Button */}
           {categories.length > 0 && (
