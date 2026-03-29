@@ -138,9 +138,27 @@ export function Bewertungen() {
             >
               {getText('bewertungen_title')}
             </h2>
-            <p data-text-key="bewertungen_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600 mb-2" style={getTextStyle('bewertungen_subtitle')}>
+            <p data-text-key="bewertungen_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600 mb-4" style={getTextStyle('bewertungen_subtitle')}>
               {getText('bewertungen_subtitle')}
             </p>
+
+            {/* Google Review CTA */}
+            <a
+              href="https://g.page/r/CSYqzFakCmSsEBM/review"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-10 py-5 bg-logo-green text-white rounded-2xl hover:bg-logo-green/90 hover:scale-105 transition-all duration-200 font-semibold text-lg shadow-lg shadow-logo-green/25"
+            >
+              <img
+                src="https://img.logo.dev/google.com?token=pk_H7vb5Y2lTsW47U4Xq-w3HA&format=png&size=64"
+                alt="Google"
+                width={28}
+                height={28}
+                className="rounded-sm"
+              />
+              Bewerten Sie uns auf Google
+              <ExternalLink size={22} />
+            </a>
 
             {/* Rating Summary */}
             <div className="flex items-center justify-center gap-2 mt-6">
@@ -325,25 +343,6 @@ export function Bewertungen() {
             </p>
           </div>
 
-          {/* Google Review CTA */}
-          <div className="text-center mt-12">
-            <a
-              href="https://g.page/r/CSYqzFakCmSsEBM/review"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-10 py-5 bg-logo-green text-white rounded-2xl hover:bg-logo-green/90 hover:scale-105 transition-all duration-200 font-semibold text-lg shadow-lg shadow-logo-green/25"
-            >
-              <img
-                src="https://img.logo.dev/google.com?token=pk_H7vb5Y2lTsW47U4Xq-w3HA&format=png&size=64"
-                alt="Google"
-                width={28}
-                height={28}
-                className="rounded-sm"
-              />
-              Bewerten Sie uns auf Google
-              <ExternalLink size={22} />
-            </a>
-          </div>
         </div>
       </div>
     </section>
