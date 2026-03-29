@@ -62,6 +62,7 @@ interface Category {
   id: number;
   title: string;
   icon: string;
+  group_name?: string;
   cards: Card[];
 }
 
@@ -379,32 +380,58 @@ function Dashboard() {
                 </div>
               )}
 
-              {/* Category List */}
-              <div className="mt-6 space-y-3">
-                {content.map((cat, index) => {
-                  const CatIcon = ICON_MAP[cat.icon] || Info;
-                  return (
-                    <motion.button
-                      key={cat.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileHover={{ scale: 1.01, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className="w-full bg-white rounded-2xl shadow-sm p-5 flex items-center gap-4 transition text-left"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-[#2d5a27]/10 flex items-center justify-center flex-shrink-0">
-                        <CatIcon size={22} className="text-[#2d5a27]" />
+              {/* Category List - grouped */}
+              <div className="mt-6 space-y-6">
+                {(() => {
+                  // Group categories by group_name, preserving order
+                  const groups: { name: string; cats: Category[] }[] = [];
+                  const seen = new Set<string>();
+                  for (const cat of content) {
+                    const g = cat.group_name || '';
+                    if (!seen.has(g)) {
+                      seen.add(g);
+                      groups.push({ name: g, cats: [] });
+                    }
+                    groups.find(gr => gr.name === g)!.cats.push(cat);
+                  }
+                  let globalIndex = 0;
+                  return groups.map((group) => (
+                    <div key={group.name || '__none'}>
+                      {group.name && (
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#2d5a27]/60 mb-2 px-1">
+                          {group.name}
+                        </h3>
+                      )}
+                      <div className="space-y-3">
+                        {group.cats.map((cat) => {
+                          const CatIcon = ICON_MAP[cat.icon] || Info;
+                          const idx = globalIndex++;
+                          return (
+                            <motion.button
+                              key={cat.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              whileHover={{ scale: 1.01, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => setSelectedCategory(cat.id)}
+                              className="w-full bg-white rounded-2xl shadow-sm p-5 flex items-center gap-4 transition text-left"
+                            >
+                              <div className="w-12 h-12 rounded-xl bg-[#2d5a27]/10 flex items-center justify-center flex-shrink-0">
+                                <CatIcon size={22} className="text-[#2d5a27]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-800">{cat.title}</h3>
+                                <p className="text-xs text-gray-400 mt-0.5">{cat.cards.length} Info{cat.cards.length !== 1 ? 's' : ''}</p>
+                              </div>
+                              <ChevronRight size={20} className="text-gray-300" />
+                            </motion.button>
+                          );
+                        })}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-800">{cat.title}</h3>
-                        <p className="text-xs text-gray-400 mt-0.5">{cat.cards.length} Info{cat.cards.length !== 1 ? 's' : ''}</p>
-                      </div>
-                      <ChevronRight size={20} className="text-gray-300" />
-                    </motion.button>
-                  );
-                })}
+                    </div>
+                  ));
+                })()}
               </div>
 
               {content.length === 0 && (

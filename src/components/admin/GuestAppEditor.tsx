@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { RichTextEditor } from './RichTextEditor';
 import {
   Plus,
   Trash2,
@@ -50,10 +51,18 @@ function getIconComponent(iconName: string): LucideIcon {
   return ICON_OPTIONS.find(o => o.value === iconName)?.Icon || Info;
 }
 
+const GROUP_OPTIONS = [
+  { value: '', label: 'Keine Gruppe' },
+  { value: 'Vor der Reise', label: 'Vor der Reise' },
+  { value: 'Während der Reise', label: 'Während der Reise' },
+  { value: 'Nach der Reise', label: 'Nach der Reise' },
+];
+
 interface Category {
   id: number;
   title: string;
   icon: string;
+  group_name: string;
   display_order: number;
   is_active: number;
   cards: Card[];
@@ -111,6 +120,7 @@ export default function GuestAppEditor() {
   // New category form
   const [newCatTitle, setNewCatTitle] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('info');
+  const [newCatGroup, setNewCatGroup] = useState('');
 
   // New token form
   const [newTokenBookingId, setNewTokenBookingId] = useState('');
@@ -219,9 +229,10 @@ export default function GuestAppEditor() {
   const handleAddCategory = async () => {
     if (!newCatTitle.trim()) return;
     try {
-      await apiCall({ action: 'create_category', title: newCatTitle.trim(), icon: newCatIcon });
+      await apiCall({ action: 'create_category', title: newCatTitle.trim(), icon: newCatIcon, group_name: newCatGroup });
       setNewCatTitle('');
       setNewCatIcon('info');
+      setNewCatGroup('');
       setSuccess('Kategorie erstellt');
       await loadData();
     } catch (e) {
@@ -381,6 +392,18 @@ export default function GuestAppEditor() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Gruppe</label>
+              <select
+                value={newCatGroup}
+                onChange={(e) => setNewCatGroup(e.target.value)}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              >
+                {GROUP_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
             <button
               onClick={handleAddCategory}
               disabled={saving || !newCatTitle.trim()}
@@ -448,15 +471,15 @@ export default function GuestAppEditor() {
                 {/* Category Content (expanded) */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
-                    {/* Edit category title/icon inline */}
-                    <div className="flex gap-3 items-center mb-4">
+                    {/* Edit category title/icon/group inline */}
+                    <div className="flex gap-3 items-center mb-4 flex-wrap">
                       <input
                         value={cat.title}
                         onChange={(e) => {
                           setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, title: e.target.value } : c));
                         }}
                         onBlur={(e) => handleUpdateCategory(cat.id, { title: e.target.value })}
-                        className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                        className="flex-1 min-w-[150px] px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
                       />
                       <select
                         value={cat.icon}
@@ -464,6 +487,18 @@ export default function GuestAppEditor() {
                         className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
                       >
                         {ICON_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={cat.group_name || ''}
+                        onChange={(e) => {
+                          setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, group_name: e.target.value } : c));
+                          handleUpdateCategory(cat.id, { group_name: e.target.value } as Partial<Category>);
+                        }}
+                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                      >
+                        {GROUP_OPTIONS.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
@@ -540,39 +575,20 @@ export default function GuestAppEditor() {
                                 />
                               </div>
 
-                              {/* Content (HTML) */}
+                              {/* Content (WYSIWYG) */}
                               <div>
-                                <div className="flex items-center justify-between mb-1">
-                                  <label className="block text-xs font-medium text-gray-500">Inhalt</label>
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditingCard(editingCard === card.id ? null : card.id)}
-                                    className="text-xs text-logo-green hover:underline"
-                                  >
-                                    {editingCard === card.id ? 'Vorschau' : 'HTML bearbeiten'}
-                                  </button>
-                                </div>
-                                {editingCard === card.id ? (
-                                  <textarea
-                                    value={card.content}
-                                    onChange={(e) => {
-                                      setCategories(prev => prev.map(c => ({
-                                        ...c,
-                                        cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: e.target.value } : cd),
-                                      })));
-                                    }}
-                                    onBlur={(e) => handleUpdateCard(card.id, { content: e.target.value })}
-                                    rows={8}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono"
-                                    placeholder="<p>Hier kommt der Inhalt hin...</p>"
-                                  />
-                                ) : (
-                                  <div
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm prose prose-sm max-w-none min-h-[80px] bg-white cursor-pointer hover:border-gray-300 transition"
-                                    onClick={() => setEditingCard(card.id)}
-                                    dangerouslySetInnerHTML={{ __html: card.content || '<span class="text-gray-400">Klicken zum Bearbeiten...</span>' }}
-                                  />
-                                )}
+                                <label className="block text-xs font-medium text-gray-500 mb-1">Inhalt</label>
+                                <RichTextEditor
+                                  value={card.content}
+                                  onChange={(html) => {
+                                    setCategories(prev => prev.map(c => ({
+                                      ...c,
+                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: html } : cd),
+                                    })));
+                                  }}
+                                  onBlur={(html) => handleUpdateCard(card.id, { content: html })}
+                                  placeholder="Text eingeben..."
+                                />
                               </div>
 
                               {/* Save button */}

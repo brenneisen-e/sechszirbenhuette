@@ -30,6 +30,7 @@ const SEED_DATA = [
   {
     title: 'Check-In & Kontakt',
     icon: 'key',
+    group_name: 'Vor der Reise',
     cards: [
       {
         title: 'Check-In & Check-Out',
@@ -53,6 +54,7 @@ const SEED_DATA = [
   {
     title: 'Anfahrt & Parken',
     icon: 'map-pin',
+    group_name: 'Vor der Reise',
     cards: [
       {
         title: 'Wegbeschreibung',
@@ -76,6 +78,7 @@ const SEED_DATA = [
   {
     title: 'Die Hütte',
     icon: 'home',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Überblick',
@@ -106,6 +109,7 @@ const SEED_DATA = [
   {
     title: 'Sauna & Wellness',
     icon: 'flame',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Sauna',
@@ -134,6 +138,7 @@ const SEED_DATA = [
   {
     title: 'Küche & Wäsche',
     icon: 'utensils',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Küche',
@@ -163,6 +168,7 @@ const SEED_DATA = [
   {
     title: 'WiFi & TV',
     icon: 'wifi',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'WiFi & Unterhaltung',
@@ -176,6 +182,7 @@ const SEED_DATA = [
   {
     title: 'Haustiere',
     icon: 'info',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Regeln für Haustiere',
@@ -193,6 +200,7 @@ const SEED_DATA = [
   {
     title: 'Müll & Reinigung',
     icon: 'info',
+    group_name: 'Nach der Reise',
     cards: [
       {
         title: 'Müllentsorgung',
@@ -219,6 +227,7 @@ const SEED_DATA = [
   {
     title: 'Einkaufen',
     icon: 'shopping-cart',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Supermärkte in der Nähe',
@@ -235,6 +244,7 @@ const SEED_DATA = [
   {
     title: 'Restaurants',
     icon: 'coffee',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Restaurants in der Nähe',
@@ -256,6 +266,7 @@ const SEED_DATA = [
   {
     title: 'Ausflüge Sommer',
     icon: 'mountain',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Kärnten Card',
@@ -299,6 +310,7 @@ const SEED_DATA = [
   {
     title: 'Ausflüge Winter',
     icon: 'snowflake',
+    group_name: 'Während der Reise',
     cards: [
       {
         title: 'Skigebiete',
@@ -336,12 +348,14 @@ export async function POST() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         icon TEXT DEFAULT 'info',
+        group_name TEXT DEFAULT '',
         display_order INTEGER DEFAULT 0,
         is_active INTEGER DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `).run();
+    try { await db.prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""').run(); } catch { /* exists */ }
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS guest_app_cards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -375,8 +389,8 @@ export async function POST() {
       const cat = SEED_DATA[i];
 
       await db.prepare(
-        'INSERT INTO guest_app_categories (title, icon, display_order, is_active) VALUES (?, ?, ?, 1)'
-      ).bind(cat.title, cat.icon, i).run();
+        'INSERT INTO guest_app_categories (title, icon, group_name, display_order, is_active) VALUES (?, ?, ?, ?, 1)'
+      ).bind(cat.title, cat.icon, cat.group_name || '', i).run();
 
       // Get the inserted category ID
       const inserted = await db.prepare(

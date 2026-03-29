@@ -42,10 +42,12 @@ async function ensureGuestTables(db: D1Database): Promise<void> {
     )`).run();
     await db.prepare(`CREATE TABLE IF NOT EXISTS guest_app_categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,
-      icon TEXT DEFAULT 'info', display_order INTEGER DEFAULT 0,
+      icon TEXT DEFAULT 'info', group_name TEXT DEFAULT '',
+      display_order INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`).run();
+    try { await db.prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""').run(); } catch { /* exists */ }
     await db.prepare(`CREATE TABLE IF NOT EXISTS guest_app_cards (
       id INTEGER PRIMARY KEY AUTOINCREMENT, category_id INTEGER NOT NULL,
       title TEXT NOT NULL, content TEXT NOT NULL DEFAULT '', image_url TEXT,

@@ -32,12 +32,17 @@ async function ensureTables(db: D1Database): Promise<void> {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         icon TEXT DEFAULT 'info',
+        group_name TEXT DEFAULT '',
         display_order INTEGER DEFAULT 0,
         is_active INTEGER DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `).run();
+    // Add group_name column if table already exists without it
+    try {
+      await db.prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""').run();
+    } catch { /* column already exists */ }
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS guest_app_cards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -127,25 +132,26 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
 
     if (action === 'create_category') {
-      const { title, icon } = body as { title: string; icon?: string };
+      const { title, icon, group_name } = body as { title: string; icon?: string; group_name?: string };
       const maxOrder = await db.prepare(
         'SELECT MAX(display_order) as max_order FROM guest_app_categories'
       ).first<{ max_order: number | null }>();
       const order = (maxOrder?.max_order ?? -1) + 1;
       await db.prepare(
-        'INSERT INTO guest_app_categories (title, icon, display_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
-      ).bind(title, icon || 'info', order, now, now).run();
+        'INSERT INTO guest_app_categories (title, icon, group_name, display_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(title, icon || 'info', group_name || '', order, now, now).run();
       return NextResponse.json({ success: true });
     }
 
     if (action === 'update_category') {
-      const { id, title, icon, is_active, display_order } = body as {
-        id: number; title?: string; icon?: string; is_active?: number; display_order?: number;
+      const { id, title, icon, group_name, is_active, display_order } = body as {
+        id: number; title?: string; icon?: string; group_name?: string; is_active?: number; display_order?: number;
       };
       const updates: string[] = [];
       const values: unknown[] = [];
       if (title !== undefined) { updates.push('title = ?'); values.push(title); }
       if (icon !== undefined) { updates.push('icon = ?'); values.push(icon); }
+      if (group_name !== undefined) { updates.push('group_name = ?'); values.push(group_name); }
       if (is_active !== undefined) { updates.push('is_active = ?'); values.push(is_active); }
       if (display_order !== undefined) { updates.push('display_order = ?'); values.push(display_order); }
       updates.push('updated_at = ?'); values.push(now);
