@@ -191,7 +191,12 @@ export default function GuestAppEditor() {
     try {
       const res = await fetch('/api/admin/bookings');
       const data = await res.json() as { bookings?: { id: number; guest_name: string; arrival_date: string }[] };
-      setBookings(data.bookings || []);
+      const sorted = (data.bookings || []).sort((a, b) => {
+        if (!a.arrival_date) return 1;
+        if (!b.arrival_date) return -1;
+        return b.arrival_date.localeCompare(a.arrival_date);
+      });
+      setBookings(sorted);
     } catch {
       // not critical
     }
