@@ -621,6 +621,35 @@ export default function GuestAppEditor() {
               </div>
             );
           })}
+
+          {/* Delete All Button */}
+          {categories.length > 0 && (
+            <div className="pt-6 border-t border-gray-200 mt-6">
+              <button
+                onClick={async () => {
+                  if (!confirm('Alle Kategorien und Kacheln wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
+                  setSaving(true);
+                  try {
+                    await fetch('/api/admin/guest-app', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'delete_all_categories' }),
+                    });
+                    setSuccess('Alle Kategorien gelöscht');
+                    await loadData();
+                  } catch {
+                    setError('Fehler beim Löschen');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-4 py-2 text-red-600 border border-red-200 rounded-lg text-sm hover:bg-red-50 disabled:opacity-50 transition"
+              >
+                <Trash2 size={14} /> Alle Kategorien löschen
+              </button>
+            </div>
+          )}
         </div>
       )}
 

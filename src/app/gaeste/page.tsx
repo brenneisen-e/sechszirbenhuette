@@ -162,6 +162,28 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
           </button>
         </form>
 
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              await fetch('/api/guest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'demo' }),
+              });
+              onLogin();
+            } catch {
+              setError('Verbindungsfehler');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+          className="w-full mt-3 py-3 bg-white/10 text-white/80 rounded-xl font-medium hover:bg-white/20 disabled:opacity-50 transition text-sm"
+        >
+          Demo ansehen
+        </button>
+
         <p className="text-center text-white/40 text-xs mt-6">
           Sechszirbenhütte · Falkertsee
         </p>

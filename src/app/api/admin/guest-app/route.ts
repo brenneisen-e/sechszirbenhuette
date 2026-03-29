@@ -168,6 +168,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === 'delete_all_categories') {
+      await db.prepare('DELETE FROM guest_app_cards').run();
+      await db.prepare('DELETE FROM guest_app_categories').run();
+      return NextResponse.json({ success: true });
+    }
+
     if (action === 'create_card') {
       const { category_id, title, content, image_url, image_alt } = body as {
         category_id: number; title: string; content?: string; image_url?: string; image_alt?: string;
