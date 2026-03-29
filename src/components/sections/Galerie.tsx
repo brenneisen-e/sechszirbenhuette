@@ -380,6 +380,7 @@ export function Galerie() {
               return (
                 <button
                   key={subCat}
+                  data-subcategory={subCat}
                   onClick={() => setSelectedSubCategory(subCat)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                     selectedSubCategory === subCat
