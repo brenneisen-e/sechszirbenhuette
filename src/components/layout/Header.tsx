@@ -15,7 +15,6 @@ const LOGO_GREEN = '#1e5631';
 // Navigation links - split for left and right of logo
 const leftNavItems = [
   { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus', isExternal: false },
-  { key: 'bewertungen', href: '#bewertungen', sectionId: 'bewertungen', isExternal: false },
   { key: 'blog', href: '/blog', sectionId: 'blog', isExternal: true },
 ] as const;
 
@@ -27,7 +26,7 @@ const rightNavItems = [
 const allNavItems = [...leftNavItems, ...rightNavItems];
 
 // All sections to track for scroll-spy (in order they appear on page)
-const SCROLL_SPY_SECTIONS = ['hero', 'bewertungen', 'introtext', 'ferienhaus', 'galerie', 'lage', 'buchung'];
+const SCROLL_SPY_SECTIONS = ['hero', 'introtext', 'ferienhaus', 'galerie', 'lage', 'buchung'];
 
 export function Header() {
   const pathname = usePathname();
