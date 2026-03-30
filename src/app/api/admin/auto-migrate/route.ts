@@ -259,6 +259,34 @@ export async function POST() {
       )
     `, 'rental_prices');
 
+    // Seed rental_prices with 2026 data if table is empty
+    try {
+      const count = await db.prepare('SELECT COUNT(*) as cnt FROM rental_prices').first<{ cnt: number }>();
+      if (count && count.cnt === 0) {
+        const seedData = [
+          // Chronologisch 2026
+          ['Standard',                          '2026-01-01', '2026-02-06', 120, 7],
+          ['Faschingswoche/Semester Kärnten',    '2026-02-07', '2026-02-22', 129, 7],
+          ['Standard',                          '2026-02-23', '2026-03-31', 120, 7],
+          ['Schlechte Saison',                  '2026-04-01', '2026-04-30', 100, 3],
+          ['Standard',                          '2026-05-01', '2026-10-31', 120, 7],
+          ['Schlechte Saison',                  '2026-11-01', '2026-12-12', 100, 3],
+          ['Vorweihnachtswoche',                '2026-12-13', '2026-12-19', 114, 7],
+          ['Weihnachten',                       '2026-12-20', '2026-12-26', 357, 7],
+          ['Silvester',                         '2026-12-27', '2026-12-31', 371, 7],
+        ];
+        for (const [name, from, to, price, minStay] of seedData) {
+          await db.prepare(
+            'INSERT INTO rental_prices (name, date_from, date_to, price_per_night, mindestaufenthalt, aktiv) VALUES (?, ?, ?, ?, ?, 1)'
+          ).bind(name, from, to, price, minStay).run();
+        }
+        migrated.push('rental_prices:seed_2026');
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      errors.push(`rental_prices:seed: ${msg}`);
+    }
+
     await createTable(`
       CREATE TABLE IF NOT EXISTS guest_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
