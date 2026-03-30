@@ -264,16 +264,16 @@ export async function POST() {
       const count = await db.prepare('SELECT COUNT(*) as cnt FROM rental_prices').first<{ cnt: number }>();
       if (count && count.cnt === 0) {
         const seedData = [
-          // Chronologisch 2026
-          ['Standard',                          '2026-01-01', '2026-02-06', 120, 7],
-          ['Faschingswoche/Semester Kärnten',    '2026-02-07', '2026-02-22', 129, 7],
-          ['Standard',                          '2026-02-23', '2026-03-31', 120, 7],
-          ['Schlechte Saison',                  '2026-04-01', '2026-04-30', 100, 3],
-          ['Standard',                          '2026-05-01', '2026-10-31', 120, 7],
-          ['Schlechte Saison',                  '2026-11-01', '2026-12-12', 100, 3],
-          ['Vorweihnachtswoche',                '2026-12-13', '2026-12-19', 114, 7],
-          ['Weihnachten',                       '2026-12-20', '2026-12-26', 357, 7],
-          ['Silvester',                         '2026-12-27', '2026-12-31', 371, 7],
+          // Chronologisch 2026 — Woche = Samstag bis Samstag
+          ['Standard',                          '2026-01-03', '2026-02-06', 120, 7],
+          ['Faschingswoche/Semester Kärnten',    '2026-02-07', '2026-02-20', 129, 7],
+          ['Standard',                          '2026-02-21', '2026-04-03', 120, 7],
+          ['Schlechte Saison',                  '2026-04-04', '2026-05-01', 100, 3],
+          ['Standard',                          '2026-05-02', '2026-10-30', 120, 7],
+          ['Schlechte Saison',                  '2026-10-31', '2026-12-11', 100, 3],
+          ['Vorweihnachtswoche',                '2026-12-12', '2026-12-18', 114, 7],
+          ['Weihnachten',                       '2026-12-19', '2026-12-25', 357, 7],
+          ['Silvester',                         '2026-12-26', '2027-01-01', 371, 7],
         ];
         for (const [name, from, to, price, minStay] of seedData) {
           await db.prepare(
