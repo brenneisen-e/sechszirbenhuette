@@ -97,7 +97,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
       {/* Carousel Track */}
       <div className="overflow-hidden mx-4 md:mx-8 pb-2">
         <div
-          className="flex items-stretch transition-transform duration-300 ease-out"
+          className="flex items-start transition-transform duration-300 ease-out"
           style={{ transform: `translateX(-${translateValue}%)` }}
         >
           {images.map((slide, index) => {
@@ -106,7 +106,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
 
             return (
               <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
-                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
+                <div className="bg-gray-50 rounded-2xl shadow-md overflow-hidden flex flex-col">
                   {/* Portrait Image or Placeholder */}
                   <div className="relative aspect-[3/4] bg-gray-100">
                     {imageUrl ? (
@@ -138,7 +138,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
                   </div>
 
                   {/* Text Content */}
-                  <div className="p-5 flex-1">
+                  <div className="p-5">
                     {slide.image_alt && (
                       <h4 className="text-lg font-bold text-logo-green mb-3">{slide.image_alt}</h4>
                     )}
