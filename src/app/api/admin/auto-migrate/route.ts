@@ -259,6 +259,44 @@ export async function POST() {
       )
     `, 'rental_prices');
 
+    // Seed rental_prices with 2026 data if table is empty
+    try {
+      const count = await db.prepare('SELECT COUNT(*) as cnt FROM rental_prices').first<{ cnt: number }>();
+      if (count && count.cnt === 0) {
+        const seedData = [
+          // Chronologisch 2026 — Woche = Samstag bis Samstag
+          ['Standard',                          '2026-01-03', '2026-02-06', 120, 7],
+          ['Faschingswoche/Semester Kärnten',    '2026-02-07', '2026-02-20', 129, 7],
+          ['Standard',                          '2026-02-21', '2026-04-03', 120, 7],
+          ['Schlechte Saison',                  '2026-04-04', '2026-05-01', 100, 3],
+          ['Standard',                          '2026-05-02', '2026-10-30', 120, 7],
+          ['Schlechte Saison',                  '2026-10-31', '2026-12-11', 100, 3],
+          ['Vorweihnachtswoche',                '2026-12-12', '2026-12-18', 114, 7],
+          ['Weihnachten',                       '2026-12-19', '2026-12-25', 357, 7],
+          ['Silvester',                         '2026-12-26', '2027-01-01', 371, 7],
+          // 2027 — gleiche Preise, Samstag-Samstag
+          ['Standard',                          '2027-01-02', '2027-02-05', 120, 7],
+          ['Faschingswoche/Semester Kärnten',    '2027-02-06', '2027-02-19', 129, 7],
+          ['Standard',                          '2027-02-20', '2027-04-02', 120, 7],
+          ['Schlechte Saison',                  '2027-04-03', '2027-04-30', 100, 3],
+          ['Standard',                          '2027-05-01', '2027-10-29', 120, 7],
+          ['Schlechte Saison',                  '2027-10-30', '2027-12-10', 100, 3],
+          ['Vorweihnachtswoche',                '2027-12-11', '2027-12-17', 114, 7],
+          ['Weihnachten',                       '2027-12-18', '2027-12-24', 357, 7],
+          ['Silvester',                         '2027-12-25', '2027-12-31', 371, 7],
+        ];
+        for (const [name, from, to, price, minStay] of seedData) {
+          await db.prepare(
+            'INSERT INTO rental_prices (name, date_from, date_to, price_per_night, mindestaufenthalt, aktiv) VALUES (?, ?, ?, ?, ?, 1)'
+          ).bind(name, from, to, price, minStay).run();
+        }
+        migrated.push('rental_prices:seed_2026');
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      errors.push(`rental_prices:seed: ${msg}`);
+    }
+
     await createTable(`
       CREATE TABLE IF NOT EXISTS guest_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
