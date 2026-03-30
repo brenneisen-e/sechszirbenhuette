@@ -189,8 +189,6 @@ export function BlogEditorForm({
               <RichTextEditor
                 value={currentPost.content || ''}
                 onChange={(html) => onUpdatePost({ content: html })}
-                availableMedia={availableMedia}
-                onMediaUploaded={onMediaUploaded}
               />
             </div>
 
