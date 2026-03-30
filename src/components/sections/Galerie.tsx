@@ -380,6 +380,7 @@ export function Galerie() {
               return (
                 <button
                   key={subCat}
+                  data-subcategory={subCat}
                   onClick={() => setSelectedSubCategory(subCat)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                     selectedSubCategory === subCat
@@ -514,6 +515,12 @@ export function Galerie() {
                       className="object-cover transition-transform group-hover:scale-110"
                       sizes="(max-width: 1200px) 50vw, 25vw"
                     />
+                    {(image.title || image.description) && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {image.title && <p className="text-white text-sm font-semibold">{image.title}</p>}
+                        {image.description && <p className="text-white/80 text-xs">{image.description}</p>}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -615,7 +622,13 @@ export function Galerie() {
                 />
               </div>
               <div className="mt-4 text-white text-center">
-                <p className="text-sm text-gray-400">
+                {images[selectedImage].title && (
+                  <p className="text-lg font-semibold">{images[selectedImage].title}</p>
+                )}
+                {images[selectedImage].description && (
+                  <p className="text-sm text-gray-300">{images[selectedImage].description}</p>
+                )}
+                <p className="text-sm text-gray-400 mt-1">
                   {selectedImage + 1} / {images.length}
                 </p>
               </div>

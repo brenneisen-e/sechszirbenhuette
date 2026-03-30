@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { RichTextEditor } from './RichTextEditor';
 import {
   Plus,
   Trash2,
@@ -50,10 +51,13 @@ function getIconComponent(iconName: string): LucideIcon {
   return ICON_OPTIONS.find(o => o.value === iconName)?.Icon || Info;
 }
 
+const DEFAULT_GROUPS = ['Vor der Reise', 'Während der Reise', 'Nach der Reise'];
+
 interface Category {
   id: number;
   title: string;
   icon: string;
+  group_name: string;
   display_order: number;
   is_active: number;
   cards: Card[];
@@ -98,6 +102,7 @@ export default function GuestAppEditor() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
@@ -107,9 +112,16 @@ export default function GuestAppEditor() {
   const [showMediaPicker, setShowMediaPicker] = useState<number | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  // Compute available groups from existing categories + defaults
+  const availableGroups = Array.from(new Set([
+    ...DEFAULT_GROUPS,
+    ...categories.map(c => c.group_name).filter(Boolean),
+  ]));
+
   // New category form
   const [newCatTitle, setNewCatTitle] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('info');
+  const [newCatGroup, setNewCatGroup] = useState('');
 
   // New token form
   const [newTokenBookingId, setNewTokenBookingId] = useState('');
@@ -117,6 +129,28 @@ export default function GuestAppEditor() {
 
   // Bookings for token creation
   const [bookings, setBookings] = useState<{ id: number; guest_name: string; arrival_date: string }[]>([]);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch('/api/admin/guest-app/seed', { method: 'POST' });
+      const data = await res.json() as { success?: boolean; message?: string; skipped?: boolean };
+      if (data.success) {
+        setSuccess(data.message || 'Inhalte erfolgreich eingefügt!');
+        await loadData();
+      } else if (data.skipped) {
+        setError(data.message || 'Inhalte existieren bereits.');
+      } else {
+        setError('Fehler beim Einfügen der Inhalte');
+      }
+    } catch {
+      setError('Verbindungsfehler beim Seeding');
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     try {
@@ -158,7 +192,12 @@ export default function GuestAppEditor() {
     try {
       const res = await fetch('/api/admin/bookings');
       const data = await res.json() as { bookings?: { id: number; guest_name: string; arrival_date: string }[] };
-      setBookings(data.bookings || []);
+      const sorted = (data.bookings || []).sort((a, b) => {
+        if (!a.arrival_date) return 1;
+        if (!b.arrival_date) return -1;
+        return b.arrival_date.localeCompare(a.arrival_date);
+      });
+      setBookings(sorted);
     } catch {
       // not critical
     }
@@ -196,9 +235,10 @@ export default function GuestAppEditor() {
   const handleAddCategory = async () => {
     if (!newCatTitle.trim()) return;
     try {
-      await apiCall({ action: 'create_category', title: newCatTitle.trim(), icon: newCatIcon });
+      await apiCall({ action: 'create_category', title: newCatTitle.trim(), icon: newCatIcon, group_name: newCatGroup });
       setNewCatTitle('');
       setNewCatIcon('info');
+      setNewCatGroup('');
       setSuccess('Kategorie erstellt');
       await loadData();
     } catch (e) {
@@ -303,7 +343,17 @@ export default function GuestAppEditor() {
     <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Gäste-App Inhalte</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-gray-800">Gäste-App Inhalte</h2>
+          <a
+            href="/gaeste"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-logo-green hover:underline"
+          >
+            App öffnen ↗
+          </a>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setSubTab('content')}
@@ -358,6 +408,21 @@ export default function GuestAppEditor() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Gruppe</label>
+              <input
+                list="group-options-new"
+                value={newCatGroup}
+                onChange={(e) => setNewCatGroup(e.target.value)}
+                placeholder="Keine Gruppe"
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              />
+              <datalist id="group-options-new">
+                {availableGroups.map(g => (
+                  <option key={g} value={g} />
+                ))}
+              </datalist>
+            </div>
             <button
               onClick={handleAddCategory}
               disabled={saving || !newCatTitle.trim()}
@@ -372,11 +437,41 @@ export default function GuestAppEditor() {
             <div className="text-center py-12 text-gray-400">
               <Info className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Noch keine Kategorien angelegt</p>
-              <p className="text-sm">Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die Reise&quot;</p>
+              <p className="text-sm mb-4">Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die Reise&quot;</p>
+              <button
+                onClick={handleSeed}
+                disabled={seeding}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-logo-green text-white rounded-xl font-medium hover:bg-logo-green/90 disabled:opacity-50 transition"
+              >
+                {seeding ? (
+                  <><Loader2 size={16} className="animate-spin" /> Wird eingefügt...</>
+                ) : (
+                  <><Upload size={16} /> Welcome Guide Inhalte einfügen</>
+                )}
+              </button>
             </div>
           )}
 
-          {categories.map((cat) => {
+          {(() => {
+            // Group categories by group_name
+            const groups: { name: string; cats: Category[] }[] = [];
+            const seen = new Set<string>();
+            for (const cat of categories) {
+              const g = cat.group_name || '';
+              if (!seen.has(g)) {
+                seen.add(g);
+                groups.push({ name: g, cats: [] });
+              }
+              groups.find(gr => gr.name === g)!.cats.push(cat);
+            }
+            return groups.map((group) => (
+              <div key={group.name || '__none'} className="space-y-4">
+                {group.name && (
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-logo-green/60 mt-6 mb-2 px-1">
+                    {group.name}
+                  </h3>
+                )}
+                {group.cats.map((cat) => {
             const isExpanded = expandedCategory === cat.id;
             const CatIcon = getIconComponent(cat.icon);
 
@@ -414,15 +509,15 @@ export default function GuestAppEditor() {
                 {/* Category Content (expanded) */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
-                    {/* Edit category title/icon inline */}
-                    <div className="flex gap-3 items-center mb-4">
+                    {/* Edit category title/icon/group inline */}
+                    <div className="flex gap-3 items-center mb-4 flex-wrap">
                       <input
                         value={cat.title}
                         onChange={(e) => {
                           setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, title: e.target.value } : c));
                         }}
                         onBlur={(e) => handleUpdateCategory(cat.id, { title: e.target.value })}
-                        className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                        className="flex-1 min-w-[150px] px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
                       />
                       <select
                         value={cat.icon}
@@ -433,6 +528,23 @@ export default function GuestAppEditor() {
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
+                      <input
+                        list={`group-options-${cat.id}`}
+                        value={cat.group_name || ''}
+                        onChange={(e) => {
+                          setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, group_name: e.target.value } : c));
+                        }}
+                        onBlur={(e) => {
+                          handleUpdateCategory(cat.id, { group_name: e.target.value } as Partial<Category>);
+                        }}
+                        placeholder="Keine Gruppe"
+                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                      />
+                      <datalist id={`group-options-${cat.id}`}>
+                        {availableGroups.map(g => (
+                          <option key={g} value={g} />
+                        ))}
+                      </datalist>
                     </div>
 
                     {/* Cards */}
@@ -506,21 +618,19 @@ export default function GuestAppEditor() {
                                 />
                               </div>
 
-                              {/* Content (HTML) */}
+                              {/* Content (WYSIWYG) */}
                               <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Inhalt (HTML)</label>
-                                <textarea
+                                <label className="block text-xs font-medium text-gray-500 mb-1">Inhalt</label>
+                                <RichTextEditor
                                   value={card.content}
-                                  onChange={(e) => {
+                                  onChange={(html) => {
                                     setCategories(prev => prev.map(c => ({
                                       ...c,
-                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: e.target.value } : cd),
+                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: html } : cd),
                                     })));
                                   }}
-                                  onBlur={(e) => handleUpdateCard(card.id, { content: e.target.value })}
-                                  rows={8}
-                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono"
-                                  placeholder="<p>Hier kommt der Inhalt hin...</p>"
+                                  onBlur={(html) => handleUpdateCard(card.id, { content: html })}
+                                  placeholder="Text eingeben..."
                                 />
                               </div>
 
@@ -554,6 +664,38 @@ export default function GuestAppEditor() {
               </div>
             );
           })}
+              </div>
+            ));
+          })()}
+
+          {/* Delete All Button */}
+          {categories.length > 0 && (
+            <div className="pt-6 border-t border-gray-200 mt-6">
+              <button
+                onClick={async () => {
+                  if (!confirm('Alle Kategorien und Kacheln wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
+                  setSaving(true);
+                  try {
+                    await fetch('/api/admin/guest-app', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'delete_all_categories' }),
+                    });
+                    setSuccess('Alle Kategorien gelöscht');
+                    await loadData();
+                  } catch {
+                    setError('Fehler beim Löschen');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-4 py-2 text-red-600 border border-red-200 rounded-lg text-sm hover:bg-red-50 disabled:opacity-50 transition"
+              >
+                <Trash2 size={14} /> Alle Kategorien löschen
+              </button>
+            </div>
+          )}
         </div>
       )}
 

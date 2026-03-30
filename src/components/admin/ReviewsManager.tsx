@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { RichTextEditor } from './RichTextEditor';
 import {
   Star,
   Plus,
@@ -278,11 +279,9 @@ export default function ReviewsManager() {
               {/* Text */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bewertungstext</label>
-                <textarea
-                  rows={4}
+                <RichTextEditor
                   value={form.text}
-                  onChange={(e) => setForm({ ...form, text: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm resize-none"
+                  onChange={(html) => setForm({ ...form, text: html })}
                   placeholder="Der Bewertungstext..."
                 />
               </div>

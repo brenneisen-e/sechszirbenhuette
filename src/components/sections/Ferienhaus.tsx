@@ -215,6 +215,15 @@ export function Ferienhaus() {
           if (categoryButton) {
             categoryButton.click();
           }
+          // If the original category differs from the top-level filter, also click the sub-category
+          if (category !== filterCategory) {
+            setTimeout(() => {
+              const subButton = document.querySelector(`#galerie button[data-subcategory="${category}"]`) as HTMLButtonElement;
+              if (subButton) {
+                subButton.click();
+              }
+            }, 300);
+          }
         }, 500);
       }
     }

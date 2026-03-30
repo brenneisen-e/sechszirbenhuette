@@ -42,10 +42,12 @@ async function ensureGuestTables(db: D1Database): Promise<void> {
     )`).run();
     await db.prepare(`CREATE TABLE IF NOT EXISTS guest_app_categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,
-      icon TEXT DEFAULT 'info', display_order INTEGER DEFAULT 0,
+      icon TEXT DEFAULT 'info', group_name TEXT DEFAULT '',
+      display_order INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`).run();
+    try { await db.prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""').run(); } catch { /* exists */ }
     await db.prepare(`CREATE TABLE IF NOT EXISTS guest_app_cards (
       id INTEGER PRIMARY KEY AUTOINCREMENT, category_id INTEGER NOT NULL,
       title TEXT NOT NULL, content TEXT NOT NULL DEFAULT '', image_url TEXT,
@@ -90,6 +92,19 @@ export async function POST(request: NextRequest) {
       }
       const response = NextResponse.json({ success: true });
       response.cookies.delete('guest_session');
+      response.cookies.delete('guest_demo');
+      return response;
+    }
+
+    if (body.action === 'demo') {
+      const response = NextResponse.json({ success: true });
+      response.cookies.set('guest_demo', '1', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: '/',
+      });
       return response;
     }
 
@@ -152,8 +167,9 @@ export async function GET(request: NextRequest) {
     if (!db) return NextResponse.json({ error: 'DB not available' }, { status: 500 });
     await ensureGuestTables(db);
 
+    const isDemo = request.cookies.get('guest_demo')?.value === '1';
     const session = await getGuestSession(request, db);
-    if (!session) {
+    if (!session && !isDemo) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
@@ -178,16 +194,26 @@ export async function GET(request: NextRequest) {
       cards: cardsByCategory[cat.id as number] || [],
     }));
 
+    const guestInfo = isDemo ? {
+      name: 'Demo Gast',
+      arrival_date: new Date().toISOString().split('T')[0],
+      departure_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+      adults: 2,
+      children: 2,
+      pets: '1 Hund',
+    } : {
+      name: session!.guest_name || session!.full_guest_name,
+      arrival_date: session!.arrival_date,
+      departure_date: session!.departure_date,
+      adults: session!.adults,
+      children: session!.children,
+      pets: session!.pets,
+    };
+
     return NextResponse.json({
       authenticated: true,
-      guest: {
-        name: session.guest_name || session.full_guest_name,
-        arrival_date: session.arrival_date,
-        departure_date: session.departure_date,
-        adults: session.adults,
-        children: session.children,
-        pets: session.pets,
-      },
+      demo: isDemo,
+      guest: guestInfo,
       content,
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { RichTextEditor } from '../RichTextEditor';
 import {
   Save,
   Eye,
@@ -17,7 +18,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { BlogPost, BlogPostImage, BlogTab } from './types';
-import { RichTextEditor } from './RichTextEditor';
 
 interface BlogEditorFormProps {
   currentPost: Partial<BlogPost>;
@@ -189,8 +189,6 @@ export function BlogEditorForm({
               <RichTextEditor
                 value={currentPost.content || ''}
                 onChange={(html) => onUpdatePost({ content: html })}
-                availableMedia={availableMedia}
-                onMediaUploaded={onMediaUploaded}
               />
             </div>
 
@@ -234,11 +232,9 @@ export function BlogEditorForm({
             {/* Intro Text */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Einleitungstext</label>
-              <textarea
+              <RichTextEditor
                 value={currentPost.content || ''}
-                onChange={(e) => onUpdatePost({ content: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                onChange={(html) => onUpdatePost({ content: html })}
                 placeholder="Einleitender Text, der über dem Karussell angezeigt wird..."
               />
             </div>
@@ -387,11 +383,9 @@ export function BlogEditorForm({
                           {/* Slide Description */}
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1.5">Beschreibung</label>
-                            <textarea
+                            <RichTextEditor
                               value={slide.caption || ''}
-                              onChange={(e) => onUpdateImage(index, { caption: e.target.value })}
-                              rows={3}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                              onChange={(html) => onUpdateImage(index, { caption: html })}
                               placeholder="Beschreibungstext für diese Einheit..."
                             />
                           </div>
@@ -411,11 +405,9 @@ export function BlogEditorForm({
             {/* Intro Text */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Einleitungstext</label>
-              <textarea
+              <RichTextEditor
                 value={tabsData.intro}
-                onChange={(e) => updateTabs(e.target.value, tabsData.tabs)}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                onChange={(html) => updateTabs(html, tabsData.tabs)}
                 placeholder="Einleitender Text über den Tabs..."
               />
             </div>
@@ -554,16 +546,14 @@ export function BlogEditorForm({
                             className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                             placeholder="Titel"
                           />
-                          <textarea
+                          <RichTextEditor
                             value={tabsData.tabs[activeTabIndex].featured?.description || ''}
-                            onChange={(e) => {
+                            onChange={(html) => {
                               const newTabs = [...tabsData.tabs];
                               const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
-                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, description: e.target.value } };
+                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, description: html } };
                               updateTabs(tabsData.intro, newTabs);
                             }}
-                            rows={2}
-                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                             placeholder="Beschreibung"
                           />
                           <div className="grid grid-cols-2 gap-2">
@@ -649,17 +639,15 @@ export function BlogEditorForm({
                                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                                 placeholder="Titel"
                               />
-                              <textarea
+                              <RichTextEditor
                                 value={slide.description}
-                                onChange={(e) => {
+                                onChange={(html) => {
                                   const newTabs = [...tabsData.tabs];
                                   const newSlides = [...newTabs[activeTabIndex].slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx], description: e.target.value };
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx], description: html };
                                   newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
                                   updateTabs(tabsData.intro, newTabs);
                                 }}
-                                rows={2}
-                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                                 placeholder="Beschreibung..."
                               />
                               <input
