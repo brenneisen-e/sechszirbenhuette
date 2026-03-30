@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  run(): Promise<unknown>;
+  all<T>(): Promise<{ results?: T[] }>;
+  first<T>(): Promise<T | null>;
+}
+
 interface D1Database {
-  prepare(query: string): {
-    run(): Promise<unknown>;
-    all<T>(): Promise<{ results?: T[] }>;
-    first<T>(): Promise<T | null>;
-  };
+  prepare(query: string): D1PreparedStatement;
 }
 
 /**
