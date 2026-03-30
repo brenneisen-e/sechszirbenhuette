@@ -12,6 +12,7 @@ import {
   FileText,
   Star,
   Smartphone,
+  Tag,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
@@ -24,6 +25,7 @@ const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => 
 const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), { ssr: false });
 const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), { ssr: false });
 const GuestAppEditor = dynamic(() => import('@/components/admin/GuestAppEditor'), { ssr: false });
+const RentalPricesEditor = dynamic(() => import('@/components/admin/RentalPricesEditor'), { ssr: false });
 
 
 function FullScreenLoader() {
@@ -43,12 +45,13 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'utilities' | 'images' | 'passwords' | 'blog' | 'reviews' | 'guestapp';
+type AdminTab = 'guests' | 'finances' | 'utilities' | 'rental-prices' | 'images' | 'passwords' | 'blog' | 'reviews' | 'guestapp';
 
 const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
+  { id: 'rental-prices', label: 'Mietpreise', shortLabel: 'Preise', icon: Tag },
   { id: 'images', label: 'Bilder', shortLabel: 'Bilder', icon: ImageIcon },
   { id: 'passwords', label: 'Zugang', shortLabel: 'Zugang', icon: Key },
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
@@ -221,6 +224,8 @@ function AdminPageContent() {
 
           {activeTab === 'utilities' && <UtilityCostsCalculator demoMode={isDemoMode} />}
 
+          {activeTab === 'rental-prices' && <RentalPricesEditor demoMode={isDemoMode} />}
+
           {activeTab === 'passwords' && <PasswordsPanel />}
 
           {activeTab === 'images' && <ImageManager />}
@@ -235,7 +240,7 @@ function AdminPageContent() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-7 h-14">
+        <div className="grid grid-cols-9 h-14">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;

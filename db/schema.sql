@@ -271,6 +271,20 @@ CREATE TABLE IF NOT EXISTS seasons (
     aktiv BOOLEAN DEFAULT TRUE
 );
 
+-- Mietpreise / Preiszeiträume
+CREATE TABLE IF NOT EXISTS rental_prices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,  -- Nebensaison, Hauptsaison, Weihnachten, etc.
+    date_from DATE NOT NULL,
+    date_to DATE NOT NULL,
+    price_per_night DECIMAL(10,2) NOT NULL,
+    nebenkosten_pro_person DECIMAL(10,2) DEFAULT 0,
+    mindestaufenthalt INTEGER DEFAULT 3,
+    aktiv BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Kontaktanfragen (allgemein)
 CREATE TABLE IF NOT EXISTS contact_messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

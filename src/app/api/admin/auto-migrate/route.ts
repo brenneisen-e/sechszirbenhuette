@@ -241,6 +241,24 @@ export async function POST() {
       )
     `, 'guest_access_tokens');
 
+    // =============================================
+    // RENTAL PRICES — seasonal pricing periods
+    // =============================================
+    await createTable(`
+      CREATE TABLE IF NOT EXISTS rental_prices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        date_from DATE NOT NULL,
+        date_to DATE NOT NULL,
+        price_per_night DECIMAL(10,2) NOT NULL,
+        nebenkosten_pro_person DECIMAL(10,2) DEFAULT 0,
+        mindestaufenthalt INTEGER DEFAULT 3,
+        aktiv BOOLEAN DEFAULT TRUE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, 'rental_prices');
+
     await createTable(`
       CREATE TABLE IF NOT EXISTS guest_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
