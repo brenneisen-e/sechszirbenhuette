@@ -143,7 +143,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
                       <h4 className="text-lg font-bold text-logo-green mb-3">{slide.image_alt}</h4>
                     )}
                     {slide.caption && (
-                      <p className="text-gray-600 text-sm leading-relaxed">{slide.caption}</p>
+                      <div className="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: slide.caption }} />
                     )}
                   </div>
                 </div>

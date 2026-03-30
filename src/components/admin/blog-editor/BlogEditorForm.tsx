@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { RichTextEditor } from '../RichTextEditor';
 import {
   Save,
   Eye,
@@ -387,11 +388,9 @@ export function BlogEditorForm({
                           {/* Slide Description */}
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1.5">Beschreibung</label>
-                            <textarea
+                            <RichTextEditor
                               value={slide.caption || ''}
-                              onChange={(e) => onUpdateImage(index, { caption: e.target.value })}
-                              rows={3}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
+                              onChange={(html) => onUpdateImage(index, { caption: html })}
                               placeholder="Beschreibungstext für diese Einheit..."
                             />
                           </div>

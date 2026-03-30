@@ -141,9 +141,7 @@ export function BlogPreview({
                           </h4>
                         )}
                         {slide.caption && (
-                          <p className="text-xs text-gray-600 line-clamp-3">
-                            {slide.caption}
-                          </p>
+                          <div className="text-xs text-gray-600 line-clamp-3 prose prose-xs max-w-none" dangerouslySetInnerHTML={{ __html: slide.caption }} />
                         )}
                       </div>
                     </div>
