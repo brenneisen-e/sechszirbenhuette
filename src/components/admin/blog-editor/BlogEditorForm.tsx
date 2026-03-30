@@ -18,7 +18,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { BlogPost, BlogPostImage, BlogTab } from './types';
-import { RichTextEditor } from './RichTextEditor';
 
 interface BlogEditorFormProps {
   currentPost: Partial<BlogPost>;
