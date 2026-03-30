@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Pencil, X, Plus, Loader2, AlertTriangle, Calendar, Users, Check } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/formatting';
+import { calculateUtilityCostsForBooking, DEFAULT_PRICING } from './utility-costs';
+import type { PricingSettings } from './utility-costs';
 
 interface RentalPrice {
   id: number;
@@ -10,7 +12,6 @@ interface RentalPrice {
   date_from: string;
   date_to: string;
   price_per_night: number;
-  nebenkosten_pro_person: number;
   mindestaufenthalt: number;
   aktiv: number;
 }
@@ -24,7 +25,6 @@ const EMPTY_FORM = {
   date_from: '',
   date_to: '',
   price_per_night: '',
-  nebenkosten_pro_person: '',
   mindestaufenthalt: '3',
   aktiv: true,
 };
@@ -45,7 +45,6 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
     date_from: '',
     date_to: '',
     price_per_night: '',
-    nebenkosten_pro_person: '',
     mindestaufenthalt: '3',
   });
   const [bulkSaving, setBulkSaving] = useState(false);
@@ -53,6 +52,9 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
   // Nebenkosten calculator state
   const [calcAdults, setCalcAdults] = useState(2);
   const [calcNights, setCalcNights] = useState(7);
+
+  // Pricing settings from API (for NK calculation)
+  const [pricing, setPricing] = useState<PricingSettings>(DEFAULT_PRICING);
 
   const fetchPrices = useCallback(async () => {
     try {
@@ -67,6 +69,34 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
     }
   }, []);
 
+  // Load pricing settings for NK calculation
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        const data = (await res.json()) as { settings?: Record<string, string> };
+        if (data.settings?.pricing_settings) {
+          const saved = JSON.parse(data.settings.pricing_settings) as Partial<PricingSettings>;
+          setPricing(prev => ({ ...prev, ...saved }));
+        }
+        // Load kurtaxe rates from API
+        const kRes = await fetch('/api/admin/kurtaxe-rates');
+        const kData = (await kRes.json()) as { rates?: { valid_from: string; valid_to: string | null; rate_per_person_per_day: number }[] };
+        if (kData.rates && kData.rates.length > 0) {
+          setPricing(prev => ({
+            ...prev,
+            kurtaxeRates: kData.rates!.map(r => ({
+              from: r.valid_from,
+              to: r.valid_to || '2099-12-31',
+              rate: r.rate_per_person_per_day,
+            })),
+          }));
+        }
+      } catch { /* use defaults */ }
+    };
+    loadSettings();
+  }, []);
+
   useEffect(() => {
     fetchPrices();
   }, [fetchPrices]);
@@ -78,7 +108,6 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
       date_from: price.date_from,
       date_to: price.date_to,
       price_per_night: price.price_per_night.toFixed(2),
-      nebenkosten_pro_person: price.nebenkosten_pro_person.toFixed(2),
       mindestaufenthalt: String(price.mindestaufenthalt),
       aktiv: !!price.aktiv,
     });
@@ -105,7 +134,6 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         date_from: editForm.date_from,
         date_to: editForm.date_to,
         price_per_night: parseFloat(editForm.price_per_night),
-        nebenkosten_pro_person: parseFloat(editForm.nebenkosten_pro_person) || 0,
         mindestaufenthalt: parseInt(editForm.mindestaufenthalt) || 3,
         aktiv: editForm.aktiv,
       };
@@ -141,17 +169,14 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
 
     setBulkSaving(true);
     try {
-      // Check for existing overlapping periods and update or create
       const overlapping = prices.filter(p => {
         return p.date_from <= bulkForm.date_to && p.date_to >= bulkForm.date_from;
       });
 
-      // Delete overlapping periods first
       for (const p of overlapping) {
         await fetch(`/api/admin/rental-prices?id=${p.id}`, { method: 'DELETE' });
       }
 
-      // Create the new period
       await fetch('/api/admin/rental-prices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -160,14 +185,13 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           date_from: bulkForm.date_from,
           date_to: bulkForm.date_to,
           price_per_night: parseFloat(bulkForm.price_per_night),
-          nebenkosten_pro_person: parseFloat(bulkForm.nebenkosten_pro_person) || 0,
           mindestaufenthalt: parseInt(bulkForm.mindestaufenthalt) || 3,
           aktiv: true,
         }),
       });
 
       setShowBulk(false);
-      setBulkForm({ name: '', date_from: '', date_to: '', price_per_night: '', nebenkosten_pro_person: '', mindestaufenthalt: '3' });
+      setBulkForm({ name: '', date_from: '', date_to: '', price_per_night: '', mindestaufenthalt: '3' });
       await fetchPrices();
     } catch (err) {
       console.error('Failed to save bulk rental price:', err);
@@ -180,15 +204,22 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
   const today = new Date().toISOString().split('T')[0];
   const currentPrice = prices.find(p => p.aktiv && p.date_from <= today && p.date_to >= today);
 
-  // Calculate Nebenkosten for display
-  const calculateTotal = (price: RentalPrice | undefined, adults: number, nights: number) => {
-    if (!price) return null;
-    const rent = price.price_per_night * nights;
-    const nebenkosten = price.nebenkosten_pro_person * adults * nights;
-    return { rent, nebenkosten, total: rent + nebenkosten };
-  };
+  // Calculate using utility costs module
+  const calcResult = (() => {
+    if (!currentPrice) return null;
+    const arrivalDate = today;
+    const departure = new Date(today);
+    departure.setDate(departure.getDate() + calcNights);
+    const departureDate = departure.toISOString().split('T')[0];
 
-  const calcResult = calculateTotal(currentPrice, calcAdults, calcNights);
+    const nkResult = calculateUtilityCostsForBooking(arrivalDate, departureDate, calcAdults, pricing);
+    const rent = currentPrice.price_per_night * calcNights;
+    const nebenkosten = nkResult.costs + nkResult.kurtaxe; // costs includes holz, water, trash, electricity, reinigung; plus kurtaxe
+    const total = rent + nebenkosten;
+    const bookingComTotal = rent * 1.2 + nebenkosten;
+
+    return { rent, nebenkosten, total, bookingComTotal, nkDetails: nkResult.details, breakdown: nkResult.breakdown };
+  })();
 
   if (loading) {
     return (
@@ -262,19 +293,6 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           <span className="text-xs text-gray-400">&euro;</span>
         </div>
       </td>
-      <td className="px-4 py-2">
-        <div className="flex items-center gap-1 justify-end">
-          <input
-            type="number"
-            step="0.01"
-            value={form.nebenkosten_pro_person}
-            onChange={(e) => setForm(prev => ({ ...prev, nebenkosten_pro_person: e.target.value }))}
-            className={numberInputClass}
-            placeholder="0.00"
-          />
-          <span className="text-xs text-gray-400">&euro;</span>
-        </div>
-      </td>
       <td className="px-4 py-2 text-center">
         <input
           type="number"
@@ -283,6 +301,9 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           onChange={(e) => setForm(prev => ({ ...prev, mindestaufenthalt: e.target.value }))}
           className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-14 text-center font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
+      </td>
+      <td className="px-4 py-2">
+        {/* Booking.com column: not editable, calculated */}
       </td>
       <td className="px-4 py-2">
         <div className="flex items-center gap-1 justify-end">
@@ -303,7 +324,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Mietpreise</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Nachtpreise und Nebenkosten pro Person verwalten</p>
+          <p className="text-sm text-gray-500 mt-0.5">Nachtpreise verwalten &middot; Nebenkosten werden aus dem NK-Reiter berechnet</p>
         </div>
       </div>
 
@@ -340,7 +361,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           </div>
 
           {calcResult ? (
-            <div className="flex items-center gap-6 ml-4">
+            <div className="flex items-center gap-6 ml-4 flex-wrap">
               <div>
                 <span className="block text-xs text-gray-500">Miete</span>
                 <span className="text-sm font-mono font-medium text-gray-900">{demoMode ? '***' : formatCurrency(calcResult.rent)}</span>
@@ -350,8 +371,13 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                 <span className="text-sm font-mono font-medium text-gray-900">{demoMode ? '***' : formatCurrency(calcResult.nebenkosten)}</span>
               </div>
               <div className="border-l border-gray-300 pl-6">
-                <span className="block text-xs text-gray-500 font-medium">Gesamt</span>
+                <span className="block text-xs text-gray-500 font-medium">Gesamt (Direkt)</span>
                 <span className="text-base font-mono font-semibold text-green-700">{demoMode ? '***' : formatCurrency(calcResult.total)}</span>
+              </div>
+              <div className="border-l border-gray-300 pl-6">
+                <span className="block text-xs text-blue-500 font-medium">Booking.com</span>
+                <span className="text-base font-mono font-semibold text-blue-700">{demoMode ? '***' : formatCurrency(calcResult.bookingComTotal)}</span>
+                <span className="block text-[10px] text-blue-400">Miete &times; 1,2 + NK</span>
               </div>
             </div>
           ) : (
@@ -361,14 +387,44 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           )}
         </div>
 
+        {/* NK Breakdown */}
+        {calcResult && !demoMode && (
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <p className="text-xs text-gray-500 mb-2">NK-Aufschlüsselung ({calcResult.nkDetails}):</p>
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Kurtaxe</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.kurtaxe)}</span>
+              </div>
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Holz ({calcResult.breakdown.holzBuendel} Bdl.)</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.holz)}</span>
+              </div>
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Wasser</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.water)}</span>
+              </div>
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Müll ({calcResult.breakdown.trashBags} Sack)</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.trash)}</span>
+              </div>
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Strom ({calcResult.breakdown.electricityKwh} kWh)</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.electricity)}</span>
+              </div>
+              <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
+                <span className="text-gray-400 block">Reinigung</span>
+                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.reinigung)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {currentPrice && (
           <div className="mt-3 text-xs text-gray-500">
             Aktueller Zeitraum: <span className="font-medium text-gray-700">{currentPrice.name}</span>
             {' '}({new Date(currentPrice.date_from).toLocaleDateString('de-DE')} &ndash; {new Date(currentPrice.date_to).toLocaleDateString('de-DE')})
             {' '}&middot; {demoMode ? '***' : formatCurrency(currentPrice.price_per_night)}/Nacht
-            {currentPrice.nebenkosten_pro_person > 0 && (
-              <> + {demoMode ? '***' : formatCurrency(currentPrice.nebenkosten_pro_person)}/Person/Nacht NK</>
-            )}
           </div>
         )}
       </div>
@@ -432,20 +488,6 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                     step="0.01"
                     value={bulkForm.price_per_night}
                     onChange={(e) => setBulkForm(prev => ({ ...prev, price_per_night: e.target.value }))}
-                    className={inputClass}
-                    placeholder="0.00"
-                  />
-                  <span className="text-xs text-gray-400 shrink-0">&euro;</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Nebenkosten pro Person/Nacht</label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={bulkForm.nebenkosten_pro_person}
-                    onChange={(e) => setBulkForm(prev => ({ ...prev, nebenkosten_pro_person: e.target.value }))}
                     className={inputClass}
                     placeholder="0.00"
                   />
@@ -533,8 +575,8 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Von</th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Bis</th>
                   <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Preis/Nacht</th>
-                  <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">NK/Person/Nacht</th>
                   <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Min. Nächte</th>
+                  <th className="text-right text-xs font-medium text-blue-500 uppercase tracking-wide px-4 py-3">Booking.com/Nacht</th>
                   <th className="w-20 px-4 py-3"></th>
                 </tr>
               </thead>
@@ -555,11 +597,11 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                         <td className="px-4 py-3 text-sm font-mono text-gray-900 text-right tabular-nums">
                           {demoMode ? '***' : formatCurrency(price.price_per_night)}
                         </td>
-                        <td className="px-4 py-3 text-sm font-mono text-gray-900 text-right tabular-nums">
-                          {demoMode ? '***' : price.nebenkosten_pro_person > 0 ? formatCurrency(price.nebenkosten_pro_person) : <span className="text-gray-300">&ndash;</span>}
-                        </td>
                         <td className="px-4 py-3 text-sm font-mono text-gray-900 text-center tabular-nums">
                           {price.mindestaufenthalt}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-mono text-blue-700 text-right tabular-nums">
+                          {demoMode ? '***' : formatCurrency(price.price_per_night * 1.2)}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1 justify-end admin-row-actions">
