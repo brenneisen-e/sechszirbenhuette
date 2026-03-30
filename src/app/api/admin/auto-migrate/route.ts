@@ -274,6 +274,16 @@ export async function POST() {
           ['Vorweihnachtswoche',                '2026-12-12', '2026-12-18', 114, 7],
           ['Weihnachten',                       '2026-12-19', '2026-12-25', 357, 7],
           ['Silvester',                         '2026-12-26', '2027-01-01', 371, 7],
+          // 2027 — gleiche Preise, Samstag-Samstag
+          ['Standard',                          '2027-01-02', '2027-02-05', 120, 7],
+          ['Faschingswoche/Semester Kärnten',    '2027-02-06', '2027-02-19', 129, 7],
+          ['Standard',                          '2027-02-20', '2027-04-02', 120, 7],
+          ['Schlechte Saison',                  '2027-04-03', '2027-04-30', 100, 3],
+          ['Standard',                          '2027-05-01', '2027-10-29', 120, 7],
+          ['Schlechte Saison',                  '2027-10-30', '2027-12-10', 100, 3],
+          ['Vorweihnachtswoche',                '2027-12-11', '2027-12-17', 114, 7],
+          ['Weihnachten',                       '2027-12-18', '2027-12-24', 357, 7],
+          ['Silvester',                         '2027-12-25', '2027-12-31', 371, 7],
         ];
         for (const [name, from, to, price, minStay] of seedData) {
           await db.prepare(
