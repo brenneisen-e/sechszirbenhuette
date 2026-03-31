@@ -40,7 +40,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   // Kurtaxe rates by date periods (JSON array)
   // Format: [{"from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "rate": number}, ...]
   kurtaxe_rates: JSON.stringify(CORRECT_KURTAXE_RATES),
-  holz_rate: '10.00',             // € per Bündel
+  holz_rate: '9.00',              // € per Sack (Pellets)
   water_rate: '7.00',             // € per person per week
   trash_rate: '11.00',            // € per bag
   electricity_rate: '0.55',       // € per kWh

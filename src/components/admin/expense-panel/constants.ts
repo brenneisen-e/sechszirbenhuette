@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS: PricingSettings = {
     { from: '2026-01-01', to: '2026-10-31', rate: 2.70 },
     { from: '2026-11-01', to: '2099-12-31', rate: 4.50 }
   ],
-  holz_rate: 10.00,
+  holz_rate: 9.00,
   water_rate: 7.00,
   trash_rate: 11.00,
   electricity_rate: 0.55,
