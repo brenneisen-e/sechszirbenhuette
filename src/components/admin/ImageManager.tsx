@@ -16,6 +16,7 @@ import {
   Grid,
   List,
   GripVertical,
+  Download,
 } from 'lucide-react';
 import Image from 'next/image';
 import { AmenityCardManager } from './AmenityCardManager';
@@ -567,6 +568,49 @@ export function ImageManager() {
           </button>
         </div>
       )}
+
+      {/* Branding Downloads */}
+      <div className="border border-gray-200 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide mb-3">Branding</h3>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3">
+            <div className="w-10 h-10 bg-white rounded border border-gray-200 flex items-center justify-center p-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/logo.svg" alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Logo</p>
+              <p className="text-xs text-gray-400">SVG</p>
+            </div>
+            <a
+              href="/images/logo.svg"
+              download="sechszirbenhuette-logo.svg"
+              className="ml-2 p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+              title="Logo herunterladen"
+            >
+              <Download className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3">
+            <div className="w-10 h-10 bg-white rounded border border-gray-200 flex items-center justify-center p-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.svg" alt="Favicon" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Favicon</p>
+              <p className="text-xs text-gray-400">SVG</p>
+            </div>
+            <a
+              href="/icon.svg"
+              download="sechszirbenhuette-favicon.svg"
+              className="ml-2 p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+              title="Favicon herunterladen"
+            >
+              <Download className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* Amenity Card Images */}
       <AmenityCardManager />
