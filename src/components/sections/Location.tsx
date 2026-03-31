@@ -64,7 +64,7 @@ export function Location() {
               {language === 'de' ? 'Anfahrt' : 'Directions'}
             </h2>
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+              href="https://maps.app.goo.gl/CaaeUUnQQjHCyhz68"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-logo-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-sm"
