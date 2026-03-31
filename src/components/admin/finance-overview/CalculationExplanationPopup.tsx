@@ -116,8 +116,8 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                     <td className="text-right font-mono">{formatCurrency(75.6)}</td>
                   </tr>
                   <tr className="text-xs text-gray-400">
-                    <td className="pl-4">Holz (5 Bündel)</td>
-                    <td className="text-right font-mono">{formatCurrency(30)}</td>
+                    <td className="pl-4">Pellets (6 Sack)</td>
+                    <td className="text-right font-mono">{formatCurrency(54)}</td>
                   </tr>
                   <tr className="text-xs text-gray-400">
                     <td className="pl-4">Wasser + Müll + Strom</td>
@@ -164,9 +164,9 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-4 py-2 border">Holz</td>
-                    <td className="px-4 py-2 border">5 Bündel × 6,00 € (Winter: 5/Woche)</td>
-                    <td className="px-4 py-2 border text-right font-mono">{formatCurrency(30)}</td>
+                    <td className="px-4 py-2 border">Pellets</td>
+                    <td className="px-4 py-2 border">6 Sack × 9,00 € (Winter: 6/Woche)</td>
+                    <td className="px-4 py-2 border text-right font-mono">{formatCurrency(54)}</td>
                   </tr>
                   <tr className="bg-gray-50">
                     <td className="px-4 py-2 border">Wasser</td>

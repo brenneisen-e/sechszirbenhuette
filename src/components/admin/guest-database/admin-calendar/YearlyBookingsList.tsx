@@ -20,7 +20,7 @@ interface BookingDisplayItem {
 
 const DEFAULT_PRICING: PricingSettings = {
   kurtaxe: 2.7,
-  holz: 10,
+  holz: 9,
   water: 7,
   trash: 11,
   electricity: 0.55,
@@ -45,7 +45,7 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
           setPricing({
             kurtaxe: parseFloat(data.settings.kurtaxe_rate) || 2.7,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || 10,
+            holz: parseFloat(data.settings.holz_rate) || 9,
             water: parseFloat(data.settings.water_rate) || 7,
             trash: parseFloat(data.settings.trash_rate) || 11,
             electricity: parseFloat(data.settings.electricity_rate) || 0.55,

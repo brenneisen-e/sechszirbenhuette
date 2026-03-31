@@ -10,7 +10,7 @@ export const DEFAULT_PRICING = {
     { from: '2026-01-01', to: '2026-10-31', rate: 2.7 },
     { from: '2026-11-01', to: '2099-12-31', rate: 4.5 },
   ],
-  holz: 10.0, // € per Bündel
+  holz: 9.0, // € per Sack (Pellets)
   water: 7.0, // € per person per week
   trash: 11.0, // € per bag
   electricity: 0.55, // € per kWh
@@ -25,14 +25,14 @@ export const CONFIG = {
     icon: Sun,
     weeks: {
       1: {
-        holzBuendel: 2, // Weniger Holz im Sommer
+        holzBuendel: 3, // Pellets im Sommer
         trashBags: { 2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4 } as { [key in AdultsCount]: number },
         electricityIncluded: { 2: 150, 3: 150, 4: 200, 5: 250, 6: 300, 7: 350, 8: 400 } as {
           [key in AdultsCount]: number;
         },
       },
       2: {
-        holzBuendel: 4,
+        holzBuendel: 6,
         trashBags: { 2: 2, 3: 2, 4: 4, 5: 4, 6: 6, 7: 6, 8: 8 } as { [key in AdultsCount]: number },
         electricityIncluded: { 2: 300, 3: 300, 4: 400, 5: 500, 6: 600, 7: 700, 8: 800 } as {
           [key in AdultsCount]: number;
@@ -46,14 +46,14 @@ export const CONFIG = {
     icon: Snowflake,
     weeks: {
       1: {
-        holzBuendel: 5, // Mehr Holz im Winter
+        holzBuendel: 6, // Pellets im Winter
         trashBags: { 2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4 } as { [key in AdultsCount]: number },
         electricityIncluded: { 2: 250, 3: 250, 4: 300, 5: 350, 6: 400, 7: 450, 8: 500 } as {
           [key in AdultsCount]: number;
         },
       },
       2: {
-        holzBuendel: 10,
+        holzBuendel: 12,
         trashBags: { 2: 2, 3: 2, 4: 4, 5: 4, 6: 6, 7: 6, 8: 8 } as { [key in AdultsCount]: number },
         electricityIncluded: { 2: 500, 3: 500, 4: 500, 5: 600, 6: 700, 7: 800, 8: 900 } as {
           [key in AdultsCount]: number;
@@ -68,12 +68,12 @@ export const WALLI_VALUES: {
   [season in 'summer' | 'winter']: { [weeks in WeeksCount]: { [adults in AdultsCount]: number } };
 } = {
   summer: {
-    1: { 2: 190, 3: 220, 4: 295, 5: 345, 6: 400, 7: 455, 8: 510 },
-    2: { 2: 375, 3: 445, 4: 590, 5: 690, 6: 800, 7: 910, 8: 1020 },
+    1: { 2: 170, 3: 195, 4: 260, 5: 315, 6: 380, 7: 430, 8: 495 },
+    2: { 2: 340, 3: 390, 4: 515, 5: 630, 6: 760, 7: 865, 8: 995 },
   },
   winter: {
-    1: { 2: 270, 3: 305, 4: 375, 5: 430, 6: 490, 7: 550, 8: 610 },
-    2: { 2: 535, 3: 610, 4: 710, 5: 820, 6: 940, 7: 1060, 8: 1180 },
+    1: { 2: 252, 3: 277, 4: 340, 5: 395, 6: 460, 7: 515, 8: 580 },
+    2: { 2: 505, 3: 560, 4: 630, 5: 740, 6: 865, 7: 975, 8: 1105 },
   },
 };
 

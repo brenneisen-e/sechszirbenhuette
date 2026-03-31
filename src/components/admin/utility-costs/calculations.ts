@@ -147,7 +147,7 @@ export function calculateUtilityCostsForBooking(
   const config = CONFIG[season].weeks[1]; // Use weekly config as base
 
   // Holz: proportional to days (base: 2 Bündel/week summer, 5 Bündel/week winter)
-  const holzBuendelPerWeek = season === 'summer' ? 2 : 5;
+  const holzBuendelPerWeek = season === 'summer' ? 3 : 6;
   const holzBuendel = Math.ceil(holzBuendelPerWeek * weeks);
   const holz = prices.holz * holzBuendel;
 
@@ -228,7 +228,7 @@ export function calculateCostsForDays(
   const config = CONFIG[season].weeks[1]; // Use weekly config as base
 
   // Holz: proportional to days (base: 2 Bündel/week summer, 5 Bündel/week winter)
-  const holzBuendelPerWeek = season === 'summer' ? 2 : 5;
+  const holzBuendelPerWeek = season === 'summer' ? 3 : 6;
   const holzBuendel = Math.ceil(holzBuendelPerWeek * weeks);
   const holz = pricing.holz * holzBuendel;
 
@@ -270,7 +270,7 @@ export function calculateCostsForDays(
 // ============================================================================
 
 export function calcHolz(weeks: number, season: Season, pricing: PricingSettings): { buendel: number; amount: number } {
-  const buendelPerWeek = season === 'summer' ? 2 : 5;
+  const buendelPerWeek = season === 'summer' ? 3 : 6;
   const buendel = Math.ceil(buendelPerWeek * weeks);
   return { buendel, amount: (pricing.holz ?? DEFAULT_PRICING.holz) * buendel };
 }

@@ -244,7 +244,7 @@ export function BookingWizard({
           setPricingSettings({
             kurtaxe: parseFloat(data.settings.kurtaxe_rate) || 2.7,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || 10,
+            holz: parseFloat(data.settings.holz_rate) || 9,
             water: parseFloat(data.settings.water_rate) || 7,
             trash: parseFloat(data.settings.trash_rate) || 11,
             electricity: parseFloat(data.settings.electricity_rate) || 0.55,
