@@ -63,6 +63,7 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -164,9 +165,28 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
 
   const setLink = () => {
     if (!editor || !linkUrl) return;
-    editor.chain().focus().setLink({ href: linkUrl }).run();
+
+    const { from, to, empty } = editor.state.selection;
+    const hasSelection = !empty;
+
+    if (linkText && (!hasSelection || linkText !== editor.state.doc.textBetween(from, to))) {
+      // User provided custom display text: delete selection (if any), insert text, then apply link
+      if (hasSelection) {
+        editor.chain().focus().deleteSelection().run();
+      }
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<a href="${linkUrl}">${linkText}</a>`)
+        .run();
+    } else {
+      // Text is selected or no custom text: just apply link to selection
+      editor.chain().focus().setLink({ href: linkUrl }).run();
+    }
+
     setShowLinkInput(false);
     setLinkUrl('');
+    setLinkText('');
   };
 
   const changeImageStyle = (style: string) => {
@@ -264,6 +284,11 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
           if (editor.isActive('link')) {
             editor.chain().focus().unsetLink().run();
           } else {
+            // Pre-fill with selected text and existing link URL
+            const { from, to, empty } = editor.state.selection;
+            const selectedText = empty ? '' : editor.state.doc.textBetween(from, to);
+            setLinkText(selectedText);
+            setLinkUrl('');
             setShowLinkInput(true);
           }
         }} title="Link">
@@ -283,7 +308,7 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
 
       {/* Link input bar */}
       {showLinkInput && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border-b border-blue-200">
+        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border-b border-blue-200 flex-wrap">
           <LinkIcon className="w-4 h-4 text-blue-500 shrink-0" />
           <input
             type="url"
@@ -291,11 +316,19 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
             onChange={(e) => setLinkUrl(e.target.value)}
             placeholder="https://..."
             autoFocus
-            className="flex-1 text-sm px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
-            onKeyDown={(e) => { if (e.key === 'Enter') setLink(); if (e.key === 'Escape') setShowLinkInput(false); }}
+            className="flex-1 min-w-[180px] text-sm px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+            onKeyDown={(e) => { if (e.key === 'Enter') setLink(); if (e.key === 'Escape') { setShowLinkInput(false); setLinkText(''); } }}
+          />
+          <input
+            type="text"
+            value={linkText}
+            onChange={(e) => setLinkText(e.target.value)}
+            placeholder="Anzeigetext (optional)"
+            className="flex-1 min-w-[140px] text-sm px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+            onKeyDown={(e) => { if (e.key === 'Enter') setLink(); if (e.key === 'Escape') { setShowLinkInput(false); setLinkText(''); } }}
           />
           <button onClick={setLink} className="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Einfügen</button>
-          <button onClick={() => setShowLinkInput(false)} className="p-1 text-gray-500 hover:text-gray-700"><X className="w-4 h-4" /></button>
+          <button onClick={() => { setShowLinkInput(false); setLinkText(''); }} className="p-1 text-gray-500 hover:text-gray-700"><X className="w-4 h-4" /></button>
         </div>
       )}
 
