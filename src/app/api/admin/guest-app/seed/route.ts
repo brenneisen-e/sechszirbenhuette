@@ -82,10 +82,10 @@ const SEED_DATA = [
     cards: [
       {
         title: 'Überblick',
-        content: `<p>Die Sechszirbenhütte bietet Ihnen <strong>80 m² Wohnfläche</strong> auf <strong>1.700 m Höhe</strong> in den Nockbergen.</p>
+        content: `<p>Die Sechszirbenhütte bietet Ihnen <strong>85 m² Wohnfläche</strong> auf <strong>1.700 m Höhe</strong> in den Nockbergen.</p>
 <ul>
-<li>2–5 Personen</li>
-<li>2 Schlafzimmer (1 Doppelbettzimmer, 1 Galeriezimmer mit 2 Einzelbetten)</li>
+<li>Bis zu 8 Personen</li>
+<li>Schlafzimmer im OG (2 Doppelbetten, 1 Einzelbett, 2 Stockbetten)</li>
 <li>Gemütlicher Wohnbereich mit Schwedenofen</li>
 <li>Vollausgestattete Küche</li>
 <li>Privater Sauna-Anbau</li>

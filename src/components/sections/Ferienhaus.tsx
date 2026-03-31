@@ -54,7 +54,7 @@ const amenityCards: AmenityCard[] = [
     key: 'rooms',
     icon: Bed,
     galleryCategory: 'schlafen',
-    items: ['1 Galeriezimmer (2 Einzelbetten)', '1 Doppelbettzimmer', '1 Zimmer mit 2 Stockbetten', 'Platz für 8 Personen'],
+    items: ['2 Doppelbetten', '1 Einzelbett', '1 Zimmer mit 2 Stockbetten', 'Platz für 8 Personen'],
     hint: 'Bettwäsche selbst mitbringen oder Komfort-Paket buchen'
   },
   {
@@ -469,13 +469,13 @@ export function Ferienhaus() {
                 </h3>
                 <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4">
                   {language === 'de'
-                    ? 'Unsere Hütte bietet auf ca. 100 m² Wohnfläche Platz für bis zu 8 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die drei Schlafzimmer mit insgesamt 4 Betten und 2 Stockbetten.'
-                    : 'Our cabin offers approx. 100 m² of living space for up to 8 people. The ground floor features the kitchen, cozy living area with wood stove, and wellness area with sauna and relaxation room. The upper floor has three bedrooms with a total of 4 beds and 2 bunk beds.'}
+                    ? 'Unsere Hütte bietet auf ca. 85 m² Wohnfläche Platz für bis zu 8 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die Schlafzimmer mit 2 Doppelbetten, 1 Einzelbett und 2 Stockbetten.'
+                    : 'Our cabin offers approx. 85 m² of living space for up to 8 people. The ground floor features the kitchen, cozy living area with wood stove, and wellness area with sauna and relaxation room. The upper floor has the bedrooms with 2 double beds, 1 single bed and 2 bunk beds.'}
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
                   <span className="inline-flex items-center gap-1.5 text-gray-600">
                     <span className="w-2 h-2 rounded-full bg-logo-green"></span>
-                    {language === 'de' ? 'ca. 100 m² Wohnfläche' : 'approx. 100 m² living space'}
+                    {language === 'de' ? 'ca. 85 m² Wohnfläche' : 'approx. 85 m² living space'}
                   </span>
                   <span className="inline-flex items-center gap-1.5 text-gray-600">
                     <span className="w-2 h-2 rounded-full bg-logo-green"></span>
