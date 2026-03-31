@@ -104,8 +104,8 @@ const defaultTexts: Record<string, ContentText> = {
   ferienhaus_title: createText('ferienhaus_title', 'Ausstattung & Komfort', 'ferienhaus', 'heading'),
   ferienhaus_subtitle: createText('ferienhaus_subtitle', 'Unsere Hütte bietet alles, was Sie für einen unvergesslichen Urlaub in den Bergen benötigen.', 'ferienhaus', 'body'),
   ferienhaus_grundriss_title: createText('ferienhaus_grundriss_title', 'Grundriss', 'ferienhaus', 'heading'),
-  ferienhaus_grundriss_description: createText('ferienhaus_grundriss_description', 'Unsere Hütte bietet auf ca. 100 m² Wohnfläche Platz für bis zu 8 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die drei Schlafzimmer mit insgesamt 4 Betten und 2 Stockbetten.', 'ferienhaus', 'body'),
-  ferienhaus_wohnflaeche: createText('ferienhaus_wohnflaeche', 'ca. 100 m² Wohnfläche', 'ferienhaus', 'body'),
+  ferienhaus_grundriss_description: createText('ferienhaus_grundriss_description', 'Unsere Hütte bietet auf ca. 85 m² Wohnfläche Platz für bis zu 8 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die Schlafzimmer mit 2 Doppelbetten, 1 Einzelbett und 2 Stockbetten.', 'ferienhaus', 'body'),
+  ferienhaus_wohnflaeche: createText('ferienhaus_wohnflaeche', 'ca. 85 m² Wohnfläche', 'ferienhaus', 'body'),
   ferienhaus_etagen: createText('ferienhaus_etagen', '2 Etagen', 'ferienhaus', 'body'),
 
   // ============================================================================
