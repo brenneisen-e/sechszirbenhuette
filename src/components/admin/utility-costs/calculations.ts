@@ -23,7 +23,7 @@ export function getKurtaxeRateForDate(date: Date, pricing: PricingSettings): num
     return pricing.kurtaxe;
   }
 
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = date.toISOString().split('T')[0] ?? '';
 
   // Exact match: date falls within a defined period
   for (const period of pricing.kurtaxeRates) {
@@ -95,7 +95,7 @@ export function calculateKurtaxeWithDateRates(
   // Build details string
   let details: string;
   if (rateCounts.size === 1) {
-    const rate = Array.from(rateCounts.keys())[0];
+    const rate = Array.from(rateCounts.keys())[0] ?? 0;
     details = `${adults} Erw. × ${days} Nächte × ${fmtNum(rate)} €`;
   } else {
     const parts: string[] = [];

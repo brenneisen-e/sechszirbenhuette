@@ -64,14 +64,14 @@ const WIZARD_PLATFORMS: Array<{
   icon: React.ReactNode;
   config: PlatformConfig;
 }> = [
-  { key: 'booking',  dbValue: 'Booking.com',  label: 'Booking.com',   icon: <Building2 className="w-5 h-5" />, config: PLATFORM_CONFIGS[0] },
-  { key: 'fewo',     dbValue: 'FeWo',         label: 'FeWo / VRBO',   icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[1] },
-  { key: 'airbnb',   dbValue: 'Airbnb',       label: 'Airbnb',        icon: <Home className="w-5 h-5" />,      config: PLATFORM_CONFIGS[2] },
-  { key: 'feratel',  dbValue: 'Feratel',      label: 'Feratel',       icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[3] },
-  { key: 'direct',   dbValue: 'E-Mail',       label: 'E-Mail/Direkt', icon: <Mail className="w-5 h-5" />,      config: PLATFORM_CONFIGS[4] },
-  { key: 'direct',   dbValue: 'WhatsApp',     label: 'WhatsApp',      icon: <MessageSquare className="w-5 h-5" />, config: PLATFORM_CONFIGS[5] },
-  { key: 'direct',   dbValue: 'Telefon',      label: 'Telefon',       icon: <Phone className="w-5 h-5" />,     config: PLATFORM_CONFIGS[6] },
-  { key: 'private',  dbValue: 'Privat',       label: 'Privat',        icon: <Users className="w-5 h-5" />,     config: PLATFORM_CONFIGS[7] },
+  { key: 'booking',  dbValue: 'Booking.com',  label: 'Booking.com',   icon: <Building2 className="w-5 h-5" />, config: PLATFORM_CONFIGS[0]! },
+  { key: 'fewo',     dbValue: 'FeWo',         label: 'FeWo / VRBO',   icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[1]! },
+  { key: 'airbnb',   dbValue: 'Airbnb',       label: 'Airbnb',        icon: <Home className="w-5 h-5" />,      config: PLATFORM_CONFIGS[2]! },
+  { key: 'feratel',  dbValue: 'Feratel',      label: 'Feratel',       icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[3]! },
+  { key: 'direct',   dbValue: 'E-Mail',       label: 'E-Mail/Direkt', icon: <Mail className="w-5 h-5" />,      config: PLATFORM_CONFIGS[4]! },
+  { key: 'direct',   dbValue: 'WhatsApp',     label: 'WhatsApp',      icon: <MessageSquare className="w-5 h-5" />, config: PLATFORM_CONFIGS[5]! },
+  { key: 'direct',   dbValue: 'Telefon',      label: 'Telefon',       icon: <Phone className="w-5 h-5" />,     config: PLATFORM_CONFIGS[6]! },
+  { key: 'private',  dbValue: 'Privat',       label: 'Privat',        icon: <Users className="w-5 h-5" />,     config: PLATFORM_CONFIGS[7]! },
 ];
 
 function getPlatformType(platform: string | null): PlatformType {
@@ -87,7 +87,7 @@ function getPlatformType(platform: string | null): PlatformType {
 
 function getPlatformConfigForDb(dbValue: string): PlatformConfig {
   const entry = WIZARD_PLATFORMS.find(p => p.dbValue === dbValue);
-  return entry?.config || PLATFORM_CONFIGS[4]; // default to mail/direct
+  return entry?.config || PLATFORM_CONFIGS[4]!; // default to mail/direct
 }
 
 function getSeason(arrivalDate: string): 'Sommer' | 'Winter' {
@@ -242,13 +242,13 @@ export function BookingWizard({
             } catch { /* ignore */ }
           }
           setPricingSettings({
-            kurtaxe: parseFloat(data.settings.kurtaxe_rate) || 2.7,
+            kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || 2.7,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || 9,
-            water: parseFloat(data.settings.water_rate) || 7,
-            trash: parseFloat(data.settings.trash_rate) || 11,
-            electricity: parseFloat(data.settings.electricity_rate) || 0.55,
-            reinigung: parseFloat(data.settings.reinigung_rate) || 100,
+            holz: parseFloat(data.settings.holz_rate ?? '') || 9,
+            water: parseFloat(data.settings.water_rate ?? '') || 7,
+            trash: parseFloat(data.settings.trash_rate ?? '') || 11,
+            electricity: parseFloat(data.settings.electricity_rate ?? '') || 0.55,
+            reinigung: parseFloat(data.settings.reinigung_rate ?? '') || 100,
           });
         }
       })
@@ -1396,10 +1396,10 @@ export function BookingWizard({
                 type="button"
                 onClick={() => setStatus(opt.value)}
                 className={`flex-1 py-2 text-xs font-medium transition-colors ${
-                  isActive ? `${style.bg} ${style.text}` : 'bg-white text-gray-500 hover:bg-gray-50'
+                  isActive ? `${style?.bg ?? ''} ${style?.text ?? ''}` : 'bg-white text-gray-500 hover:bg-gray-50'
                 }`}
               >
-                {style.label}
+                {style?.label ?? opt.value}
               </button>
             );
           })}

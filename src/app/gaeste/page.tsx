@@ -206,7 +206,7 @@ function CardCarousel({ cards }: { cards: Card[] }) {
     setActiveIndex(Math.min(index, cards.length - 1));
   }, [cards.length]);
 
-  if (cards.length === 1) {
+  if (cards.length === 1 && cards[0]) {
     return <SingleCard card={cards[0]} />;
   }
 
@@ -483,7 +483,7 @@ function Dashboard() {
 
                   {selected.cards.length > 1 ? (
                     <CardCarousel cards={selected.cards} />
-                  ) : selected.cards.length === 1 ? (
+                  ) : selected.cards.length === 1 && selected.cards[0] ? (
                     <SingleCard card={selected.cards[0]} />
                   ) : (
                     <p className="text-gray-400 text-center py-8">Keine Infos in dieser Kategorie</p>

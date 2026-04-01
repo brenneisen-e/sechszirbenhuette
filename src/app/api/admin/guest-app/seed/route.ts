@@ -84,8 +84,8 @@ const SEED_DATA = [
         title: 'Überblick',
         content: `<p>Die Sechszirbenhütte bietet Ihnen <strong>85 m² Wohnfläche</strong> auf <strong>1.700 m Höhe</strong> in den Nockbergen.</p>
 <ul>
-<li>Bis zu 8 Personen</li>
-<li>Schlafzimmer im OG (2 Doppelbetten, 1 Einzelbett, 2 Stockbetten)</li>
+<li>Bis zu 5 Personen</li>
+<li>Schlafzimmer im OG (2 Doppelbetten, 1 Einzelbett)</li>
 <li>Gemütlicher Wohnbereich mit Schwedenofen</li>
 <li>Vollausgestattete Küche</li>
 <li>Privater Sauna-Anbau</li>
@@ -387,6 +387,7 @@ export async function POST() {
 
     for (let i = 0; i < SEED_DATA.length; i++) {
       const cat = SEED_DATA[i];
+      if (!cat) continue;
 
       await db.prepare(
         'INSERT INTO guest_app_categories (title, icon, group_name, display_order, is_active) VALUES (?, ?, ?, ?, 1)'
@@ -402,6 +403,7 @@ export async function POST() {
 
       for (let j = 0; j < cat.cards.length; j++) {
         const card = cat.cards[j];
+        if (!card) continue;
         await db.prepare(
           'INSERT INTO guest_app_cards (category_id, title, content, display_order, is_active) VALUES (?, ?, ?, ?, 1)'
         ).bind(inserted.id, card.title, card.content, j).run();

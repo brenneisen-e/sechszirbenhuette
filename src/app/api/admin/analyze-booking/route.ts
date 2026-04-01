@@ -144,7 +144,7 @@ function getNationalityFromPhone(phone: string): string {
 
   for (const countryPrefix of sortedPrefixes) {
     if (prefix.startsWith(countryPrefix)) {
-      return PHONE_PREFIX_TO_COUNTRY[countryPrefix];
+      return PHONE_PREFIX_TO_COUNTRY[countryPrefix] ?? '';
     }
   }
 

@@ -328,8 +328,8 @@
     "checkAvailability": "Preveri razpoložljivost",
     "loadingBooking": "Nalaganje rezervacijskega sistema...",
     "floorPlan": "Tloris",
-    "floorPlanDesc": "Naša koča ponuja približno 100 m² bivalne površine za do 8 oseb.",
-    "livingSpace": "približno 100 m² bivalne površine",
+    "floorPlanDesc": "Naša koča ponuja približno 85 m² bivalne površine za do 5 oseb.",
+    "livingSpace": "približno 85 m² bivalne površine",
     "floors": "2 nadstropji",
     "previousReview": "Prejšnja ocena",
     "nextReview": "Naslednja ocena",
@@ -357,7 +357,7 @@
   "amenities": {
     "living": {
       "title": "Dnevni Prostor",
-      "items": ["Švedska peč", "Jedilni kotiček za 8-10 oseb", "Satelitska TV & DVD", "Stereo naprava"]
+      "items": ["Švedska peč", "Jedilni kotiček", "Satelitska TV & DVD", "Stereo naprava"]
     },
     "kitchen": {
       "title": "Kuhinja",
@@ -365,7 +365,7 @@
     },
     "rooms": {
       "title": "Spalnice",
-      "items": ["1 galerijska soba (2 enojni postelji)", "1 dvoposteljna soba", "1 soba z 2 pogradi", "Prostor za 8 oseb"],
+      "items": ["1 galerijska soba (2 enojni postelji)", "1 dvoposteljna soba", "1 soba z 2 pogradi", "Prostor za 5 oseb"],
       "hint": "Prinesite lastno posteljnino ali rezervirajte paket udobja"
     },
     "sauna": {

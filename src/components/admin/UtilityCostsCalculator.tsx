@@ -60,13 +60,13 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
           }
 
           const loadedPricing: PricingSettings = {
-            kurtaxe: parseFloat(data.settings.kurtaxe_rate) || DEFAULT_PRICING.kurtaxe,
+            kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || DEFAULT_PRICING.kurtaxe,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || DEFAULT_PRICING.holz,
-            water: parseFloat(data.settings.water_rate) || DEFAULT_PRICING.water,
-            trash: parseFloat(data.settings.trash_rate) || DEFAULT_PRICING.trash,
-            electricity: parseFloat(data.settings.electricity_rate) || DEFAULT_PRICING.electricity,
-            reinigung: parseFloat(data.settings.reinigung_rate) || DEFAULT_PRICING.reinigung,
+            holz: parseFloat(data.settings.holz_rate ?? '') || DEFAULT_PRICING.holz,
+            water: parseFloat(data.settings.water_rate ?? '') || DEFAULT_PRICING.water,
+            trash: parseFloat(data.settings.trash_rate ?? '') || DEFAULT_PRICING.trash,
+            electricity: parseFloat(data.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
+            reinigung: parseFloat(data.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
           };
           setPricing(loadedPricing);
         }
@@ -127,7 +127,7 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <Calculator className="w-6 h-6 text-purple-600" />
               Nebenkosten (kalkulatorisch)
             </h2>
-            <p className="text-gray-600 mt-1">Kalkulatorische Nebenkosten für Gäste (2-8 Personen) · Kurtaxe: 2,70€ bis 31.10.2026, ab 01.11.2026 dann 4,50€</p>
+            <p className="text-gray-600 mt-1">Kalkulatorische Nebenkosten für Gäste (2-5 Personen) · Kurtaxe: 2,70€ bis 31.10.2026, ab 01.11.2026 dann 4,50€</p>
           </div>
 
           <button

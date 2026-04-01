@@ -344,8 +344,8 @@
     "checkAvailability": "Verfügbarkeit prüfen",
     "loadingBooking": "Buchungssystem wird geladen...",
     "floorPlan": "Grundriss",
-    "floorPlanDesc": "Unsere Hütte bietet auf ca. 100 m² Wohnfläche Platz für bis zu 8 Personen.",
-    "livingSpace": "ca. 100 m² Wohnfläche",
+    "floorPlanDesc": "Unsere Hütte bietet auf ca. 85 m² Wohnfläche Platz für bis zu 5 Personen.",
+    "livingSpace": "ca. 85 m² Wohnfläche",
     "floors": "2 Etagen",
     "previousReview": "Vorherige Bewertung",
     "nextReview": "Nächste Bewertung",
@@ -373,7 +373,7 @@
   "amenities": {
     "living": {
       "title": "Wohnbereich",
-      "items": ["Schwedenofen", "Essecke für 8-10 Personen", "Satellit-TV & DVD", "Stereoanlage"]
+      "items": ["Schwedenofen", "Essecke", "Satellit-TV & DVD", "Stereoanlage"]
     },
     "kitchen": {
       "title": "Küche",
@@ -381,7 +381,7 @@
     },
     "rooms": {
       "title": "Schlafzimmer",
-      "items": ["1 Galeriezimmer (2 Einzelbetten)", "1 Doppelbettzimmer", "1 Zimmer mit 2 Stockbetten", "Platz für 8 Personen"],
+      "items": ["1 Galeriezimmer (2 Einzelbetten)", "1 Doppelbettzimmer", "1 Zimmer mit 2 Stockbetten", "Platz für 5 Personen"],
       "hint": "Bettwäsche selbst mitbringen oder Komfort-Paket buchen"
     },
     "sauna": {

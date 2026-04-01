@@ -268,13 +268,13 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
         const loadedPricing: PricingSettings = {
           ...DEFAULT_PRICING,
-          kurtaxe: parseFloat(settingsData.settings.kurtaxe_rate) || DEFAULT_PRICING.kurtaxe,
+          kurtaxe: parseFloat(settingsData.settings.kurtaxe_rate ?? '') || DEFAULT_PRICING.kurtaxe,
           kurtaxeRates: kurtaxeRates,
-          holz: parseFloat(settingsData.settings.holz_rate) || DEFAULT_PRICING.holz,
-          water: parseFloat(settingsData.settings.water_rate) || DEFAULT_PRICING.water,
-          trash: parseFloat(settingsData.settings.trash_rate) || DEFAULT_PRICING.trash,
-          electricity: parseFloat(settingsData.settings.electricity_rate) || DEFAULT_PRICING.electricity,
-          reinigung: parseFloat(settingsData.settings.reinigung_rate) || DEFAULT_PRICING.reinigung,
+          holz: parseFloat(settingsData.settings.holz_rate ?? '') || DEFAULT_PRICING.holz,
+          water: parseFloat(settingsData.settings.water_rate ?? '') || DEFAULT_PRICING.water,
+          trash: parseFloat(settingsData.settings.trash_rate ?? '') || DEFAULT_PRICING.trash,
+          electricity: parseFloat(settingsData.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
+          reinigung: parseFloat(settingsData.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
         };
         setPricing(loadedPricing);
       }
@@ -383,7 +383,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
         months.push({
           month: monthIndex,
-          monthName: MONTH_NAMES[monthIndex],
+          monthName: MONTH_NAMES[monthIndex] ?? '',
           guests: monthGuests,
           totalRevenue: monthTotals.totalRevenue,
           commission: monthTotals.commission,
@@ -751,7 +751,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                       const monthOcc = calculateMonthOccupancy(selectedYear, monthIdx);
                       return (
                         <div key={m} className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500 w-16">{MONTH_NAMES[monthIdx].substring(0, 3)}</span>
+                          <span className="text-gray-500 w-16">{(MONTH_NAMES[monthIdx] ?? '').substring(0, 3)}</span>
                           <div className="flex items-center gap-2 flex-1 ml-2">
                             <div className="flex-1 bg-gray-100 rounded-full h-1.5">
                               <div

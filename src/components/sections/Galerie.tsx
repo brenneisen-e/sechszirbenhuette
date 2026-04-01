@@ -103,7 +103,7 @@ const fallbackImages: GalleryImage[] = [
 function parseAltText(altText: string): { title: string; description: string } {
   const parts = altText.split(' - ');
   if (parts.length >= 2) {
-    return { title: parts[0], description: parts.slice(1).join(' - ') };
+    return { title: parts[0] ?? altText, description: parts.slice(1).join(' - ') };
   }
   return { title: altText, description: '' };
 }
@@ -143,11 +143,11 @@ export function Galerie() {
 
   // Touch handlers for mobile swipe
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    touchStartX.current = e.touches[0]?.clientX ?? 0;
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
+    touchEndX.current = e.touches[0]?.clientX ?? 0;
   }, []);
 
   const handleTouchEnd = useCallback((filteredLength: number) => {
@@ -419,12 +419,12 @@ export function Galerie() {
                 >
                   {/* Current Image */}
                   <div
-                    onClick={() => setSelectedImage(images.indexOf(filteredImages[mobileIndex]))}
+                    onClick={() => { const img = filteredImages[mobileIndex]; if (img) setSelectedImage(images.indexOf(img)); }}
                     className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
                   >
                     <AdaptiveImage
-                      src={filteredImages[mobileIndex].src}
-                      alt={filteredImages[mobileIndex].title || 'Galeriebild'}
+                      src={filteredImages[mobileIndex]?.src ?? ''}
+                      alt={filteredImages[mobileIndex]?.title || 'Galeriebild'}
                       fill
                       className="object-cover"
                       sizes="100vw"
@@ -613,8 +613,8 @@ export function Galerie() {
               </button>
               <div className="relative aspect-[4/3] bg-black rounded-xl overflow-hidden">
                 <Image
-                  src={images[selectedImage].src}
-                  alt={images[selectedImage].title}
+                  src={images[selectedImage]?.src ?? ''}
+                  alt={images[selectedImage]?.title ?? ''}
                   fill
                   className="object-contain"
                   sizes="100vw"
@@ -622,11 +622,11 @@ export function Galerie() {
                 />
               </div>
               <div className="mt-4 text-white text-center">
-                {images[selectedImage].title && (
-                  <p className="text-lg font-semibold">{images[selectedImage].title}</p>
+                {images[selectedImage]?.title && (
+                  <p className="text-lg font-semibold">{images[selectedImage]?.title}</p>
                 )}
-                {images[selectedImage].description && (
-                  <p className="text-sm text-gray-300">{images[selectedImage].description}</p>
+                {images[selectedImage]?.description && (
+                  <p className="text-sm text-gray-300">{images[selectedImage]?.description}</p>
                 )}
                 <p className="text-sm text-gray-400 mt-1">
                   {selectedImage + 1} / {images.length}

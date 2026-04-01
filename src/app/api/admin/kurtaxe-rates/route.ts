@@ -53,8 +53,11 @@ async function detectGaps(
 
   const warnings: string[] = [];
   for (let i = 0; i < allRates.length - 1; i++) {
-    const currentTo = allRates[i].to;
-    const nextFrom = allRates[i + 1].from;
+    const current = allRates[i];
+    const next = allRates[i + 1];
+    if (!current || !next) continue;
+    const currentTo = current.to;
+    const nextFrom = next.from;
 
     if (!currentTo) continue; // open-ended period — no gap possible
 

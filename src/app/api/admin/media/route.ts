@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
       const categoriesMap: Record<string, string[]> = {};
       (catResult.results || []).forEach(row => {
         if (!categoriesMap[row.media_id]) categoriesMap[row.media_id] = [];
-        categoriesMap[row.media_id].push(row.category);
+        categoriesMap[row.media_id]!.push(row.category);
       });
 
       // Attach categories to each media item

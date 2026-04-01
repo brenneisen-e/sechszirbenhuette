@@ -66,11 +66,11 @@ export function Reviews() {
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchEndX.current = null;
-    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartX.current = e.targetTouches[0]?.clientX ?? null;
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0]?.clientX ?? null;
   };
 
   const onTouchEnd = () => {

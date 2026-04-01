@@ -82,7 +82,7 @@ export function Buchung() {
       const result = originalMatchMedia.call(window, query);
       if (query.includes('min-width')) {
         const match = query.match(/min-width:\s*(\d+)/);
-        if (match && parseInt(match[1]) > 500) {
+        if (match?.[1] && parseInt(match[1]) > 500) {
           return {
             ...result,
             matches: false,
@@ -98,7 +98,7 @@ export function Buchung() {
       }
       if (query.includes('max-width')) {
         const match = query.match(/max-width:\s*(\d+)/);
-        if (match && parseInt(match[1]) >= 500) {
+        if (match?.[1] && parseInt(match[1]) >= 500) {
           return {
             ...result,
             matches: true,

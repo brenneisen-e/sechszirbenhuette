@@ -59,7 +59,7 @@ export function AllTasksView({
               if (!acc[task.guest_id]) {
                 acc[task.guest_id] = [];
               }
-              acc[task.guest_id].push(task);
+              acc[task.guest_id]!.push(task);
               return acc;
             }, {} as Record<number, Task[]>);
 

@@ -111,6 +111,7 @@ function parseGermanDate(dateStr: string): string | null {
   if (!match) return null;
 
   const [, day, monthName, year, time] = match;
+  if (!monthName || !day) return null;
   const monthKey = monthName.toLowerCase().replace(/\.$/, '');
   const month = GERMAN_MONTHS[monthKey];
 
@@ -198,7 +199,7 @@ function parseCommunication(communication: string): Array<{ sender: 'host' | 'gu
     const dateOnlyMatch = trimmedLine.match(/^(\d{2}\.\d{2}\.\d{4})$/);
     if (dateOnlyMatch) {
       saveCurrentMessage();
-      currentDate = dateOnlyMatch[1];
+      currentDate = dateOnlyMatch[1] ?? '';
       continue;
     }
 
@@ -207,8 +208,8 @@ function parseCommunication(communication: string): Array<{ sender: 'host' | 'gu
     const inlineDateMatch = trimmedLine.match(/^(\d{2}\.\d{2}\.\d{4}(?:\s+\d{2}:\d{2})?)\s*[-–—]\s*(.+)$/);
     if (inlineDateMatch) {
       saveCurrentMessage();
-      currentDate = inlineDateMatch[1];
-      const rest = inlineDateMatch[2];
+      currentDate = inlineDateMatch[1] ?? '';
+      const rest = inlineDateMatch[2] ?? '';
       parseMessageContent(rest, currentDate, messages);
       continue;
     }
@@ -217,7 +218,7 @@ function parseCommunication(communication: string): Array<{ sender: 'host' | 'gu
     // Support different dash types: hyphen (-), en-dash (–), em-dash (—)
     const msgMatch = trimmedLine.match(/^\d+\s*[-–—]\s*(.+)$/);
     if (msgMatch) {
-      parseMessageContent(msgMatch[1], currentDate, messages);
+      parseMessageContent(msgMatch[1] ?? '', currentDate, messages);
       continue;
     }
 

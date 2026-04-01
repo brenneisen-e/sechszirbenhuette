@@ -110,7 +110,7 @@ export async function GET() {
       if (!bySection[text.section]) {
         bySection[text.section] = [];
       }
-      bySection[text.section].push(text);
+      bySection[text.section]!.push(text);
     }
 
     return NextResponse.json({
@@ -143,7 +143,7 @@ export async function GET() {
       if (!bySection[text.section]) {
         bySection[text.section] = [];
       }
-      bySection[text.section].push(text);
+      bySection[text.section]!.push(text);
     }
 
     return NextResponse.json({ texts, bySection, success: true });

@@ -214,6 +214,7 @@ export default function GuestAppEditor() {
       const t = setTimeout(() => { setError(''); setSuccess(''); }, 3000);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [error, success]);
 
   const apiCall = async (body: Record<string, unknown>) => {

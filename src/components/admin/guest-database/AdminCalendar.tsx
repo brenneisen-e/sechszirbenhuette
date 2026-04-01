@@ -38,8 +38,8 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
   // Parse date string to local Date (avoiding UTC timezone issues)
   const parseLocalDate = (dateStr: string): Date => {
     // Handle ISO date strings like "2026-01-04" by parsing components directly
-    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
-    return new Date(year, month - 1, day);
+    const parts = (dateStr.split('T')[0] ?? '').split('-').map(Number);
+    return new Date(parts[0] ?? 0, (parts[1] ?? 1) - 1, parts[2] ?? 1);
   };
 
   // Fetch additional bookings from the bookings table

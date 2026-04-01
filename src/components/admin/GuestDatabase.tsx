@@ -234,7 +234,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           if (!bookingsByGuest[booking.guest_id]) {
             bookingsByGuest[booking.guest_id] = [];
           }
-          bookingsByGuest[booking.guest_id].push(booking);
+          bookingsByGuest[booking.guest_id]!.push(booking);
         }
         setGuestBookings(bookingsByGuest);
         setAllBookingsLoaded(true);
@@ -260,7 +260,9 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
       return { arrival: null, departure: null };
     }
 
-    return { arrival: validBookings[0].arrival_date, departure: validBookings[0].departure_date };
+    const latest = validBookings[0];
+    if (!latest) return { arrival: null, departure: null };
+    return { arrival: latest.arrival_date, departure: latest.departure_date };
   }, [guestBookings]);
 
   // Calculate effective status - delegates to shared utility in helpers.ts
@@ -318,13 +320,13 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
 
         setPricing({
           ...DEFAULT_PRICING,
-          kurtaxe: parseFloat(data.settings.kurtaxe_rate) || DEFAULT_PRICING.kurtaxe,
+          kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || DEFAULT_PRICING.kurtaxe,
           kurtaxeRates: kurtaxeRates,
-          holz: parseFloat(data.settings.holz_rate) || DEFAULT_PRICING.holz,
-          water: parseFloat(data.settings.water_rate) || DEFAULT_PRICING.water,
-          trash: parseFloat(data.settings.trash_rate) || DEFAULT_PRICING.trash,
-          electricity: parseFloat(data.settings.electricity_rate) || DEFAULT_PRICING.electricity,
-          reinigung: parseFloat(data.settings.reinigung_rate) || DEFAULT_PRICING.reinigung,
+          holz: parseFloat(data.settings.holz_rate ?? '') || DEFAULT_PRICING.holz,
+          water: parseFloat(data.settings.water_rate ?? '') || DEFAULT_PRICING.water,
+          trash: parseFloat(data.settings.trash_rate ?? '') || DEFAULT_PRICING.trash,
+          electricity: parseFloat(data.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
+          reinigung: parseFloat(data.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
         });
       }
     } catch (err) {
@@ -479,6 +481,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
             const updated = { ...prev };
             for (const gId of Object.keys(updated)) {
               const bookings = updated[Number(gId)];
+              if (!bookings) continue;
               const idx = bookings.findIndex(b => b.id === bookingData.id);
               if (idx >= 0) {
                 updated[Number(gId)] = [
@@ -521,6 +524,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           const updated = { ...prev };
           for (const guestId of Object.keys(updated)) {
             const bookings = updated[Number(guestId)];
+            if (!bookings) continue;
             const idx = bookings.findIndex(b => b.id === bookingId);
             if (idx >= 0) {
               updated[Number(guestId)] = [
@@ -557,6 +561,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           const updated = { ...prev };
           for (const guestId of Object.keys(updated)) {
             const bookings = updated[Number(guestId)];
+            if (!bookings) continue;
             const idx = bookings.findIndex(b => b.id === bookingId);
             if (idx >= 0) {
               updated[Number(guestId)] = [
@@ -594,6 +599,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           const updated = { ...prev };
           for (const guestId of Object.keys(updated)) {
             const bookings = updated[Number(guestId)];
+            if (!bookings) continue;
             const idx = bookings.findIndex(b => b.id === bookingId);
             if (idx >= 0) {
               updated[Number(guestId)] = [
@@ -631,6 +637,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           const updated = { ...prev };
           for (const guestId of Object.keys(updated)) {
             const bookings = updated[Number(guestId)];
+            if (!bookings) continue;
             const idx = bookings.findIndex(b => b.id === bookingId);
             if (idx >= 0) {
               updated[Number(guestId)] = [
@@ -696,6 +703,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
           const updated = { ...prev };
           for (const guestId of Object.keys(updated)) {
             const bookings = updated[Number(guestId)];
+            if (!bookings) continue;
             const idx = bookings.findIndex(b => b.id === bookingId);
             if (idx >= 0) {
               updated[Number(guestId)] = [

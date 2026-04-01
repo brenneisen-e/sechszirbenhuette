@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
     if (body.images && body.images.length > 0) {
       for (let i = 0; i < body.images.length; i++) {
         const img = body.images[i];
-        if (img.image_url) {
+        if (img && img.image_url) {
           await env.DB.prepare(`
             INSERT INTO blog_post_images (post_id, image_url, image_alt, caption, display_order)
             VALUES (?, ?, ?, ?, ?)
@@ -277,7 +277,7 @@ export async function PUT(request: NextRequest) {
       // Add new images
       for (let i = 0; i < body.images.length; i++) {
         const img = body.images[i];
-        if (img.image_url) {
+        if (img && img.image_url) {
           await env.DB.prepare(`
             INSERT INTO blog_post_images (post_id, image_url, image_alt, caption, display_order)
             VALUES (?, ?, ?, ?, ?)

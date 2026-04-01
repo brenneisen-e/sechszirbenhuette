@@ -107,7 +107,7 @@ export const STATUS_STYLES: Record<string, { label: string; bg: string; text: st
 };
 
 export function getStatusClasses(status: string): string {
-  const s = STATUS_STYLES[status] || STATUS_STYLES.active;
+  const s = STATUS_STYLES[status] ?? STATUS_STYLES['active']!;
   return `${s.bg} ${s.text} ${s.border}`;
 }
 

@@ -57,7 +57,8 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
     try {
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
+        const file = files[i];
+        if (file) formData.append('files', file);
       }
       formData.append('category', 'blog');
       formData.append('alt_text', '');
@@ -162,7 +163,7 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
                   activeCategory === cat ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {CATEGORY_LABELS[cat] || cat} ({grouped[cat].length})
+                {CATEGORY_LABELS[cat] || cat} ({grouped[cat]?.length ?? 0})
               </button>
             ))}
           </div>
@@ -177,9 +178,9 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
               {categories.map(cat => (
                 <div key={cat}>
                   <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    {CATEGORY_LABELS[cat] || cat} ({grouped[cat].length})
+                    {CATEGORY_LABELS[cat] || cat} ({grouped[cat]?.length ?? 0})
                   </h4>
-                  {renderMediaGrid(grouped[cat])}
+                  {renderMediaGrid(grouped[cat] ?? [])}
                 </div>
               ))}
             </div>

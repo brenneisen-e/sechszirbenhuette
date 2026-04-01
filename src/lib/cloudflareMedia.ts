@@ -99,7 +99,7 @@ export function getImageUrl(imageId: string, variant: string = 'public'): string
  */
 export function parseImageUrl(variantUrl: string): { accountHash: string; imageId: string; variant: string } | null {
   const match = variantUrl.match(/imagedelivery\.net\/([^/]+)\/([^/]+)\/([^/]+)/);
-  if (!match) return null;
+  if (!match?.[1] || !match[2] || !match[3]) return null;
   return { accountHash: match[1], imageId: match[2], variant: match[3] };
 }
 

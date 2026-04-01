@@ -254,8 +254,8 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
         <div className="overflow-hidden mx-4 md:mx-8">
           <div className="flex items-stretch transition-transform duration-300 ease-out" style={{ transform: `translateX(-${translateValue}%)` }}>
             {tab.slides.map((trip, index) => {
-              const categoryKey = categories[index];
-              const tripImages = dogTripImages[categoryKey] || [];
+              const categoryKey = categories[index] as string | undefined;
+              const tripImages = categoryKey ? dogTripImages[categoryKey] || [] : [];
               const firstImage = tripImages[0];
 
               return (
@@ -488,7 +488,7 @@ function markdownToHtml(md: string): string {
   let inList = false;
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
+    let line = (lines[i] ?? '').trim();
     if (!line) {
       if (inList) {
         result.push('</ul>');
@@ -660,6 +660,7 @@ export default function BlogPostPage() {
         }
       };
     }
+    return undefined;
   }, [post]);
 
   const formatDate = (dateString: string | null) => {
@@ -828,7 +829,7 @@ export default function BlogPostPage() {
             )}
             <Image
               src={getLightboxImageUrl(currentImageIndex)}
-              alt={images[currentImageIndex].image_alt || ''}
+              alt={images[currentImageIndex]?.image_alt || ''}
               width={1200}
               height={800}
               className="max-w-full max-h-[90vh] object-contain"
@@ -982,8 +983,8 @@ export default function BlogPostPage() {
             </>
           )}
           <Image
-            src={images[currentImageIndex].image_url}
-            alt={images[currentImageIndex].image_alt || ''}
+            src={images[currentImageIndex]?.image_url ?? ''}
+            alt={images[currentImageIndex]?.image_alt || ''}
             width={1200}
             height={800}
             className="max-w-full max-h-[90vh] object-contain"

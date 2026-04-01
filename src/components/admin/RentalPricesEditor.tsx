@@ -201,7 +201,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
   };
 
   // Find the current price for the calculator
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0] ?? '';
   const currentPrice = prices.find(p => p.aktiv && p.date_from <= today && p.date_to >= today);
 
   // Calculate using utility costs module
@@ -210,7 +210,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
     const arrivalDate = today;
     const departure = new Date(today);
     departure.setDate(departure.getDate() + calcNights);
-    const departureDate = departure.toISOString().split('T')[0];
+    const departureDate = departure.toISOString().split('T')[0] ?? '';
 
     const nkResult = calculateUtilityCostsForBooking(arrivalDate, departureDate, calcAdults, pricing);
     const rent = currentPrice.price_per_night * calcNights;

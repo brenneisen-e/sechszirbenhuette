@@ -38,8 +38,8 @@ function hashString(str: string): number {
 export function anonymizeGuestName(name: string | null): string {
   if (!name) return 'Demo Gast';
   const hash = hashString(name);
-  const firstName = DEMO_FIRST_NAMES[hash % DEMO_FIRST_NAMES.length];
-  const lastName = DEMO_LAST_NAMES[(hash >> 4) % DEMO_LAST_NAMES.length];
+  const firstName = DEMO_FIRST_NAMES[hash % DEMO_FIRST_NAMES.length] ?? 'Demo';
+  const lastName = DEMO_LAST_NAMES[(hash >> 4) % DEMO_LAST_NAMES.length] ?? 'Gast';
   return `${firstName} ${lastName}`;
 }
 
@@ -49,7 +49,7 @@ export function anonymizeGuestName(name: string | null): string {
 export function anonymizeEmail(email: string | null): string {
   if (!email) return null as unknown as string;
   const hash = hashString(email);
-  const firstName = DEMO_FIRST_NAMES[hash % DEMO_FIRST_NAMES.length].toLowerCase();
+  const firstName = (DEMO_FIRST_NAMES[hash % DEMO_FIRST_NAMES.length] ?? 'demo').toLowerCase();
   return `${firstName}.demo@beispiel.de`;
 }
 
