@@ -8,6 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "pages:build": "opennextjs-cloudflare build && cp -r .open-next/cloudflare .open-next/middleware .open-next/server-functions .open-next/.build .open-next/assets/ && cp .open-next/worker.js .open-next/assets/_worker.js && cp public/_routes.json .open-next/assets/_routes.json",
     "preview": "opennextjs-cloudflare build && wrangler dev",
     "deploy": "opennextjs-cloudflare build && wrangler pages deploy .open-next/assets --project-name=sechszirbenhuette",
@@ -38,8 +41,6 @@
     "@tiptap/pm": "^3.20.4",
     "@tiptap/react": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",
-    "@types/node": "^25.0.8",
-    "@types/react": "^19.2.8",
     "autoprefixer": "^10.4.23",
     "clsx": "^2.1.1",
     "framer-motion": "^12.26.2",
@@ -58,7 +59,9 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
     "@cloudflare/workers-types": "^4.20260116.0",
-    "@opennextjs/cloudflare": "^1.14.8"
+    "@opennextjs/cloudflare": "^1.14.8",
+    "@types/node": "^25.0.8",
+    "@types/react": "^19.2.8"
   },
   "optionalDependencies": {
     "@next/swc-linux-x64-gnu": "15.5.14",
