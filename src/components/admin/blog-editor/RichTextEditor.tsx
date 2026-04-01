@@ -141,7 +141,8 @@ export function RichTextEditor({ value, onChange, availableMedia, onMediaUploade
     try {
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
+        const file = files[i];
+        if (file) formData.append('files', file);
       }
       formData.append('category', 'blog');
       formData.append('alt_text', '');

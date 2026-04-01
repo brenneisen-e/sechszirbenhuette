@@ -70,7 +70,7 @@ export async function calculateImageHash(imageSource: string | File): Promise<st
 
       const pixels: number[] = [];
       for (let i = 0; i < imageData.data.length; i += 4) {
-        const gray = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+        const gray = ((imageData.data[i] ?? 0) + (imageData.data[i + 1] ?? 0) + (imageData.data[i + 2] ?? 0)) / 3;
         pixels.push(gray);
       }
 
@@ -101,8 +101,8 @@ export function hammingDistance(hash1: string, hash2: string): number {
   if (hash1.length !== hash2.length) return Infinity;
   let distance = 0;
   for (let i = 0; i < hash1.length; i++) {
-    const bits1 = parseInt(hash1[i], 16);
-    const bits2 = parseInt(hash2[i], 16);
+    const bits1 = parseInt(hash1[i] ?? '0', 16);
+    const bits2 = parseInt(hash2[i] ?? '0', 16);
     let xor = bits1 ^ bits2;
     while (xor > 0) {
       distance += xor & 1;

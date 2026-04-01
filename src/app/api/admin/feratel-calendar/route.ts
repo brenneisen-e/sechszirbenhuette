@@ -52,6 +52,7 @@ function parseICalData(icalData: string, sourceName: string): BookedPeriod[] {
 
   while ((match = eventRegex.exec(icalData)) !== null) {
     const eventBlock = match[1];
+    if (!eventBlock) continue;
 
     // Extract DTSTART (handle both DATE and DATE-TIME formats)
     const startMatch = eventBlock.match(/DTSTART[^:]*:(\d{8})/);
@@ -63,6 +64,7 @@ function parseICalData(icalData: string, sourceName: string): BookedPeriod[] {
     if (startMatch && endMatch) {
       const startStr = startMatch[1];
       const endStr = endMatch[1];
+      if (!startStr || !endStr) continue;
 
       // Format: YYYYMMDD -> YYYY-MM-DD
       const start = `${startStr.slice(0, 4)}-${startStr.slice(4, 6)}-${startStr.slice(6, 8)}`;
@@ -71,7 +73,7 @@ function parseICalData(icalData: string, sourceName: string): BookedPeriod[] {
       events.push({
         start,
         end,
-        summary: summaryMatch ? `[${sourceName}] ${summaryMatch[1].trim()}` : `[${sourceName}]`,
+        summary: summaryMatch?.[1] ? `[${sourceName}] ${summaryMatch[1].trim()}` : `[${sourceName}]`,
         source: sourceName
       });
     }
@@ -138,7 +140,7 @@ export async function GET(request: NextRequest) {
     results.forEach((result, index) => {
       if (result.periods.length > 0) {
         allPeriods.push(...result.periods);
-        successfulSources.push(ICAL_SOURCES[index].name);
+        successfulSources.push(ICAL_SOURCES[index]!.name);
       }
       if (result.error) {
         errors.push(result.error);

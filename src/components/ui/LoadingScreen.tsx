@@ -54,9 +54,10 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
         // 4. Also preload thumbnail
         const thumbRes = await fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' });
         const thumbData = await thumbRes.json() as { media?: { url: string }[] };
-        if (thumbData.media?.[0]?.url) {
+        const thumbUrl = thumbData.media?.[0]?.url;
+        if (thumbUrl) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).__heroThumbnailUrl = thumbData.media[0].url;
+        (window as any).__heroThumbnailUrl = thumbUrl;
         }
       } catch {
         // Preload failed, Hero component will fetch as fallback
@@ -140,6 +141,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
       }, 100);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [videoLoaded, minTimeElapsed, onLoadComplete]);
 
   return (

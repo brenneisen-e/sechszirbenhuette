@@ -30,7 +30,7 @@ export function Location() {
       try {
         const response = await fetch('/api/media?category=aussen&type=image');
         const data = await response.json() as { media?: MediaItem[] };
-        if (data.media && data.media.length > 0) {
+        if (data.media && data.media.length > 0 && data.media[0]) {
           setMarkerImage(data.media[0].url);
         } else {
           // Use fallback if no images in database

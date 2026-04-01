@@ -3,27 +3,27 @@
 import { useState, useEffect } from 'react';
 import { Calculator, Sun, Snowflake, Calendar, Printer, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/formatting';
+import { CostTable, DayBasedCostTable } from './utility-costs/CostTable';
+import { PricingEditor } from './utility-costs/PricingEditor';
 import {
-  CostTable,
-  DayBasedCostTable,
-  PricingEditor,
-  DEFAULT_PRICING,
-  WALLI_VALUES,
   calculateUtilityCostsForBooking,
-} from './utility-costs';
-import type { PricingSettings, KurtaxeRatePeriod, Season, WeeksCount } from './utility-costs';
+  calculateCosts,
+  calculateCostsForDays,
+} from './utility-costs/calculations';
+import { DEFAULT_PRICING, WALLI_VALUES } from './utility-costs/constants';
+import type { PricingSettings, KurtaxeRatePeriod, Season, WeeksCount } from './utility-costs/types';
 
 // Re-export for backward compatibility
 export { WALLI_VALUES, calculateUtilityCostsForBooking };
-export type { CostBreakdownDetailed } from './utility-costs';
+export type { CostBreakdownDetailed } from './utility-costs/types';
 
 interface UtilityCostsCalculatorProps {
   demoMode?: boolean;
 }
 
 // Kurtaxe rates
-const KURTAXE_ALT = 2.7;  // bis 31.10.2026
-const KURTAXE_NEU = 4.5;  // ab 01.11.2026
+const KURTAXE_ALT = 2.7; // bis 31.10.2026
+const KURTAXE_NEU = 4.5; // ab 01.11.2026
 
 export default function UtilityCostsCalculator({ demoMode = false }: UtilityCostsCalculatorProps) {
   const [selectedSeason, setSelectedSeason] = useState<Season>('summer');
@@ -44,9 +44,7 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const res = await fetch('/api/admin/settings', {
-          
-        });
+        const res = await fetch('/api/admin/settings', {});
         const data = (await res.json()) as { settings?: Record<string, string> };
         if (data.settings) {
           // Parse kurtaxe rates JSON if available
@@ -60,13 +58,14 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
           }
 
           const loadedPricing: PricingSettings = {
-            kurtaxe: parseFloat(data.settings.kurtaxe_rate) || DEFAULT_PRICING.kurtaxe,
+            kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || DEFAULT_PRICING.kurtaxe,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || DEFAULT_PRICING.holz,
-            water: parseFloat(data.settings.water_rate) || DEFAULT_PRICING.water,
-            trash: parseFloat(data.settings.trash_rate) || DEFAULT_PRICING.trash,
-            electricity: parseFloat(data.settings.electricity_rate) || DEFAULT_PRICING.electricity,
-            reinigung: parseFloat(data.settings.reinigung_rate) || DEFAULT_PRICING.reinigung,
+            holz: parseFloat(data.settings.holz_rate ?? '') || DEFAULT_PRICING.holz,
+            water: parseFloat(data.settings.water_rate ?? '') || DEFAULT_PRICING.water,
+            trash: parseFloat(data.settings.trash_rate ?? '') || DEFAULT_PRICING.trash,
+            electricity:
+              parseFloat(data.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
+            reinigung: parseFloat(data.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
           };
           setPricing(loadedPricing);
         }
@@ -127,7 +126,10 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <Calculator className="w-6 h-6 text-purple-600" />
               Nebenkosten (kalkulatorisch)
             </h2>
-            <p className="text-gray-600 mt-1">Kalkulatorische Nebenkosten für Gäste (2-8 Personen) · Kurtaxe: 2,70€ bis 31.10.2026, ab 01.11.2026 dann 4,50€</p>
+            <p className="text-gray-600 mt-1">
+              Kalkulatorische Nebenkosten für Gäste (2-5 Personen) · Kurtaxe: 2,70€ bis 31.10.2026,
+              ab 01.11.2026 dann 4,50€
+            </p>
           </div>
 
           <button
@@ -153,7 +155,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setSelectedSeason('summer')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  selectedSeason === 'summer' ? 'bg-amber-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  selectedSeason === 'summer'
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Sun className="w-4 h-4" />
@@ -162,7 +166,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setSelectedSeason('winter')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  selectedSeason === 'winter' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  selectedSeason === 'winter'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Snowflake className="w-4 h-4" />
@@ -177,7 +183,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setViewMode('weeks')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  viewMode === 'weeks' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  viewMode === 'weeks'
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -186,7 +194,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setViewMode('days')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  viewMode === 'days' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  viewMode === 'days'
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -202,7 +212,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
                 <button
                   onClick={() => setSelectedWeeks(1)}
                   className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                    selectedWeeks === 1 ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    selectedWeeks === 1
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   1 Woche
@@ -210,7 +222,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
                 <button
                   onClick={() => setSelectedWeeks(2)}
                   className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                    selectedWeeks === 2 ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    selectedWeeks === 2
+                      ? 'bg-primary text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   2 Wochen
@@ -225,10 +239,14 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
                 min="1"
                 max="30"
                 value={selectedDays}
-                onChange={(e) => setSelectedDays(Math.min(30, Math.max(1, parseInt(e.target.value) || 1)))}
+                onChange={(e) =>
+                  setSelectedDays(Math.min(30, Math.max(1, parseInt(e.target.value) || 1)))
+                }
                 className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
               />
-              <span className="text-sm text-gray-500">({(selectedDays / 7).toFixed(1)} Wochen)</span>
+              <span className="text-sm text-gray-500">
+                ({(selectedDays / 7).toFixed(1)} Wochen)
+              </span>
             </div>
           )}
 
@@ -239,7 +257,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setSelectedKurtaxe('alt')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  selectedKurtaxe === 'alt' ? 'bg-green-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  selectedKurtaxe === 'alt'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 2,70€ (bis 31.10.26)
@@ -247,7 +267,9 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
               <button
                 onClick={() => setSelectedKurtaxe('neu')}
                 className={`px-4 py-2 flex items-center gap-2 text-sm font-medium transition-colors ${
-                  selectedKurtaxe === 'neu' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                  selectedKurtaxe === 'neu'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 4,50€ (ab 01.11.26)
@@ -262,7 +284,11 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
         {viewMode === 'weeks' ? (
           <CostTable season={selectedSeason} weeks={selectedWeeks} pricing={effectivePricing} />
         ) : (
-          <DayBasedCostTable season={selectedSeason} days={selectedDays} pricing={effectivePricing} />
+          <DayBasedCostTable
+            season={selectedSeason}
+            days={selectedDays}
+            pricing={effectivePricing}
+          />
         )}
       </div>
 
@@ -281,12 +307,18 @@ export default function UtilityCostsCalculator({ demoMode = false }: UtilityCost
       <div className="bg-gray-50 rounded-xl p-6 text-sm text-gray-600">
         <h4 className="font-semibold text-gray-800 mb-2">Hinweise:</h4>
         <ul className="list-disc list-inside space-y-1">
-          <li>Kurtaxe wird pro Erwachsenen und Nacht berechnet ({formatCurrency(pricing.kurtaxe)})</li>
-          <li>Holz: Im Sommer weniger Verbrauch (2 Bündel/Woche), im Winter mehr (5 Bündel/Woche)</li>
+          <li>
+            Kurtaxe wird pro Erwachsenen und Nacht berechnet ({formatCurrency(pricing.kurtaxe)})
+          </li>
+          <li>
+            Holz: Im Sommer weniger Verbrauch (2 Bündel/Woche), im Winter mehr (5 Bündel/Woche)
+          </li>
           <li>Müllsäcke: Anzahl variiert je nach Personenzahl (1-4 Säcke)</li>
           <li>Strom: Inklusiv-kWh variiert je nach Saison, Dauer und Personenzahl (150-900 kWh)</li>
           <li>Kinder unter 15 Jahren sind bei der Kurtaxe ermäßigt (hier nicht berücksichtigt)</li>
-          <li>Preise können im Admin-Center unter &quot;Ausgaben → Preise&quot; angepasst werden</li>
+          <li>
+            Preise können im Admin-Center unter &quot;Ausgaben → Preise&quot; angepasst werden
+          </li>
         </ul>
       </div>
     </div>

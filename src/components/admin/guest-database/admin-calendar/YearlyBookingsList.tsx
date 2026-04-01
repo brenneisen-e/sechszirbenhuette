@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { calculateUtilityCostsForBooking } from '../../UtilityCostsCalculator';
-import type { PricingSettings, KurtaxeRatePeriod } from '../../utility-costs';
+import type { PricingSettings, KurtaxeRatePeriod } from '../../utility-costs/types';
 import type { Guest, Booking } from '../types';
 
 interface YearlyBookingsListProps {
@@ -27,33 +27,42 @@ const DEFAULT_PRICING: PricingSettings = {
   reinigung: 100,
 };
 
-export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: YearlyBookingsListProps) {
+export function YearlyBookingsList({
+  guests,
+  bookings,
+  year,
+  onSelectBooking,
+}: YearlyBookingsListProps) {
   // Load pricing settings from DB
   const [pricing, setPricing] = useState<PricingSettings>(DEFAULT_PRICING);
 
   useEffect(() => {
     fetch('/api/admin/settings')
-      .then(res => res.json() as Promise<{ settings?: Record<string, string> }>)
+      .then((res) => res.json() as Promise<{ settings?: Record<string, string> }>)
       .then((data) => {
         if (data.settings) {
           let kurtaxeRates: KurtaxeRatePeriod[] | undefined;
           if (data.settings.kurtaxe_rates) {
             try {
               kurtaxeRates = JSON.parse(data.settings.kurtaxe_rates) as KurtaxeRatePeriod[];
-            } catch { /* ignore */ }
+            } catch {
+              /* ignore */
+            }
           }
           setPricing({
-            kurtaxe: parseFloat(data.settings.kurtaxe_rate) || 2.7,
+            kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || 2.7,
             kurtaxeRates,
-            holz: parseFloat(data.settings.holz_rate) || 9,
-            water: parseFloat(data.settings.water_rate) || 7,
-            trash: parseFloat(data.settings.trash_rate) || 11,
-            electricity: parseFloat(data.settings.electricity_rate) || 0.55,
-            reinigung: parseFloat(data.settings.reinigung_rate) || 100,
+            holz: parseFloat(data.settings.holz_rate ?? '') || 9,
+            water: parseFloat(data.settings.water_rate ?? '') || 7,
+            trash: parseFloat(data.settings.trash_rate ?? '') || 11,
+            electricity: parseFloat(data.settings.electricity_rate ?? '') || 0.55,
+            reinigung: parseFloat(data.settings.reinigung_rate ?? '') || 100,
           });
         }
       })
-      .catch(() => { /* use defaults */ });
+      .catch(() => {
+        /* use defaults */
+      });
   }, []);
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -70,7 +79,10 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
       return guest ? { booking: b, guest } : null;
     })
     .filter((item): item is BookingDisplayItem => item !== null)
-    .sort((a, b) => new Date(a.booking.arrival_date!).getTime() - new Date(b.booking.arrival_date!).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.booking.arrival_date!).getTime() - new Date(b.booking.arrival_date!).getTime(),
+    );
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -80,7 +92,13 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
           const hasDog = booking.pets?.toLowerCase().includes('hund') ?? false;
           const costCalc =
             booking.arrival_date && booking.departure_date
-              ? calculateUtilityCostsForBooking(booking.arrival_date, booking.departure_date, booking.adults || 2, pricing, hasDog)
+              ? calculateUtilityCostsForBooking(
+                  booking.arrival_date,
+                  booking.departure_date,
+                  booking.adults || 2,
+                  pricing,
+                  hasDog,
+                )
               : null;
           return (
             <div
@@ -102,7 +120,10 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span>
-                    {new Date(booking.arrival_date!).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                    {new Date(booking.arrival_date!).toLocaleDateString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                    })}
                     {' - '}
                     {booking.departure_date
                       ? new Date(booking.departure_date).toLocaleDateString('de-DE', {
@@ -111,7 +132,9 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
                         })
                       : '?'}
                   </span>
-                  <span className="px-2 py-0.5 bg-gray-200 rounded text-xs">{booking.platform || 'Direkt'}</span>
+                  <span className="px-2 py-0.5 bg-gray-200 rounded text-xs">
+                    {booking.platform || 'Direkt'}
+                  </span>
                 </div>
               </div>
               <div className="mt-2 flex items-center justify-between text-xs">
@@ -121,16 +144,26 @@ export function YearlyBookingsList({ guests, bookings, year, onSelectBooking }: 
                 </div>
                 <div className="flex items-center gap-3">
                   {booking.rental_price > 0 && (
-                    <span className="text-green-700 font-medium">Miete: {formatCurrency(booking.rental_price)}</span>
+                    <span className="text-green-700 font-medium">
+                      Miete: {formatCurrency(booking.rental_price)}
+                    </span>
                   )}
-                  {costCalc && <span className="text-purple-700">Kurtaxe: {formatCurrency(costCalc.kurtaxe)}</span>}
-                  {costCalc && <span className="text-gray-600">NK: {formatCurrency(costCalc.costs)}</span>}
+                  {costCalc && (
+                    <span className="text-purple-700">
+                      Kurtaxe: {formatCurrency(costCalc.kurtaxe)}
+                    </span>
+                  )}
+                  {costCalc && (
+                    <span className="text-gray-600">NK: {formatCurrency(costCalc.costs)}</span>
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
-        {yearBookingItems.length === 0 && <p className="text-sm text-gray-500">Keine Buchungen für {year}</p>}
+        {yearBookingItems.length === 0 && (
+          <p className="text-sm text-gray-500">Keine Buchungen für {year}</p>
+        )}
       </div>
     </div>
   );

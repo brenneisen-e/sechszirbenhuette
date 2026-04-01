@@ -1,8 +1,11 @@
 'use client';
 
-import { BookingDetailPopup as SharedBookingDetailPopup, type BookingDetailData } from '../shared/BookingDetailPopup';
+import {
+  BookingDetailPopup as SharedBookingDetailPopup,
+  type BookingDetailData,
+} from '../shared/BookingDetailPopup';
 import type { FinanceGuest } from './types';
-import type { PricingSettings } from '../utility-costs';
+import type { PricingSettings } from '../utility-costs/types';
 
 interface BookingDetailPopupProps {
   guest: FinanceGuest;
@@ -39,7 +42,12 @@ function toBookingDetailData(guest: FinanceGuest): BookingDetailData {
   };
 }
 
-export function BookingDetailPopup({ guest, pricing, onClose, onNavigateToGuest }: BookingDetailPopupProps) {
+export function BookingDetailPopup({
+  guest,
+  pricing,
+  onClose,
+  onNavigateToGuest,
+}: BookingDetailPopupProps) {
   return (
     <SharedBookingDetailPopup
       data={toBookingDetailData(guest)}

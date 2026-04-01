@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
 import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
-import { Header, Footer, MobileBookingButton } from '@/components/layout';
+import { Header, MobileBookingButton } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { MobileScrollProgress } from '@/components/ui/MobileScrollProgress';
 import '@/styles/globals.css';
 
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
     default: 'Sechszirbenhütte am Falkert | Premium-Hüttenurlaub in den Nockbergen',
     template: '%s | Sechszirbenhütte',
   },
-  description: 'Historische Berghütte mit Sauna in Alleinlage auf 1.700m. Wandern, Skifahren & Erholung in Kärnten. Familien & Hunde willkommen.',
+  description:
+    'Historische Berghütte mit Sauna in Alleinlage auf 1.700m. Wandern, Skifahren & Erholung in Kärnten. Familien & Hunde willkommen.',
   keywords: [
     'Ferienhütte Kärnten',
     'Berghütte Nockberge',
@@ -31,7 +33,8 @@ export const metadata: Metadata = {
   publisher: 'Sechszirbenhütte',
   openGraph: {
     title: 'Sechszirbenhütte – Ihr Traumurlaub am Falkert',
-    description: 'Über 250 Jahre alte Berghütte mit modernem Komfort und Sauna. Direkt am Nationalpark Nockberge.',
+    description:
+      'Über 250 Jahre alte Berghütte mit modernem Komfort und Sauna. Direkt am Nationalpark Nockberge.',
     images: ['/images/fallback/og-image.jpg'],
     locale: 'de_DE',
     type: 'website',
@@ -60,11 +63,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de" suppressHydrationWarning>
       <head>
@@ -94,8 +93,14 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased overflow-x-hidden" suppressHydrationWarning>
         {/* Immediate CSS-only loading indicator - shows before JS loads */}
-        <div id="initial-loader" className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white" suppressHydrationWarning>
-          <style dangerouslySetInnerHTML={{ __html: `
+        <div
+          id="initial-loader"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
+          suppressHydrationWarning
+        >
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             #initial-loader { transition: opacity 0.3s ease-out; }
             #initial-loader.loaded { opacity: 0; pointer-events: none; }
             @keyframes spin { to { transform: rotate(360deg); } }
@@ -105,7 +110,9 @@ export default function RootLayout({
             .init-dot { width: 8px; height: 8px; background: #1e5631; border-radius: 50%; animation: bounce 0.8s ease-in-out infinite; }
             .init-dot:nth-child(2) { animation-delay: 0.2s; }
             .init-dot:nth-child(3) { animation-delay: 0.4s; }
-          `}} />
+          `,
+            }}
+          />
           <div className="init-spinner" />
           <div className="init-dots">
             <div className="init-dot" />
@@ -114,7 +121,9 @@ export default function RootLayout({
           </div>
         </div>
         {/* Auto-dismiss initial loader for non-homepage routes (admin, blog, etc.) */}
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function() {
             var isHomepage = window.location.pathname === '/';
             if (isHomepage) document.body.classList.add('is-loading');
@@ -126,11 +135,12 @@ export default function RootLayout({
               }
             }, delay);
           })();
-        `}} />
+        `,
+          }}
+        />
         <SiteSettingsProvider>
           <LanguageProvider>
             <ContentTextsProvider>
-
               <MobileScrollProgress />
               <Header />
               <MobileBookingButton />

@@ -39,7 +39,9 @@ export function SettingsPanel({
 
   const updateKurtaxePeriod = (index: number, field: 'from' | 'to' | 'rate', value: string | number) => {
     const updated = [...editedSettings.kurtaxe_rates];
-    updated[index] = { ...updated[index], [field]: value };
+    const existing = updated[index];
+    if (!existing) return;
+    updated[index] = { ...existing, [field]: value };
     onEditedSettingsChange({ ...editedSettings, kurtaxe_rates: updated });
   };
 

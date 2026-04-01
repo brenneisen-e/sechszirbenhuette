@@ -107,7 +107,7 @@ function extractStreamUid(url: string): string | null {
   if (!url) return null;
   // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
   const match = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
-  return match ? match[1] : null;
+  return match ? match[1] ?? null : null;
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
@@ -408,7 +408,7 @@ export function ImageManager() {
       const toIdx = categoryItems.findIndex((m) => m.id === targetId);
       if (fromIdx === -1 || toIdx === -1) { setDragItem(null); return; }
       const [moved] = categoryItems.splice(fromIdx, 1);
-      categoryItems.splice(toIdx, 0, moved);
+      if (moved) categoryItems.splice(toIdx, 0, moved);
     }
 
     // Update display_order for items in the target category

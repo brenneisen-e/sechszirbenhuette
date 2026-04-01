@@ -344,8 +344,8 @@
     "checkAvailability": "Check availability",
     "loadingBooking": "Loading booking system...",
     "floorPlan": "Floor Plan",
-    "floorPlanDesc": "Our cabin offers approx. 100 m² of living space for up to 8 people.",
-    "livingSpace": "approx. 100 m² living space",
+    "floorPlanDesc": "Our cabin offers approx. 85 m² of living space for up to 5 people.",
+    "livingSpace": "approx. 85 m² living space",
     "floors": "2 floors",
     "previousReview": "Previous review",
     "nextReview": "Next review",
@@ -373,7 +373,7 @@
   "amenities": {
     "living": {
       "title": "Living Area",
-      "items": ["Wood stove", "Dining area for 8-10 people", "Satellite TV & DVD", "Stereo system"]
+      "items": ["Wood stove", "Dining area", "Satellite TV & DVD", "Stereo system"]
     },
     "kitchen": {
       "title": "Kitchen",
@@ -381,7 +381,7 @@
     },
     "rooms": {
       "title": "Bedrooms",
-      "items": ["1 gallery room (2 single beds)", "1 double bedroom", "1 room with 2 bunk beds", "Space for 8 people"],
+      "items": ["1 gallery room (2 single beds)", "1 double bedroom", "1 room with 2 bunk beds", "Space for 5 people"],
       "hint": "Bring your own bedding or book comfort package"
     },
     "sauna": {

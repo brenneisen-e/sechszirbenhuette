@@ -470,12 +470,14 @@ export function BlogEditorForm({
                             <button
                               key={opt.label}
                               onClick={() => {
+                                const tab = tabsData.tabs[activeTabIndex];
+                                if (!tab) return;
                                 const newTabs = [...tabsData.tabs];
-                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], type: opt.value };
+                                newTabs[activeTabIndex] = { ...tab, type: opt.value };
                                 updateTabs(tabsData.intro, newTabs);
                               }}
                               className={`px-3 py-1.5 text-xs rounded-lg border transition ${
-                                tabsData.tabs[activeTabIndex].type === opt.value
+                                tabsData.tabs[activeTabIndex]?.type === opt.value
                                   ? 'border-logo-green bg-logo-green/10 text-logo-green font-medium'
                                   : 'border-gray-200 text-gray-500 hover:border-gray-300'
                               }`}
@@ -491,10 +493,12 @@ export function BlogEditorForm({
                         <label className="block text-xs font-medium text-gray-600 mb-1">Abschnitts-Überschrift</label>
                         <input
                           type="text"
-                          value={tabsData.tabs[activeTabIndex].sectionTitle || ''}
+                          value={tabsData.tabs[activeTabIndex]?.sectionTitle || ''}
                           onChange={(e) => {
+                            const tab = tabsData.tabs[activeTabIndex];
+                            if (!tab) return;
                             const newTabs = [...tabsData.tabs];
-                            newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], sectionTitle: e.target.value };
+                            newTabs[activeTabIndex] = { ...tab, sectionTitle: e.target.value };
                             updateTabs(tabsData.intro, newTabs);
                           }}
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
@@ -508,10 +512,12 @@ export function BlogEditorForm({
                           <label className="block text-xs font-medium text-gray-600 mb-1">Tab-Titel</label>
                           <input
                             type="text"
-                            value={tabsData.tabs[activeTabIndex].title}
+                            value={tabsData.tabs[activeTabIndex]?.title ?? ''}
                             onChange={(e) => {
+                              const tab = tabsData.tabs[activeTabIndex];
+                              if (!tab) return;
                               const newTabs = [...tabsData.tabs];
-                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], title: e.target.value };
+                              newTabs[activeTabIndex] = { ...tab, title: e.target.value };
                               updateTabs(tabsData.intro, newTabs);
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-logo-green focus:border-logo-green"
@@ -531,27 +537,31 @@ export function BlogEditorForm({
                       </div>
 
                       {/* Featured trip (for kids-accordion type) */}
-                      {tabsData.tabs[activeTabIndex].type === 'kids-accordion' && (
+                      {tabsData.tabs[activeTabIndex]?.type === 'kids-accordion' && (
                         <div className="border border-logo-green/30 rounded-lg bg-logo-green/5 p-3 space-y-2">
                           <label className="block text-xs font-medium text-logo-green">Hervorgehobener Eintrag</label>
                           <input
                             type="text"
-                            value={tabsData.tabs[activeTabIndex].featured?.title || ''}
+                            value={tabsData.tabs[activeTabIndex]?.featured?.title || ''}
                             onChange={(e) => {
+                              const tab = tabsData.tabs[activeTabIndex];
+                              if (!tab) return;
                               const newTabs = [...tabsData.tabs];
-                              const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
-                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, title: e.target.value } };
+                              const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
+                              newTabs[activeTabIndex] = { ...tab, featured: { ...prev, title: e.target.value } };
                               updateTabs(tabsData.intro, newTabs);
                             }}
                             className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
                             placeholder="Titel"
                           />
                           <RichTextEditor
-                            value={tabsData.tabs[activeTabIndex].featured?.description || ''}
+                            value={tabsData.tabs[activeTabIndex]?.featured?.description || ''}
                             onChange={(html) => {
+                              const tab = tabsData.tabs[activeTabIndex];
+                              if (!tab) return;
                               const newTabs = [...tabsData.tabs];
-                              const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
-                              newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, description: html } };
+                              const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
+                              newTabs[activeTabIndex] = { ...tab, featured: { ...prev, description: html } };
                               updateTabs(tabsData.intro, newTabs);
                             }}
                             placeholder="Beschreibung"
@@ -559,11 +569,13 @@ export function BlogEditorForm({
                           <div className="grid grid-cols-2 gap-2">
                             <input
                               type="text"
-                              value={tabsData.tabs[activeTabIndex].featured?.distance || ''}
+                              value={tabsData.tabs[activeTabIndex]?.featured?.distance || ''}
                               onChange={(e) => {
+                                const tab = tabsData.tabs[activeTabIndex];
+                                if (!tab) return;
                                 const newTabs = [...tabsData.tabs];
-                                const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
-                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, distance: e.target.value } };
+                                const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
+                                newTabs[activeTabIndex] = { ...tab, featured: { ...prev, distance: e.target.value } };
                                 updateTabs(tabsData.intro, newTabs);
                               }}
                               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -571,11 +583,13 @@ export function BlogEditorForm({
                             />
                             <input
                               type="text"
-                              value={tabsData.tabs[activeTabIndex].featured?.age || ''}
+                              value={tabsData.tabs[activeTabIndex]?.featured?.age || ''}
                               onChange={(e) => {
+                                const tab = tabsData.tabs[activeTabIndex];
+                                if (!tab) return;
                                 const newTabs = [...tabsData.tabs];
-                                const prev = newTabs[activeTabIndex].featured || { title: '', description: '', distance: '', age: '' };
-                                newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], featured: { ...prev, age: e.target.value } };
+                                const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
+                                newTabs[activeTabIndex] = { ...tab, featured: { ...prev, age: e.target.value } };
                                 updateTabs(tabsData.intro, newTabs);
                               }}
                               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -589,14 +603,16 @@ export function BlogEditorForm({
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-xs font-medium text-gray-600">
-                            Einheiten ({tabsData.tabs[activeTabIndex].slides.length})
+                            Einheiten ({tabsData.tabs[activeTabIndex]?.slides.length ?? 0})
                           </label>
                           <button
                             onClick={() => {
+                              const tab = tabsData.tabs[activeTabIndex];
+                              if (!tab) return;
                               const newTabs = [...tabsData.tabs];
                               newTabs[activeTabIndex] = {
-                                ...newTabs[activeTabIndex],
-                                slides: [...newTabs[activeTabIndex].slides, { title: '', description: '' }],
+                                ...tab,
+                                slides: [...tab.slides, { title: '', description: '' }],
                               };
                               updateTabs(tabsData.intro, newTabs);
                             }}
@@ -608,16 +624,18 @@ export function BlogEditorForm({
                         </div>
 
                         <div className="space-y-2">
-                          {tabsData.tabs[activeTabIndex].slides.map((slide, slideIdx) => (
+                          {(tabsData.tabs[activeTabIndex]?.slides ?? []).map((slide, slideIdx) => (
                             <div key={slideIdx} className="border border-gray-200 rounded-lg bg-white p-3 space-y-2">
                               <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-gray-500">Einheit {slideIdx + 1}</span>
                                 <button
                                   onClick={() => {
+                                    const tab = tabsData.tabs[activeTabIndex];
+                                    if (!tab) return;
                                     const newTabs = [...tabsData.tabs];
                                     newTabs[activeTabIndex] = {
-                                      ...newTabs[activeTabIndex],
-                                      slides: newTabs[activeTabIndex].slides.filter((_, i) => i !== slideIdx),
+                                      ...tab,
+                                      slides: tab.slides.filter((_, i) => i !== slideIdx),
                                     };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
@@ -631,9 +649,9 @@ export function BlogEditorForm({
                                 value={slide.title}
                                 onChange={(e) => {
                                   const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex].slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx], title: e.target.value };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, title: e.target.value };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                   updateTabs(tabsData.intro, newTabs);
                                 }}
                                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -643,9 +661,9 @@ export function BlogEditorForm({
                                 value={slide.description}
                                 onChange={(html) => {
                                   const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex].slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx], description: html };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, description: html };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                   updateTabs(tabsData.intro, newTabs);
                                 }}
                                 placeholder="Beschreibung..."
@@ -655,9 +673,9 @@ export function BlogEditorForm({
                                 value={slide.tip || ''}
                                 onChange={(e) => {
                                   const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex].slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx], tip: e.target.value };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, tip: e.target.value };
+                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                   updateTabs(tabsData.intro, newTabs);
                                 }}
                                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -669,9 +687,9 @@ export function BlogEditorForm({
                                   value={slide.difficulty || ''}
                                   onChange={(e) => {
                                     const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex].slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx], difficulty: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, difficulty: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
                                   className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -682,9 +700,9 @@ export function BlogEditorForm({
                                   value={slide.duration || ''}
                                   onChange={(e) => {
                                     const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex].slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx], duration: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, duration: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
                                   className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -695,9 +713,9 @@ export function BlogEditorForm({
                                   value={slide.distance || ''}
                                   onChange={(e) => {
                                     const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex].slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx], distance: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, distance: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
                                   className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -708,9 +726,9 @@ export function BlogEditorForm({
                                   value={slide.age || ''}
                                   onChange={(e) => {
                                     const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex].slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx], age: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex], slides: newSlides };
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, age: e.target.value };
+                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
                                   className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"

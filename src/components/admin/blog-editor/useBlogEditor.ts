@@ -165,6 +165,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
       }, 3000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [error, success]);
 
   // Create new post
@@ -317,7 +318,8 @@ export function useBlogEditor(): UseBlogEditorReturn {
     if (toIndex < 0 || toIndex >= postImages.length) return;
     setPostImages(prev => {
       const updated = [...prev];
-      const [moved] = updated.splice(fromIndex, 1);
+      const moved = updated.splice(fromIndex, 1)[0];
+      if (!moved) return updated;
       updated.splice(toIndex, 0, moved);
       return updated.map((img, i) => ({ ...img, display_order: i }));
     });

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Calendar, Plus, Loader2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/formatting';
 import type { Guest, Booking, BankPayment, GuestDocument } from '../types';
-import type { PricingSettings } from '../../utility-costs';
+import type { PricingSettings } from '../../utility-costs/types';
 import { BookingDetail } from './BookingDetail';
 
 interface GuestBookingsTabProps {
@@ -18,25 +18,48 @@ interface GuestBookingsTabProps {
   onUpdateBookingStatus?: (bookingId: number, status: string) => void;
   onEditBooking?: (booking: Booking) => void;
   onToggleCleaningCash?: (bookingId: number, isCash: boolean) => void;
-  onTogglePaymentStatus?: (bookingId: number, field: 'deposit_paid' | 'final_payment_paid', value: number) => void;
-  onUpdateTransactions?: (bookingId: number, transactions: Array<{
-    date: string;
-    amount: number;
-    type: 'payment' | 'refund';
-    status: string;
-    description?: string;
-    fee?: number;
-  }>, payoutDate: string) => void;
+  onTogglePaymentStatus?: (
+    bookingId: number,
+    field: 'deposit_paid' | 'final_payment_paid',
+    value: number,
+  ) => void;
+  onUpdateTransactions?: (
+    bookingId: number,
+    transactions: Array<{
+      date: string;
+      amount: number;
+      type: 'payment' | 'refund';
+      status: string;
+      description?: string;
+      fee?: number;
+    }>,
+    payoutDate: string,
+  ) => void;
   onUploadDocument?: (bookingId: number, guestId: number, file: File) => Promise<void>;
   onDeleteBooking?: (bookingId: number) => void;
 }
 
-export function GuestBookingsTab({ guest, bookings, bankPayments, documents = [], loading, pricing, onAddBooking, onUpdateBookingStatus, onEditBooking, onToggleCleaningCash, onTogglePaymentStatus, onUpdateTransactions, onUploadDocument, onDeleteBooking }: GuestBookingsTabProps) {
+export function GuestBookingsTab({
+  guest,
+  bookings,
+  bankPayments,
+  documents = [],
+  loading,
+  pricing,
+  onAddBooking,
+  onUpdateBookingStatus,
+  onEditBooking,
+  onToggleCleaningCash,
+  onTogglePaymentStatus,
+  onUpdateTransactions,
+  onUploadDocument,
+  onDeleteBooking,
+}: GuestBookingsTabProps) {
   const [activeBookingIndex, setActiveBookingIndex] = useState(0);
 
   // Filter documents by booking_id for each booking
   const getBookingDocuments = (bookingId: number) => {
-    return documents.filter(doc => doc.booking_id === bookingId);
+    return documents.filter((doc) => doc.booking_id === bookingId);
   };
 
   if (loading) {
@@ -105,16 +128,8 @@ export function GuestBookingsTab({ guest, bookings, bankPayments, documents = []
               ? (status) => onUpdateBookingStatus(currentBooking.id, status)
               : undefined
           }
-          onEdit={
-            onEditBooking
-              ? () => onEditBooking(currentBooking)
-              : undefined
-          }
-          onDelete={
-            onDeleteBooking
-              ? () => onDeleteBooking(currentBooking.id)
-              : undefined
-          }
+          onEdit={onEditBooking ? () => onEditBooking(currentBooking) : undefined}
+          onDelete={onDeleteBooking ? () => onDeleteBooking(currentBooking.id) : undefined}
           onToggleCleaningCash={
             onToggleCleaningCash
               ? (isCash) => onToggleCleaningCash(currentBooking.id, isCash)
@@ -127,7 +142,8 @@ export function GuestBookingsTab({ guest, bookings, bankPayments, documents = []
           }
           onUpdateTransactions={
             onUpdateTransactions
-              ? (transactions, payoutDate) => onUpdateTransactions(currentBooking.id, transactions, payoutDate)
+              ? (transactions, payoutDate) =>
+                  onUpdateTransactions(currentBooking.id, transactions, payoutDate)
               : undefined
           }
           onUploadDocument={
@@ -140,7 +156,9 @@ export function GuestBookingsTab({ guest, bookings, bankPayments, documents = []
         <div className="text-center py-8 text-gray-500">
           <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p>Noch keine Buchungen vorhanden</p>
-          <p className="text-sm mt-1">Fügen Sie eine neue Buchung hinzu oder führen Sie die Migration durch.</p>
+          <p className="text-sm mt-1">
+            Fügen Sie eine neue Buchung hinzu oder führen Sie die Migration durch.
+          </p>
         </div>
       )}
 

@@ -222,7 +222,7 @@ function calculateKurtaxeFromDBRates(
 
   const current = new Date(arrival);
   while (current < departure) {
-    const dateStr = current.toISOString().split('T')[0];
+    const dateStr = current.toISOString().split('T')[0] ?? '';
     const rate = getDBRateForDate(dateStr, rates);
     total += rate * persons;
     rateCounts.set(rate, (rateCounts.get(rate) || 0) + 1);
@@ -231,8 +231,8 @@ function calculateKurtaxeFromDBRates(
 
   let description: string;
   if (rateCounts.size === 1) {
-    const rate = Array.from(rateCounts.keys())[0];
-    const days = Array.from(rateCounts.values())[0];
+    const rate = Array.from(rateCounts.keys())[0] ?? 0;
+    const days = Array.from(rateCounts.values())[0] ?? 0;
     description = `${persons} Pers. × ${days} Nächte × ${fmtNum(rate)} €`;
   } else {
     const parts: string[] = [];
@@ -254,7 +254,8 @@ function getDBRateForDate(dateStr: string, rates: KurtaxeRate[]): number {
     }
   }
   // Fallback to last known rate
-  return rates.length > 0 ? rates[rates.length - 1].rate_per_person_per_day : 2.70;
+  const lastRate = rates[rates.length - 1];
+  return lastRate ? lastRate.rate_per_person_per_day : 2.70;
 }
 
 function calculateKurtaxeWithDateRates(
@@ -271,7 +272,7 @@ function calculateKurtaxeWithDateRates(
 
   const current = new Date(arrival);
   while (current < departure) {
-    const dateStr = current.toISOString().split('T')[0];
+    const dateStr = current.toISOString().split('T')[0] ?? '';
     let rate = pricing.kurtaxe;
 
     if (pricing.kurtaxeRates) {
@@ -290,8 +291,8 @@ function calculateKurtaxeWithDateRates(
 
   let description: string;
   if (rateCounts.size === 1) {
-    const rate = Array.from(rateCounts.keys())[0];
-    const days = Array.from(rateCounts.values())[0];
+    const rate = Array.from(rateCounts.keys())[0] ?? 0;
+    const days = Array.from(rateCounts.values())[0] ?? 0;
     description = `${persons} Pers. × ${days} Nächte × ${fmtNum(rate)} €`;
   } else {
     const parts: string[] = [];

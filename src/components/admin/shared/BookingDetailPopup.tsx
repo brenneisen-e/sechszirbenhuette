@@ -1,7 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Euro, Users, X, User, ChevronDown, ChevronUp, MessageCircle, FileText, Send, Inbox, Upload, Download, Loader2 } from 'lucide-react';
+import {
+  Calendar,
+  Euro,
+  Users,
+  X,
+  User,
+  ChevronDown,
+  ChevronUp,
+  MessageCircle,
+  FileText,
+  Send,
+  Inbox,
+  Upload,
+  Download,
+  Loader2,
+} from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import {
   calculateBookingFinances,
@@ -12,7 +27,7 @@ import {
   parsePrivateConfig,
   type PlatformFees,
 } from '@/lib/utils/financeCalculations';
-import type { PricingSettings } from '../utility-costs';
+import type { PricingSettings } from '../utility-costs/types';
 
 // ============================================================================
 // WICHTIG: Keine Finanzberechnungen in dieser Komponente!
@@ -87,7 +102,14 @@ interface BookingDetailPopupProps {
   onUploadDocument?: (file: File) => Promise<void>;
 }
 
-export function BookingDetailPopup({ data, pricing, documents, onClose, onNavigateToGuest, onUploadDocument }: BookingDetailPopupProps) {
+export function BookingDetailPopup({
+  data,
+  pricing,
+  documents,
+  onClose,
+  onNavigateToGuest,
+  onUploadDocument,
+}: BookingDetailPopupProps) {
   const [showNkDetails, setShowNkDetails] = useState(false);
   const [showFinanceDetails, setShowFinanceDetails] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -95,7 +117,8 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
   // === Basis-Flags aus Buchungsdaten ===
   const hasDog = data.pets?.toLowerCase().includes('hund') ?? false;
   const skipNk = data.no_nebenkosten === 1;
-  const isCleaningCash = data.cleaning_cash === 1 || (data.final_cleaning?.includes('vor Ort') ?? false);
+  const isCleaningCash =
+    data.cleaning_cash === 1 || (data.final_cleaning?.includes('vor Ort') ?? false);
   const isUtilitiesCash = data.utilities_cash === 1;
   const isKurtaxeCash = data.kurtaxe_cash === 1;
 
@@ -132,18 +155,18 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
     baseCosts,
     kurtaxe,
     cleaningCost,
-    totalNkCosts,  // NK ohne Reinigung - für Anzeige
+    totalNkCosts, // NK ohne Reinigung - für Anzeige
     basisMiete,
-    mieterlos,  // Basis für Provision
+    mieterlos, // Basis für Provision
     nkEinnahmen,
     reinigungEinnahmen,
     kurtaxeEinnahmen,
     provision: commission,
     gesamteinzahlung,
     gesamtbelastung,
-    gesamtauszahlung,  // Für Mieterlös-Berechnung (Booking.com)
-    calculatedCostsForMieterlos,  // Abzug für Booking.com
-    anteiligeMietgebuehr,  // Abzug für andere Plattformen
+    gesamtauszahlung, // Für Mieterlös-Berechnung (Booking.com)
+    calculatedCostsForMieterlos, // Abzug für Booking.com
+    anteiligeMietgebuehr, // Abzug für andere Plattformen
     paymentProcessingFee,
     mietAnteil,
     isBookingCom,
@@ -207,11 +230,15 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
           <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-lg p-3">
             <div>
               <span className="text-xs text-gray-500 uppercase">Anreise</span>
-              <p className="font-medium text-green-700">{formatDateWithWeekday(data.arrival_date)}</p>
+              <p className="font-medium text-green-700">
+                {formatDateWithWeekday(data.arrival_date)}
+              </p>
             </div>
             <div>
               <span className="text-xs text-gray-500 uppercase">Abreise</span>
-              <p className="font-medium text-red-700">{formatDateWithWeekday(data.departure_date)}</p>
+              <p className="font-medium text-red-700">
+                {formatDateWithWeekday(data.departure_date)}
+              </p>
             </div>
             <div>
               <span className="text-xs text-gray-500 uppercase">Nächte</span>
@@ -233,7 +260,8 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 data.platform?.toLowerCase().includes('booking')
                   ? 'bg-blue-100 text-blue-800'
-                  : data.platform?.toLowerCase().includes('fewo') || data.platform?.toLowerCase().includes('vrbo')
+                  : data.platform?.toLowerCase().includes('fewo') ||
+                      data.platform?.toLowerCase().includes('vrbo')
                     ? 'bg-orange-100 text-orange-800'
                     : data.platform?.toLowerCase().includes('airbnb')
                       ? 'bg-pink-100 text-pink-800'
@@ -242,12 +270,18 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
             >
               {data.platform || 'Direkt'}
             </span>
-            {data.booking_number && <span className="text-sm text-gray-500 font-mono">#{data.booking_number}</span>}
+            {data.booking_number && (
+              <span className="text-sm text-gray-500 font-mono">#{data.booking_number}</span>
+            )}
             {data.is_private === 1 && (
-              <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Privat</span>
+              <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                Privat
+              </span>
             )}
             {skipNk && (
-              <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">Keine NK</span>
+              <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                Keine NK
+              </span>
             )}
           </div>
 
@@ -258,7 +292,9 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
               <div className="grid grid-cols-4 gap-2">
                 <div className="bg-green-50 rounded-lg p-2 text-center">
                   <p className="text-[10px] text-gray-500 uppercase tracking-wide">Einzahlung</p>
-                  <p className="text-sm font-bold text-green-700">{formatCurrency(gesamteinzahlung)}</p>
+                  <p className="text-sm font-bold text-green-700">
+                    {formatCurrency(gesamteinzahlung)}
+                  </p>
                 </div>
                 <div className="bg-purple-50 rounded-lg p-2 text-center">
                   <p className="text-[10px] text-gray-500 uppercase tracking-wide">Mieterlös</p>
@@ -266,11 +302,19 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                 </div>
                 <div className="bg-red-50 rounded-lg p-2 text-center">
                   <p className="text-[10px] text-gray-500 uppercase tracking-wide">Kosten</p>
-                  <p className="text-sm font-bold text-red-600">{formatCurrency(gesamtbelastung)}</p>
+                  <p className="text-sm font-bold text-red-600">
+                    {formatCurrency(gesamtbelastung)}
+                  </p>
                 </div>
-                <div className={`${ertrag >= 0 ? 'bg-emerald-50' : 'bg-red-50'} rounded-lg p-2 text-center`}>
+                <div
+                  className={`${ertrag >= 0 ? 'bg-emerald-50' : 'bg-red-50'} rounded-lg p-2 text-center`}
+                >
                   <p className="text-[10px] text-gray-500 uppercase tracking-wide">Ertrag</p>
-                  <p className={`text-sm font-bold ${ertrag >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{formatCurrency(ertrag)}</p>
+                  <p
+                    className={`text-sm font-bold ${ertrag >= 0 ? 'text-emerald-700' : 'text-red-600'}`}
+                  >
+                    {formatCurrency(ertrag)}
+                  </p>
                 </div>
               </div>
             );
@@ -278,8 +322,12 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
 
           {/* Provision + Payout summary line */}
           <div className="flex items-center justify-between text-xs text-gray-500 px-1">
-            <span>Provision: {formatCurrency(commission)} (10% v. {formatCurrency(mieterlos)})</span>
-            {payoutDate && <span className="text-emerald-700 font-medium">Eingegangen: {payoutDate}</span>}
+            <span>
+              Provision: {formatCurrency(commission)} (10% v. {formatCurrency(mieterlos)})
+            </span>
+            {payoutDate && (
+              <span className="text-emerald-700 font-medium">Eingegangen: {payoutDate}</span>
+            )}
           </div>
 
           {/* Expandable financial details */}
@@ -292,7 +340,11 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                 <Euro className="w-4 h-4" />
                 Finanzdetails
               </span>
-              {showFinanceDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showFinanceDetails ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
             </button>
 
             {showFinanceDetails && (
@@ -301,7 +353,12 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                   <tbody>
                     {/* === EINZAHLUNGEN === */}
                     <tr>
-                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Einzahlungen</td>
+                      <td
+                        colSpan={2}
+                        className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                      >
+                        Einzahlungen
+                      </td>
                     </tr>
                     <tr className="text-green-700">
                       <td className="py-0.5 pl-2">Miete:</td>
@@ -324,20 +381,26 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                     {kurtaxeEinnahmen > 0 && !isPlatformWithIncludedCosts && (
                       <tr className="text-green-700">
                         <td className="py-0.5 pl-2">Kurtaxe:</td>
-                        <td className="py-0.5 text-right w-28">{formatCurrency(kurtaxeEinnahmen)}</td>
+                        <td className="py-0.5 text-right w-28">
+                          {formatCurrency(kurtaxeEinnahmen)}
+                        </td>
                       </tr>
                     )}
-                    {!isUtilitiesCash && (isKurtaxeCash || isPlatformWithIncludedCosts) && barKurtaxe > 0 && (
-                      <tr className="text-green-700">
-                        <td className="py-0.5 pl-2">Kurtaxe (bar):</td>
-                        <td className="py-0.5 text-right w-28">{formatCurrency(barKurtaxe)}</td>
-                      </tr>
-                    )}
+                    {!isUtilitiesCash &&
+                      (isKurtaxeCash || isPlatformWithIncludedCosts) &&
+                      barKurtaxe > 0 && (
+                        <tr className="text-green-700">
+                          <td className="py-0.5 pl-2">Kurtaxe (bar):</td>
+                          <td className="py-0.5 text-right w-28">{formatCurrency(barKurtaxe)}</td>
+                        </tr>
+                      )}
                     {(reinigungEinnahmen > 0 || isPlatformWithIncludedCosts) && (
                       <tr className="text-green-700">
                         <td className="py-0.5 pl-2">Reinigung:</td>
                         <td className="py-0.5 text-right w-28">
-                          {isPlatformWithIncludedCosts ? '(inkl.)' : formatCurrency(reinigungEinnahmen)}
+                          {isPlatformWithIncludedCosts
+                            ? '(inkl.)'
+                            : formatCurrency(reinigungEinnahmen)}
                         </td>
                       </tr>
                     )}
@@ -350,11 +413,15 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                     {komfortpaketEnabled && komfortpaketIncome > 0 && (
                       <tr className="text-green-700">
                         <td className="py-0.5 pl-2">Komfortpaket:</td>
-                        <td className="py-0.5 text-right w-28">{formatCurrency(komfortpaketIncome)}</td>
+                        <td className="py-0.5 text-right w-28">
+                          {formatCurrency(komfortpaketIncome)}
+                        </td>
                       </tr>
                     )}
                     <tr className="bg-green-50">
-                      <td className="py-1 pl-2 font-medium border-t border-green-200">= Gesamteinzahlung:</td>
+                      <td className="py-1 pl-2 font-medium border-t border-green-200">
+                        = Gesamteinzahlung:
+                      </td>
                       <td className="py-1 text-right w-28 font-semibold text-green-700 border-t border-green-200">
                         {formatCurrency(gesamteinzahlung)}
                       </td>
@@ -362,7 +429,12 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
 
                     {/* === KOSTEN === */}
                     <tr>
-                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kosten</td>
+                      <td
+                        colSpan={2}
+                        className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                      >
+                        Kosten
+                      </td>
                     </tr>
                     {!skipNk && (
                       <>
@@ -373,7 +445,11 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                               className="flex items-center gap-1 hover:text-red-800"
                             >
                               NK (kalk. inkl. Kurtaxe)
-                              {showNkDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                              {showNkDetails ? (
+                                <ChevronUp className="w-3 h-3" />
+                              ) : (
+                                <ChevronDown className="w-3 h-3" />
+                              )}
                             </button>
                           </td>
                           <td className="py-0.5 text-right w-28">{formatCurrency(totalNkCosts)}</td>
@@ -381,29 +457,51 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                         {showNkDetails && costCalc?.breakdown && (
                           <>
                             <tr className="text-xs text-gray-500">
-                              <td className="py-0.5 pl-6">Kurtaxe ({costCalc.breakdown.kurtaxeDetails}):</td>
-                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.kurtaxe)}</td>
+                              <td className="py-0.5 pl-6">
+                                Kurtaxe ({costCalc.breakdown.kurtaxeDetails}):
+                              </td>
+                              <td className="py-0.5 text-right">
+                                {formatCurrency(costCalc.breakdown.kurtaxe)}
+                              </td>
                             </tr>
                             <tr className="text-xs text-gray-500">
-                              <td className="py-0.5 pl-6">Holz ({costCalc.breakdown.holzBuendel} Bündel):</td>
-                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.holz)}</td>
+                              <td className="py-0.5 pl-6">
+                                Holz ({costCalc.breakdown.holzBuendel} Bündel):
+                              </td>
+                              <td className="py-0.5 text-right">
+                                {formatCurrency(costCalc.breakdown.holz)}
+                              </td>
                             </tr>
                             <tr className="text-xs text-gray-500">
                               <td className="py-0.5 pl-6">Wasser:</td>
-                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.water)}</td>
+                              <td className="py-0.5 text-right">
+                                {formatCurrency(costCalc.breakdown.water)}
+                              </td>
                             </tr>
                             <tr className="text-xs text-gray-500">
-                              <td className="py-0.5 pl-6">Müll ({costCalc.breakdown.trashBags} Säcke):</td>
-                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.trash)}</td>
+                              <td className="py-0.5 pl-6">
+                                Müll ({costCalc.breakdown.trashBags} Säcke):
+                              </td>
+                              <td className="py-0.5 text-right">
+                                {formatCurrency(costCalc.breakdown.trash)}
+                              </td>
                             </tr>
                             <tr className="text-xs text-gray-500">
-                              <td className="py-0.5 pl-6">Strom ({costCalc.breakdown.electricityKwh} kWh inkl.):</td>
-                              <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.electricity)}</td>
+                              <td className="py-0.5 pl-6">
+                                Strom ({costCalc.breakdown.electricityKwh} kWh inkl.):
+                              </td>
+                              <td className="py-0.5 text-right">
+                                {formatCurrency(costCalc.breakdown.electricity)}
+                              </td>
                             </tr>
                             {!isCleaningCash && (
                               <tr className="text-xs text-gray-500">
-                                <td className="py-0.5 pl-6">Reinigung ({hasDog ? 'mit Hund' : 'Standard'}):</td>
-                                <td className="py-0.5 text-right">{formatCurrency(costCalc.breakdown.reinigung)}</td>
+                                <td className="py-0.5 pl-6">
+                                  Reinigung ({hasDog ? 'mit Hund' : 'Standard'}):
+                                </td>
+                                <td className="py-0.5 text-right">
+                                  {formatCurrency(costCalc.breakdown.reinigung)}
+                                </td>
                               </tr>
                             )}
                           </>
@@ -416,22 +514,38 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                     )}
                     {komfortpaketEnabled && komfortpaketCosts > 0 && (
                       <tr className="text-red-600">
-                        <td className="py-0.5 pl-2">Komfortpaket ({komfortpaket?.persons || 0} Pers.):</td>
-                        <td className="py-0.5 text-right w-28">{formatCurrency(komfortpaketCosts)}</td>
+                        <td className="py-0.5 pl-2">
+                          Komfortpaket ({komfortpaket?.persons || 0} Pers.):
+                        </td>
+                        <td className="py-0.5 text-right w-28">
+                          {formatCurrency(komfortpaketCosts)}
+                        </td>
                       </tr>
                     )}
 
                     {/* === MIETERLÖS === */}
                     <tr>
-                      <td colSpan={2} className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mieterlös (Basis für Provision)</td>
+                      <td
+                        colSpan={2}
+                        className="py-1 pt-2 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                      >
+                        Mieterlös (Basis für Provision)
+                      </td>
                     </tr>
                     <tr className="text-gray-500 text-xs">
                       <td className="py-0.5 pl-4">Gesamteinzahlung (Basis):</td>
-                      <td className="py-0.5 text-right">{formatCurrency(mieterlos + calculatedCostsForMieterlos)}</td>
+                      <td className="py-0.5 text-right">
+                        {formatCurrency(mieterlos + calculatedCostsForMieterlos)}
+                      </td>
                     </tr>
                     <tr className="text-gray-500 text-xs">
-                      <td className="py-0.5 pl-4">./. kalk. Kosten (NK+Kurtaxe+Reinigung{komfortpaketEnabled && komfortpaketCosts > 0 ? '+Komfortpaket' : ''}):</td>
-                      <td className="py-0.5 text-right">-{formatCurrency(calculatedCostsForMieterlos)}</td>
+                      <td className="py-0.5 pl-4">
+                        ./. kalk. Kosten (NK+Kurtaxe+Reinigung
+                        {komfortpaketEnabled && komfortpaketCosts > 0 ? '+Komfortpaket' : ''}):
+                      </td>
+                      <td className="py-0.5 text-right">
+                        -{formatCurrency(calculatedCostsForMieterlos)}
+                      </td>
                     </tr>
                     <tr className="text-purple-700 font-medium">
                       <td className="py-0.5 pl-2">= Mieterlös:</td>
@@ -442,7 +556,6 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
               </div>
             )}
           </div>
-
 
           {/* Notes */}
           {notes && (
@@ -457,11 +570,11 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
             <div className="bg-teal-50 rounded-lg p-3">
               <h4 className="font-semibold text-teal-900 mb-2 flex items-center gap-2">
                 <MessageCircle className="w-4 h-4" />
-                Kommunikation ({communications.filter(c => c.type !== 'system').length})
+                Kommunikation ({communications.filter((c) => c.type !== 'system').length})
               </h4>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {communications
-                  .filter(c => c.type !== 'system') // Skip system events
+                  .filter((c) => c.type !== 'system') // Skip system events
                   .map((comm, i) => (
                     <div
                       key={i}
@@ -479,7 +592,10 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                         )}
                         <span>{comm.type === 'guest' ? 'Gast' : 'Host'}</span>
                         <span>•</span>
-                        <span>{formatDate(comm.date)}{comm.time ? ` ${comm.time}` : ''}</span>
+                        <span>
+                          {formatDate(comm.date)}
+                          {comm.time ? ` ${comm.time}` : ''}
+                        </span>
                       </div>
                       {comm.message && (
                         <p className="text-gray-700 whitespace-pre-line">{comm.message}</p>
@@ -507,10 +623,14 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
                       className="flex items-center justify-between p-2 bg-white rounded border border-indigo-100"
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <FileText className={`w-4 h-4 flex-shrink-0 ${
-                          doc.file_type.includes('pdf') ? 'text-red-500' : 'text-blue-500'
-                        }`} />
-                        <span className="text-sm text-gray-700 truncate">{doc.original_filename}</span>
+                        <FileText
+                          className={`w-4 h-4 flex-shrink-0 ${
+                            doc.file_type.includes('pdf') ? 'text-red-500' : 'text-blue-500'
+                          }`}
+                        />
+                        <span className="text-sm text-gray-700 truncate">
+                          {doc.original_filename}
+                        </span>
                       </div>
                       <a
                         href={`/api/admin/guest-documents/download?key=${encodeURIComponent(doc.r2_key)}`}
@@ -563,7 +683,10 @@ export function BookingDetailPopup({ data, pricing, documents, onClose, onNaviga
 
         {/* Actions */}
         <div className="flex gap-3 p-4 border-t bg-gray-50">
-          <button onClick={onClose} className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 font-medium">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 font-medium"
+          >
             Schließen
           </button>
           {onNavigateToGuest && (

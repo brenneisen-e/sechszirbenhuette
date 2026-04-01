@@ -328,8 +328,8 @@
     "checkAvailability": "Verifica disponibilità",
     "loadingBooking": "Caricamento sistema prenotazione...",
     "floorPlan": "Planimetria",
-    "floorPlanDesc": "Il nostro rifugio offre circa 100 m² di superficie abitabile per un massimo di 8 persone.",
-    "livingSpace": "circa 100 m² di superficie",
+    "floorPlanDesc": "Il nostro rifugio offre circa 85 m² di superficie abitabile per un massimo di 5 persone.",
+    "livingSpace": "circa 85 m² di superficie",
     "floors": "2 piani",
     "previousReview": "Recensione precedente",
     "nextReview": "Prossima recensione",
@@ -357,7 +357,7 @@
   "amenities": {
     "living": {
       "title": "Zona Giorno",
-      "items": ["Stufa svedese", "Zona pranzo per 8-10 persone", "TV satellitare & DVD", "Impianto stereo"]
+      "items": ["Stufa svedese", "Zona pranzo", "TV satellitare & DVD", "Impianto stereo"]
     },
     "kitchen": {
       "title": "Cucina",
@@ -365,7 +365,7 @@
     },
     "rooms": {
       "title": "Camere da Letto",
-      "items": ["1 camera soppalco (2 letti singoli)", "1 camera matrimoniale", "1 camera con 2 letti a castello", "Posto per 8 persone"],
+      "items": ["1 camera soppalco (2 letti singoli)", "1 camera matrimoniale", "1 camera con 2 letti a castello", "Posto per 5 persone"],
       "hint": "Portare biancheria propria o prenotare pacchetto comfort"
     },
     "sauna": {

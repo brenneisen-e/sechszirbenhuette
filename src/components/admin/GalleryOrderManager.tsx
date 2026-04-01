@@ -80,7 +80,7 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
     setImages(prev => {
       const updated = [...prev];
       const [moved] = updated.splice(dragIndex, 1);
-      updated.splice(targetIndex, 0, moved);
+      if (moved) updated.splice(targetIndex, 0, moved);
       return updated;
     });
     setHasChanges(true);

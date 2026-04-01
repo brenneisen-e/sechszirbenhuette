@@ -17,16 +17,45 @@ import {
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
 // Lazy load heavy components with ssr:false (admin is client-only)
-const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), { ssr: false });
-const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), { ssr: false });
-const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), { ssr: false });
-const ImageManager = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.ImageManager })), { ssr: false });
-const PasswordsPanel = dynamic(() => import('@/components/admin').then((mod) => ({ default: mod.PasswordsPanel })), { ssr: false });
-const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), { ssr: false });
-const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), { ssr: false });
-const GuestAppEditor = dynamic(() => import('@/components/admin/GuestAppEditor'), { ssr: false });
-const RentalPricesEditor = dynamic(() => import('@/components/admin/RentalPricesEditor'), { ssr: false });
+const AdminLoadingFallback = () => <div className="animate-pulse h-96 bg-gray-100 rounded-lg" />;
 
+const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const FinanceOverview = dynamic(() => import('@/components/admin/FinanceOverview'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const UtilityCostsCalculator = dynamic(() => import('@/components/admin/UtilityCostsCalculator'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const ImageManager = dynamic(
+  () => import('@/components/admin/ImageManager').then((mod) => ({ default: mod.ImageManager })),
+  { ssr: false, loading: AdminLoadingFallback },
+);
+const PasswordsPanel = dynamic(
+  () =>
+    import('@/components/admin/PasswordsPanel').then((mod) => ({ default: mod.PasswordsPanel })),
+  { ssr: false, loading: AdminLoadingFallback },
+);
+const BlogEditor = dynamic(() => import('@/components/admin/BlogEditor'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const ReviewsManager = dynamic(() => import('@/components/admin/ReviewsManager'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const GuestAppEditor = dynamic(() => import('@/components/admin/GuestAppEditor'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const RentalPricesEditor = dynamic(() => import('@/components/admin/RentalPricesEditor'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
 
 function FullScreenLoader() {
   return (
@@ -45,9 +74,23 @@ function FullScreenLoader() {
   );
 }
 
-type AdminTab = 'guests' | 'finances' | 'utilities' | 'rental-prices' | 'images' | 'passwords' | 'blog' | 'reviews' | 'guestapp';
+type AdminTab =
+  | 'guests'
+  | 'finances'
+  | 'utilities'
+  | 'rental-prices'
+  | 'images'
+  | 'passwords'
+  | 'blog'
+  | 'reviews'
+  | 'guestapp';
 
-const TABS: { id: AdminTab; label: string; shortLabel: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const TABS: {
+  id: AdminTab;
+  label: string;
+  shortLabel: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
@@ -81,7 +124,9 @@ function AdminPageContent() {
     try {
       const saved = localStorage.getItem('sechszirben_demo_mode');
       if (saved === 'true') setIsDemoMode(true);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   // Sync browser back/forward with tab state
@@ -99,14 +144,16 @@ function AdminPageContent() {
     setIsDemoMode(newValue);
     try {
       localStorage.setItem('sechszirben_demo_mode', String(newValue));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   // Switch tabs using local state + pushState — bypasses Next.js router entirely
   // to avoid Suspense/fiber reconciliation conflicts that cause DOM errors
   const setActiveTab = useCallback((tab: AdminTab) => {
     if (tab === 'finances') {
-      setFinanceRefreshKey(prev => prev + 1);
+      setFinanceRefreshKey((prev) => prev + 1);
     }
     setActiveTabState(tab);
     window.history.pushState(null, '', `/admin?tab=${tab}`);
@@ -115,7 +162,6 @@ function AdminPageContent() {
   const handleDataLoaded = () => {
     setIsInitialLoading(false);
   };
-
 
   // Full screen loader
   if (isInitialLoading) {
@@ -130,7 +176,10 @@ function AdminPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white admin-panel" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div
+      className="min-h-screen bg-white admin-panel"
+      style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}
+    >
       {/* Demo Mode Banner */}
       {isDemoMode && (
         <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-center py-1.5 text-xs font-medium z-50 relative">
@@ -139,7 +188,10 @@ function AdminPageContent() {
       )}
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40" style={isDemoMode ? { top: '32px' } : {}}>
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40"
+        style={isDemoMode ? { top: '32px' } : {}}
+      >
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <a href="/" className="p-1 text-gray-400 hover:text-gray-600">
@@ -147,7 +199,7 @@ function AdminPageContent() {
             </a>
           </div>
           <h1 className="text-sm font-medium text-gray-900">
-            {TABS.find(t => t.id === activeTab)?.label}
+            {TABS.find((t) => t.id === activeTab)?.label}
           </h1>
           <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
         </div>
@@ -161,8 +213,12 @@ function AdminPageContent() {
               <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors">
                 <Home className="w-5 h-5" />
               </a>
-              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Sechszirbenhütte</h1>
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Admin</span>
+              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+                Sechszirbenhütte
+              </h1>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                Admin
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
@@ -232,10 +288,10 @@ function AdminPageContent() {
 
           {activeTab === 'blog' && <BlogEditor />}
 
-            {activeTab === 'reviews' && <ReviewsManager />}
+          {activeTab === 'reviews' && <ReviewsManager />}
 
-            {activeTab === 'guestapp' && <GuestAppEditor />}
-          </div>
+          {activeTab === 'guestapp' && <GuestAppEditor />}
+        </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
@@ -249,9 +305,7 @@ function AdminPageContent() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
-                  isActive
-                    ? 'text-green-600'
-                    : 'text-gray-400 active:text-gray-600'
+                  isActive ? 'text-green-600' : 'text-gray-400 active:text-gray-600'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />

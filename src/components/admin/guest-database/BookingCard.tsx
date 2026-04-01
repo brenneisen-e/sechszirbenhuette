@@ -53,11 +53,11 @@ export default function BookingCard({
   onDelete,
   demoMode = false,
 }: BookingCardProps) {
-  const statusStyle = STATUS_STYLES[effectiveStatus] || STATUS_STYLES.active;
-  const platform = getPlatformInfo(guest.platform || bookings[0]?.platform);
+  const statusStyle = STATUS_STYLES[effectiveStatus] ?? STATUS_STYLES['active']!;
+  const platform = getPlatformInfo(guest.platform || (bookings[0]?.platform ?? null));
   const nights = getNights(latestBooking.arrival, latestBooking.departure);
   const displayName = demoMode ? anonymizeGuestName(guest.guest_name) : guest.guest_name;
-  const totalPrice = bookings.reduce((sum, b) => sum + (b.rental_price || 0), 0) || guest.rental_price;
+  const totalPrice = (bookings.reduce((sum, b) => sum + (b.rental_price || 0), 0)) || guest.rental_price;
   const displayPrice = demoMode ? `~${roundDemoAmount(totalPrice).toLocaleString('de-DE')} EUR` : formatCurrency(totalPrice);
   const hasDog = guest.pets?.toLowerCase().includes('hund') ?? false;
   const latestBookingObj = bookings.length > 0

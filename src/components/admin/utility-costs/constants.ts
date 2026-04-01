@@ -17,7 +17,7 @@ export const DEFAULT_PRICING = {
   reinigung: 100.0, // € per booking
 };
 
-// Configuration for seasons and durations (supports 2-8 people)
+// Configuration for seasons and durations (supports 2-5 people)
 export const CONFIG = {
   summer: {
     name: 'Sommer',
@@ -26,15 +26,15 @@ export const CONFIG = {
     weeks: {
       1: {
         holzBuendel: 3, // Pellets im Sommer
-        trashBags: { 2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4 } as { [key in AdultsCount]: number },
-        electricityIncluded: { 2: 150, 3: 150, 4: 200, 5: 250, 6: 300, 7: 350, 8: 400 } as {
+        trashBags: { 2: 1, 3: 1, 4: 2, 5: 2 } as { [key in AdultsCount]: number },
+        electricityIncluded: { 2: 150, 3: 150, 4: 200, 5: 250 } as {
           [key in AdultsCount]: number;
         },
       },
       2: {
         holzBuendel: 6,
-        trashBags: { 2: 2, 3: 2, 4: 4, 5: 4, 6: 6, 7: 6, 8: 8 } as { [key in AdultsCount]: number },
-        electricityIncluded: { 2: 300, 3: 300, 4: 400, 5: 500, 6: 600, 7: 700, 8: 800 } as {
+        trashBags: { 2: 2, 3: 2, 4: 4, 5: 4 } as { [key in AdultsCount]: number },
+        electricityIncluded: { 2: 300, 3: 300, 4: 400, 5: 500 } as {
           [key in AdultsCount]: number;
         },
       },
@@ -47,15 +47,15 @@ export const CONFIG = {
     weeks: {
       1: {
         holzBuendel: 6, // Pellets im Winter
-        trashBags: { 2: 1, 3: 1, 4: 2, 5: 2, 6: 3, 7: 3, 8: 4 } as { [key in AdultsCount]: number },
-        electricityIncluded: { 2: 250, 3: 250, 4: 300, 5: 350, 6: 400, 7: 450, 8: 500 } as {
+        trashBags: { 2: 1, 3: 1, 4: 2, 5: 2 } as { [key in AdultsCount]: number },
+        electricityIncluded: { 2: 250, 3: 250, 4: 300, 5: 350 } as {
           [key in AdultsCount]: number;
         },
       },
       2: {
         holzBuendel: 12,
-        trashBags: { 2: 2, 3: 2, 4: 4, 5: 4, 6: 6, 7: 6, 8: 8 } as { [key in AdultsCount]: number },
-        electricityIncluded: { 2: 500, 3: 500, 4: 500, 5: 600, 6: 700, 7: 800, 8: 900 } as {
+        trashBags: { 2: 2, 3: 2, 4: 4, 5: 4 } as { [key in AdultsCount]: number },
+        electricityIncluded: { 2: 500, 3: 500, 4: 500, 5: 600 } as {
           [key in AdultsCount]: number;
         },
       },
@@ -63,19 +63,19 @@ export const CONFIG = {
   },
 } as const;
 
-// Gerundete Nebenkosten pro Woche/Personenzahl (2-8 Personen, Kurtaxe 2,70€ bis 31.10.2026, danach 4,50€)
+// Gerundete Nebenkosten pro Woche/Personenzahl (2-5 Personen, Kurtaxe 2,70€ bis 31.10.2026, danach 4,50€)
 export const WALLI_VALUES: {
   [season in 'summer' | 'winter']: { [weeks in WeeksCount]: { [adults in AdultsCount]: number } };
 } = {
   summer: {
-    1: { 2: 170, 3: 195, 4: 260, 5: 315, 6: 380, 7: 430, 8: 495 },
-    2: { 2: 340, 3: 390, 4: 515, 5: 630, 6: 760, 7: 865, 8: 995 },
+    1: { 2: 170, 3: 195, 4: 260, 5: 315 },
+    2: { 2: 340, 3: 390, 4: 515, 5: 630 },
   },
   winter: {
-    1: { 2: 252, 3: 277, 4: 340, 5: 395, 6: 460, 7: 515, 8: 580 },
-    2: { 2: 505, 3: 560, 4: 630, 5: 740, 6: 865, 7: 975, 8: 1105 },
+    1: { 2: 252, 3: 277, 4: 340, 5: 395 },
+    2: { 2: 505, 3: 560, 4: 630, 5: 740 },
   },
 };
 
 // Adults count options for iteration
-export const ADULTS_OPTIONS: AdultsCount[] = [2, 3, 4, 5, 6, 7, 8];
+export const ADULTS_OPTIONS: AdultsCount[] = [2, 3, 4, 5];

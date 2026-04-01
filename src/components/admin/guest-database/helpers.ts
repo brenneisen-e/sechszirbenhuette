@@ -117,19 +117,19 @@ export function parseGuestInfo(
   if (lines.length === 1) {
     // Try to find address pattern (street with number, postal code)
     const match = guestName.match(/^(.+?)\s+([A-Za-zäöüßÄÖÜ]+(?:str(?:aße|\.)?|weg|allee|platz|gasse)\s*\.?\s*\d+.*)$/i);
-    if (match) {
+    if (match?.[1] && match[2]) {
       return { name: match[1].trim(), address: match[2].trim() };
     }
     // Try postal code pattern
     const postalMatch = guestName.match(/^(.+?)\s+(\d{4,5}\s+.+)$/);
-    if (postalMatch) {
+    if (postalMatch?.[1] && postalMatch[2]) {
       return { name: postalMatch[1].trim(), address: postalMatch[2].trim() };
     }
     return { name: guestName, address: null };
   }
 
   // Multiple lines - first is name, rest is address
-  return { name: lines[0], address: lines.slice(1).join(', ') };
+  return { name: lines[0] ?? guestName, address: lines.slice(1).join(', ') };
 }
 
 /**

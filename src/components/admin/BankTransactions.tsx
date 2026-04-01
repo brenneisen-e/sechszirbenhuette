@@ -12,21 +12,21 @@ function parseDate(dateStr: string): Date {
   const germanMatch = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
   if (germanMatch) {
     const [, day, month, year] = germanMatch;
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return new Date(parseInt(year ?? '0'), parseInt(month ?? '0') - 1, parseInt(day ?? '0'));
   }
 
   // Try German format with spaces
   const germanSpaceMatch = dateStr.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})$/);
   if (germanSpaceMatch) {
     const [, day, month, year] = germanSpaceMatch;
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return new Date(parseInt(year ?? '0'), parseInt(month ?? '0') - 1, parseInt(day ?? '0'));
   }
 
   // Try ISO format (YYYY-MM-DD)
   const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (isoMatch) {
     const [, year, month, day] = isoMatch;
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return new Date(parseInt(year ?? '0'), parseInt(month ?? '0') - 1, parseInt(day ?? '0'));
   }
 
   return new Date(dateStr);

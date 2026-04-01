@@ -30,7 +30,7 @@ function parseGermanDate(german: string): string {
   const match = german.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
   if (!match) return '';
   const [, d, m, y] = match;
-  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  return `${y}-${(m ?? '').padStart(2, '0')}-${(d ?? '').padStart(2, '0')}`;
 }
 
 function getDaysInMonth(year: number, month: number): number {
@@ -172,8 +172,10 @@ export function GermanDateInput({ value, onChange, required, className = '', min
 
   const isSelected = useCallback((day: number): boolean => {
     if (!value) return false;
-    const [y, m] = value.split('-').map(Number);
-    const d = parseInt(value.split('-')[2]);
+    const parts = value.split('-').map(Number);
+    const y = parts[0] ?? 0;
+    const m = parts[1] ?? 0;
+    const d = parts[2] ?? 0;
     return y === calendarMonth.year && m - 1 === calendarMonth.month && d === day;
   }, [value, calendarMonth]);
 

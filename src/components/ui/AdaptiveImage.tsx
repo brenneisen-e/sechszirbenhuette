@@ -101,6 +101,7 @@ export function AdaptiveImage({
       connection.addEventListener('change', handleChange);
       return () => connection.removeEventListener?.('change', handleChange);
     }
+    return undefined;
   }, []);
 
   // Use consistent quality for initial render to prevent hydration mismatch
@@ -188,6 +189,7 @@ export function useNetworkQuality() {
       connection.addEventListener('change', updateQuality);
       return () => connection.removeEventListener?.('change', updateQuality);
     }
+    return undefined;
   }, []);
 
   return quality;
