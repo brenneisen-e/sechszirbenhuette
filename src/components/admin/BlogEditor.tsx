@@ -1,21 +1,12 @@
 'use client';
 
-import {
-  Plus,
-  X,
-  Loader2,
-  RefreshCw,
-  AlertCircle,
-  Check,
-} from 'lucide-react';
-import {
-  useBlogEditor,
-  BlogPostList,
-  BlogEditorForm,
-  BlogPreview,
-  MediaPickerModal,
-} from './blog-editor';
-import type { MediaItem } from './blog-editor';
+import { Plus, X, Loader2, RefreshCw, AlertCircle, Check } from 'lucide-react';
+import { useBlogEditor } from './blog-editor/useBlogEditor';
+import { BlogPostList } from './blog-editor/BlogPostList';
+import { BlogEditorForm } from './blog-editor/BlogEditorForm';
+import { BlogPreview } from './blog-editor/BlogPreview';
+import { MediaPickerModal } from './blog-editor/MediaPickerModal';
+import type { MediaItem } from './blog-editor/types';
 
 export default function BlogEditor() {
   const {
@@ -53,7 +44,7 @@ export default function BlogEditor() {
 
   const handleMediaSelect = (media: MediaItem) => {
     if (mediaPickerTarget === 'cover') {
-      setCurrentPost(prev => ({
+      setCurrentPost((prev) => ({
         ...prev,
         cover_image_url: media.url,
         cover_image_alt: media.alt_text,
@@ -158,11 +149,7 @@ export default function BlogEditor() {
       <div className="p-6">
         {/* Post List */}
         {activeTab === 'list' && (
-          <BlogPostList
-            posts={posts}
-            onEdit={handleEditPost}
-            onDelete={handleDelete}
-          />
+          <BlogPostList posts={posts} onEdit={handleEditPost} onDelete={handleDelete} />
         )}
 
         {/* Editor + Preview */}
@@ -174,7 +161,7 @@ export default function BlogEditor() {
               saving={saving}
               activeTab={activeTab}
               availableMedia={availableMedia}
-              onUpdatePost={(updates) => setCurrentPost(prev => ({ ...prev, ...updates }))}
+              onUpdatePost={(updates) => setCurrentPost((prev) => ({ ...prev, ...updates }))}
               onRemoveImage={removeImageFromGallery}
               onUpdateImage={updateImageInGallery}
               onReorderImages={reorderImages}

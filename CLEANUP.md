@@ -8,12 +8,12 @@ based on the 2025/2026 full-stack monorepo playbook.
 ## Status: What's been done
 
 - [x] **TSConfig hardened** — Added beyond-strict flags: `noUncheckedIndexedAccess`,
-  `noFallthroughCasesInSwitch`, `noImplicitReturns`, `noImplicitOverride`,
-  `forceConsistentCasingInFileNames`, `moduleDetection: "force"`, target bumped to ES2022
+      `noFallthroughCasesInSwitch`, `noImplicitReturns`, `noImplicitOverride`,
+      `forceConsistentCasingInFileNames`, `moduleDetection: "force"`, target bumped to ES2022
 - [x] **Prettier configured** — `.prettierrc` + `.prettierignore` added
 - [x] **EditorConfig added** — `.editorconfig` for consistent whitespace
 - [x] **package.json cleaned** — `@types/*` moved to `devDependencies`,
-  `typecheck`/`format`/`format:check` scripts added
+      `typecheck`/`format`/`format:check` scripts added
 - [x] **.gitignore updated** — Added `.open-next/` build artifacts
 
 ---
@@ -22,17 +22,17 @@ based on the 2025/2026 full-stack monorepo playbook.
 
 These files far exceed the 500-line hard limit:
 
-| File | Lines | Action |
-|------|-------|--------|
-| `GuestDatabase.tsx` | 2,151 | Split into sub-components: filters, table, modals |
-| `BookingWizard.tsx` | 1,734 | Extract step components, validation logic |
-| `BookingDetail.tsx` | 1,248 | Extract sections into sub-components |
-| `ImageManager.tsx` | 1,159 | Extract upload, gallery, modal components |
-| `FinanceOverview.tsx` | 1,146 | Extract charts, summary cards, tables |
-| `blog/[slug]/page.tsx` | 1,014 | Extract content renderer, sidebar, metadata |
-| `financeCalculations.ts` | 900 | Split by domain: tax, revenue, expense utils |
-| `GuestAppEditor.tsx` | 815 | Extract form sections into sub-components |
-| `BlogEditorForm.tsx` | 788 | Extract toolbar, preview, media picker |
+| File                     | Lines | Action                                            |
+| ------------------------ | ----- | ------------------------------------------------- |
+| `GuestDatabase.tsx`      | 2,151 | Split into sub-components: filters, table, modals |
+| `BookingWizard.tsx`      | 1,734 | Extract step components, validation logic         |
+| `BookingDetail.tsx`      | 1,248 | Extract sections into sub-components              |
+| `ImageManager.tsx`       | 1,159 | Extract upload, gallery, modal components         |
+| `FinanceOverview.tsx`    | 1,146 | Extract charts, summary cards, tables             |
+| `blog/[slug]/page.tsx`   | 1,014 | Extract content renderer, sidebar, metadata       |
+| `financeCalculations.ts` | 900   | Split by domain: tax, revenue, expense utils      |
+| `GuestAppEditor.tsx`     | 815   | Extract form sections into sub-components         |
+| `BlogEditorForm.tsx`     | 788   | Extract toolbar, preview, media picker            |
 
 **Approach**: Extract sub-components into sibling files within the same directory.
 Import directly — do NOT create new barrel files.
@@ -71,8 +71,8 @@ Currently ESLint is **disabled** (`ignoreDuringBuilds: true` in next.config.js).
 Set up a proper flat config:
 
 1. Install: `npm install -D eslint @eslint/js typescript-eslint eslint-plugin-react
-   eslint-plugin-react-hooks eslint-plugin-simple-import-sort
-   eslint-config-prettier globals`
+eslint-plugin-react-hooks eslint-plugin-simple-import-sort
+eslint-config-prettier globals`
 2. Create `eslint.config.js` with `strictTypeChecked` + `stylisticTypeChecked`
 3. Remove `ignoreDuringBuilds: true` from next.config.js
 4. Add `lint` step to CI
@@ -94,6 +94,7 @@ npx ncu --target minor
 ```
 
 **Known candidates for review**:
+
 - `jszip` — verify if still used or can be lazy-loaded
 - `hls.js` — should be lazy-loaded (video streaming, not needed at startup)
 - `framer-motion` — large library, verify usage scope
@@ -112,6 +113,7 @@ npx source-map-explorer .next/static/**/*.js
 ```
 
 **Quick wins**:
+
 - Lazy-load admin components (they're behind auth)
 - Lazy-load Tiptap editor (only used in admin)
 - Lazy-load `hls.js` (only used when video plays)
@@ -120,10 +122,10 @@ npx source-map-explorer .next/static/**/*.js
 
 ---
 
-## Priority 6: Binary files in git
+## Priority 6: Binary files in git ✅
 
-`Zeichnung Hütte 2.png` (2.4MB) is tracked in the repo root.
-Move to R2/CDN and reference by URL, or at minimum move to `public/`.
+`Zeichnung Hütte 2.png` moved to `public/images/zeichnung-huette.png`.
+`Welcome_Guide.pdf` moved to `public/welcome-guide.pdf`.
 
 ---
 
@@ -169,7 +171,7 @@ pre-commit:
   parallel: true
   commands:
     format:
-      glob: "*.{ts,tsx,js,jsx,json,css,md,yaml}"
+      glob: '*.{ts,tsx,js,jsx,json,css,md,yaml}'
       run: npx prettier --write {staged_files}
       stage_fixed: true
     typecheck:

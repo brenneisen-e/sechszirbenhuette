@@ -26,7 +26,7 @@ export function PineBackground() {
     <div
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-700"
       style={{
-        backgroundImage: 'url(/images/Zeichnung%20Hütte%202.png)',
+        backgroundImage: 'url(/images/zeichnung-huette.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
         backgroundSize: 'cover',

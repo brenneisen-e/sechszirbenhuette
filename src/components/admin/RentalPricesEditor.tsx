@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Pencil, X, Plus, Loader2, AlertTriangle, Calendar, Users, Check } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils/formatting';
-import { calculateUtilityCostsForBooking, DEFAULT_PRICING } from './utility-costs';
-import type { PricingSettings } from './utility-costs';
+import { calculateUtilityCostsForBooking } from './utility-costs/calculations';
+import { DEFAULT_PRICING } from './utility-costs/constants';
+import type { PricingSettings } from './utility-costs/types';
 
 interface RentalPrice {
   id: number;
@@ -59,7 +60,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
   const fetchPrices = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/rental-prices');
-      const data = await res.json() as { prices?: RentalPrice[]; tableExists?: boolean };
+      const data = (await res.json()) as { prices?: RentalPrice[]; tableExists?: boolean };
       setPrices(data.prices || []);
       setTableExists(data.tableExists !== false);
     } catch (err) {
@@ -77,22 +78,30 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         const data = (await res.json()) as { settings?: Record<string, string> };
         if (data.settings?.pricing_settings) {
           const saved = JSON.parse(data.settings.pricing_settings) as Partial<PricingSettings>;
-          setPricing(prev => ({ ...prev, ...saved }));
+          setPricing((prev) => ({ ...prev, ...saved }));
         }
         // Load kurtaxe rates from API
         const kRes = await fetch('/api/admin/kurtaxe-rates');
-        const kData = (await kRes.json()) as { rates?: { valid_from: string; valid_to: string | null; rate_per_person_per_day: number }[] };
+        const kData = (await kRes.json()) as {
+          rates?: {
+            valid_from: string;
+            valid_to: string | null;
+            rate_per_person_per_day: number;
+          }[];
+        };
         if (kData.rates && kData.rates.length > 0) {
-          setPricing(prev => ({
+          setPricing((prev) => ({
             ...prev,
-            kurtaxeRates: kData.rates!.map(r => ({
+            kurtaxeRates: kData.rates!.map((r) => ({
               from: r.valid_from,
               to: r.valid_to || '2099-12-31',
               rate: r.rate_per_person_per_day,
             })),
           }));
         }
-      } catch { /* use defaults */ }
+      } catch {
+        /* use defaults */
+      }
     };
     loadSettings();
   }, []);
@@ -165,11 +174,12 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
   };
 
   const saveBulk = async () => {
-    if (!bulkForm.name || !bulkForm.date_from || !bulkForm.date_to || !bulkForm.price_per_night) return;
+    if (!bulkForm.name || !bulkForm.date_from || !bulkForm.date_to || !bulkForm.price_per_night)
+      return;
 
     setBulkSaving(true);
     try {
-      const overlapping = prices.filter(p => {
+      const overlapping = prices.filter((p) => {
         return p.date_from <= bulkForm.date_to && p.date_to >= bulkForm.date_from;
       });
 
@@ -191,7 +201,13 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
       });
 
       setShowBulk(false);
-      setBulkForm({ name: '', date_from: '', date_to: '', price_per_night: '', mindestaufenthalt: '3' });
+      setBulkForm({
+        name: '',
+        date_from: '',
+        date_to: '',
+        price_per_night: '',
+        mindestaufenthalt: '3',
+      });
       await fetchPrices();
     } catch (err) {
       console.error('Failed to save bulk rental price:', err);
@@ -202,7 +218,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
 
   // Find the current price for the calculator
   const today = new Date().toISOString().split('T')[0] ?? '';
-  const currentPrice = prices.find(p => p.aktiv && p.date_from <= today && p.date_to >= today);
+  const currentPrice = prices.find((p) => p.aktiv && p.date_from <= today && p.date_to >= today);
 
   // Calculate using utility costs module
   const calcResult = (() => {
@@ -212,13 +228,25 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
     departure.setDate(departure.getDate() + calcNights);
     const departureDate = departure.toISOString().split('T')[0] ?? '';
 
-    const nkResult = calculateUtilityCostsForBooking(arrivalDate, departureDate, calcAdults, pricing);
+    const nkResult = calculateUtilityCostsForBooking(
+      arrivalDate,
+      departureDate,
+      calcAdults,
+      pricing,
+    );
     const rent = currentPrice.price_per_night * calcNights;
     const nebenkosten = nkResult.costs + nkResult.kurtaxe; // costs includes holz, water, trash, electricity, reinigung; plus kurtaxe
     const total = rent + nebenkosten;
     const bookingComTotal = rent * 1.2 + nebenkosten;
 
-    return { rent, nebenkosten, total, bookingComTotal, nkDetails: nkResult.details, breakdown: nkResult.breakdown };
+    return {
+      rent,
+      nebenkosten,
+      total,
+      bookingComTotal,
+      nkDetails: nkResult.details,
+      breakdown: nkResult.breakdown,
+    };
   })();
 
   if (loading) {
@@ -237,29 +265,33 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-medium text-amber-800">Mietpreise-Tabelle nicht vorhanden</p>
-            <p className="text-xs text-amber-600 mt-1">Bitte laden Sie die Admin-Seite erneut, um die Datenbank-Migration durchzuführen.</p>
+            <p className="text-xs text-amber-600 mt-1">
+              Bitte laden Sie die Admin-Seite erneut, um die Datenbank-Migration durchzuführen.
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
-  const inputClass = "border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none";
-  const numberInputClass = "border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-24 text-right font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none";
+  const inputClass =
+    'border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none';
+  const numberInputClass =
+    'border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-24 text-right font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none';
 
   const renderFormRow = (
     form: typeof editForm,
     setForm: (fn: (prev: typeof editForm) => typeof editForm) => void,
     onSave: () => void,
     onCancel: () => void,
-    isSaving: boolean
+    isSaving: boolean,
   ) => (
     <>
       <td className="px-4 py-2">
         <input
           type="text"
           value={form.name}
-          onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           className={inputClass}
           placeholder="z.B. Nebensaison"
         />
@@ -268,7 +300,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         <input
           type="date"
           value={form.date_from}
-          onChange={(e) => setForm(prev => ({ ...prev, date_from: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, date_from: e.target.value }))}
           className={inputClass}
         />
       </td>
@@ -276,7 +308,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         <input
           type="date"
           value={form.date_to}
-          onChange={(e) => setForm(prev => ({ ...prev, date_to: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, date_to: e.target.value }))}
           className={inputClass}
         />
       </td>
@@ -286,7 +318,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
             type="number"
             step="0.01"
             value={form.price_per_night}
-            onChange={(e) => setForm(prev => ({ ...prev, price_per_night: e.target.value }))}
+            onChange={(e) => setForm((prev) => ({ ...prev, price_per_night: e.target.value }))}
             className={numberInputClass}
             placeholder="0.00"
           />
@@ -298,19 +330,28 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
           type="number"
           min="1"
           value={form.mindestaufenthalt}
-          onChange={(e) => setForm(prev => ({ ...prev, mindestaufenthalt: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, mindestaufenthalt: e.target.value }))}
           className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-14 text-center font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
       </td>
-      <td className="px-4 py-2">
-        {/* Booking.com column: not editable, calculated */}
-      </td>
+      <td className="px-4 py-2">{/* Booking.com column: not editable, calculated */}</td>
       <td className="px-4 py-2">
         <div className="flex items-center gap-1 justify-end">
-          <button onClick={onSave} disabled={isSaving} className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors">
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-xs font-medium">OK</span>}
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors"
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <span className="text-xs font-medium">OK</span>
+            )}
           </button>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors">
+          <button
+            onClick={onCancel}
+            className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -324,7 +365,9 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Mietpreise</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Nachtpreise verwalten &middot; Nebenkosten werden aus dem NK-Reiter berechnet</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Nachtpreise verwalten &middot; Nebenkosten werden aus dem NK-Reiter berechnet
+          </p>
         </div>
       </div>
 
@@ -343,8 +386,10 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
               onChange={(e) => setCalcAdults(parseInt(e.target.value))}
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
             >
-              {[2, 3, 4, 5, 6, 7, 8].map(n => (
-                <option key={n} value={n}>{n} Personen</option>
+              {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <option key={n} value={n}>
+                  {n} Personen
+                </option>
               ))}
             </select>
           </div>
@@ -364,19 +409,27 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
             <div className="flex items-center gap-6 ml-4 flex-wrap">
               <div>
                 <span className="block text-xs text-gray-500">Miete</span>
-                <span className="text-sm font-mono font-medium text-gray-900">{demoMode ? '***' : formatCurrency(calcResult.rent)}</span>
+                <span className="text-sm font-mono font-medium text-gray-900">
+                  {demoMode ? '***' : formatCurrency(calcResult.rent)}
+                </span>
               </div>
               <div>
                 <span className="block text-xs text-gray-500">Nebenkosten</span>
-                <span className="text-sm font-mono font-medium text-gray-900">{demoMode ? '***' : formatCurrency(calcResult.nebenkosten)}</span>
+                <span className="text-sm font-mono font-medium text-gray-900">
+                  {demoMode ? '***' : formatCurrency(calcResult.nebenkosten)}
+                </span>
               </div>
               <div className="border-l border-gray-300 pl-6">
                 <span className="block text-xs text-gray-500 font-medium">Gesamt (Direkt)</span>
-                <span className="text-base font-mono font-semibold text-green-700">{demoMode ? '***' : formatCurrency(calcResult.total)}</span>
+                <span className="text-base font-mono font-semibold text-green-700">
+                  {demoMode ? '***' : formatCurrency(calcResult.total)}
+                </span>
               </div>
               <div className="border-l border-gray-300 pl-6">
                 <span className="block text-xs text-blue-500 font-medium">Booking.com</span>
-                <span className="text-base font-mono font-semibold text-blue-700">{demoMode ? '***' : formatCurrency(calcResult.bookingComTotal)}</span>
+                <span className="text-base font-mono font-semibold text-blue-700">
+                  {demoMode ? '***' : formatCurrency(calcResult.bookingComTotal)}
+                </span>
                 <span className="block text-[10px] text-blue-400">Miete &times; 1,2 + NK</span>
               </div>
             </div>
@@ -390,31 +443,51 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         {/* NK Breakdown */}
         {calcResult && !demoMode && (
           <div className="mt-4 pt-3 border-t border-gray-200">
-            <p className="text-xs text-gray-500 mb-2">NK-Aufschlüsselung ({calcResult.nkDetails}):</p>
+            <p className="text-xs text-gray-500 mb-2">
+              NK-Aufschlüsselung ({calcResult.nkDetails}):
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
                 <span className="text-gray-400 block">Kurtaxe</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.kurtaxe)}</span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.kurtaxe)}
+                </span>
               </div>
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
-                <span className="text-gray-400 block">Holz ({calcResult.breakdown.holzBuendel} Bdl.)</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.holz)}</span>
+                <span className="text-gray-400 block">
+                  Holz ({calcResult.breakdown.holzBuendel} Bdl.)
+                </span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.holz)}
+                </span>
               </div>
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
                 <span className="text-gray-400 block">Wasser</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.water)}</span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.water)}
+                </span>
               </div>
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
-                <span className="text-gray-400 block">Müll ({calcResult.breakdown.trashBags} Sack)</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.trash)}</span>
+                <span className="text-gray-400 block">
+                  Müll ({calcResult.breakdown.trashBags} Sack)
+                </span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.trash)}
+                </span>
               </div>
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
-                <span className="text-gray-400 block">Strom ({calcResult.breakdown.electricityKwh} kWh)</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.electricity)}</span>
+                <span className="text-gray-400 block">
+                  Strom ({calcResult.breakdown.electricityKwh} kWh)
+                </span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.electricity)}
+                </span>
               </div>
               <div className="bg-white rounded px-2 py-1.5 border border-gray-100">
                 <span className="text-gray-400 block">Reinigung</span>
-                <span className="font-mono font-medium text-gray-900">{formatCurrency(calcResult.breakdown.reinigung)}</span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatCurrency(calcResult.breakdown.reinigung)}
+                </span>
               </div>
             </div>
           </div>
@@ -422,9 +495,11 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
 
         {currentPrice && (
           <div className="mt-3 text-xs text-gray-500">
-            Aktueller Zeitraum: <span className="font-medium text-gray-700">{currentPrice.name}</span>
-            {' '}({new Date(currentPrice.date_from).toLocaleDateString('de-DE')} &ndash; {new Date(currentPrice.date_to).toLocaleDateString('de-DE')})
-            {' '}&middot; {demoMode ? '***' : formatCurrency(currentPrice.price_per_night)}/Nacht
+            Aktueller Zeitraum:{' '}
+            <span className="font-medium text-gray-700">{currentPrice.name}</span> (
+            {new Date(currentPrice.date_from).toLocaleDateString('de-DE')} &ndash;{' '}
+            {new Date(currentPrice.date_to).toLocaleDateString('de-DE')}) &middot;{' '}
+            {demoMode ? '***' : formatCurrency(currentPrice.price_per_night)}/Nacht
           </div>
         )}
       </div>
@@ -449,7 +524,8 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
         {showBulk && (
           <div className="space-y-4">
             <p className="text-xs text-gray-500">
-              Definieren Sie einen Zeitraum mit einheitlichem Preis. Bestehende überlappende Einträge werden ersetzt.
+              Definieren Sie einen Zeitraum mit einheitlichem Preis. Bestehende überlappende
+              Einträge werden ersetzt.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
@@ -457,7 +533,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                 <input
                   type="text"
                   value={bulkForm.name}
-                  onChange={(e) => setBulkForm(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => setBulkForm((prev) => ({ ...prev, name: e.target.value }))}
                   className={inputClass}
                   placeholder="z.B. Nebensaison Winter"
                 />
@@ -467,7 +543,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                 <input
                   type="date"
                   value={bulkForm.date_from}
-                  onChange={(e) => setBulkForm(prev => ({ ...prev, date_from: e.target.value }))}
+                  onChange={(e) => setBulkForm((prev) => ({ ...prev, date_from: e.target.value }))}
                   className={inputClass}
                 />
               </div>
@@ -476,7 +552,7 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                 <input
                   type="date"
                   value={bulkForm.date_to}
-                  onChange={(e) => setBulkForm(prev => ({ ...prev, date_to: e.target.value }))}
+                  onChange={(e) => setBulkForm((prev) => ({ ...prev, date_to: e.target.value }))}
                   className={inputClass}
                 />
               </div>
@@ -487,7 +563,9 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                     type="number"
                     step="0.01"
                     value={bulkForm.price_per_night}
-                    onChange={(e) => setBulkForm(prev => ({ ...prev, price_per_night: e.target.value }))}
+                    onChange={(e) =>
+                      setBulkForm((prev) => ({ ...prev, price_per_night: e.target.value }))
+                    }
                     className={inputClass}
                     placeholder="0.00"
                   />
@@ -495,51 +573,69 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Mindestaufenthalt (Nächte)</label>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Mindestaufenthalt (Nächte)
+                </label>
                 <input
                   type="number"
                   min="1"
                   value={bulkForm.mindestaufenthalt}
-                  onChange={(e) => setBulkForm(prev => ({ ...prev, mindestaufenthalt: e.target.value }))}
+                  onChange={(e) =>
+                    setBulkForm((prev) => ({ ...prev, mindestaufenthalt: e.target.value }))
+                  }
                   className={inputClass}
                 />
               </div>
             </div>
 
             {/* Preview of overlapping periods */}
-            {bulkForm.date_from && bulkForm.date_to && (() => {
-              const overlapping = prices.filter(p =>
-                p.date_from <= bulkForm.date_to && p.date_to >= bulkForm.date_from
-              );
-              if (overlapping.length === 0) return null;
-              return (
-                <div className="border border-amber-200 bg-amber-50 rounded-lg p-3">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs font-medium text-amber-800">
-                        {overlapping.length} bestehende{overlapping.length === 1 ? 'r' : ''} Zeitraum{overlapping.length > 1 ? 'räume' : ''} wird ersetzt:
-                      </p>
-                      <ul className="mt-1 space-y-0.5">
-                        {overlapping.map(p => (
-                          <li key={p.id} className="text-xs text-amber-700">
-                            {p.name} ({new Date(p.date_from).toLocaleDateString('de-DE')} &ndash; {new Date(p.date_to).toLocaleDateString('de-DE')})
-                          </li>
-                        ))}
-                      </ul>
+            {bulkForm.date_from &&
+              bulkForm.date_to &&
+              (() => {
+                const overlapping = prices.filter(
+                  (p) => p.date_from <= bulkForm.date_to && p.date_to >= bulkForm.date_from,
+                );
+                if (overlapping.length === 0) return null;
+                return (
+                  <div className="border border-amber-200 bg-amber-50 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-amber-800">
+                          {overlapping.length} bestehende{overlapping.length === 1 ? 'r' : ''}{' '}
+                          Zeitraum{overlapping.length > 1 ? 'räume' : ''} wird ersetzt:
+                        </p>
+                        <ul className="mt-1 space-y-0.5">
+                          {overlapping.map((p) => (
+                            <li key={p.id} className="text-xs text-amber-700">
+                              {p.name} ({new Date(p.date_from).toLocaleDateString('de-DE')} &ndash;{' '}
+                              {new Date(p.date_to).toLocaleDateString('de-DE')})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
             <div className="flex items-center gap-2">
               <button
                 onClick={saveBulk}
-                disabled={bulkSaving || !bulkForm.name || !bulkForm.date_from || !bulkForm.date_to || !bulkForm.price_per_night}
+                disabled={
+                  bulkSaving ||
+                  !bulkForm.name ||
+                  !bulkForm.date_from ||
+                  !bulkForm.date_to ||
+                  !bulkForm.price_per_night
+                }
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {bulkSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                {bulkSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
                 Zeitraum speichern
               </button>
               <button
@@ -554,8 +650,8 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
 
         {!showBulk && (
           <p className="text-xs text-gray-400">
-            Legen Sie schnell einen Preiszeitraum an, z.B. &quot;01.01.2026 &ndash; 31.03.2026 = 150 &euro;/Nacht&quot;.
-            Bestehende überlappende Einträge werden automatisch ersetzt.
+            Legen Sie schnell einen Preiszeitraum an, z.B. &quot;01.01.2026 &ndash; 31.03.2026 = 150
+            &euro;/Nacht&quot;. Bestehende überlappende Einträge werden automatisch ersetzt.
           </p>
         )}
       </div>
@@ -571,23 +667,40 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Bezeichnung</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Von</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Bis</th>
-                  <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Preis/Nacht</th>
-                  <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Min. Nächte</th>
-                  <th className="text-right text-xs font-medium text-blue-500 uppercase tracking-wide px-4 py-3">Booking.com/Nacht</th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                    Bezeichnung
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                    Von
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                    Bis
+                  </th>
+                  <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                    Preis/Nacht
+                  </th>
+                  <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                    Min. Nächte
+                  </th>
+                  <th className="text-right text-xs font-medium text-blue-500 uppercase tracking-wide px-4 py-3">
+                    Booking.com/Nacht
+                  </th>
                   <th className="w-20 px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {prices.map((price) => (
-                  <tr key={price.id} className={`admin-row hover:bg-gray-50 transition-colors ${!price.aktiv ? 'opacity-50' : ''}`}>
+                  <tr
+                    key={price.id}
+                    className={`admin-row hover:bg-gray-50 transition-colors ${!price.aktiv ? 'opacity-50' : ''}`}
+                  >
                     {editingId === price.id ? (
                       renderFormRow(editForm, setEditForm, savePrice, cancelEdit, saving)
                     ) : (
                       <>
-                        <td className="px-4 py-3 text-sm text-gray-900 font-medium">{price.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                          {price.name}
+                        </td>
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {new Date(price.date_from).toLocaleDateString('de-DE')}
                         </td>
@@ -636,7 +749,8 @@ export default function RentalPricesEditor({ demoMode = false }: RentalPricesEdi
 
           {prices.length === 0 && !showAdd && (
             <div className="text-center py-8 text-sm text-gray-400">
-              Noch keine Preiszeiträume angelegt. Nutzen Sie die Massenänderung oder fügen Sie einzelne Einträge hinzu.
+              Noch keine Preiszeiträume angelegt. Nutzen Sie die Massenänderung oder fügen Sie
+              einzelne Einträge hinzu.
             </div>
           )}
         </div>

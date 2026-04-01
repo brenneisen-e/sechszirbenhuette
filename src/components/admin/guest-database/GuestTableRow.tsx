@@ -1,24 +1,40 @@
 'use client';
 
 import {
-  Mail, Phone, Calendar, ChevronDown, ChevronUp,
-  Edit3, Trash2, Users, ListTodo, CalendarRange
+  Mail,
+  Phone,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Edit3,
+  Trash2,
+  Users,
+  ListTodo,
+  CalendarRange,
 } from 'lucide-react';
 import type {
-  Guest, Booking, Task, BankPayment,
-  GuestDocument, GuestNote, GuestProfileTab
+  Guest,
+  Booking,
+  Task,
+  BankPayment,
+  GuestDocument,
+  GuestNote,
+  GuestProfileTab,
 } from './types';
-import type { PricingSettings } from '../utility-costs';
+import type { PricingSettings } from '../utility-costs/types';
 import { NationalityFlags } from './FlagIcon';
 import {
-  formatDate, formatCurrency, parseGuestInfo,
-  getGuestPlatforms, getPlatformBadgeStyle,
+  formatDate,
+  formatCurrency,
+  parseGuestInfo,
+  getGuestPlatforms,
+  getPlatformBadgeStyle,
   getEffectiveBookingAmount,
 } from './helpers';
 import { getStatusClasses } from './constants';
-import { GuestOverviewTab } from './tabs';
-import { GuestBookingsTab } from './tabs';
-import { GuestTasksTab } from './tabs';
+import { GuestOverviewTab } from './tabs/GuestOverviewTab';
+import { GuestBookingsTab } from './tabs/GuestBookingsTab';
+import { GuestTasksTab } from './tabs/GuestTasksTab';
 import {
   anonymizeGuestName,
   anonymizeEmail,
@@ -56,15 +72,23 @@ interface GuestTableRowProps {
   onEditBooking: (booking: Booking) => void;
   onDeleteBooking: (bookingId: number) => Promise<void>;
   onToggleCleaningCash: (bookingId: number, isCash: boolean) => Promise<void>;
-  onTogglePaymentStatus: (bookingId: number, field: 'deposit_paid' | 'final_payment_paid', value: number) => void;
-  onUpdateTransactions: (bookingId: number, transactions: Array<{
-    date: string;
-    amount: number;
-    type: 'payment' | 'refund';
-    status: string;
-    description?: string;
-    fee?: number;
-  }>, payoutDate: string) => void;
+  onTogglePaymentStatus: (
+    bookingId: number,
+    field: 'deposit_paid' | 'final_payment_paid',
+    value: number,
+  ) => void;
+  onUpdateTransactions: (
+    bookingId: number,
+    transactions: Array<{
+      date: string;
+      amount: number;
+      type: 'payment' | 'refund';
+      status: string;
+      description?: string;
+      fee?: number;
+    }>,
+    payoutDate: string,
+  ) => void;
   onUploadDocument: (bookingId: number, guestId: number, file: File) => Promise<void>;
   // Note handlers
   onAddNote: (content: string) => Promise<void>;
@@ -137,19 +161,12 @@ export function GuestTableRow({
 
   return (
     <>
-      <tr
-        className="hover:bg-gray-50 cursor-pointer"
-        onClick={onToggleRow}
-      >
+      <tr className="hover:bg-gray-50 cursor-pointer" onClick={onToggleRow}>
         {/* Name */}
         <td className="px-3 py-3">
           <div className="flex items-center gap-2">
             <span className="text-gray-400 text-xs w-5 flex items-center gap-0.5">
-              {isExpanded ? (
-                <ChevronUp className="w-3 h-3" />
-              ) : (
-                <ChevronDown className="w-3 h-3" />
-              )}
+              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               {displayNumber}
             </span>
             <NationalityFlags nationality={guest.nationality} size="tiny" round />
@@ -176,26 +193,32 @@ export function GuestTableRow({
                 <span className="truncate">{displayPhone}</span>
               </div>
             )}
-            {!guest.email && !guest.phone && (
-              <span className="text-gray-400">-</span>
-            )}
+            {!guest.email && !guest.phone && <span className="text-gray-400">-</span>}
           </div>
         </td>
         {/* Buchungen */}
         <td className="px-3 py-3">
           {(() => {
             const bookingCount = bookings.length;
-            if (bookingCount === 0) return <span className="text-xs text-gray-400">Keine Buchungen</span>;
+            if (bookingCount === 0)
+              return <span className="text-xs text-gray-400">Keine Buchungen</span>;
             const latestBooking = getLatestBooking();
-            const totalRentalPrice = bookings.reduce((sum, b) => sum + getEffectiveBookingAmount(b), 0);
+            const totalRentalPrice = bookings.reduce(
+              (sum, b) => sum + getEffectiveBookingAmount(b),
+              0,
+            );
             return (
               <div className="text-xs space-y-0.5">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3 text-gray-400" />
-                  <span>{formatDate(latestBooking.arrival)} - {formatDate(latestBooking.departure)}</span>
+                  <span>
+                    {formatDate(latestBooking.arrival)} - {formatDate(latestBooking.departure)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-500">
-                  <span className="font-medium text-gray-700">{demoFormatCurrency(totalRentalPrice)}</span>
+                  <span className="font-medium text-gray-700">
+                    {demoFormatCurrency(totalRentalPrice)}
+                  </span>
                   {bookingCount > 1 && (
                     <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full text-xs">
                       {bookingCount} Buchungen
@@ -262,7 +285,11 @@ export function GuestTableRow({
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-4 border-b border-gray-200">
               <button
-                onClick={(e) => { e.stopPropagation(); onTabChange('overview'); onLoadNotes(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTabChange('overview');
+                  onLoadNotes();
+                }}
                 className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-2 ${
                   guestProfileTab === 'overview'
                     ? 'bg-white text-primary border-t border-l border-r border-gray-200 -mb-px'
@@ -273,7 +300,11 @@ export function GuestTableRow({
                 Übersicht
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onTabChange('bookings'); onLoadDocuments(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTabChange('bookings');
+                  onLoadDocuments();
+                }}
                 className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-2 ${
                   guestProfileTab === 'bookings'
                     ? 'bg-white text-primary border-t border-l border-r border-gray-200 -mb-px'
@@ -289,7 +320,10 @@ export function GuestTableRow({
                 )}
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onTabChange('tasks'); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTabChange('tasks');
+                }}
                 className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-2 ${
                   guestProfileTab === 'tasks'
                     ? 'bg-white text-primary border-t border-l border-r border-gray-200 -mb-px'
@@ -298,9 +332,9 @@ export function GuestTableRow({
               >
                 <ListTodo className="w-4 h-4" />
                 Aufgaben
-                {guestTasks.filter(t => !t.is_completed).length > 0 && (
+                {guestTasks.filter((t) => !t.is_completed).length > 0 && (
                   <span className="bg-purple-100 text-purple-700 text-xs px-1.5 rounded-full">
-                    {guestTasks.filter(t => !t.is_completed).length}
+                    {guestTasks.filter((t) => !t.is_completed).length}
                   </span>
                 )}
               </button>
@@ -338,7 +372,9 @@ export function GuestTableRow({
                   onToggleCleaningCash={onToggleCleaningCash}
                   onTogglePaymentStatus={onTogglePaymentStatus}
                   onUpdateTransactions={onUpdateTransactions}
-                  onUploadDocument={(bookingId, guestId, file) => onUploadDocument(bookingId, guestId, file)}
+                  onUploadDocument={(bookingId, guestId, file) =>
+                    onUploadDocument(bookingId, guestId, file)
+                  }
                 />
               )}
 

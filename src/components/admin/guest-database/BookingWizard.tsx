@@ -3,16 +3,34 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Loader2, Save, X, ChevronRight, ChevronLeft, Check, Plus, Minus,
-  Calendar, Users, Euro, Building2, Mail, Phone, MessageSquare,
-  Globe, Home, CreditCard, Banknote, Info, ListChecks, AlertTriangle,
-  Dog, Package, Lock,
+  Loader2,
+  Save,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Plus,
+  Minus,
+  Calendar,
+  Users,
+  Euro,
+  Building2,
+  Mail,
+  Phone,
+  MessageSquare,
+  Globe,
+  Home,
+  CreditCard,
+  Banknote,
+  Info,
+  ListChecks,
+  AlertTriangle,
+  Dog,
+  Package,
+  Lock,
 } from 'lucide-react';
 import { type Booking, type PrivateBookingConfig, DEFAULT_PRIVATE_CONFIG } from './types';
-import {
-  PLATFORM_CONFIGS, STATUS_STYLES, STATUS_OPTIONS,
-  type PlatformConfig,
-} from './constants';
+import { PLATFORM_CONFIGS, STATUS_STYLES, STATUS_OPTIONS, type PlatformConfig } from './constants';
 import { formatCurrency } from '@/lib/utils/formatting';
 import {
   calculateBookingFinances,
@@ -23,7 +41,7 @@ import {
   KOMFORTPAKET_COST_PER_PERSON,
   KOMFORTPAKET_DEFAULT_PRICE,
 } from '@/lib/utils/financeCalculations';
-import { PositionsEditor } from '@/components/admin/positions';
+import PositionsEditor from '@/components/admin/positions/PositionsEditor';
 import type { BookingPosition } from '@/lib/types/positions';
 import type { PositionCalcContext } from '@/lib/utils/positionCalculator';
 import { GermanDateInput } from './GermanDateInput';
@@ -64,14 +82,62 @@ const WIZARD_PLATFORMS: Array<{
   icon: React.ReactNode;
   config: PlatformConfig;
 }> = [
-  { key: 'booking',  dbValue: 'Booking.com',  label: 'Booking.com',   icon: <Building2 className="w-5 h-5" />, config: PLATFORM_CONFIGS[0]! },
-  { key: 'fewo',     dbValue: 'FeWo',         label: 'FeWo / VRBO',   icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[1]! },
-  { key: 'airbnb',   dbValue: 'Airbnb',       label: 'Airbnb',        icon: <Home className="w-5 h-5" />,      config: PLATFORM_CONFIGS[2]! },
-  { key: 'feratel',  dbValue: 'Feratel',      label: 'Feratel',       icon: <Globe className="w-5 h-5" />,     config: PLATFORM_CONFIGS[3]! },
-  { key: 'direct',   dbValue: 'E-Mail',       label: 'E-Mail/Direkt', icon: <Mail className="w-5 h-5" />,      config: PLATFORM_CONFIGS[4]! },
-  { key: 'direct',   dbValue: 'WhatsApp',     label: 'WhatsApp',      icon: <MessageSquare className="w-5 h-5" />, config: PLATFORM_CONFIGS[5]! },
-  { key: 'direct',   dbValue: 'Telefon',      label: 'Telefon',       icon: <Phone className="w-5 h-5" />,     config: PLATFORM_CONFIGS[6]! },
-  { key: 'private',  dbValue: 'Privat',       label: 'Privat',        icon: <Users className="w-5 h-5" />,     config: PLATFORM_CONFIGS[7]! },
+  {
+    key: 'booking',
+    dbValue: 'Booking.com',
+    label: 'Booking.com',
+    icon: <Building2 className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[0]!,
+  },
+  {
+    key: 'fewo',
+    dbValue: 'FeWo',
+    label: 'FeWo / VRBO',
+    icon: <Globe className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[1]!,
+  },
+  {
+    key: 'airbnb',
+    dbValue: 'Airbnb',
+    label: 'Airbnb',
+    icon: <Home className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[2]!,
+  },
+  {
+    key: 'feratel',
+    dbValue: 'Feratel',
+    label: 'Feratel',
+    icon: <Globe className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[3]!,
+  },
+  {
+    key: 'direct',
+    dbValue: 'E-Mail',
+    label: 'E-Mail/Direkt',
+    icon: <Mail className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[4]!,
+  },
+  {
+    key: 'direct',
+    dbValue: 'WhatsApp',
+    label: 'WhatsApp',
+    icon: <MessageSquare className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[5]!,
+  },
+  {
+    key: 'direct',
+    dbValue: 'Telefon',
+    label: 'Telefon',
+    icon: <Phone className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[6]!,
+  },
+  {
+    key: 'private',
+    dbValue: 'Privat',
+    label: 'Privat',
+    icon: <Users className="w-5 h-5" />,
+    config: PLATFORM_CONFIGS[7]!,
+  },
 ];
 
 function getPlatformType(platform: string | null): PlatformType {
@@ -86,23 +152,34 @@ function getPlatformType(platform: string | null): PlatformType {
 }
 
 function getPlatformConfigForDb(dbValue: string): PlatformConfig {
-  const entry = WIZARD_PLATFORMS.find(p => p.dbValue === dbValue);
+  const entry = WIZARD_PLATFORMS.find((p) => p.dbValue === dbValue);
   return entry?.config || PLATFORM_CONFIGS[4]!; // default to mail/direct
 }
 
 function getSeason(arrivalDate: string): 'Sommer' | 'Winter' {
   const month = new Date(arrivalDate).getMonth() + 1;
-  return (month >= 5 && month <= 9) ? 'Sommer' : 'Winter';
+  return month >= 5 && month <= 9 ? 'Sommer' : 'Winter';
 }
 
 // ============================================================================
 // INPUT COMPONENT (green focus ring)
 // ============================================================================
 
-const focusClasses = 'focus:outline-none focus:ring-2 focus:ring-[rgba(22,163,74,0.15)] focus:border-[var(--admin-accent,#16a34a)]';
+const focusClasses =
+  'focus:outline-none focus:ring-2 focus:ring-[rgba(22,163,74,0.15)] focus:border-[var(--admin-accent,#16a34a)]';
 
-function NumberStepper({ value, onChange, min = 0, max = 20, label }: {
-  value: number; onChange: (v: number) => void; min?: number; max?: number; label?: string;
+function NumberStepper({
+  value,
+  onChange,
+  min = 0,
+  max = 20,
+  label,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  label?: string;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -172,11 +249,19 @@ export function BookingWizard({
   const [bookingNumber, setBookingNumber] = useState(booking?.booking_number || '');
 
   // ── Private booking config ──
-  const existingPrivateConfig = booking?.private_config ? parsePrivateConfig(booking.private_config) : null;
-  const [privateMieteZero, setPrivateMieteZero] = useState(existingPrivateConfig?.miete_zero ?? true);
+  const existingPrivateConfig = booking?.private_config
+    ? parsePrivateConfig(booking.private_config)
+    : null;
+  const [privateMieteZero, setPrivateMieteZero] = useState(
+    existingPrivateConfig?.miete_zero ?? true,
+  );
   const [privateNkPaid, setPrivateNkPaid] = useState(existingPrivateConfig?.nk_paid ?? false);
-  const [privateKurtaxePaid, setPrivateKurtaxePaid] = useState(existingPrivateConfig?.kurtaxe_paid ?? false);
-  const [privateProvisionCharged, setPrivateProvisionCharged] = useState(existingPrivateConfig?.provision_charged ?? false);
+  const [privateKurtaxePaid, setPrivateKurtaxePaid] = useState(
+    existingPrivateConfig?.kurtaxe_paid ?? false,
+  );
+  const [privateProvisionCharged, setPrivateProvisionCharged] = useState(
+    existingPrivateConfig?.provision_charged ?? false,
+  );
 
   // ── Step 2: Stay & Guests ──
   const [arrivalDate, setArrivalDate] = useState(booking?.arrival_date || '');
@@ -196,7 +281,7 @@ export function BookingWizard({
   const [nebenkostenIncome, setNebenkostenIncome] = useState(0);
   const [cleaningFeeIncome, setCleaningFeeIncome] = useState(0);
   const [kurtaxeIncome, setKurtaxeIncome] = useState(0);
-  const [kurtaxeInputStr, setKurtaxeInputStr] = useState('');  // String-State für Input (erlaubt "0")
+  const [kurtaxeInputStr, setKurtaxeInputStr] = useState(''); // String-State für Input (erlaubt "0")
   const [payoutDate, setPayoutDate] = useState('');
   const [cleaningCash, setCleaningCash] = useState(booking?.cleaning_cash === 1);
   const [utilitiesCash, setUtilitiesCash] = useState(booking?.utilities_cash === 1);
@@ -226,20 +311,29 @@ export function BookingWizard({
   const [notes, setNotes] = useState(booking?.notes || '');
 
   // ── Pricing settings from DB ──
-  const [pricingSettings, setPricingSettings] = useState<Record<string, unknown> | undefined>(undefined);
+  const [pricingSettings, setPricingSettings] = useState<Record<string, unknown> | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     // Load pricing settings (kurtaxeRates etc.) from DB
     fetch('/api/admin/settings')
-      .then(res => res.json() as Promise<{ settings?: Record<string, string> }>)
+      .then((res) => res.json() as Promise<{ settings?: Record<string, string> }>)
       .then((data) => {
         if (data.settings) {
           let kurtaxeRates: Array<{ from: string; to: string; rate: number }> | undefined;
           if (data.settings.kurtaxe_rates) {
             try {
-              kurtaxeRates = (JSON.parse(data.settings.kurtaxe_rates) as Array<{ from: string; to: string; rate: number }>)
-                .map(r => ({ from: r.from, to: r.to, rate: r.rate }));
-            } catch { /* ignore */ }
+              kurtaxeRates = (
+                JSON.parse(data.settings.kurtaxe_rates) as Array<{
+                  from: string;
+                  to: string;
+                  rate: number;
+                }>
+              ).map((r) => ({ from: r.from, to: r.to, rate: r.rate }));
+            } catch {
+              /* ignore */
+            }
           }
           setPricingSettings({
             kurtaxe: parseFloat(data.settings.kurtaxe_rate ?? '') || 2.7,
@@ -252,7 +346,9 @@ export function BookingWizard({
           });
         }
       })
-      .catch(() => { /* use defaults */ });
+      .catch(() => {
+        /* use defaults */
+      });
   }, []);
 
   // ── Derived ──
@@ -261,12 +357,14 @@ export function BookingWizard({
   const hasDog = pets.toLowerCase().includes('hund');
 
   // Build granular private config
-  const privateConfig: PrivateBookingConfig | undefined = isPrivate ? {
-    miete_zero: privateMieteZero,
-    nk_paid: privateNkPaid,
-    kurtaxe_paid: privateKurtaxePaid,
-    provision_charged: privateProvisionCharged,
-  } : undefined;
+  const privateConfig: PrivateBookingConfig | undefined = isPrivate
+    ? {
+        miete_zero: privateMieteZero,
+        nk_paid: privateNkPaid,
+        kurtaxe_paid: privateKurtaxePaid,
+        provision_charged: privateProvisionCharged,
+      }
+    : undefined;
 
   // ── Auto-set departure = arrival + 7 days (only when creating new booking) ──
   useEffect(() => {
@@ -279,12 +377,14 @@ export function BookingWizard({
     departure.setDate(departure.getDate() + 7);
     const iso = `${departure.getFullYear()}-${(departure.getMonth() + 1).toString().padStart(2, '0')}-${departure.getDate().toString().padStart(2, '0')}`;
     setDepartureDate(iso);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrivalDate, mode]);
 
   const nights = useMemo(() => {
     if (!arrivalDate || !departureDate) return 0;
-    return Math.ceil((new Date(departureDate).getTime() - new Date(arrivalDate).getTime()) / 86400000);
+    return Math.ceil(
+      (new Date(departureDate).getTime() - new Date(arrivalDate).getTime()) / 86400000,
+    );
   }, [arrivalDate, departureDate]);
 
   const season = arrivalDate ? getSeason(arrivalDate) : null;
@@ -321,76 +421,137 @@ export function BookingWizard({
         if (db.anzahlung_bank) setDirectAnzahlung(db.anzahlung_bank.toString());
         if (db.restzahlung_vor_ort) setDirectRestzahlung(db.restzahlung_vor_ort.toString());
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [booking?.additional_costs]);
 
   // ── Breakdown-Felder → effektive NK/Kurtaxe/Reinigung-Einnahmen (für Feratel, FeWo & Direkt) ──
-  const breakdownNkTotal = useMemo(() =>
-    (parseFloat(directElectricity) || 0) + (parseFloat(directWater) || 0) +
-    (parseFloat(directMuell) || 0) + (parseFloat(directHolz) || 0),
-    [directElectricity, directWater, directMuell, directHolz]);
+  const breakdownNkTotal = useMemo(
+    () =>
+      (parseFloat(directElectricity) || 0) +
+      (parseFloat(directWater) || 0) +
+      (parseFloat(directMuell) || 0) +
+      (parseFloat(directHolz) || 0),
+    [directElectricity, directWater, directMuell, directHolz],
+  );
   const breakdownKurtaxe = useMemo(() => parseFloat(directKurtaxe) || 0, [directKurtaxe]);
 
   // Für Feratel/FeWo/Direkt: Breakdown-Werte als Einnahmen verwenden (wenn vorhanden)
-  const hasBreakdown = platformType === 'feratel' || platformType === 'fewo' || platformType === 'direct';
-  const effectiveNkIncome = hasBreakdown && breakdownNkTotal > 0 ? breakdownNkTotal : nebenkostenIncome;
-  const effectiveKurtaxeIncome = hasBreakdown && breakdownKurtaxe > 0 ? breakdownKurtaxe : kurtaxeIncome;
+  const hasBreakdown =
+    platformType === 'feratel' || platformType === 'fewo' || platformType === 'direct';
+  const effectiveNkIncome =
+    hasBreakdown && breakdownNkTotal > 0 ? breakdownNkTotal : nebenkostenIncome;
+  const effectiveKurtaxeIncome =
+    hasBreakdown && breakdownKurtaxe > 0 ? breakdownKurtaxe : kurtaxeIncome;
 
   // ── Finance calculations ──
-  const platformFeesObj: PlatformFees = useMemo(() => ({
-    payout_amount: payoutAmount || (rentalPrice + effectiveNkIncome + cleaningFeeIncome + effectiveKurtaxeIncome),
-    guest_total_payment: guestTotalPayment,
-    platform_service_fee: platformServiceFee,
-    nebenkosten_income: effectiveNkIncome,
-    cleaning_fee_income: cleaningFeeIncome,
-    payment_processing_fee: paymentProcessingFee,
-    kurtaxe_income: effectiveKurtaxeIncome,
-  }), [payoutAmount, guestTotalPayment, platformServiceFee, rentalPrice, effectiveNkIncome, cleaningFeeIncome, paymentProcessingFee, effectiveKurtaxeIncome]);
+  const platformFeesObj: PlatformFees = useMemo(
+    () => ({
+      payout_amount:
+        payoutAmount ||
+        rentalPrice + effectiveNkIncome + cleaningFeeIncome + effectiveKurtaxeIncome,
+      guest_total_payment: guestTotalPayment,
+      platform_service_fee: platformServiceFee,
+      nebenkosten_income: effectiveNkIncome,
+      cleaning_fee_income: cleaningFeeIncome,
+      payment_processing_fee: paymentProcessingFee,
+      kurtaxe_income: effectiveKurtaxeIncome,
+    }),
+    [
+      payoutAmount,
+      guestTotalPayment,
+      platformServiceFee,
+      rentalPrice,
+      effectiveNkIncome,
+      cleaningFeeIncome,
+      paymentProcessingFee,
+      effectiveKurtaxeIncome,
+    ],
+  );
 
-  const komfortpaketObj: KomfortpaketData | undefined = useMemo(() =>
-    komfortpaketEnabled ? {
-      enabled: true,
-      persons: komfortpaketPersons,
-      guestPaid: komfortpaketGuestPaid,
-      pricePerPerson: KOMFORTPAKET_DEFAULT_PRICE,
-    } : undefined
-  , [komfortpaketEnabled, komfortpaketPersons, komfortpaketGuestPaid]);
+  const komfortpaketObj: KomfortpaketData | undefined = useMemo(
+    () =>
+      komfortpaketEnabled
+        ? {
+            enabled: true,
+            persons: komfortpaketPersons,
+            guestPaid: komfortpaketGuestPaid,
+            pricePerPerson: KOMFORTPAKET_DEFAULT_PRICE,
+          }
+        : undefined,
+    [komfortpaketEnabled, komfortpaketPersons, komfortpaketGuestPaid],
+  );
 
-  const financeResult = useMemo(() => calculateBookingFinances({
-    arrivalDate,
-    departureDate,
-    adults,
-    rentalPrice,
-    platform,
-    hasDog,
-    isPrivate,
-    skipNk: false,
-    isCleaningCash: cleaningCash,
-    isUtilitiesCash: utilitiesCash,
-    isKurtaxeCash: kurtaxeCash,
-    privateConfig,
-    platformFees: platformFeesObj,
-    komfortpaket: komfortpaketObj,
-    pricingSettings,
-  }), [arrivalDate, departureDate, adults, rentalPrice, platform, hasDog, isPrivate, cleaningCash, utilitiesCash, kurtaxeCash, privateConfig, platformFeesObj, komfortpaketObj, pricingSettings]);
+  const financeResult = useMemo(
+    () =>
+      calculateBookingFinances({
+        arrivalDate,
+        departureDate,
+        adults,
+        rentalPrice,
+        platform,
+        hasDog,
+        isPrivate,
+        skipNk: false,
+        isCleaningCash: cleaningCash,
+        isUtilitiesCash: utilitiesCash,
+        isKurtaxeCash: kurtaxeCash,
+        privateConfig,
+        platformFees: platformFeesObj,
+        komfortpaket: komfortpaketObj,
+        pricingSettings,
+      }),
+    [
+      arrivalDate,
+      departureDate,
+      adults,
+      rentalPrice,
+      platform,
+      hasDog,
+      isPrivate,
+      cleaningCash,
+      utilitiesCash,
+      kurtaxeCash,
+      privateConfig,
+      platformFeesObj,
+      komfortpaketObj,
+      pricingSettings,
+    ],
+  );
 
   const {
-    cleaningCost, kurtaxe, mieterlos, provision,
-    gesamteinzahlung, gesamtbelastung, gesamtertrag,
-    totalNkCosts, komfortpaketCosts, komfortpaketIncome,
+    cleaningCost,
+    kurtaxe,
+    mieterlos,
+    provision,
+    gesamteinzahlung,
+    gesamtbelastung,
+    gesamtertrag,
+    totalNkCosts,
+    komfortpaketCosts,
+    komfortpaketIncome,
   } = financeResult;
 
   // ── Position calculation context ──
-  const posCalcContext: PositionCalcContext = useMemo(() => ({
-    arrivalDate: arrivalDate || null,
-    departureDate: departureDate || null,
-    adults,
-    children,
-    childrenAges: childrenAges ? childrenAges.split(',').map(a => parseInt(a.trim())).filter(a => !isNaN(a)) : [],
-    hasDog,
-    isPrivate,
-    platform: platform || null,
-  }), [arrivalDate, departureDate, adults, children, childrenAges, hasDog, isPrivate, platform]);
+  const posCalcContext: PositionCalcContext = useMemo(
+    () => ({
+      arrivalDate: arrivalDate || null,
+      departureDate: departureDate || null,
+      adults,
+      children,
+      childrenAges: childrenAges
+        ? childrenAges
+            .split(',')
+            .map((a) => parseInt(a.trim()))
+            .filter((a) => !isNaN(a))
+        : [],
+      hasDog,
+      isPrivate,
+      platform: platform || null,
+    }),
+    [arrivalDate, departureDate, adults, children, childrenAges, hasDog, isPrivate, platform],
+  );
 
   // ── Validation ──
   const canProceedStep1 = !!platform;
@@ -402,7 +563,8 @@ export function BookingWizard({
   if (!platform) missingFields.push('Plattform');
   if (!arrivalDate) missingFields.push('Anreise');
   if (!departureDate) missingFields.push('Abreise');
-  if (rentalPrice <= 0 && payoutAmount <= 0 && !(isPrivate && privateMieteZero)) missingFields.push('Mietpreis oder Auszahlung');
+  if (rentalPrice <= 0 && payoutAmount <= 0 && !(isPrivate && privateMieteZero))
+    missingFields.push('Mietpreis oder Auszahlung');
 
   // ── Navigation ──
   const goTo = (step: WizardStep) => {
@@ -420,20 +582,26 @@ export function BookingWizard({
 
   // ── Build additional_costs JSON ──
   const buildAdditionalCosts = () => {
-    const usesBreakdown = platformType === 'direct' || platformType === 'feratel' || platformType === 'fewo';
-    const directBreakdown = usesBreakdown ? {
-      water: parseFloat(directWater) || undefined,
-      electricity: parseFloat(directElectricity) || undefined,
-      muell: parseFloat(directMuell) || undefined,
-      holz: parseFloat(directHolz) || undefined,
-      kurtaxe: parseFloat(directKurtaxe) || undefined,
-      ...(platformType === 'direct' ? {
-        anzahlung_bank: parseFloat(directAnzahlung) || undefined,
-        restzahlung_vor_ort: parseFloat(directRestzahlung) || undefined,
-      } : {}),
-    } : undefined;
+    const usesBreakdown =
+      platformType === 'direct' || platformType === 'feratel' || platformType === 'fewo';
+    const directBreakdown = usesBreakdown
+      ? {
+          water: parseFloat(directWater) || undefined,
+          electricity: parseFloat(directElectricity) || undefined,
+          muell: parseFloat(directMuell) || undefined,
+          holz: parseFloat(directHolz) || undefined,
+          kurtaxe: parseFloat(directKurtaxe) || undefined,
+          ...(platformType === 'direct'
+            ? {
+                anzahlung_bank: parseFloat(directAnzahlung) || undefined,
+                restzahlung_vor_ort: parseFloat(directRestzahlung) || undefined,
+              }
+            : {}),
+        }
+      : undefined;
 
-    const hasDirectBreakdown = directBreakdown && Object.values(directBreakdown).some(v => v !== undefined);
+    const hasDirectBreakdown =
+      directBreakdown && Object.values(directBreakdown).some((v) => v !== undefined);
 
     return {
       payout_amount: payoutAmount || gesamteinzahlung || undefined,
@@ -442,17 +610,20 @@ export function BookingWizard({
       nebenkosten_income: effectiveNkIncome || undefined,
       cleaning_fee_income: cleaningFeeIncome || undefined,
       // Booking.com/Airbnb: Kurtaxe immer speichern (auch 0), da manuell eingegeben
-      kurtaxe_income: (platformType === 'booking' || platformType === 'airbnb')
-        ? effectiveKurtaxeIncome
-        : (effectiveKurtaxeIncome || undefined),
+      kurtaxe_income:
+        platformType === 'booking' || platformType === 'airbnb'
+          ? effectiveKurtaxeIncome
+          : effectiveKurtaxeIncome || undefined,
       payment_processing_fee: paymentProcessingFee || undefined,
       payout_date: payoutDate || undefined,
-      komfortpaket: komfortpaketEnabled ? {
-        enabled: true,
-        persons: komfortpaketPersons,
-        guestPaid: komfortpaketGuestPaid,
-        pricePerPerson: KOMFORTPAKET_DEFAULT_PRICE,
-      } : undefined,
+      komfortpaket: komfortpaketEnabled
+        ? {
+            enabled: true,
+            persons: komfortpaketPersons,
+            guestPaid: komfortpaketGuestPaid,
+            pricePerPerson: KOMFORTPAKET_DEFAULT_PRICE,
+          }
+        : undefined,
       direct_breakdown: hasDirectBreakdown ? directBreakdown : undefined,
     };
   };
@@ -501,7 +672,7 @@ export function BookingWizard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isNew ? { ...bookingData, guest_id: guestId } : bookingData),
       });
-      const data = await response.json() as { booking?: Booking; error?: string };
+      const data = (await response.json()) as { booking?: Booking; error?: string };
 
       if (data.error) {
         onError?.(data.error);
@@ -516,18 +687,24 @@ export function BookingWizard({
             const posRes = await fetch('/api/admin/booking-positions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...pos, booking_id: data.booking.id }),
+              body: JSON.stringify({ ...pos, booking_id: data.booking.id }),
             });
             if (!posRes.ok) {
               const posData = await posRes.json().catch(() => ({ error: 'Unbekannt' }));
-              positionErrors.push(`"${pos.name}": ${(posData as { error?: string }).error || posRes.statusText}`);
+              positionErrors.push(
+                `"${pos.name}": ${(posData as { error?: string }).error || posRes.statusText}`,
+              );
             }
           } catch (e) {
-            positionErrors.push(`"${pos.name}": ${e instanceof Error ? e.message : 'Netzwerkfehler'}`);
+            positionErrors.push(
+              `"${pos.name}": ${e instanceof Error ? e.message : 'Netzwerkfehler'}`,
+            );
           }
         }
         if (positionErrors.length > 0) {
-          onError?.(`Buchung erstellt, aber ${positionErrors.length} Position(en) fehlgeschlagen:\n${positionErrors.join('\n')}`);
+          onError?.(
+            `Buchung erstellt, aber ${positionErrors.length} Position(en) fehlgeschlagen:\n${positionErrors.join('\n')}`,
+          );
           if (isNew) onBookingCreated?.();
           onClose();
           return;
@@ -553,7 +730,9 @@ export function BookingWizard({
   const StepPlatform = () => (
     <div className="space-y-6">
       <div>
-        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Plattform wählen</label>
+        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+          Plattform wählen
+        </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {WIZARD_PLATFORMS.map((wp) => {
             const isSelected = platform === wp.dbValue;
@@ -564,16 +743,22 @@ export function BookingWizard({
                 onClick={() => setPlatform(wp.dbValue)}
                 className={`
                   p-3 rounded-xl border-2 transition-all text-left
-                  ${isSelected
-                    ? 'border-[var(--admin-accent,#16a34a)] bg-green-50 ring-1 ring-green-200'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}
+                  ${
+                    isSelected
+                      ? 'border-[var(--admin-accent,#16a34a)] bg-green-50 ring-1 ring-green-200'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }
                 `}
               >
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <div className={`p-2 rounded-lg ${isSelected ? wp.config.solidBg : 'bg-gray-100'} text-white`}>
+                  <div
+                    className={`p-2 rounded-lg ${isSelected ? wp.config.solidBg : 'bg-gray-100'} text-white`}
+                  >
                     {wp.icon}
                   </div>
-                  <span className={`text-xs font-medium ${isSelected ? 'text-green-800' : 'text-gray-600'}`}>
+                  <span
+                    className={`text-xs font-medium ${isSelected ? 'text-green-800' : 'text-gray-600'}`}
+                  >
                     {wp.label}
                   </span>
                 </div>
@@ -590,7 +775,9 @@ export function BookingWizard({
             <Lock className="w-4 h-4 text-purple-600" />
             <span className="text-sm font-medium text-purple-800">Privatbuchung – Details</span>
           </div>
-          <p className="text-xs text-purple-600 mb-3">Was bedeutet &quot;privat&quot; für diese Buchung?</p>
+          <p className="text-xs text-purple-600 mb-3">
+            Was bedeutet &quot;privat&quot; für diese Buchung?
+          </p>
 
           <label className="flex items-center gap-3 cursor-pointer py-1">
             <input
@@ -614,7 +801,9 @@ export function BookingWizard({
             />
             <div>
               <span className="text-sm text-gray-800 font-medium">Nebenkosten bezahlt</span>
-              <p className="text-[10px] text-gray-500">NK in kalkulatorischer Höhe werden berechnet</p>
+              <p className="text-[10px] text-gray-500">
+                NK in kalkulatorischer Höhe werden berechnet
+              </p>
             </div>
           </label>
 
@@ -702,11 +891,25 @@ export function BookingWizard({
         <div className="flex items-center justify-center gap-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 py-2.5 px-4 rounded-xl">
           <span className="font-semibold text-gray-700">{nights} Nächte</span>
           <span className="text-gray-300">|</span>
-          <span>{new Date(arrivalDate).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' })} — {new Date(departureDate).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short' })}</span>
+          <span>
+            {new Date(arrivalDate).toLocaleDateString('de-DE', {
+              weekday: 'short',
+              day: '2-digit',
+              month: 'short',
+            })}{' '}
+            —{' '}
+            {new Date(departureDate).toLocaleDateString('de-DE', {
+              weekday: 'short',
+              day: '2-digit',
+              month: 'short',
+            })}
+          </span>
           {season && (
             <>
               <span className="text-gray-300">|</span>
-              <span className={`px-2 py-0.5 rounded-full font-medium ${season === 'Sommer' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}>
+              <span
+                className={`px-2 py-0.5 rounded-full font-medium ${season === 'Sommer' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}
+              >
                 {season}
               </span>
             </>
@@ -740,7 +943,9 @@ export function BookingWizard({
           <NumberStepper value={adults} onChange={setAdults} min={1} max={10} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Kinder</label>
+          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            Kinder
+          </label>
           <NumberStepper value={children} onChange={setChildren} min={0} max={10} />
         </div>
       </div>
@@ -772,7 +977,9 @@ export function BookingWizard({
               if (petsEnabled) setPets('');
             }}
           >
-            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${petsEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            <div
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${petsEnabled ? 'translate-x-5' : 'translate-x-0.5'}`}
+            />
           </div>
           <span className="text-sm text-gray-700 flex items-center gap-1.5">
             <Dog className="w-4 h-4 text-gray-400" />
@@ -804,11 +1011,15 @@ export function BookingWizard({
         {pt === 'booking' && (
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 space-y-4">
-              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Booking.com Zahlungsdetails</p>
+              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                Booking.com Zahlungsdetails
+              </p>
 
               {/* ① Gesamtpreis */}
               <div>
-                <label className="block text-xs text-gray-600 mb-1">① Gesamtpreis (lt. Booking.com)</label>
+                <label className="block text-xs text-gray-600 mb-1">
+                  ① Gesamtpreis (lt. Booking.com)
+                </label>
                 <div className="relative">
                   <input
                     type="number"
@@ -827,13 +1038,17 @@ export function BookingWizard({
                     placeholder="z.B. 1241.92"
                     className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    €
+                  </span>
                 </div>
               </div>
 
               {/* ② Kommission & Gebühren */}
               <div>
-                <label className="block text-xs text-gray-600 mb-1">② Kommission und Gebühren</label>
+                <label className="block text-xs text-gray-600 mb-1">
+                  ② Kommission und Gebühren
+                </label>
                 <div className="relative">
                   <input
                     type="number"
@@ -852,13 +1067,17 @@ export function BookingWizard({
                     placeholder="z.B. 253.64"
                     className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    €
+                  </span>
                 </div>
               </div>
 
               {/* ③ Kurtaxe (bar) — String-basiertes Input, damit "0" als Wert funktioniert */}
               <div>
-                <label className="block text-xs text-gray-600 mb-1">③ Kurtaxe / Übernachtungssteuer (bar)</label>
+                <label className="block text-xs text-gray-600 mb-1">
+                  ③ Kurtaxe / Übernachtungssteuer (bar)
+                </label>
                 <div className="relative">
                   <input
                     type="text"
@@ -878,7 +1097,9 @@ export function BookingWizard({
                     placeholder="z.B. 56.70 (0 wenn nicht bar)"
                     className={`w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    €
+                  </span>
                 </div>
               </div>
 
@@ -888,16 +1109,28 @@ export function BookingWizard({
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">= Auszahlung (berechnet):</span>
                     <span className="text-lg font-bold text-blue-700 font-mono">
-                      {(guestTotalPayment - platformServiceFee - kurtaxeIncome).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      {(guestTotalPayment - platformServiceFee - kurtaxeIncome).toLocaleString(
+                        'de-DE',
+                        { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+                      )}{' '}
+                      €
                     </span>
                   </div>
-                  <p className="text-[10px] text-gray-400">① {guestTotalPayment.toLocaleString('de-DE', {minimumFractionDigits: 2})} − ② {platformServiceFee.toLocaleString('de-DE', {minimumFractionDigits: 2})}{kurtaxeIncome > 0 ? ` − ③ ${kurtaxeIncome.toLocaleString('de-DE', {minimumFractionDigits: 2})}` : ''}</p>
+                  <p className="text-[10px] text-gray-400">
+                    ① {guestTotalPayment.toLocaleString('de-DE', { minimumFractionDigits: 2 })} − ②{' '}
+                    {platformServiceFee.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                    {kurtaxeIncome > 0
+                      ? ` − ③ ${kurtaxeIncome.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`
+                      : ''}
+                  </p>
                 </div>
               )}
 
               {/* ④ Auszahlungsdatum */}
               <div className="max-w-[200px]">
-                <label className="block text-xs text-gray-600 mb-1">④ Auszahlungsdatum (optional)</label>
+                <label className="block text-xs text-gray-600 mb-1">
+                  ④ Auszahlungsdatum (optional)
+                </label>
                 <GermanDateInput
                   value={payoutDate}
                   onChange={setPayoutDate}
@@ -912,10 +1145,14 @@ export function BookingWizard({
         {pt === 'airbnb' && (
           <div className="space-y-4">
             <div className="p-4 bg-pink-50 rounded-xl border border-pink-200 space-y-4">
-              <p className="text-xs font-medium text-pink-600 uppercase tracking-wide">Airbnb Zahlungsdetails</p>
+              <p className="text-xs font-medium text-pink-600 uppercase tracking-wide">
+                Airbnb Zahlungsdetails
+              </p>
 
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Auszahlungsbetrag (Payout)</label>
+                <label className="block text-xs text-gray-600 mb-1">
+                  Auszahlungsbetrag (Payout)
+                </label>
                 <div className="relative">
                   <input
                     type="number"
@@ -933,7 +1170,9 @@ export function BookingWizard({
                     placeholder="z.B. 1246.56"
                     className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    €
+                  </span>
                 </div>
               </div>
 
@@ -971,7 +1210,11 @@ export function BookingWizard({
                 <div className="flex items-center justify-between p-2 bg-white rounded-lg border border-pink-100 text-sm">
                   <span className="text-gray-500">Airbnb Service-Fee (berechnet):</span>
                   <span className="font-medium text-pink-700 font-mono">
-                    {(guestTotalPayment - payoutAmount).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                    {(guestTotalPayment - payoutAmount).toLocaleString('de-DE', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    €
                   </span>
                 </div>
               )}
@@ -984,7 +1227,9 @@ export function BookingWizard({
           <div className="space-y-4">
             {/* Zahlungsübersicht wie in der FeWo-Rechnung */}
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">FeWo Zahlungsdetails (lt. Rechnung)</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                FeWo Zahlungsdetails (lt. Rechnung)
+              </p>
 
               {/* Raten / Mietpreis */}
               <div>
@@ -998,20 +1243,39 @@ export function BookingWizard({
                     placeholder="z.B. 910.00"
                     className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    €
+                  </span>
                 </div>
               </div>
 
               {/* NK-Aufschlüsselung */}
               <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 space-y-3">
-                <span className="text-sm font-medium text-blue-800">Gebühren (lt. FeWo-Rechnung)</span>
+                <span className="text-sm font-medium text-blue-800">
+                  Gebühren (lt. FeWo-Rechnung)
+                </span>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'Strom', value: directElectricity, set: setDirectElectricity, ph: '112.00' },
+                    {
+                      label: 'Strom',
+                      value: directElectricity,
+                      set: setDirectElectricity,
+                      ph: '112.00',
+                    },
                     { label: 'Wasser', value: directWater, set: setDirectWater, ph: '28.00' },
-                    { label: 'Kurtaxe (Verwaltung)', value: directKurtaxe, set: setDirectKurtaxe, ph: '86.80' },
-                    { label: 'Heizkosten (Holz)', value: directHolz, set: setDirectHolz, ph: '63.00' },
-                  ].map(f => (
+                    {
+                      label: 'Kurtaxe (Verwaltung)',
+                      value: directKurtaxe,
+                      set: setDirectKurtaxe,
+                      ph: '86.80',
+                    },
+                    {
+                      label: 'Heizkosten (Holz)',
+                      value: directHolz,
+                      set: setDirectHolz,
+                      ph: '63.00',
+                    },
+                  ].map((f) => (
                     <div key={f.label}>
                       <label className="block text-xs text-gray-600 mb-1">{f.label}</label>
                       <input
@@ -1054,7 +1318,9 @@ export function BookingWizard({
               {/* Auszahlung & Gebühren */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Gesamtauszahlung (Payout)</label>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Gesamtauszahlung (Payout)
+                  </label>
                   <div className="relative">
                     <input
                       type="number"
@@ -1064,11 +1330,15 @@ export function BookingWizard({
                       placeholder="1292.71"
                       className={`w-full px-3 py-2 text-sm font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">€</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      €
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Zahlungsbearbeitungsgebühr</label>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Zahlungsbearbeitungsgebühr
+                  </label>
                   <input
                     type="number"
                     value={paymentProcessingFee || ''}
@@ -1087,7 +1357,9 @@ export function BookingWizard({
         {pt === 'direct' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Mietpreis *</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Mietpreis *
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -1097,7 +1369,9 @@ export function BookingWizard({
                   placeholder="z.B. 994.00"
                   className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                  €
+                </span>
               </div>
             </div>
 
@@ -1108,12 +1382,17 @@ export function BookingWizard({
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Strom', value: directElectricity, set: setDirectElectricity, ph: '112.00' },
+                  {
+                    label: 'Strom',
+                    value: directElectricity,
+                    set: setDirectElectricity,
+                    ph: '112.00',
+                  },
                   { label: 'Wasser', value: directWater, set: setDirectWater, ph: '28.00' },
                   { label: 'Müll', value: directMuell, set: setDirectMuell, ph: '11.20' },
                   { label: 'Holz', value: directHolz, set: setDirectHolz, ph: '63.00' },
                   { label: 'Kurtaxe', value: directKurtaxe, set: setDirectKurtaxe, ph: '44.80' },
-                ].map(f => (
+                ].map((f) => (
                   <div key={f.label}>
                     <label className="block text-xs text-gray-600 mb-1">{f.label}</label>
                     <input
@@ -1130,10 +1409,14 @@ export function BookingWizard({
             </div>
 
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Zahlungsaufteilung</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Zahlungsaufteilung
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Anzahlung (Überweisung)</label>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Anzahlung (Überweisung)
+                  </label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -1163,7 +1446,9 @@ export function BookingWizard({
         {pt === 'feratel' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Gesamtpreis Erwachsene (Miete)</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Gesamtpreis Erwachsene (Miete)
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -1173,23 +1458,32 @@ export function BookingWizard({
                   placeholder="z.B. 1085.00"
                   className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                  €
+                </span>
               </div>
             </div>
 
             <div className="p-4 bg-cyan-50 rounded-xl border border-cyan-200 space-y-3">
               <div className="flex items-center gap-2">
                 <Euro className="w-4 h-4 text-cyan-600" />
-                <span className="text-sm font-medium text-cyan-800">Feratel-Aufschlüsselung (lt. Buchungsdetails)</span>
+                <span className="text-sm font-medium text-cyan-800">
+                  Feratel-Aufschlüsselung (lt. Buchungsdetails)
+                </span>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Strom', value: directElectricity, set: setDirectElectricity, ph: '112.00' },
+                  {
+                    label: 'Strom',
+                    value: directElectricity,
+                    set: setDirectElectricity,
+                    ph: '112.00',
+                  },
                   { label: 'Wasser', value: directWater, set: setDirectWater, ph: '42.00' },
                   { label: 'Müll', value: directMuell, set: setDirectMuell, ph: '11.20' },
                   { label: 'Holz', value: directHolz, set: setDirectHolz, ph: '63.00' },
                   { label: 'Kurtaxe', value: directKurtaxe, set: setDirectKurtaxe, ph: '75.60' },
-                ].map(f => (
+                ].map((f) => (
                   <div key={f.label}>
                     <label className="block text-xs text-gray-600 mb-1">{f.label}</label>
                     <input
@@ -1230,7 +1524,9 @@ export function BookingWizard({
               </div>
             ) : (
               <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Mietpreis</label>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                  Mietpreis
+                </label>
                 <div className="relative">
                   <input
                     type="number"
@@ -1240,7 +1536,9 @@ export function BookingWizard({
                     placeholder="0.00"
                     className={`w-full px-3 py-2.5 text-lg font-semibold font-mono border border-gray-200 rounded-xl ${focusClasses}`}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">€</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                    €
+                  </span>
                 </div>
               </div>
             )}
@@ -1250,21 +1548,35 @@ export function BookingWizard({
         {/* ─── Cash payment toggles (when NK/costs are relevant) ─── */}
         {(!isPrivate || privateNkPaid || privateKurtaxePaid) && (
           <div className="p-3 border-2 border-dashed border-gray-200 rounded-xl space-y-2">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Barzahlungen</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+              Barzahlungen
+            </p>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={cleaningCash} onChange={(e) => setCleaningCash(e.target.checked)}
-                className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+              <input
+                type="checkbox"
+                checked={cleaningCash}
+                onChange={(e) => setCleaningCash(e.target.checked)}
+                className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
               <span className="text-sm text-gray-700">Reinigung bar</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={utilitiesCash} onChange={(e) => setUtilitiesCash(e.target.checked)}
-                className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+              <input
+                type="checkbox"
+                checked={utilitiesCash}
+                onChange={(e) => setUtilitiesCash(e.target.checked)}
+                className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
               <span className="text-sm text-gray-700">NK bar</span>
             </label>
             {!utilitiesCash && (
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={kurtaxeCash} onChange={(e) => setKurtaxeCash(e.target.checked)}
-                  className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+                <input
+                  type="checkbox"
+                  checked={kurtaxeCash}
+                  onChange={(e) => setKurtaxeCash(e.target.checked)}
+                  className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                />
                 <span className="text-sm text-gray-700">Kurtaxe bar</span>
               </label>
             )}
@@ -1320,7 +1632,9 @@ export function BookingWizard({
                   if (next && komfortpaketPersons === 0) setKomfortpaketPersons(adults);
                 }}
               >
-                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${komfortpaketEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                <div
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${komfortpaketEnabled ? 'translate-x-5' : 'translate-x-0.5'}`}
+                />
               </div>
             </label>
           </div>
@@ -1328,15 +1642,26 @@ export function BookingWizard({
           {komfortpaketEnabled && (
             <div className="space-y-3 animate-fade-in">
               <div className="flex items-center gap-4">
-                <NumberStepper value={komfortpaketPersons} onChange={setKomfortpaketPersons} min={1} max={10} label="Personen" />
+                <NumberStepper
+                  value={komfortpaketPersons}
+                  onChange={setKomfortpaketPersons}
+                  min={1}
+                  max={10}
+                  label="Personen"
+                />
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={komfortpaketGuestPaid} onChange={(e) => setKomfortpaketGuestPaid(e.target.checked)}
-                  className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+                <input
+                  type="checkbox"
+                  checked={komfortpaketGuestPaid}
+                  onChange={(e) => setKomfortpaketGuestPaid(e.target.checked)}
+                  className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                />
                 <span className="text-sm text-gray-700">Gast hat bezahlt</span>
               </label>
               <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
-                {komfortpaketPersons} × {KOMFORTPAKET_DEFAULT_PRICE} € = <strong>{formatCurrency(komfortpaketPersons * KOMFORTPAKET_DEFAULT_PRICE)}</strong>
+                {komfortpaketPersons} × {KOMFORTPAKET_DEFAULT_PRICE} € ={' '}
+                <strong>{formatCurrency(komfortpaketPersons * KOMFORTPAKET_DEFAULT_PRICE)}</strong>
               </div>
             </div>
           )}
@@ -1346,7 +1671,9 @@ export function BookingWizard({
       {/* Deposit */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Anzahlung (€)</label>
+          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+            Anzahlung (€)
+          </label>
           <input
             type="number"
             value={depositAmount || ''}
@@ -1357,8 +1684,12 @@ export function BookingWizard({
         </div>
         <div className="flex items-end pb-1">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={depositPaid} onChange={(e) => setDepositPaid(e.target.checked)}
-              className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+            <input
+              type="checkbox"
+              checked={depositPaid}
+              onChange={(e) => setDepositPaid(e.target.checked)}
+              className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
             <span className="text-sm text-gray-700">Anzahlung bezahlt</span>
           </label>
         </div>
@@ -1366,7 +1697,9 @@ export function BookingWizard({
 
       {/* Kaution */}
       <div>
-        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Kaution (€)</label>
+        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+          Kaution (€)
+        </label>
         <input
           type="number"
           value={securityDeposit || ''}
@@ -1378,16 +1711,22 @@ export function BookingWizard({
 
       {/* Final payment */}
       <label className="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" checked={finalPaymentPaid} onChange={(e) => setFinalPaymentPaid(e.target.checked)}
-          className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+        <input
+          type="checkbox"
+          checked={finalPaymentPaid}
+          onChange={(e) => setFinalPaymentPaid(e.target.checked)}
+          className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+        />
         <span className="text-sm text-gray-700">Restzahlung bezahlt</span>
       </label>
 
       {/* Status as segmented control */}
       <div>
-        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Status</label>
+        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+          Status
+        </label>
         <div className="flex rounded-xl border border-gray-200 overflow-hidden">
-          {STATUS_OPTIONS.map(opt => {
+          {STATUS_OPTIONS.map((opt) => {
             const style = STATUS_STYLES[opt.value];
             const isActive = status === opt.value;
             return (
@@ -1396,7 +1735,9 @@ export function BookingWizard({
                 type="button"
                 onClick={() => setStatus(opt.value)}
                 className={`flex-1 py-2 text-xs font-medium transition-colors ${
-                  isActive ? `${style?.bg ?? ''} ${style?.text ?? ''}` : 'bg-white text-gray-500 hover:bg-gray-50'
+                  isActive
+                    ? `${style?.bg ?? ''} ${style?.text ?? ''}`
+                    : 'bg-white text-gray-500 hover:bg-gray-50'
                 }`}
               >
                 {style?.label ?? opt.value}
@@ -1408,7 +1749,9 @@ export function BookingWizard({
 
       {/* Notes */}
       <div>
-        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Notizen</label>
+        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+          Notizen
+        </label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -1452,8 +1795,12 @@ export function BookingWizard({
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-gray-900 font-mono tabular-nums">{formatCurrency(gesamtertrag)}</p>
-                <p className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">Ertrag</p>
+                <p className="text-lg font-bold text-gray-900 font-mono tabular-nums">
+                  {formatCurrency(gesamtertrag)}
+                </p>
+                <p className="text-[10px] uppercase tracking-wide text-gray-400 font-medium">
+                  Ertrag
+                </p>
               </div>
             </div>
           </div>
@@ -1483,7 +1830,9 @@ export function BookingWizard({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Gäste</span>
-                    <span className="font-medium">{adults} Erw.{children > 0 ? `, ${children} Ki.` : ''}</span>
+                    <span className="font-medium">
+                      {adults} Erw.{children > 0 ? `, ${children} Ki.` : ''}
+                    </span>
                   </div>
                   {hasDog && (
                     <div className="flex justify-between">
@@ -1493,13 +1842,17 @@ export function BookingWizard({
                   )}
                   <div className="flex justify-between">
                     <span className="text-gray-500">Status</span>
-                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[status]?.bg} ${STATUS_STYLES[status]?.text}`}>
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-xs font-medium ${STATUS_STYLES[status]?.bg} ${STATUS_STYLES[status]?.text}`}
+                    >
                       {STATUS_STYLES[status]?.label || status}
                     </span>
                   </div>
                   {isPrivate && (
                     <div className="mt-2 pt-2 border-t border-gray-100">
-                      <p className="text-[10px] font-semibold text-purple-500 uppercase mb-1">Privat-Details</p>
+                      <p className="text-[10px] font-semibold text-purple-500 uppercase mb-1">
+                        Privat-Details
+                      </p>
                       <div className="space-y-0.5 text-xs text-gray-600">
                         <p>Miete: {privateMieteZero ? '0 EUR' : formatCurrency(rentalPrice)}</p>
                         <p>NK: {privateNkPaid ? 'ja' : 'nein'}</p>
@@ -1518,22 +1871,30 @@ export function BookingWizard({
                   {rentalPrice > 0 && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Miete</span>
-                      <span className="font-medium text-green-600">{formatCurrency(rentalPrice)}</span>
+                      <span className="font-medium text-green-600">
+                        {formatCurrency(rentalPrice)}
+                      </span>
                     </div>
                   )}
                   {payoutAmount > 0 && payoutAmount !== rentalPrice && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Auszahlung</span>
-                      <span className="font-medium text-green-600">{formatCurrency(payoutAmount)}</span>
+                      <span className="font-medium text-green-600">
+                        {formatCurrency(payoutAmount)}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between border-t pt-1.5">
                     <span className="text-gray-500">Einnahmen</span>
-                    <span className="font-semibold text-green-600">{formatCurrency(gesamteinzahlung)}</span>
+                    <span className="font-semibold text-green-600">
+                      {formatCurrency(gesamteinzahlung)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Kosten</span>
-                    <span className="font-semibold text-red-500">−{formatCurrency(gesamtbelastung)}</span>
+                    <span className="font-semibold text-red-500">
+                      −{formatCurrency(gesamtbelastung)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Provision</span>
@@ -1541,7 +1902,9 @@ export function BookingWizard({
                   </div>
                   <div className="flex justify-between border-t pt-1.5 font-semibold">
                     <span>Ertrag</span>
-                    <span className={gesamtertrag >= 0 ? 'text-blue-600' : 'text-red-600'}>{formatCurrency(gesamtertrag)}</span>
+                    <span className={gesamtertrag >= 0 ? 'text-blue-600' : 'text-red-600'}>
+                      {formatCurrency(gesamtertrag)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1550,13 +1913,18 @@ export function BookingWizard({
             {/* Positions summary */}
             {bookingPositions.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Positionen ({bookingPositions.length})</p>
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                  Positionen ({bookingPositions.length})
+                </p>
                 <div className="space-y-1">
                   {bookingPositions.map((pos, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-gray-600">{pos.name || 'Position'}</span>
-                      <span className={`font-mono tabular-nums ${pos.type === 'expense' ? 'text-red-500' : 'text-green-600'}`}>
-                        {pos.type === 'expense' ? '−' : '+'}{formatCurrency(pos.amount)}
+                      <span
+                        className={`font-mono tabular-nums ${pos.type === 'expense' ? 'text-red-500' : 'text-green-600'}`}
+                      >
+                        {pos.type === 'expense' ? '−' : '+'}
+                        {formatCurrency(pos.amount)}
                       </span>
                     </div>
                   ))}
@@ -1587,7 +1955,9 @@ export function BookingWizard({
       {[1, 2, 3, 4, 5].map((step, idx) => {
         const isActive = currentStep === step;
         const isCompleted = currentStep > step;
-        const canClick = isCompleted || (step === 1) ||
+        const canClick =
+          isCompleted ||
+          step === 1 ||
           (step === 2 && canProceedStep1) ||
           (step === 3 && canProceedStep1 && canProceedStep2) ||
           (step === 4 && canProceedStep1 && canProceedStep2) ||
@@ -1601,23 +1971,30 @@ export function BookingWizard({
               disabled={!canClick}
               className={`flex items-center gap-1.5 transition-all ${!canClick ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              <div className={`
+              <div
+                className={`
                 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all shrink-0
-                ${isActive
-                  ? 'border-2 border-[var(--admin-accent,#16a34a)] text-[var(--admin-accent,#16a34a)] bg-white'
-                  : isCompleted
-                    ? 'bg-[var(--admin-accent,#16a34a)] text-white'
-                    : 'bg-gray-100 text-gray-400'
+                ${
+                  isActive
+                    ? 'border-2 border-[var(--admin-accent,#16a34a)] text-[var(--admin-accent,#16a34a)] bg-white'
+                    : isCompleted
+                      ? 'bg-[var(--admin-accent,#16a34a)] text-white'
+                      : 'bg-gray-100 text-gray-400'
                 }
-              `}>
+              `}
+              >
                 {isCompleted ? <Check className="w-3.5 h-3.5" /> : step}
               </div>
-              <span className={`text-xs font-medium hidden sm:inline ${isActive ? 'text-gray-900' : isCompleted ? 'text-[var(--admin-accent,#16a34a)]' : 'text-gray-400'}`}>
+              <span
+                className={`text-xs font-medium hidden sm:inline ${isActive ? 'text-gray-900' : isCompleted ? 'text-[var(--admin-accent,#16a34a)]' : 'text-gray-400'}`}
+              >
                 {STEP_LABELS[step - 1]}
               </span>
             </button>
             {step < 5 && (
-              <div className={`flex-1 h-px mx-2 ${isCompleted ? 'bg-[var(--admin-accent,#16a34a)]' : 'bg-gray-200'}`} />
+              <div
+                className={`flex-1 h-px mx-2 ${isCompleted ? 'bg-[var(--admin-accent,#16a34a)]' : 'bg-gray-200'}`}
+              />
             )}
           </div>
         );
@@ -1629,14 +2006,21 @@ export function BookingWizard({
   // RENDER
   // ============================================================================
   const canProceedCurrent =
-    currentStep === 1 ? canProceedStep1 :
-    currentStep === 2 ? canProceedStep2 :
-    currentStep === 3 ? canProceedStep3 :
-    currentStep === 4 ? canProceedStep4 :
-    true;
+    currentStep === 1
+      ? canProceedStep1
+      : currentStep === 2
+        ? canProceedStep2
+        : currentStep === 3
+          ? canProceedStep3
+          : currentStep === 4
+            ? canProceedStep4
+            : true;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}
+    >
       <div className="bg-white rounded-xl border border-gray-200 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
@@ -1648,7 +2032,10 @@ export function BookingWizard({
               {guestName} — Schritt {currentStep} von 5
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+          <button
+            onClick={onClose}
+            className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>

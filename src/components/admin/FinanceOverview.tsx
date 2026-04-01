@@ -26,23 +26,30 @@ import {
   parsePrivateConfig,
   type PlatformFees as FinanceCalcPlatformFees,
 } from '@/lib/utils/financeCalculations';
-import {
-  BookingDetailPopup,
-  CalculationExplanationPopup,
-  FinancePrintView,
-  MONTH_NAMES,
-  QUARTER_LABELS,
-} from './finance-overview';
-import type { FinanceGuest, MonthData, QuarterData, ExpenseRecord, BookingWithFees, PlatformFees } from './finance-overview';
-import type { PricingSettings } from './utility-costs';
-import { DEFAULT_PRICING } from './utility-costs';
+import { BookingDetailPopup } from './finance-overview/BookingDetailPopup';
+import { CalculationExplanationPopup } from './finance-overview/CalculationExplanationPopup';
+import { FinancePrintView } from './finance-overview/FinancePrintView';
+import { MONTH_NAMES, QUARTER_LABELS } from './finance-overview/constants';
+import type {
+  FinanceGuest,
+  MonthData,
+  QuarterData,
+  ExpenseRecord,
+  BookingWithFees,
+  PlatformFees,
+} from './finance-overview/types';
+import type { PricingSettings } from './utility-costs/types';
+import { DEFAULT_PRICING } from './utility-costs/constants';
 
 interface FinanceOverviewProps {
   onNavigateToGuest?: (guestId: number) => void;
   demoMode?: boolean;
 }
 
-export default function FinanceOverview({ onNavigateToGuest, demoMode = false }: FinanceOverviewProps) {
+export default function FinanceOverview({
+  onNavigateToGuest,
+  demoMode = false,
+}: FinanceOverviewProps) {
   const [loading, setLoading] = useState(true);
   // Default to 2026 as we're almost there
   const [selectedYear, setSelectedYear] = useState(2026);
@@ -53,9 +60,15 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
   const [expandedQuarters, setExpandedQuarters] = useState<Set<number>>(new Set([1, 2, 3, 4]));
   const [showExplanation, setShowExplanation] = useState(false);
   const [pricing, setPricing] = useState<PricingSettings>(DEFAULT_PRICING);
-  const [platformFees, setPlatformFees] = useState<PlatformFees>({ platform_service_fee: 0, payment_processing_fee: 0 });
+  const [platformFees, setPlatformFees] = useState<PlatformFees>({
+    platform_service_fee: 0,
+    payment_processing_fee: 0,
+  });
   const [settingPayoutDates, setSettingPayoutDates] = useState(false);
-  const [payoutDatesResult, setPayoutDatesResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [payoutDatesResult, setPayoutDatesResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   // Demo mode helpers
   const demoFormat = (amount: number): string => {
@@ -69,7 +82,11 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
   // Set payout dates for FeWo/Booking bookings
   const handleSetPayoutDates = async () => {
-    if (!confirm('Soll für alle FeWo- und Booking.com-Buchungen ohne Auszahlungsdatum das Abreisedatum als Auszahlungsdatum gesetzt werden?')) {
+    if (
+      !confirm(
+        'Soll für alle FeWo- und Booking.com-Buchungen ohne Auszahlungsdatum das Abreisedatum als Auszahlungsdatum gesetzt werden?',
+      )
+    ) {
       return;
     }
     setSettingPayoutDates(true);
@@ -78,9 +95,16 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
       const response = await fetch('/api/admin/bookings/set-payout-dates', {
         method: 'POST',
       });
-      const data = await response.json() as { success?: boolean; message?: string; error?: string };
+      const data = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+        error?: string;
+      };
       if (data.success) {
-        setPayoutDatesResult({ success: true, message: data.message || 'Auszahlungsdaten gesetzt' });
+        setPayoutDatesResult({
+          success: true,
+          message: data.message || 'Auszahlungsdaten gesetzt',
+        });
         // Reload data to reflect changes
         loadData();
       } else {
@@ -107,7 +131,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
   // Get expenses for a specific month
   const getMonthExpenses = (month: number): number => {
-    return allExpenses.filter((e) => e.year === selectedYear && e.month === month).reduce((sum, e) => sum + e.amount, 0);
+    return allExpenses
+      .filter((e) => e.year === selectedYear && e.month === month)
+      .reduce((sum, e) => sum + e.amount, 0);
   };
 
   // Get expenses for a quarter (months 1-3, 4-6, 7-9, 10-12)
@@ -141,7 +167,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
       if (parsed.transactions && Array.isArray(parsed.transactions)) {
         const totalFeesFromTransactions = parsed.transactions.reduce(
           (sum: number, t: { fee?: number }) => sum + (t.fee || 0),
-          0
+          0,
         );
         if (totalFeesFromTransactions > 0) {
           return {
@@ -184,7 +210,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
       // Create one entry per BOOKING (not per guest) - ensures all bookings are counted
       // This fixes the issue where guests with multiple bookings only had one counted
-      const allBookingsWithGuestData: FinanceGuest[] = bookings.map(booking => {
+      const allBookingsWithGuestData: FinanceGuest[] = bookings.map((booking) => {
         const guest = guestById.get(booking.guest_id);
         return {
           // Use guest_id for navigation
@@ -224,7 +250,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
           status: getEffectiveBookingStatus(
             (booking as { status?: string }).status ?? guest?.status ?? '',
             (booking as { departure_date?: string | null }).departure_date ?? null,
-            (booking as { arrival_date?: string | null }).arrival_date ?? null
+            (booking as { arrival_date?: string | null }).arrival_date ?? null,
           ),
         };
       });
@@ -234,17 +260,20 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
       // Calculate platform fees from bookings for the selected year
       const yearlyFees = bookings
-        .filter(b => {
+        .filter((b) => {
           if (!b.arrival_date) return false;
           return new Date(b.arrival_date).getFullYear() === selectedYear;
         })
-        .reduce((acc, booking) => {
-          const fees = parsePlatformFees(booking.additional_costs);
-          return {
-            platform_service_fee: acc.platform_service_fee + fees.platform_service_fee,
-            payment_processing_fee: acc.payment_processing_fee + fees.payment_processing_fee,
-          };
-        }, { platform_service_fee: 0, payment_processing_fee: 0 });
+        .reduce(
+          (acc, booking) => {
+            const fees = parsePlatformFees(booking.additional_costs);
+            return {
+              platform_service_fee: acc.platform_service_fee + fees.platform_service_fee,
+              payment_processing_fee: acc.payment_processing_fee + fees.payment_processing_fee,
+            };
+          },
+          { platform_service_fee: 0, payment_processing_fee: 0 },
+        );
       setPlatformFees(yearlyFees);
 
       // Load pricing settings - load kurtaxeRates from DB like ExpensePanel does
@@ -273,8 +302,10 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
           holz: parseFloat(settingsData.settings.holz_rate ?? '') || DEFAULT_PRICING.holz,
           water: parseFloat(settingsData.settings.water_rate ?? '') || DEFAULT_PRICING.water,
           trash: parseFloat(settingsData.settings.trash_rate ?? '') || DEFAULT_PRICING.trash,
-          electricity: parseFloat(settingsData.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
-          reinigung: parseFloat(settingsData.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
+          electricity:
+            parseFloat(settingsData.settings.electricity_rate ?? '') || DEFAULT_PRICING.electricity,
+          reinigung:
+            parseFloat(settingsData.settings.reinigung_rate ?? '') || DEFAULT_PRICING.reinigung,
         };
         setPricing(loadedPricing);
       }
@@ -288,7 +319,8 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
   // Helper: Calculate finance data for a single guest using central function
   const calculateGuestFinance = (g: FinanceGuest) => {
     const hasDog = g.pets?.toLowerCase().includes('hund') ?? false;
-    const isCleaningCash = g.cleaning_cash === 1 || (g.final_cleaning?.includes('vor Ort') ?? false);
+    const isCleaningCash =
+      g.cleaning_cash === 1 || (g.final_cleaning?.includes('vor Ort') ?? false);
     const isUtilitiesCash = g.utilities_cash === 1;
     const isKurtaxeCash = g.kurtaxe_cash === 1;
     const additionalCostsJson = g.booking_additional_costs || g.additional_costs;
@@ -317,12 +349,14 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
     });
 
     // Gebühren Plattform = Service + Payment Processing Fees
-    const platformFeesTotal = (platformFees.platform_service_fee || 0) + (platformFees.payment_processing_fee || 0);
+    const platformFeesTotal =
+      (platformFees.platform_service_fee || 0) + (platformFees.payment_processing_fee || 0);
     // Gesamtzahlung Gast = was der Gast zahlt
     // Fallback auf Gesamteinzahlung wenn kein guest_total_payment vorhanden (z.B. Feratel, FeWo)
-    const guestTotalPayment = (platformFees.guest_total_payment && platformFees.guest_total_payment > 0)
-      ? platformFees.guest_total_payment
-      : financeResult.gesamteinzahlung;
+    const guestTotalPayment =
+      platformFees.guest_total_payment && platformFees.guest_total_payment > 0
+        ? platformFees.guest_total_payment
+        : financeResult.gesamteinzahlung;
 
     return {
       miete: financeResult.mieteResult.miete,
@@ -361,7 +395,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
           .filter((g) => {
             if (!g.arrival_date) return false;
             const arrivalDate = new Date(g.arrival_date);
-            return arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() === monthIndex;
+            return (
+              arrivalDate.getFullYear() === selectedYear && arrivalDate.getMonth() === monthIndex
+            );
           })
           .sort((a, b) => {
             const dateA = new Date(a.arrival_date || '').getTime();
@@ -378,7 +414,7 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               commission: acc.commission + finance.provision,
             };
           },
-          { totalRevenue: 0, commission: 0 }
+          { totalRevenue: 0, commission: 0 },
         );
 
         months.push({
@@ -461,14 +497,23 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
   const getPlatformBadge = (platform: string | null) => {
     const { name, classes } = getPlatformDisplay(platform);
-    return <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${classes}`}>{name}</span>;
+    return (
+      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${classes}`}>
+        {name}
+      </span>
+    );
   };
 
   // Helper: Calculate occupancy (Auslastung) for a specific month
-  const calculateMonthOccupancy = (year: number, month: number): { bookedNights: number; availableNights: number; rate: number } => {
+  const calculateMonthOccupancy = (
+    year: number,
+    month: number,
+  ): { bookedNights: number; availableNights: number; rate: number } => {
     const monthStart = new Date(year, month, 1);
     const nextMonthStart = new Date(year, month + 1, 1);
-    const availableNights = Math.round((nextMonthStart.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24));
+    const availableNights = Math.round(
+      (nextMonthStart.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     let bookedNights = 0;
     for (const guest of allGuests) {
@@ -483,7 +528,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
       const overlapEnd = new Date(Math.min(departure.getTime(), nextMonthStart.getTime()));
 
       if (overlapStart < overlapEnd) {
-        const nights = Math.round((overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60 * 24));
+        const nights = Math.round(
+          (overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60 * 24),
+        );
         bookedNights += nights;
       }
     }
@@ -496,7 +543,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
   };
 
   // Helper: Calculate quarterly occupancy
-  const calculateQuarterOccupancy = (quarter: number): { bookedNights: number; availableNights: number; rate: number } => {
+  const calculateQuarterOccupancy = (
+    quarter: number,
+  ): { bookedNights: number; availableNights: number; rate: number } => {
     const startMonth = (quarter - 1) * 3;
     let totalBooked = 0;
     let totalAvailable = 0;
@@ -513,7 +562,11 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
   };
 
   // Helper: Calculate yearly occupancy
-  const calculateYearlyOccupancy = (): { bookedNights: number; availableNights: number; rate: number } => {
+  const calculateYearlyOccupancy = (): {
+    bookedNights: number;
+    availableNights: number;
+    rate: number;
+  } => {
     let totalBooked = 0;
     let totalAvailable = 0;
     for (let m = 0; m < 12; m++) {
@@ -545,18 +598,28 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
   // Calculate yearly totals including NK - using central function for consistency
   const yearlyTotals = quarterData.reduce(
     (acc, q) => {
-      const quarterData2 = q.months.reduce((sum, m) =>
-        m.guests.reduce((s, g) => {
-          const finance = calculateGuestFinance(g);
-          return {
-            nk: s.nk + finance.nkCosts + finance.barNk + finance.barReinigung,
-            guestTotalPayment: s.guestTotalPayment + finance.guestTotalPayment,
-            platformFeesTotal: s.platformFeesTotal + finance.platformFeesTotal,
-            gesamteinzahlung: s.gesamteinzahlung + finance.gesamteinzahlung,
-            kalkKosten: s.kalkKosten + finance.calculatedCostsForMieterlos,
-            mieterlos: s.mieterlos + finance.mieterlos,
-          };
-        }, sum), { nk: 0, guestTotalPayment: 0, platformFeesTotal: 0, gesamteinzahlung: 0, kalkKosten: 0, mieterlos: 0 });
+      const quarterData2 = q.months.reduce(
+        (sum, m) =>
+          m.guests.reduce((s, g) => {
+            const finance = calculateGuestFinance(g);
+            return {
+              nk: s.nk + finance.nkCosts + finance.barNk + finance.barReinigung,
+              guestTotalPayment: s.guestTotalPayment + finance.guestTotalPayment,
+              platformFeesTotal: s.platformFeesTotal + finance.platformFeesTotal,
+              gesamteinzahlung: s.gesamteinzahlung + finance.gesamteinzahlung,
+              kalkKosten: s.kalkKosten + finance.calculatedCostsForMieterlos,
+              mieterlos: s.mieterlos + finance.mieterlos,
+            };
+          }, sum),
+        {
+          nk: 0,
+          guestTotalPayment: 0,
+          platformFeesTotal: 0,
+          gesamteinzahlung: 0,
+          kalkKosten: 0,
+          mieterlos: 0,
+        },
+      );
       return {
         revenue: acc.revenue + q.totalRevenue,
         nk: acc.nk + quarterData2.nk,
@@ -569,13 +632,24 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
         mieterlos: acc.mieterlos + quarterData2.mieterlos,
       };
     },
-    { revenue: 0, nk: 0, commission: 0, guestCount: 0, guestTotalPayment: 0, platformFeesTotal: 0, gesamteinzahlung: 0, kalkKosten: 0, mieterlos: 0 }
+    {
+      revenue: 0,
+      nk: 0,
+      commission: 0,
+      guestCount: 0,
+      guestTotalPayment: 0,
+      platformFeesTotal: 0,
+      gesamteinzahlung: 0,
+      kalkKosten: 0,
+      mieterlos: 0,
+    },
   );
 
   const yearlyExpenses = getYearlyExpenses();
   const totalPlatformFees = platformFees.platform_service_fee + platformFees.payment_processing_fee;
   const yearlyTotalIncome = yearlyTotals.revenue + yearlyTotals.nk;
-  const yearlyProfit = yearlyTotalIncome - yearlyExpenses - yearlyTotals.commission - totalPlatformFees;
+  const yearlyProfit =
+    yearlyTotalIncome - yearlyExpenses - yearlyTotals.commission - totalPlatformFees;
   const yearlyOccupancy = calculateYearlyOccupancy();
 
   if (loading) {
@@ -597,7 +671,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               <Euro className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               Finanzübersicht {selectedYear}
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">Monatliche und quartalsweise Übersicht</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
+              Monatliche und quartalsweise Übersicht
+            </p>
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
@@ -615,7 +691,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               <span className="hidden sm:inline ml-2">Auszahlungsdaten</span>
             </button>
             {payoutDatesResult && (
-              <span className={`text-xs px-2 py-1 rounded ${payoutDatesResult.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <span
+                className={`text-xs px-2 py-1 rounded ${payoutDatesResult.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+              >
                 {payoutDatesResult.message}
               </span>
             )}
@@ -666,45 +744,67 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
         {/* Yearly Summary Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Gesamt. Gast</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-blue-700 mt-1">{demoFormat(yearlyTotals.guestTotalPayment)}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Gesamt. Gast
+            </p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-blue-700 mt-1">
+              {demoFormat(yearlyTotals.guestTotalPayment)}
+            </p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Geb. Plattform</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-gray-600 mt-1">-{demoFormat(yearlyTotals.platformFeesTotal)}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Geb. Plattform
+            </p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-gray-600 mt-1">
+              -{demoFormat(yearlyTotals.platformFeesTotal)}
+            </p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Gesamteinz.</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-green-700 mt-1">{demoFormat(yearlyTotals.gesamteinzahlung)}</p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-green-700 mt-1">
+              {demoFormat(yearlyTotals.gesamteinzahlung)}
+            </p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Kalk. Kosten</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-gray-600 mt-1">{demoFormat(yearlyTotals.kalkKosten)}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Kalk. Kosten
+            </p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-gray-600 mt-1">
+              {demoFormat(yearlyTotals.kalkKosten)}
+            </p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Mieterlös</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-purple-700 mt-1">{demoFormat(yearlyTotals.mieterlos)}</p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-purple-700 mt-1">
+              {demoFormat(yearlyTotals.mieterlos)}
+            </p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Provision</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-purple-700 mt-1">-{demoFormat(yearlyTotals.commission)}</p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-purple-700 mt-1">
+              -{demoFormat(yearlyTotals.commission)}
+            </p>
           </div>
 
           <div className="border border-emerald-200 bg-emerald-50 rounded-lg p-4">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Überschuss</p>
-            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-emerald-700 mt-1">{demoFormat(yearlyTotals.mieterlos - yearlyTotals.commission)}</p>
+            <p className="text-xl sm:text-2xl font-semibold font-mono tabular-nums text-emerald-700 mt-1">
+              {demoFormat(yearlyTotals.mieterlos - yearlyTotals.commission)}
+            </p>
             <p className="text-[10px] text-gray-400 mt-1">vor Steuern & Versicherung</p>
           </div>
         </div>
 
         {/* Additional Info */}
         <div className="mt-3 text-xs text-gray-500">
-          <span>Buchungen: <span className="font-bold text-gray-700">{yearlyTotals.guestCount}</span></span>
+          <span>
+            Buchungen: <span className="font-bold text-gray-700">{yearlyTotals.guestCount}</span>
+          </span>
         </div>
       </div>
 
@@ -717,7 +817,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               Auslastung {selectedYear}
             </h3>
             <div className="flex items-center gap-2">
-              <span className={`text-2xl sm:text-3xl font-bold ${getOccupancyColor(yearlyOccupancy.rate)}`}>
+              <span
+                className={`text-2xl sm:text-3xl font-bold ${getOccupancyColor(yearlyOccupancy.rate)}`}
+              >
                 {yearlyOccupancy.rate.toFixed(1)}%
               </span>
               <span className="text-xs text-gray-400">
@@ -728,14 +830,18 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
         </div>
         <div className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(q => {
+            {[1, 2, 3, 4].map((q) => {
               const qOcc = calculateQuarterOccupancy(q);
               const startMonth = (q - 1) * 3;
               return (
                 <div key={q} className="border border-gray-100 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">{QUARTER_LABELS[q - 1]}</span>
-                    <span className={`text-base sm:text-lg font-bold ${getOccupancyColor(qOcc.rate)}`}>
+                    <span className="text-sm font-medium text-gray-900">
+                      {QUARTER_LABELS[q - 1]}
+                    </span>
+                    <span
+                      className={`text-base sm:text-lg font-bold ${getOccupancyColor(qOcc.rate)}`}
+                    >
                       {qOcc.rate.toFixed(1)}%
                     </span>
                   </div>
@@ -746,12 +852,14 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                     ></div>
                   </div>
                   <div className="space-y-1.5">
-                    {[0, 1, 2].map(m => {
+                    {[0, 1, 2].map((m) => {
                       const monthIdx = startMonth + m;
                       const monthOcc = calculateMonthOccupancy(selectedYear, monthIdx);
                       return (
                         <div key={m} className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500 w-16">{(MONTH_NAMES[monthIdx] ?? '').substring(0, 3)}</span>
+                          <span className="text-gray-500 w-16">
+                            {(MONTH_NAMES[monthIdx] ?? '').substring(0, 3)}
+                          </span>
                           <div className="flex items-center gap-2 flex-1 ml-2">
                             <div className="flex-1 bg-gray-100 rounded-full h-1.5">
                               <div
@@ -759,7 +867,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                                 style={{ width: `${Math.min(monthOcc.rate, 100)}%` }}
                               ></div>
                             </div>
-                            <span className={`font-medium w-10 text-right ${getOccupancyColor(monthOcc.rate)}`}>
+                            <span
+                              className={`font-medium w-10 text-right ${getOccupancyColor(monthOcc.rate)}`}
+                            >
                               {monthOcc.rate.toFixed(0)}%
                             </span>
                           </div>
@@ -789,13 +899,27 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
           <table className="w-full min-w-[500px]">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-gray-600 uppercase">Quartal</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-gray-600 uppercase">Buch.</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-blue-600 uppercase">Ges. Gast</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-gray-500 uppercase">Geb. Platf.</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-green-600 uppercase">Gesamteinz.</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-gray-500 uppercase">Kalk. K.</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-purple-600 uppercase bg-purple-50">Mieterlös</th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-gray-600 uppercase">
+                  Quartal
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold text-gray-600 uppercase">
+                  Buch.
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-blue-600 uppercase">
+                  Ges. Gast
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-gray-500 uppercase">
+                  Geb. Platf.
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-green-600 uppercase">
+                  Gesamteinz.
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-gray-500 uppercase">
+                  Kalk. K.
+                </th>
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-purple-600 uppercase bg-purple-50">
+                  Mieterlös
+                </th>
                 <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold text-purple-600 uppercase">
                   Prov.
                 </th>
@@ -808,22 +932,36 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               {quarterData.map((q) => {
                 const quarterExpenses = getQuarterExpenses(q.quarter);
                 // Use central function for calculations - consistent with all other views
-                const qCalc = q.months.reduce((acc, m) =>
-                  m.guests.reduce((a, g) => {
-                    const finance = calculateGuestFinance(g);
-                    return {
-                      guestTotalPayment: a.guestTotalPayment + finance.guestTotalPayment,
-                      platformFeesTotal: a.platformFeesTotal + finance.platformFeesTotal,
-                      gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
-                      kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
-                      mieterlos: a.mieterlos + finance.mieterlos,
-                      gewinn: a.gewinn + finance.gesamtertrag,
-                    };
-                  }, acc), { guestTotalPayment: 0, platformFeesTotal: 0, gesamteinzahlung: 0, kalkKosten: 0, mieterlos: 0, gewinn: 0 });
+                const qCalc = q.months.reduce(
+                  (acc, m) =>
+                    m.guests.reduce((a, g) => {
+                      const finance = calculateGuestFinance(g);
+                      return {
+                        guestTotalPayment: a.guestTotalPayment + finance.guestTotalPayment,
+                        platformFeesTotal: a.platformFeesTotal + finance.platformFeesTotal,
+                        gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
+                        kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
+                        mieterlos: a.mieterlos + finance.mieterlos,
+                        gewinn: a.gewinn + finance.gesamtertrag,
+                      };
+                    }, acc),
+                  {
+                    guestTotalPayment: 0,
+                    platformFeesTotal: 0,
+                    gesamteinzahlung: 0,
+                    kalkKosten: 0,
+                    mieterlos: 0,
+                    gewinn: 0,
+                  },
+                );
                 return (
                   <tr key={q.quarter} className="hover:bg-gray-50">
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-900">{QUARTER_LABELS[q.quarter - 1]}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm text-gray-600">{q.guestCount}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-gray-900">
+                      {QUARTER_LABELS[q.quarter - 1]}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm text-gray-600">
+                      {q.guestCount}
+                    </td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-blue-700">
                       {demoFormat(qCalc.guestTotalPayment)}
                     </td>
@@ -853,28 +991,55 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
             </tbody>
             <tfoot className="bg-gray-200 font-bold">
               {(() => {
-                const yearCalc = quarterData.reduce((acc, q) =>
-                  q.months.reduce((a, m) =>
-                    m.guests.reduce((b, g) => {
-                      const finance = calculateGuestFinance(g);
-                      return {
-                        guestTotalPayment: b.guestTotalPayment + finance.guestTotalPayment,
-                        platformFeesTotal: b.platformFeesTotal + finance.platformFeesTotal,
-                        gesamteinzahlung: b.gesamteinzahlung + finance.gesamteinzahlung,
-                        kalkKosten: b.kalkKosten + finance.calculatedCostsForMieterlos,
-                        mieterlos: b.mieterlos + finance.mieterlos,
-                        gewinn: b.gewinn + finance.gesamtertrag,
-                      };
-                    }, a), acc), { guestTotalPayment: 0, platformFeesTotal: 0, gesamteinzahlung: 0, kalkKosten: 0, mieterlos: 0, gewinn: 0 });
+                const yearCalc = quarterData.reduce(
+                  (acc, q) =>
+                    q.months.reduce(
+                      (a, m) =>
+                        m.guests.reduce((b, g) => {
+                          const finance = calculateGuestFinance(g);
+                          return {
+                            guestTotalPayment: b.guestTotalPayment + finance.guestTotalPayment,
+                            platformFeesTotal: b.platformFeesTotal + finance.platformFeesTotal,
+                            gesamteinzahlung: b.gesamteinzahlung + finance.gesamteinzahlung,
+                            kalkKosten: b.kalkKosten + finance.calculatedCostsForMieterlos,
+                            mieterlos: b.mieterlos + finance.mieterlos,
+                            gewinn: b.gewinn + finance.gesamtertrag,
+                          };
+                        }, a),
+                      acc,
+                    ),
+                  {
+                    guestTotalPayment: 0,
+                    platformFeesTotal: 0,
+                    gesamteinzahlung: 0,
+                    kalkKosten: 0,
+                    mieterlos: 0,
+                    gewinn: 0,
+                  },
+                );
                 return (
                   <tr>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">Gesamt</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm text-gray-900">{yearlyTotals.guestCount}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-blue-800">{demoFormat(yearCalc.guestTotalPayment)}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-gray-600">-{demoFormat(yearCalc.platformFeesTotal)}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-green-800">{demoFormat(yearCalc.gesamteinzahlung)}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-gray-700">{demoFormat(yearCalc.kalkKosten)}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-purple-800 bg-purple-100">{demoFormat(yearCalc.mieterlos)}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">
+                      Gesamt
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm text-gray-900">
+                      {yearlyTotals.guestCount}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-blue-800">
+                      {demoFormat(yearCalc.guestTotalPayment)}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-gray-600">
+                      -{demoFormat(yearCalc.platformFeesTotal)}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-green-800">
+                      {demoFormat(yearCalc.gesamteinzahlung)}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-gray-700">
+                      {demoFormat(yearCalc.kalkKosten)}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-purple-800 bg-purple-100">
+                      {demoFormat(yearCalc.mieterlos)}
+                    </td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-purple-800">
                       {demoFormat(yearlyTotals.commission)}
                     </td>
@@ -893,7 +1058,10 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
 
       {/* Monthly Details */}
       {quarterData.map((quarter) => (
-        <div key={quarter.quarter} className="border border-gray-200 rounded-lg overflow-hidden print:hidden">
+        <div
+          key={quarter.quarter}
+          className="border border-gray-200 rounded-lg overflow-hidden print:hidden"
+        >
           {/* Quarter Header - Clickable */}
           <button
             onClick={() => toggleQuarter(quarter.quarter)}
@@ -901,7 +1069,9 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
           >
             <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900">{QUARTER_LABELS[quarter.quarter - 1]}</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">
+                  {QUARTER_LABELS[quarter.quarter - 1]}
+                </h3>
                 <span className="text-xs sm:text-sm text-gray-500">
                   ({quarter.guestCount} Buch.)
                 </span>
@@ -912,20 +1082,29 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
             </div>
             {(() => {
               // Calculate totals using central function for header display
-              const headerTotals = quarter.months.reduce((acc, m) =>
-                m.guests.reduce((a, g) => {
-                  const finance = calculateGuestFinance(g);
-                  return {
-                    mieterlos: a.mieterlos + finance.mieterlos,
-                    kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
-                    gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
-                  };
-                }, acc), { mieterlos: 0, kalkKosten: 0, gesamteinzahlung: 0 });
+              const headerTotals = quarter.months.reduce(
+                (acc, m) =>
+                  m.guests.reduce((a, g) => {
+                    const finance = calculateGuestFinance(g);
+                    return {
+                      mieterlos: a.mieterlos + finance.mieterlos,
+                      kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
+                      gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
+                    };
+                  }, acc),
+                { mieterlos: 0, kalkKosten: 0, gesamteinzahlung: 0 },
+              );
               return (
                 <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                  <span className="text-green-700 font-semibold">M: {demoFormat(headerTotals.mieterlos)}</span>
-                  <span className="text-gray-600 font-semibold">NK: {demoFormat(headerTotals.kalkKosten)}</span>
-                  <span className="text-purple-700 font-semibold">P: {demoFormat(quarter.commission)}</span>
+                  <span className="text-green-700 font-semibold">
+                    M: {demoFormat(headerTotals.mieterlos)}
+                  </span>
+                  <span className="text-gray-600 font-semibold">
+                    NK: {demoFormat(headerTotals.kalkKosten)}
+                  </span>
+                  <span className="text-purple-700 font-semibold">
+                    P: {demoFormat(quarter.commission)}
+                  </span>
                   <span className="text-emerald-700 font-semibold bg-emerald-100 px-2 sm:px-3 py-0.5 sm:py-1 rounded">
                     Σ {demoFormat(headerTotals.gesamteinzahlung)}
                   </span>
@@ -962,9 +1141,15 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                       <table className="w-full text-xs sm:text-sm min-w-[750px]">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500">Gast</th>
-                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500 hidden sm:table-cell">Plattform</th>
-                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-medium text-gray-500">Anreise</th>
+                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500">
+                              Gast
+                            </th>
+                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500 hidden sm:table-cell">
+                              Plattform
+                            </th>
+                            <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-center text-[10px] sm:text-xs font-medium text-gray-500">
+                              Anreise
+                            </th>
                             <th className="px-2 sm:px-4 py-1.5 sm:py-2 text-right text-[10px] sm:text-xs font-medium text-blue-600">
                               Ges. Gast
                             </th>
@@ -992,21 +1177,37 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                           {monthData.guests.map((guest) => {
                             // Use central calculation - same as BookingDetailPopup
                             const finance = calculateGuestFinance(guest);
-                            const { guestTotalPayment, platformFeesTotal, gesamteinzahlung, calculatedCostsForMieterlos, mieterlos, provision, gesamtertrag } = finance;
+                            const {
+                              guestTotalPayment,
+                              platformFeesTotal,
+                              gesamteinzahlung,
+                              calculatedCostsForMieterlos,
+                              mieterlos,
+                              provision,
+                              gesamtertrag,
+                            } = finance;
                             return (
                               <tr
                                 key={guest.id}
                                 className="hover:bg-gray-100 cursor-pointer transition-colors"
                                 onClick={() => setSelectedBooking(guest)}
                               >
-                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 font-medium text-gray-900 truncate max-w-[120px]">{demoName(guest.guest_name)}</td>
-                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 hidden sm:table-cell">{getPlatformBadge(guest.platform)}</td>
-                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-center text-gray-600">{formatDate(guest.arrival_date)}</td>
+                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 font-medium text-gray-900 truncate max-w-[120px]">
+                                  {demoName(guest.guest_name)}
+                                </td>
+                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 hidden sm:table-cell">
+                                  {getPlatformBadge(guest.platform)}
+                                </td>
+                                <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-center text-gray-600">
+                                  {formatDate(guest.arrival_date)}
+                                </td>
                                 <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-right font-semibold text-blue-700">
                                   {demoFormat(guestTotalPayment)}
                                 </td>
                                 <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-right font-semibold text-gray-500">
-                                  {platformFeesTotal > 0 ? `-${demoFormat(platformFeesTotal)}` : demoFormat(0)}
+                                  {platformFeesTotal > 0
+                                    ? `-${demoFormat(platformFeesTotal)}`
+                                    : demoFormat(0)}
                                 </td>
                                 <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-right font-semibold text-green-700">
                                   {demoFormat(gesamteinzahlung)}
@@ -1031,21 +1232,39 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
                           <tfoot className="bg-gray-100">
                             {(() => {
                               // Calculate totals using central function - consistent with row display
-                              const totals = monthData.guests.reduce((acc, g) => {
-                                const finance = calculateGuestFinance(g);
-                                return {
-                                  totalGuestTotalPayment: acc.totalGuestTotalPayment + finance.guestTotalPayment,
-                                  totalPlatformFees: acc.totalPlatformFees + finance.platformFeesTotal,
-                                  totalGesamteinzahlung: acc.totalGesamteinzahlung + finance.gesamteinzahlung,
-                                  totalKalkKosten: acc.totalKalkKosten + finance.calculatedCostsForMieterlos,
-                                  totalMieterlos: acc.totalMieterlos + finance.mieterlos,
-                                  totalProvision: acc.totalProvision + finance.provision,
-                                  totalGewinn: acc.totalGewinn + finance.gesamtertrag,
-                                };
-                              }, { totalGuestTotalPayment: 0, totalPlatformFees: 0, totalGesamteinzahlung: 0, totalKalkKosten: 0, totalMieterlos: 0, totalProvision: 0, totalGewinn: 0 });
+                              const totals = monthData.guests.reduce(
+                                (acc, g) => {
+                                  const finance = calculateGuestFinance(g);
+                                  return {
+                                    totalGuestTotalPayment:
+                                      acc.totalGuestTotalPayment + finance.guestTotalPayment,
+                                    totalPlatformFees:
+                                      acc.totalPlatformFees + finance.platformFeesTotal,
+                                    totalGesamteinzahlung:
+                                      acc.totalGesamteinzahlung + finance.gesamteinzahlung,
+                                    totalKalkKosten:
+                                      acc.totalKalkKosten + finance.calculatedCostsForMieterlos,
+                                    totalMieterlos: acc.totalMieterlos + finance.mieterlos,
+                                    totalProvision: acc.totalProvision + finance.provision,
+                                    totalGewinn: acc.totalGewinn + finance.gesamtertrag,
+                                  };
+                                },
+                                {
+                                  totalGuestTotalPayment: 0,
+                                  totalPlatformFees: 0,
+                                  totalGesamteinzahlung: 0,
+                                  totalKalkKosten: 0,
+                                  totalMieterlos: 0,
+                                  totalProvision: 0,
+                                  totalGewinn: 0,
+                                },
+                              );
                               return (
                                 <tr>
-                                  <td colSpan={3} className="px-2 sm:px-4 py-1.5 sm:py-2 text-right text-[10px] sm:text-xs font-medium text-gray-600">
+                                  <td
+                                    colSpan={3}
+                                    className="px-2 sm:px-4 py-1.5 sm:py-2 text-right text-[10px] sm:text-xs font-medium text-gray-600"
+                                  >
                                     Summe:
                                   </td>
                                   <td className="px-2 sm:px-4 py-1.5 sm:py-2 text-right font-bold text-blue-800 text-xs sm:text-sm">
@@ -1083,22 +1302,33 @@ export default function FinanceOverview({ onNavigateToGuest, demoMode = false }:
               {/* Quarter Summary Row */}
               {(() => {
                 // Calculate totals using central function - consistent with all other calculations
-                const qSummary = quarter.months.reduce((acc, m) =>
-                  m.guests.reduce((a, g) => {
-                    const finance = calculateGuestFinance(g);
-                    return {
-                      mieterlos: a.mieterlos + finance.mieterlos,
-                      kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
-                      gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
-                    };
-                  }, acc), { mieterlos: 0, kalkKosten: 0, gesamteinzahlung: 0 });
+                const qSummary = quarter.months.reduce(
+                  (acc, m) =>
+                    m.guests.reduce((a, g) => {
+                      const finance = calculateGuestFinance(g);
+                      return {
+                        mieterlos: a.mieterlos + finance.mieterlos,
+                        kalkKosten: a.kalkKosten + finance.calculatedCostsForMieterlos,
+                        gesamteinzahlung: a.gesamteinzahlung + finance.gesamteinzahlung,
+                      };
+                    }, acc),
+                  { mieterlos: 0, kalkKosten: 0, gesamteinzahlung: 0 },
+                );
                 return (
                   <div className="bg-gray-50 px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
-                    <span className="text-sm font-medium text-gray-900">Summe {QUARTER_LABELS[quarter.quarter - 1]}</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      Summe {QUARTER_LABELS[quarter.quarter - 1]}
+                    </span>
                     <div className="flex items-center gap-3 sm:gap-4 text-sm">
-                      <span className="font-medium text-green-700">M: {demoFormat(qSummary.mieterlos)}</span>
-                      <span className="font-medium text-gray-600">NK: {demoFormat(qSummary.kalkKosten)}</span>
-                      <span className="font-medium text-purple-700">P: {demoFormat(quarter.commission)}</span>
+                      <span className="font-medium text-green-700">
+                        M: {demoFormat(qSummary.mieterlos)}
+                      </span>
+                      <span className="font-medium text-gray-600">
+                        NK: {demoFormat(qSummary.kalkKosten)}
+                      </span>
+                      <span className="font-medium text-purple-700">
+                        P: {demoFormat(quarter.commission)}
+                      </span>
                       <span className="font-semibold text-emerald-700">
                         Σ {demoFormat(qSummary.gesamteinzahlung)}
                       </span>
