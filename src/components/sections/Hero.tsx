@@ -51,12 +51,12 @@ export function Hero() {
     // Check for preloaded video URL from LoadingScreen
     const resolveVideoUrl = (url: string) => {
       setVideoUrl(url);
-      // Generate a thumbnail from the Stream video at 7s to match the start frame
+      // Generate a thumbnail from the Stream video at 1s to match the start frame
       // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
       const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
       if (uidMatch && !thumbnailUrl) {
         const subdomain = url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
-        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?width=1920&height=1080`);
+        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`);
       }
     };
 
@@ -110,30 +110,32 @@ export function Hero() {
       setTimeout(() => setShowPlaceholder(false), 300);
     };
 
+    const ua = navigator.userAgent;
+    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(ua);
+
     const tryPlay = () => {
       if (cancelled) return;
       video.muted = true;
       video.volume = 0;
-      video.currentTime = 7;
+      video.currentTime = 1;
+
+      // On mobile, don't autoplay — always show the play button so the user starts it
+      if (isMobileDevice) {
+        setShowPlayHint(true);
+        return;
+      }
+
       const p = video.play();
       if (p) {
         p.then(onPlaySuccess).catch(() => {
           // Autoplay blocked — start from beginning on user interaction
           if (!cancelled) setShowPlayHint(true);
-          video.currentTime = 0;
-          const playOnInteraction = () => {
-            video.muted = true;
-            video.currentTime = 0;
-            video.play().then(onPlaySuccess).catch(() => {});
-          };
-          document.addEventListener('click', playOnInteraction, { once: true });
-          document.addEventListener('touchstart', playOnInteraction, { once: true });
+          video.currentTime = 1;
         });
       }
     };
 
     const initHls = async () => {
-      const ua = navigator.userAgent;
       const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
       const useNativeHls = (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
@@ -197,6 +199,9 @@ export function Hero() {
   // Also try play when video reports it can play (belt and suspenders)
   const handleVideoCanPlay = () => {
     if (videoRef.current && !videoLoaded) {
+      const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      // On mobile, don't autoplay — the user starts playback via the play button
+      if (isMobileDevice) return;
       videoRef.current.muted = true;
       videoRef.current.volume = 0;
       videoRef.current.play().then(() => {
@@ -269,7 +274,6 @@ export function Hero() {
         <video
           ref={videoRef}
           id="hero-video"
-          autoPlay
           muted
           loop
           playsInline
@@ -290,6 +294,7 @@ export function Hero() {
             onClick={() => {
               if (videoRef.current) {
                 videoRef.current.muted = true;
+                videoRef.current.currentTime = 1;
                 videoRef.current.play().then(() => {
                   setVideoLoaded(true);
                   setShowPlayHint(false);
