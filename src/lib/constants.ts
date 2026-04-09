@@ -1,6 +1,6 @@
 export const SITE_CONFIG = {
   name: 'Sechszirbenhütte',
-  url: 'https://www.sechszirbenhuette.com',
+  url: 'https://sechszirbenhuette.com',
   email: 'info@sechszirbenhuette.com',
   phone: '+49 (0)176 600 30 373',
   address: {
