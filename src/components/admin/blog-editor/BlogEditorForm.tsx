@@ -17,7 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
-import type { BlogPost, BlogPostImage, BlogTab } from './types';
+import type { BlogPost, BlogPostImage, BlogTab, MediaPickerTarget } from './types';
 
 interface BlogEditorFormProps {
   currentPost: Partial<BlogPost>;
@@ -29,7 +29,7 @@ interface BlogEditorFormProps {
   onRemoveImage: (index: number) => void;
   onUpdateImage: (index: number, updates: Partial<BlogPostImage>) => void;
   onReorderImages: (fromIndex: number, toIndex: number) => void;
-  onOpenMediaPicker: (target: 'cover' | 'gallery' | number) => void;
+  onOpenMediaPicker: (target: MediaPickerTarget) => void;
   onSave: (publish?: boolean) => void;
   onTogglePreview: () => void;
   onMediaUploaded?: () => void;
@@ -199,7 +199,10 @@ export function BlogEditorForm({
               </label>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 {postImages.map((img, index) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-lg overflow-hidden bg-gray-100"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img.image_url}
@@ -231,7 +234,9 @@ export function BlogEditorForm({
           <>
             {/* Intro Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Einleitungstext</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Einleitungstext
+              </label>
               <RichTextEditor
                 value={currentPost.content || ''}
                 onChange={(html) => onUpdatePost({ content: html })}
@@ -260,7 +265,9 @@ export function BlogEditorForm({
                 <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl text-gray-400">
                   <LayoutGrid className="w-10 h-10 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">Noch keine Karussell-Einheiten</p>
-                  <p className="text-xs mt-1">Klicke &quot;Einheit hinzufügen&quot; um zu beginnen</p>
+                  <p className="text-xs mt-1">
+                    Klicke &quot;Einheit hinzufügen&quot; um zu beginnen
+                  </p>
                 </div>
               )}
 
@@ -310,7 +317,10 @@ export function BlogEditorForm({
                         {/* Reorder & Delete buttons */}
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={(e) => { e.stopPropagation(); onReorderImages(index, index - 1); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onReorderImages(index, index - 1);
+                            }}
                             disabled={index === 0}
                             className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                             title="Nach oben"
@@ -318,7 +328,10 @@ export function BlogEditorForm({
                             <ChevronUp className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); onReorderImages(index, index + 1); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onReorderImages(index, index + 1);
+                            }}
                             disabled={index === postImages.length - 1}
                             className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                             title="Nach unten"
@@ -326,7 +339,10 @@ export function BlogEditorForm({
                             <ChevronDown className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); onRemoveImage(index); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemoveImage(index);
+                            }}
                             className="p-1 text-red-400 hover:text-red-600"
                             title="Entfernen"
                           >
@@ -340,7 +356,9 @@ export function BlogEditorForm({
                         <div className="p-4 space-y-4 border-t border-gray-200">
                           {/* Slide Image */}
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1.5">Bild</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                              Bild
+                            </label>
                             {slide.image_url ? (
                               <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -370,7 +388,9 @@ export function BlogEditorForm({
 
                           {/* Slide Title */}
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1.5">Titel</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                              Titel
+                            </label>
                             <input
                               type="text"
                               value={slide.image_alt || ''}
@@ -382,7 +402,9 @@ export function BlogEditorForm({
 
                           {/* Slide Description */}
                           <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1.5">Beschreibung</label>
+                            <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                              Beschreibung
+                            </label>
                             <RichTextEditor
                               value={slide.caption || ''}
                               onChange={(html) => onUpdateImage(index, { caption: html })}
@@ -404,7 +426,9 @@ export function BlogEditorForm({
           <>
             {/* Intro Text */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Einleitungstext</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Einleitungstext
+              </label>
               <RichTextEditor
                 value={tabsData.intro}
                 onChange={(html) => updateTabs(html, tabsData.tabs)}
@@ -420,7 +444,10 @@ export function BlogEditorForm({
                 </label>
                 <button
                   onClick={() => {
-                    const newTabs = [...tabsData.tabs, { title: `Tab ${tabsData.tabs.length + 1}`, slides: [] }];
+                    const newTabs = [
+                      ...tabsData.tabs,
+                      { title: `Tab ${tabsData.tabs.length + 1}`, slides: [] },
+                    ];
                     updateTabs(tabsData.intro, newTabs);
                     setActiveTabIndex(newTabs.length - 1);
                   }}
@@ -460,7 +487,9 @@ export function BlogEditorForm({
                     <div className="space-y-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
                       {/* Tab type selector */}
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Tab-Typ</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Tab-Typ
+                        </label>
                         <div className="flex gap-2">
                           {[
                             { value: undefined, label: 'Standard' },
@@ -490,7 +519,9 @@ export function BlogEditorForm({
 
                       {/* Section title */}
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Abschnitts-Überschrift</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Abschnitts-Überschrift
+                        </label>
                         <input
                           type="text"
                           value={tabsData.tabs[activeTabIndex]?.sectionTitle || ''}
@@ -509,7 +540,9 @@ export function BlogEditorForm({
                       {/* Tab title */}
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Tab-Titel</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Tab-Titel
+                          </label>
                           <input
                             type="text"
                             value={tabsData.tabs[activeTabIndex]?.title ?? ''}
@@ -539,7 +572,9 @@ export function BlogEditorForm({
                       {/* Featured trip (for kids-accordion type) */}
                       {tabsData.tabs[activeTabIndex]?.type === 'kids-accordion' && (
                         <div className="border border-logo-green/30 rounded-lg bg-logo-green/5 p-3 space-y-2">
-                          <label className="block text-xs font-medium text-logo-green">Hervorgehobener Eintrag</label>
+                          <label className="block text-xs font-medium text-logo-green">
+                            Hervorgehobener Eintrag
+                          </label>
                           <input
                             type="text"
                             value={tabsData.tabs[activeTabIndex]?.featured?.title || ''}
@@ -547,8 +582,16 @@ export function BlogEditorForm({
                               const tab = tabsData.tabs[activeTabIndex];
                               if (!tab) return;
                               const newTabs = [...tabsData.tabs];
-                              const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
-                              newTabs[activeTabIndex] = { ...tab, featured: { ...prev, title: e.target.value } };
+                              const prev = tab.featured || {
+                                title: '',
+                                description: '',
+                                distance: '',
+                                age: '',
+                              };
+                              newTabs[activeTabIndex] = {
+                                ...tab,
+                                featured: { ...prev, title: e.target.value },
+                              };
                               updateTabs(tabsData.intro, newTabs);
                             }}
                             className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -560,8 +603,16 @@ export function BlogEditorForm({
                               const tab = tabsData.tabs[activeTabIndex];
                               if (!tab) return;
                               const newTabs = [...tabsData.tabs];
-                              const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
-                              newTabs[activeTabIndex] = { ...tab, featured: { ...prev, description: html } };
+                              const prev = tab.featured || {
+                                title: '',
+                                description: '',
+                                distance: '',
+                                age: '',
+                              };
+                              newTabs[activeTabIndex] = {
+                                ...tab,
+                                featured: { ...prev, description: html },
+                              };
                               updateTabs(tabsData.intro, newTabs);
                             }}
                             placeholder="Beschreibung"
@@ -574,8 +625,16 @@ export function BlogEditorForm({
                                 const tab = tabsData.tabs[activeTabIndex];
                                 if (!tab) return;
                                 const newTabs = [...tabsData.tabs];
-                                const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
-                                newTabs[activeTabIndex] = { ...tab, featured: { ...prev, distance: e.target.value } };
+                                const prev = tab.featured || {
+                                  title: '',
+                                  description: '',
+                                  distance: '',
+                                  age: '',
+                                };
+                                newTabs[activeTabIndex] = {
+                                  ...tab,
+                                  featured: { ...prev, distance: e.target.value },
+                                };
                                 updateTabs(tabsData.intro, newTabs);
                               }}
                               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -588,8 +647,16 @@ export function BlogEditorForm({
                                 const tab = tabsData.tabs[activeTabIndex];
                                 if (!tab) return;
                                 const newTabs = [...tabsData.tabs];
-                                const prev = tab.featured || { title: '', description: '', distance: '', age: '' };
-                                newTabs[activeTabIndex] = { ...tab, featured: { ...prev, age: e.target.value } };
+                                const prev = tab.featured || {
+                                  title: '',
+                                  description: '',
+                                  distance: '',
+                                  age: '',
+                                };
+                                newTabs[activeTabIndex] = {
+                                  ...tab,
+                                  featured: { ...prev, age: e.target.value },
+                                };
                                 updateTabs(tabsData.intro, newTabs);
                               }}
                               className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
@@ -624,119 +691,237 @@ export function BlogEditorForm({
                         </div>
 
                         <div className="space-y-2">
-                          {(tabsData.tabs[activeTabIndex]?.slides ?? []).map((slide, slideIdx) => (
-                            <div key={slideIdx} className="border border-gray-200 rounded-lg bg-white p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-gray-500">Einheit {slideIdx + 1}</span>
-                                <button
-                                  onClick={() => {
-                                    const tab = tabsData.tabs[activeTabIndex];
-                                    if (!tab) return;
+                          {(tabsData.tabs[activeTabIndex]?.slides ?? []).map((slide, slideIdx) => {
+                            const activeTabType = tabsData.tabs[activeTabIndex]?.type;
+                            const showImageField =
+                              activeTabType === 'dog-carousel' || activeTabType === undefined;
+                            return (
+                              <div
+                                key={slideIdx}
+                                className="border border-gray-200 rounded-lg bg-white p-3 space-y-2"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium text-gray-500">
+                                    Einheit {slideIdx + 1}
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      const tab = tabsData.tabs[activeTabIndex];
+                                      if (!tab) return;
+                                      const newTabs = [...tabsData.tabs];
+                                      newTabs[activeTabIndex] = {
+                                        ...tab,
+                                        slides: tab.slides.filter((_, i) => i !== slideIdx),
+                                      };
+                                      updateTabs(tabsData.intro, newTabs);
+                                    }}
+                                    className="p-0.5 text-red-400 hover:text-red-600"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                                {showImageField && (
+                                  <div>
+                                    <label className="block text-[10px] font-medium text-gray-500 mb-1">
+                                      Bild
+                                    </label>
+                                    {slide.image_url ? (
+                                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={slide.image_url}
+                                          alt={slide.image_alt || ''}
+                                          className="w-full h-full object-cover"
+                                          loading="eager"
+                                        />
+                                        <button
+                                          onClick={() =>
+                                            onOpenMediaPicker({
+                                              kind: 'tab-slide',
+                                              tabIndex: activeTabIndex,
+                                              slideIndex: slideIdx,
+                                            })
+                                          }
+                                          className="absolute bottom-2 right-2 px-2 py-1 text-xs bg-white/90 text-gray-700 rounded-lg hover:bg-white shadow transition"
+                                        >
+                                          Ändern
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            const newTabs = [...tabsData.tabs];
+                                            const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                            newSlides[slideIdx] = {
+                                              ...newSlides[slideIdx]!,
+                                              image_url: undefined,
+                                              image_alt: undefined,
+                                            };
+                                            newTabs[activeTabIndex] = {
+                                              ...newTabs[activeTabIndex]!,
+                                              slides: newSlides,
+                                            };
+                                            updateTabs(tabsData.intro, newTabs);
+                                          }}
+                                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                          title="Bild entfernen"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        onClick={() =>
+                                          onOpenMediaPicker({
+                                            kind: 'tab-slide',
+                                            tabIndex: activeTabIndex,
+                                            slideIndex: slideIdx,
+                                          })
+                                        }
+                                        className="w-full aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 hover:border-logo-green hover:text-logo-green transition"
+                                      >
+                                        <Upload className="w-5 h-5 mb-1" />
+                                        <span className="text-[10px]">
+                                          Bild auswählen / hochladen
+                                        </span>
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                                <input
+                                  type="text"
+                                  value={slide.title}
+                                  onChange={(e) => {
                                     const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = {
+                                      ...newSlides[slideIdx]!,
+                                      title: e.target.value,
+                                    };
                                     newTabs[activeTabIndex] = {
-                                      ...tab,
-                                      slides: tab.slides.filter((_, i) => i !== slideIdx),
+                                      ...newTabs[activeTabIndex]!,
+                                      slides: newSlides,
                                     };
                                     updateTabs(tabsData.intro, newTabs);
                                   }}
-                                  className="p-0.5 text-red-400 hover:text-red-600"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Titel"
+                                />
+                                <RichTextEditor
+                                  value={slide.description}
+                                  onChange={(html) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = {
+                                      ...newSlides[slideIdx]!,
+                                      description: html,
+                                    };
+                                    newTabs[activeTabIndex] = {
+                                      ...newTabs[activeTabIndex]!,
+                                      slides: newSlides,
+                                    };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  placeholder="Beschreibung..."
+                                />
+                                <input
+                                  type="text"
+                                  value={slide.tip || ''}
+                                  onChange={(e) => {
+                                    const newTabs = [...tabsData.tabs];
+                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                    newSlides[slideIdx] = {
+                                      ...newSlides[slideIdx]!,
+                                      tip: e.target.value,
+                                    };
+                                    newTabs[activeTabIndex] = {
+                                      ...newTabs[activeTabIndex]!,
+                                      slides: newSlides,
+                                    };
+                                    updateTabs(tabsData.intro, newTabs);
+                                  }}
+                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                  placeholder="Tipp (optional)"
+                                />
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input
+                                    type="text"
+                                    value={slide.difficulty || ''}
+                                    onChange={(e) => {
+                                      const newTabs = [...tabsData.tabs];
+                                      const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                      newSlides[slideIdx] = {
+                                        ...newSlides[slideIdx]!,
+                                        difficulty: e.target.value,
+                                      };
+                                      newTabs[activeTabIndex] = {
+                                        ...newTabs[activeTabIndex]!,
+                                        slides: newSlides,
+                                      };
+                                      updateTabs(tabsData.intro, newTabs);
+                                    }}
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                    placeholder="Schwierigkeit (optional)"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={slide.duration || ''}
+                                    onChange={(e) => {
+                                      const newTabs = [...tabsData.tabs];
+                                      const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                      newSlides[slideIdx] = {
+                                        ...newSlides[slideIdx]!,
+                                        duration: e.target.value,
+                                      };
+                                      newTabs[activeTabIndex] = {
+                                        ...newTabs[activeTabIndex]!,
+                                        slides: newSlides,
+                                      };
+                                      updateTabs(tabsData.intro, newTabs);
+                                    }}
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                    placeholder="Dauer (optional)"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={slide.distance || ''}
+                                    onChange={(e) => {
+                                      const newTabs = [...tabsData.tabs];
+                                      const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                      newSlides[slideIdx] = {
+                                        ...newSlides[slideIdx]!,
+                                        distance: e.target.value,
+                                      };
+                                      newTabs[activeTabIndex] = {
+                                        ...newTabs[activeTabIndex]!,
+                                        slides: newSlides,
+                                      };
+                                      updateTabs(tabsData.intro, newTabs);
+                                    }}
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                    placeholder="Entfernung (optional)"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={slide.age || ''}
+                                    onChange={(e) => {
+                                      const newTabs = [...tabsData.tabs];
+                                      const newSlides = [...newTabs[activeTabIndex]!.slides];
+                                      newSlides[slideIdx] = {
+                                        ...newSlides[slideIdx]!,
+                                        age: e.target.value,
+                                      };
+                                      newTabs[activeTabIndex] = {
+                                        ...newTabs[activeTabIndex]!,
+                                        slides: newSlides,
+                                      };
+                                      updateTabs(tabsData.intro, newTabs);
+                                    }}
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
+                                    placeholder="Altersgruppe (optional)"
+                                  />
+                                </div>
                               </div>
-                              <input
-                                type="text"
-                                value={slide.title}
-                                onChange={(e) => {
-                                  const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, title: e.target.value };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                  updateTabs(tabsData.intro, newTabs);
-                                }}
-                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                placeholder="Titel"
-                              />
-                              <RichTextEditor
-                                value={slide.description}
-                                onChange={(html) => {
-                                  const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, description: html };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                  updateTabs(tabsData.intro, newTabs);
-                                }}
-                                placeholder="Beschreibung..."
-                              />
-                              <input
-                                type="text"
-                                value={slide.tip || ''}
-                                onChange={(e) => {
-                                  const newTabs = [...tabsData.tabs];
-                                  const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                  newSlides[slideIdx] = { ...newSlides[slideIdx]!, tip: e.target.value };
-                                  newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                  updateTabs(tabsData.intro, newTabs);
-                                }}
-                                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                placeholder="Tipp (optional)"
-                              />
-                              <div className="grid grid-cols-2 gap-2">
-                                <input
-                                  type="text"
-                                  value={slide.difficulty || ''}
-                                  onChange={(e) => {
-                                    const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, difficulty: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                    updateTabs(tabsData.intro, newTabs);
-                                  }}
-                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                  placeholder="Schwierigkeit (optional)"
-                                />
-                                <input
-                                  type="text"
-                                  value={slide.duration || ''}
-                                  onChange={(e) => {
-                                    const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, duration: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                    updateTabs(tabsData.intro, newTabs);
-                                  }}
-                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                  placeholder="Dauer (optional)"
-                                />
-                                <input
-                                  type="text"
-                                  value={slide.distance || ''}
-                                  onChange={(e) => {
-                                    const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, distance: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                    updateTabs(tabsData.intro, newTabs);
-                                  }}
-                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                  placeholder="Entfernung (optional)"
-                                />
-                                <input
-                                  type="text"
-                                  value={slide.age || ''}
-                                  onChange={(e) => {
-                                    const newTabs = [...tabsData.tabs];
-                                    const newSlides = [...newTabs[activeTabIndex]!.slides];
-                                    newSlides[slideIdx] = { ...newSlides[slideIdx]!, age: e.target.value };
-                                    newTabs[activeTabIndex] = { ...newTabs[activeTabIndex]!, slides: newSlides };
-                                    updateTabs(tabsData.intro, newTabs);
-                                  }}
-                                  className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-logo-green"
-                                  placeholder="Altersgruppe (optional)"
-                                />
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     </div>

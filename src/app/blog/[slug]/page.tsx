@@ -57,7 +57,15 @@ interface MediaItem {
 }
 
 // Carousel Cards component matching the original FeatureCarousel style
-function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPostImage[]; mediaImages: MediaItem[]; onImageClick: (index: number) => void }) {
+function CarouselCards({
+  images,
+  mediaImages,
+  onImageClick,
+}: {
+  images: BlogPostImage[];
+  mediaImages: MediaItem[];
+  onImageClick: (index: number) => void;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -110,10 +118,7 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
                   {/* Portrait Image or Placeholder */}
                   <div className="relative aspect-[3/4] bg-gray-100">
                     {imageUrl ? (
-                      <button
-                        onClick={() => onImageClick(index)}
-                        className="w-full h-full"
-                      >
+                      <button onClick={() => onImageClick(index)} className="w-full h-full">
                         <Image
                           src={imageUrl}
                           alt={slide.image_alt || ''}
@@ -143,7 +148,10 @@ function CarouselCards({ images, mediaImages, onImageClick }: { images: BlogPost
                       <h4 className="text-lg font-bold text-logo-green mb-3">{slide.image_alt}</h4>
                     )}
                     {slide.caption && (
-                      <div className="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: slide.caption }} />
+                      <div
+                        className="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: slide.caption }}
+                      />
                     )}
                   </div>
                 </div>
@@ -183,6 +191,8 @@ const DOG_TRIP_CATEGORIES = [
 interface TabSlide {
   title: string;
   description: string;
+  image_url?: string;
+  image_alt?: string;
   tip?: string;
   difficulty?: string;
   duration?: string;
@@ -205,7 +215,13 @@ interface TabsData {
 }
 
 // Dog Trips Carousel - matches DogTripsCarousel.tsx exactly
-function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTripImages: Record<string, MediaItem[]> }) {
+function DogTripsCarouselDynamic({
+  tab,
+  dogTripImages,
+}: {
+  tab: TabData;
+  dogTripImages: Record<string, MediaItem[]>;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -227,7 +243,10 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
       {/* Section Title */}
       {tab.sectionTitle && (
         <div className="flex flex-col items-center text-center mb-8">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl text-logo-green" style={{ fontFamily: 'FeelingPassionate, cursive' }}>
+          <h3
+            className="text-2xl sm:text-3xl md:text-4xl text-logo-green"
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+          >
             {tab.sectionTitle}
           </h3>
         </div>
@@ -252,11 +271,18 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
 
         {/* Carousel Track */}
         <div className="overflow-hidden mx-4 md:mx-8">
-          <div className="flex items-stretch transition-transform duration-300 ease-out" style={{ transform: `translateX(-${translateValue}%)` }}>
+          <div
+            className="flex items-stretch transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${translateValue}%)` }}
+          >
             {tab.slides.map((trip, index) => {
               const categoryKey = categories[index] as string | undefined;
               const tripImages = categoryKey ? dogTripImages[categoryKey] || [] : [];
-              const firstImage = tripImages[0];
+              const categoryImage = tripImages[0];
+              const slideImage = trip.image_url
+                ? { url: trip.image_url, alt_text: trip.image_alt || trip.title }
+                : null;
+              const firstImage = slideImage || categoryImage;
 
               return (
                 <div key={index} className="w-full md:w-1/2 flex-shrink-0 px-2">
@@ -275,7 +301,7 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-wood-100 to-wood-200">
                           <div className="text-center text-wood-600">
                             <Dog size={48} className="mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">Bild im Admin hinzufügen</p>
+                            <p className="text-sm">Bild im Blog-Editor hochladen</p>
                           </div>
                         </div>
                       )}
@@ -288,8 +314,14 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
                     {/* Text Content */}
                     <div className="p-5 flex-1">
                       <h4 className="text-lg font-bold text-logo-green mb-1">{trip.title}</h4>
-                      {trip.difficulty && <p className="text-sm text-logo-green/70 font-medium mb-3">{trip.difficulty}</p>}
-                      <p className="text-gray-600 text-sm leading-relaxed mb-3">{trip.description}</p>
+                      {trip.difficulty && (
+                        <p className="text-sm text-logo-green/70 font-medium mb-3">
+                          {trip.difficulty}
+                        </p>
+                      )}
+                      <p className="text-gray-600 text-sm leading-relaxed mb-3">
+                        {trip.description}
+                      </p>
                       <div className="flex flex-wrap gap-3 text-sm">
                         {trip.duration && (
                           <span className="flex items-center gap-1 text-gray-500">
@@ -297,9 +329,7 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
                           </span>
                         )}
                         {trip.tip && (
-                          <span className="text-wood-600 font-medium">
-                            Hinweis: {trip.tip}
-                          </span>
+                          <span className="text-wood-600 font-medium">Hinweis: {trip.tip}</span>
                         )}
                       </div>
                     </div>
@@ -317,7 +347,9 @@ function DogTripsCarouselDynamic({ tab, dogTripImages }: { tab: TabData; dogTrip
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
-                currentIndex === index ? 'bg-logo-green w-6' : 'bg-logo-green/30 hover:bg-logo-green/50'
+                currentIndex === index
+                  ? 'bg-logo-green w-6'
+                  : 'bg-logo-green/30 hover:bg-logo-green/50'
               }`}
             />
           ))}
@@ -336,7 +368,10 @@ function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
       {/* Section Title */}
       {tab.sectionTitle && (
         <div className="flex flex-col items-center text-center mb-8">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl text-logo-green" style={{ fontFamily: 'FeelingPassionate, cursive' }}>
+          <h3
+            className="text-2xl sm:text-3xl md:text-4xl text-logo-green"
+            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+          >
             {tab.sectionTitle}
           </h3>
         </div>
@@ -351,7 +386,9 @@ function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
                 1
               </span>
               <div>
-                <h4 className="text-xl md:text-2xl font-bold text-logo-green">{tab.featured.title}</h4>
+                <h4 className="text-xl md:text-2xl font-bold text-logo-green">
+                  {tab.featured.title}
+                </h4>
                 <p className="text-sm text-gray-500 font-medium">
                   <Car className="inline w-4 h-4 mr-1" />
                   {tab.featured.distance} | {tab.featured.age}
@@ -383,7 +420,8 @@ function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
                   {(trip.distance || trip.age) && (
                     <p className="text-xs text-gray-500">
                       <Car className="inline w-3 h-3 mr-1" />
-                      {trip.distance}{trip.age ? ` | ${trip.age}` : ''}
+                      {trip.distance}
+                      {trip.age ? ` | ${trip.age}` : ''}
                     </p>
                   )}
                 </div>
@@ -403,7 +441,13 @@ function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
 }
 
 // Tabs Content component for tabs layout blog posts
-function TabsContent({ content, dogTripImages }: { content: string; dogTripImages: Record<string, MediaItem[]> }) {
+function TabsContent({
+  content,
+  dogTripImages,
+}: {
+  content: string;
+  dogTripImages: Record<string, MediaItem[]>;
+}) {
   const [activeTab, setActiveTab] = useState(0);
 
   let data: TabsData;
@@ -422,9 +466,7 @@ function TabsContent({ content, dogTripImages }: { content: string; dogTripImage
       transition={{ delay: 0.3 }}
     >
       {/* Intro */}
-      {data.intro && (
-        <p className="text-gray-600 mb-10 max-w-3xl">{data.intro}</p>
-      )}
+      {data.intro && <p className="text-gray-600 mb-10 max-w-3xl">{data.intro}</p>}
 
       {/* Tab buttons */}
       {tabs.length > 0 && (
@@ -480,7 +522,10 @@ function markdownToHtml(md: string): string {
   let html = md;
 
   // Convert markdown links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  html = html.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
 
   // Split by double newlines for paragraphs, or by ## for headings
   const lines = html.split(/\n/);
@@ -499,13 +544,22 @@ function markdownToHtml(md: string): string {
 
     // Headings
     if (line.startsWith('### ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       result.push(`<h3>${line.slice(4)}</h3>`);
     } else if (line.startsWith('## ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       result.push(`<h2>${line.slice(3)}</h2>`);
     } else if (line.startsWith('# ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       // Skip h1 since the title is already displayed in the header
       continue;
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
@@ -515,13 +569,22 @@ function markdownToHtml(md: string): string {
       }
       result.push(`<li>${line.slice(2)}</li>`);
     } else if (line.startsWith('> ')) {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       result.push(`<blockquote><p>${line.slice(2)}</p></blockquote>`);
     } else if (line === '---' || line === '***') {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       result.push('<hr />');
     } else {
-      if (inList) { result.push('</ul>'); inList = false; }
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
       // Bold and italic
       line = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
       line = line.replace(/\*([^*]+)\*/g, '<em>$1</em>');
@@ -581,7 +644,7 @@ export default function BlogPostPage() {
             .then((mediaData) => {
               if (mediaData.media) {
                 const grouped: Record<string, MediaItem[]> = {};
-                DOG_TRIP_CATEGORIES.forEach(cat => {
+                DOG_TRIP_CATEGORIES.forEach((cat) => {
                   grouped[cat] = mediaData.media!.filter((m) => m.category === cat);
                 });
                 setDogTripImages(grouped);
@@ -626,7 +689,9 @@ export default function BlogPostPage() {
         '@type': 'BlogPosting',
         headline: post.title,
         description: post.meta_description || post.excerpt || '',
-        image: post.cover_image_url || 'https://sechszirbenhuette.pages.dev/images/fallback/og-image.jpg',
+        image:
+          post.cover_image_url ||
+          'https://sechszirbenhuette.pages.dev/images/fallback/og-image.jpg',
         author: {
           '@type': 'Organization',
           name: post.author,
@@ -700,7 +765,9 @@ export default function BlogPostPage() {
         <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
           <div className="container text-center py-20">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Beitrag nicht gefunden</h1>
-            <p className="text-gray-600 mb-8">Der gesuchte Blogbeitrag existiert nicht oder wurde entfernt.</p>
+            <p className="text-gray-600 mb-8">
+              Der gesuchte Blogbeitrag existiert nicht oder wurde entfernt.
+            </p>
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 text-logo-green hover:text-logo-green/80 transition-colors"
@@ -767,9 +834,7 @@ export default function BlogPostPage() {
 
                 {/* Content / Intro text */}
                 {post.layout === 'carousel' && post.content && (
-                  <p className="text-gray-600 mb-10 max-w-3xl">
-                    {post.content}
-                  </p>
+                  <p className="text-gray-600 mb-10 max-w-3xl">{post.content}</p>
                 )}
 
                 {/* Carousel */}
@@ -886,9 +951,7 @@ export default function BlogPostPage() {
               {post.title}
             </h1>
             {post.subtitle && (
-              <p className="text-xl text-logo-green/80 font-medium mb-4">
-                {post.subtitle}
-              </p>
+              <p className="text-xl text-logo-green/80 font-medium mb-4">{post.subtitle}</p>
             )}
             <div className="flex flex-wrap items-center gap-4 text-gray-500 text-sm">
               <span className="flex items-center gap-1.5">
@@ -994,21 +1057,91 @@ export default function BlogPostPage() {
       )}
       {/* Blog content styles matching TipTap editor output */}
       <style jsx global>{`
-        .prose img[data-style="default"] { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
-        .prose img[data-style="rounded"] { border-radius: 16px; max-width: 80%; height: auto; margin: 1.5rem auto; display: block; }
-        .prose img[data-style="circle"] { border-radius: 50%; width: 250px; height: 250px; object-fit: cover; margin: 1.5rem auto; display: block; }
-        .prose img[data-style="full"] { border-radius: 0; width: 100%; height: auto; margin: 2rem 0; display: block; }
-        .prose img:not([data-style]) { border-radius: 8px; max-width: 100%; height: auto; margin: 1.5rem auto; display: block; }
-        .prose h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; margin-top: 2rem; color: #1e5631; }
-        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; margin-top: 1.5rem; color: #1e5631; }
-        .prose p { margin-bottom: 1rem; line-height: 1.75; }
-        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .prose li { margin-bottom: 0.25rem; }
-        .prose blockquote { border-left: 4px solid #1e5631; padding-left: 1rem; font-style: italic; color: #6b7280; margin: 1.5rem 0; }
-        .prose hr { border-top: 1px solid #e5e7eb; margin: 2rem 0; }
-        .prose a { color: #1e5631; text-decoration: underline; }
-        .prose a:hover { color: #163f24; }
+        .prose img[data-style='default'] {
+          border-radius: 8px;
+          max-width: 100%;
+          height: auto;
+          margin: 1.5rem auto;
+          display: block;
+        }
+        .prose img[data-style='rounded'] {
+          border-radius: 16px;
+          max-width: 80%;
+          height: auto;
+          margin: 1.5rem auto;
+          display: block;
+        }
+        .prose img[data-style='circle'] {
+          border-radius: 50%;
+          width: 250px;
+          height: 250px;
+          object-fit: cover;
+          margin: 1.5rem auto;
+          display: block;
+        }
+        .prose img[data-style='full'] {
+          border-radius: 0;
+          width: 100%;
+          height: auto;
+          margin: 2rem 0;
+          display: block;
+        }
+        .prose img:not([data-style]) {
+          border-radius: 8px;
+          max-width: 100%;
+          height: auto;
+          margin: 1.5rem auto;
+          display: block;
+        }
+        .prose h2 {
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin-bottom: 0.75rem;
+          margin-top: 2rem;
+          color: #1e5631;
+        }
+        .prose h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          margin-top: 1.5rem;
+          color: #1e5631;
+        }
+        .prose p {
+          margin-bottom: 1rem;
+          line-height: 1.75;
+        }
+        .prose ul {
+          list-style: disc;
+          padding-left: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        .prose ol {
+          list-style: decimal;
+          padding-left: 1.5rem;
+          margin-bottom: 1rem;
+        }
+        .prose li {
+          margin-bottom: 0.25rem;
+        }
+        .prose blockquote {
+          border-left: 4px solid #1e5631;
+          padding-left: 1rem;
+          font-style: italic;
+          color: #6b7280;
+          margin: 1.5rem 0;
+        }
+        .prose hr {
+          border-top: 1px solid #e5e7eb;
+          margin: 2rem 0;
+        }
+        .prose a {
+          color: #1e5631;
+          text-decoration: underline;
+        }
+        .prose a:hover {
+          color: #163f24;
+        }
       `}</style>
     </>
   );

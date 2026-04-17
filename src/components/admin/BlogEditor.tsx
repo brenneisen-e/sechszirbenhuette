@@ -6,7 +6,7 @@ import { BlogPostList } from './blog-editor/BlogPostList';
 import { BlogEditorForm } from './blog-editor/BlogEditorForm';
 import { BlogPreview } from './blog-editor/BlogPreview';
 import { MediaPickerModal } from './blog-editor/MediaPickerModal';
-import type { MediaItem } from './blog-editor/types';
+import type { MediaItem, MediaPickerTarget, BlogTab, BlogTabSlide } from './blog-editor/types';
 
 export default function BlogEditor() {
   const {
@@ -42,6 +42,31 @@ export default function BlogEditor() {
     reorderImages,
   } = useBlogEditor();
 
+  const updateTabSlideImage = (
+    tabIndex: number,
+    slideIndex: number,
+    image_url: string,
+    image_alt: string,
+  ) => {
+    setCurrentPost((prev) => {
+      if (!prev) return prev;
+      let data: { intro?: string; tabs?: BlogTab[] };
+      try {
+        data = JSON.parse(prev.content || '{}');
+      } catch {
+        data = { intro: prev.content || '', tabs: [] };
+      }
+      const tabs: BlogTab[] = data.tabs || [];
+      const tab = tabs[tabIndex];
+      if (!tab) return prev;
+      const newSlides: BlogTabSlide[] = tab.slides.map((s, i) =>
+        i === slideIndex ? { ...s, image_url, image_alt: s.image_alt || image_alt } : s,
+      );
+      const newTabs = tabs.map((t, i) => (i === tabIndex ? { ...t, slides: newSlides } : t));
+      return { ...prev, content: JSON.stringify({ intro: data.intro || '', tabs: newTabs }) };
+    });
+  };
+
   const handleMediaSelect = (media: MediaItem) => {
     if (mediaPickerTarget === 'cover') {
       setCurrentPost((prev) => ({
@@ -57,12 +82,24 @@ export default function BlogEditor() {
         image_alt: postImages[mediaPickerTarget]?.image_alt || media.alt_text,
       });
       setShowMediaPicker(false);
+    } else if (
+      mediaPickerTarget &&
+      typeof mediaPickerTarget === 'object' &&
+      mediaPickerTarget.kind === 'tab-slide'
+    ) {
+      updateTabSlideImage(
+        mediaPickerTarget.tabIndex,
+        mediaPickerTarget.slideIndex,
+        media.url,
+        media.alt_text,
+      );
+      setShowMediaPicker(false);
     } else if (mediaPickerTarget === 'gallery') {
       addImageToGallery(media);
     }
   };
 
-  const handleOpenMediaPicker = (target: 'cover' | 'gallery' | number) => {
+  const handleOpenMediaPicker = (target: MediaPickerTarget) => {
     setMediaPickerTarget(target);
     setShowMediaPicker(true);
   };

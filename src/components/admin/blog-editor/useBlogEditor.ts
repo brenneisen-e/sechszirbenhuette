@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { BlogPost, BlogPostImage, MediaItem, EditorTab } from './types';
+import type { BlogPost, BlogPostImage, MediaItem, EditorTab, MediaPickerTarget } from './types';
 
 interface UseBlogEditorReturn {
   posts: BlogPost[];
@@ -13,13 +13,13 @@ interface UseBlogEditorReturn {
   postImages: BlogPostImage[];
   availableMedia: MediaItem[];
   showMediaPicker: boolean;
-  mediaPickerTarget: 'cover' | 'gallery' | number | null;
+  mediaPickerTarget: MediaPickerTarget;
   previewImageIndex: number;
   setActiveTab: (tab: EditorTab) => void;
   setCurrentPost: React.Dispatch<React.SetStateAction<Partial<BlogPost> | null>>;
   setPostImages: React.Dispatch<React.SetStateAction<BlogPostImage[]>>;
   setShowMediaPicker: (show: boolean) => void;
-  setMediaPickerTarget: (target: 'cover' | 'gallery' | number | null) => void;
+  setMediaPickerTarget: (target: MediaPickerTarget) => void;
   setPreviewImageIndex: React.Dispatch<React.SetStateAction<number>>;
   loadPosts: () => Promise<void>;
   loadMedia: () => Promise<void>;
@@ -46,7 +46,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const [postImages, setPostImages] = useState<BlogPostImage[]>([]);
   const [availableMedia, setAvailableMedia] = useState<MediaItem[]>([]);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<'cover' | 'gallery' | number | null>(null);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<MediaPickerTarget>(null);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
 
   // Load posts
@@ -56,9 +56,9 @@ export function useBlogEditor(): UseBlogEditorReturn {
       // Add cache buster to avoid stale cached results
       const res = await fetch(`/api/blog?_t=${Date.now()}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: { 'Cache-Control': 'no-cache' },
       });
-      const data = await res.json() as { posts?: BlogPost[]; error?: string };
+      const data = (await res.json()) as { posts?: BlogPost[]; error?: string };
       console.log('[BlogEditor] Loaded posts:', data);
       if (data.error) {
         setError(data.error);
@@ -78,11 +78,20 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const loadMedia = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/media');
-      const data = await res.json() as { media: (MediaItem & { media_type?: string; category?: string })[] };
-      const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+      const data = (await res.json()) as {
+        media: (MediaItem & { media_type?: string; category?: string })[];
+      };
+      const HERO_CATS = new Set([
+        'hero',
+        'hero-thumbnail',
+        'hero-1080p',
+        'hero-720p',
+        'hero-480p',
+        'hero-360p',
+      ]);
       // Filter out videos and hero images
-      const images = (data.media || []).filter(m =>
-        m.media_type !== 'video' && !HERO_CATS.has(m.category || '')
+      const images = (data.media || []).filter(
+        (m) => m.media_type !== 'video' && !HERO_CATS.has(m.category || ''),
       );
       setAvailableMedia(images);
     } catch (err) {
@@ -96,13 +105,18 @@ export function useBlogEditor(): UseBlogEditorReturn {
     const init = async () => {
       try {
         const [postsRes, mediaRes] = await Promise.all([
-          fetch(`/api/blog?_t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+          fetch(`/api/blog?_t=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' },
+          }),
           fetch('/api/admin/media'),
         ]);
         if (cancelled) return;
 
-        const postsData = await postsRes.json() as { posts?: BlogPost[]; error?: string };
-        const mediaData = await mediaRes.json() as { media: (MediaItem & { media_type?: string; category?: string })[] };
+        const postsData = (await postsRes.json()) as { posts?: BlogPost[]; error?: string };
+        const mediaData = (await mediaRes.json()) as {
+          media: (MediaItem & { media_type?: string; category?: string })[];
+        };
 
         if (cancelled) return;
 
@@ -113,9 +127,16 @@ export function useBlogEditor(): UseBlogEditorReturn {
           setPosts(postsData.posts || []);
         }
 
-        const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
-        const images = (mediaData.media || []).filter(m =>
-          m.media_type !== 'video' && !HERO_CATS.has(m.category || '')
+        const HERO_CATS = new Set([
+          'hero',
+          'hero-thumbnail',
+          'hero-1080p',
+          'hero-720p',
+          'hero-480p',
+          'hero-360p',
+        ]);
+        const images = (mediaData.media || []).filter(
+          (m) => m.media_type !== 'video' && !HERO_CATS.has(m.category || ''),
         );
         setAvailableMedia(images);
       } catch (err) {
@@ -129,7 +150,9 @@ export function useBlogEditor(): UseBlogEditorReturn {
     };
 
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Setup blog database tables
@@ -141,7 +164,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'migrate_blog_tables' }),
       });
-      const data = await res.json() as { success?: boolean; message?: string; error?: string };
+      const data = (await res.json()) as { success?: boolean; message?: string; error?: string };
       if (res.ok && data.success) {
         setSuccess(data.message || 'Blog-Datenbank eingerichtet!');
         await loadPosts();
@@ -192,7 +215,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
   const handleEditPost = async (post: BlogPost) => {
     try {
       const res = await fetch(`/api/blog?slug=${post.slug}&images=true`);
-      const data = await res.json() as { post: BlogPost; images: BlogPostImage[] };
+      const data = (await res.json()) as { post: BlogPost; images: BlogPostImage[] };
       setCurrentPost(data.post);
       setPostImages(data.images || []);
       setActiveTab('edit');
@@ -244,12 +267,17 @@ export function useBlogEditor(): UseBlogEditorReturn {
         body: JSON.stringify(postData),
       });
 
-      const data = await res.json() as { success?: boolean; error?: string; id?: string; slug?: string };
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        id?: string;
+        slug?: string;
+      };
 
       if (res.ok && data.success) {
         setSuccess(publish ? 'Beitrag veröffentlicht!' : 'Beitrag gespeichert!');
         if (!currentPost.id && data.id) {
-          setCurrentPost(prev => ({ ...prev, id: data.id, slug: data.slug }));
+          setCurrentPost((prev) => ({ ...prev, id: data.id, slug: data.slug }));
         }
         await loadPosts();
       } else {
@@ -291,7 +319,7 @@ export function useBlogEditor(): UseBlogEditorReturn {
 
   // Add image to gallery
   const addImageToGallery = (media: MediaItem) => {
-    setPostImages(prev => [
+    setPostImages((prev) => [
       ...prev,
       {
         image_url: media.url,
@@ -305,18 +333,18 @@ export function useBlogEditor(): UseBlogEditorReturn {
 
   // Remove image from gallery
   const removeImageFromGallery = (index: number) => {
-    setPostImages(prev => prev.filter((_, i) => i !== index));
+    setPostImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Update image properties (for carousel slides)
   const updateImageInGallery = (index: number, updates: Partial<BlogPostImage>) => {
-    setPostImages(prev => prev.map((img, i) => i === index ? { ...img, ...updates } : img));
+    setPostImages((prev) => prev.map((img, i) => (i === index ? { ...img, ...updates } : img)));
   };
 
   // Reorder images (for carousel slides)
   const reorderImages = (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= postImages.length) return;
-    setPostImages(prev => {
+    setPostImages((prev) => {
       const updated = [...prev];
       const moved = updated.splice(fromIndex, 1)[0];
       if (!moved) return updated;
