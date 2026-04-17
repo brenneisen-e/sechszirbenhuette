@@ -1,7 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+
+const CHUNK_RELOAD_KEY = 'chunk-load-error-reloaded';
+
+function isChunkLoadError(error: Error): boolean {
+  return (
+    error.name === 'ChunkLoadError' ||
+    /Loading chunk [\w-]+ failed/i.test(error.message) ||
+    /Loading CSS chunk [\w-]+ failed/i.test(error.message)
+  );
+}
 
 export default function AdminError({
   error,
@@ -10,10 +20,33 @@ export default function AdminError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [reloading, setReloading] = useState(false);
+
   useEffect(() => {
-    // Log the error to console for debugging
+    if (isChunkLoadError(error)) {
+      const alreadyReloaded = sessionStorage.getItem(CHUNK_RELOAD_KEY);
+      if (!alreadyReloaded) {
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
+        setReloading(true);
+        window.location.reload();
+        return;
+      }
+      // If we already reloaded once, clear the flag so a later fresh error can retry.
+      sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+    }
     console.error('Admin Error:', error);
   }, [error]);
+
+  if (reloading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+        <div className="flex items-center gap-3 text-slate-600">
+          <RefreshCw className="w-5 h-5 animate-spin" />
+          <span>Neue Version wird geladen…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
@@ -23,20 +56,14 @@ export default function AdminError({
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h1 className="text-2xl font-bold text-slate-800">Fehler im Admin-Bereich</h1>
-          <p className="text-slate-500 mt-2">
-            Ein unerwarteter Fehler ist aufgetreten.
-          </p>
+          <p className="text-slate-500 mt-2">Ein unerwarteter Fehler ist aufgetreten.</p>
         </div>
 
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-red-700 font-mono break-all">
             {error.message || 'Unbekannter Fehler'}
           </p>
-          {error.digest && (
-            <p className="text-xs text-red-500 mt-2">
-              Digest: {error.digest}
-            </p>
-          )}
+          {error.digest && <p className="text-xs text-red-500 mt-2">Digest: {error.digest}</p>}
         </div>
 
         <div className="space-y-3">
