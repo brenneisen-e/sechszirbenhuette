@@ -19,6 +19,20 @@ const nextConfig = {
       bodySizeLimit: '100mb',
     },
   },
+
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors *',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
