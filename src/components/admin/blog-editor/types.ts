@@ -48,11 +48,19 @@ export interface BlogTabSlide {
   title: string;
   description: string;
   image_url?: string;
+  image_alt?: string;
   tip?: string;
   difficulty?: string;
   duration?: string;
   distance?: string;
   age?: string;
 }
+
+export type MediaPickerTarget =
+  | 'cover'
+  | 'gallery'
+  | number
+  | { kind: 'tab-slide'; tabIndex: number; slideIndex: number }
+  | null;
 
 export type EditorTab = 'list' | 'edit' | 'preview';
