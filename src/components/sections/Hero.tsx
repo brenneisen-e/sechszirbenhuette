@@ -55,8 +55,11 @@ export function Hero() {
       // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
       const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
       if (uidMatch && !thumbnailUrl) {
-        const subdomain = url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
-        setThumbnailUrl(`https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`);
+        const subdomain =
+          url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
+        setThumbnailUrl(
+          `https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`,
+        );
       }
     };
 
@@ -136,9 +139,12 @@ export function Hero() {
     };
 
     const initHls = async () => {
-      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isIOS =
+        /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
-      const useNativeHls = (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
+      const useNativeHls =
+        (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
 
       if (useNativeHls) {
         video.src = videoUrl;
@@ -161,17 +167,20 @@ export function Hero() {
           startLevel: isMobile ? 0 : -1,
         });
 
-        hls.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
-          if (data.fatal) {
-            if (data.type === 'networkError') {
-              hls.startLoad();
-            } else {
-              hls.destroy();
-              hlsRef.current = null;
-              if (!cancelled) setVideoError(true);
+        hls.on(
+          Hls.Events.ERROR,
+          (_event: string, data: { fatal: boolean; type: string; details: string }) => {
+            if (data.fatal) {
+              if (data.type === 'networkError') {
+                hls.startLoad();
+              } else {
+                hls.destroy();
+                hlsRef.current = null;
+                if (!cancelled) setVideoError(true);
+              }
             }
-          }
-        });
+          },
+        );
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           tryPlay();
@@ -204,10 +213,13 @@ export function Hero() {
       if (isMobileDevice) return;
       videoRef.current.muted = true;
       videoRef.current.volume = 0;
-      videoRef.current.play().then(() => {
-        setVideoLoaded(true);
-        setTimeout(() => setShowPlaceholder(false), 300);
-      }).catch(() => {});
+      videoRef.current
+        .play()
+        .then(() => {
+          setVideoLoaded(true);
+          setTimeout(() => setShowPlaceholder(false), 300);
+        })
+        .catch(() => {});
     }
   };
 
@@ -230,7 +242,9 @@ export function Hero() {
       galerie.scrollIntoView({ behavior: 'smooth' });
       // Wait for scroll, then click the category button
       setTimeout(() => {
-        const categoryButton = document.querySelector(`#galerie button[data-category="${category}"]`) as HTMLButtonElement;
+        const categoryButton = document.querySelector(
+          `#galerie button[data-category="${category}"]`,
+        ) as HTMLButtonElement;
         if (categoryButton) {
           categoryButton.click();
         }
@@ -239,10 +253,22 @@ export function Hero() {
   };
 
   const features = [
-    { icon: Mountain, label: t.features.altitude.title, onClick: () => scrollToSection('#heidiAlm') },
-    { icon: TreePine, label: t.features.secluded.title, onClick: () => scrollToGalleryCategory('aussen') },
+    {
+      icon: Mountain,
+      label: t.features.altitude.title,
+      onClick: () => scrollToSection('#heidiAlm'),
+    },
+    {
+      icon: TreePine,
+      label: t.features.secluded.title,
+      onClick: () => scrollToGalleryCategory('aussen'),
+    },
     { icon: Flame, label: t.features.sauna.title, onClick: () => scrollToGalleryCategory('bad') },
-    { icon: Users, label: t.features.guests.title, onClick: () => scrollToGalleryCategory('schlafen') },
+    {
+      icon: Users,
+      label: t.features.guests.title,
+      onClick: () => scrollToGalleryCategory('schlafen'),
+    },
     { icon: Dog, label: t.features.dogs.title, onClick: () => scrollToSection('#dog-trips') },
     { icon: Star, label: t.features.rating.title, onClick: () => scrollToSection('#bewertungen') },
   ];
@@ -295,27 +321,31 @@ export function Hero() {
               if (videoRef.current) {
                 videoRef.current.muted = true;
                 videoRef.current.currentTime = 1;
-                videoRef.current.play().then(() => {
-                  setVideoLoaded(true);
-                  setShowPlayHint(false);
-                  setTimeout(() => setShowPlaceholder(false), 300);
-                }).catch(() => {});
+                videoRef.current
+                  .play()
+                  .then(() => {
+                    setVideoLoaded(true);
+                    setShowPlayHint(false);
+                    setTimeout(() => setShowPlaceholder(false), 300);
+                  })
+                  .catch(() => {});
               }
             }}
           >
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: LOGO_GREEN }}>
+            <div
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: LOGO_GREEN }}
+            >
               <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white ml-1" />
             </div>
           </motion.div>
         )}
       </div>
 
-
       {/* Content Container - Full height with flex column */}
       <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
-
         {/* Upper Third - Headline centered */}
-        <div className="flex-1 flex items-center justify-center pt-20 sm:pt-24 md:pt-20">
+        <div className="flex-1 flex items-center justify-center pt-32 sm:pt-40 md:pt-36">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -365,7 +395,7 @@ export function Hero() {
                 transition={{
                   duration: videoLoaded ? 0.4 : 0.8,
                   delay: videoLoaded ? index * 0.05 : 1.2 + index * 0.15,
-                  ease: [0.25, 0.46, 0.45, 0.94]
+                  ease: [0.25, 0.46, 0.45, 0.94],
                 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
@@ -375,7 +405,7 @@ export function Hero() {
                   className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
                   style={{ backgroundColor: LOGO_GREEN }}
                   whileHover={{ scale: 1.15, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
                   <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </motion.div>
