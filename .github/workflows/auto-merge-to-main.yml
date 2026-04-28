@@ -1,0 +1,59 @@
+name: Auto-merge to main
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+concurrency:
+  group: auto-merge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.meta.outputs.sha }}
+      branch: ${{ steps.meta.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm run build
+      - id: meta
+        run: |
+          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+  merge:
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Merge feature branch into main
+        env:
+          FEATURE_SHA: ${{ needs.quality.outputs.sha }}
+          FEATURE_BRANCH: ${{ needs.quality.outputs.branch }}
+        run: |
+          git fetch origin "$FEATURE_SHA"
+          git merge --ff-only "$FEATURE_SHA" \
+            || git merge --no-ff "$FEATURE_SHA" \
+                 -m "Auto-merge ${FEATURE_BRANCH} into main (${FEATURE_SHA::7})"
+          git push origin main
