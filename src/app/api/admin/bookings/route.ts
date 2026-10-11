@@ -44,6 +44,10 @@ interface Booking {
   preferred_language: string | null;
   early_checkin: string | null;
   late_checkout: string | null;
+  beds24_booking_id: string | null;
+  expected_checkin_time: string | null;
+  late_checkin_requested: number;
+  checkin_time_source: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -65,9 +69,10 @@ export async function GET(request: NextRequest) {
 
     if (bookingId) {
       // Get single booking
-      const booking = await db.prepare(
-        'SELECT * FROM bookings WHERE id = ?'
-      ).bind(bookingId).first<Booking>();
+      const booking = await db
+        .prepare('SELECT * FROM bookings WHERE id = ?')
+        .bind(bookingId)
+        .first<Booking>();
 
       if (!booking) {
         return NextResponse.json({ error: 'Buchung nicht gefunden' }, { status: 404 });
@@ -78,20 +83,25 @@ export async function GET(request: NextRequest) {
 
     if (guestId) {
       // Get bookings for a specific guest
-      const result = await db.prepare(
-        'SELECT * FROM bookings WHERE guest_id = ? ORDER BY arrival_date DESC'
-      ).bind(guestId).all<Booking>();
+      const result = await db
+        .prepare('SELECT * FROM bookings WHERE guest_id = ? ORDER BY arrival_date DESC')
+        .bind(guestId)
+        .all<Booking>();
 
       return NextResponse.json({ bookings: result.results || [] });
     }
 
     // Get all bookings with guest_name via JOIN
-    const result = await db.prepare(`
+    const result = await db
+      .prepare(
+        `
       SELECT b.*, g.guest_name
       FROM bookings b
       LEFT JOIN guests g ON b.guest_id = g.id
       ORDER BY b.arrival_date DESC
-    `).all<Booking & { guest_name?: string }>();
+    `,
+      )
+      .all<Booking & { guest_name?: string }>();
 
     return NextResponse.json({ bookings: result.results || [] });
   } catch (error) {
@@ -113,7 +123,7 @@ export async function POST(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    const data = await request.json() as Partial<Booking>;
+    const data = (await request.json()) as Partial<Booking>;
 
     if (!data.guest_id) {
       return NextResponse.json({ error: 'guest_id ist erforderlich' }, { status: 400 });
@@ -152,30 +162,37 @@ export async function POST(request: NextRequest) {
       { name: 'kurtaxe_cash', value: data.kurtaxe_cash || 0 },
       { name: 'is_private', value: data.is_private || 0 },
       { name: 'private_config', value: data.private_config || null },
+      // Beds24-Übernahme (Cockpit)
+      { name: 'beds24_booking_id', value: data.beds24_booking_id || null },
+      { name: 'expected_checkin_time', value: data.expected_checkin_time || null },
+      { name: 'late_checkin_requested', value: data.late_checkin_requested || 0 },
+      { name: 'checkin_time_source', value: data.checkin_time_source || null },
     ];
 
     // Check which columns exist in the table (handles pending migrations)
     let filteredColumns = columnDefs;
     try {
       const tableInfo = await db.prepare('PRAGMA table_info(bookings)').all<{ name: string }>();
-      const existingColumns = new Set((tableInfo.results || []).map(col => col.name));
-      filteredColumns = columnDefs.filter(c => existingColumns.has(c.name));
+      const existingColumns = new Set((tableInfo.results || []).map((col) => col.name));
+      filteredColumns = columnDefs.filter((c) => existingColumns.has(c.name));
     } catch {
       // If PRAGMA fails, try all columns
     }
 
-    const colNames = filteredColumns.map(c => c.name).join(', ');
+    const colNames = filteredColumns.map((c) => c.name).join(', ');
     const placeholders = filteredColumns.map(() => '?').join(', ');
-    const colValues = filteredColumns.map(c => c.value);
+    const colValues = filteredColumns.map((c) => c.value);
 
-    const result = await db.prepare(
-      `INSERT INTO bookings (${colNames}) VALUES (${placeholders})`
-    ).bind(...colValues).run();
+    const result = await db
+      .prepare(`INSERT INTO bookings (${colNames}) VALUES (${placeholders})`)
+      .bind(...colValues)
+      .run();
 
     // Fetch the created booking
-    const booking = await db.prepare(
-      'SELECT * FROM bookings WHERE id = ?'
-    ).bind(result.meta.last_row_id).first<Booking>();
+    const booking = await db
+      .prepare('SELECT * FROM bookings WHERE id = ?')
+      .bind(result.meta.last_row_id)
+      .first<Booking>();
 
     return NextResponse.json({ booking });
   } catch (error) {
@@ -191,7 +208,7 @@ export async function PUT(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    const data = await request.json() as Partial<Booking> & { id: number };
+    const data = (await request.json()) as Partial<Booking> & { id: number };
 
     if (!data.id) {
       return NextResponse.json({ error: 'Buchungs-ID ist erforderlich' }, { status: 400 });
@@ -199,20 +216,48 @@ export async function PUT(request: NextRequest) {
 
     // Build dynamic update query
     const allFields = [
-      'booking_number', 'platform', 'arrival_date', 'departure_date',
-      'adults', 'children', 'children_ages', 'pets', 'rental_price', 'deposit_amount', 'deposit_paid',
-      'final_payment', 'final_payment_paid', 'electricity_flat', 'additional_payment',
-      'security_deposit', 'additional_costs', 'final_cleaning', 'first_contact_date',
-      'offer_sent', 'contract_sent', 'welcome_guide_sent', 'admin_briefed', 'status', 'notes',
-      'cleaning_cash', 'utilities_cash', 'kurtaxe_cash', 'is_private', 'private_config'
+      'booking_number',
+      'platform',
+      'arrival_date',
+      'departure_date',
+      'adults',
+      'children',
+      'children_ages',
+      'pets',
+      'rental_price',
+      'deposit_amount',
+      'deposit_paid',
+      'final_payment',
+      'final_payment_paid',
+      'electricity_flat',
+      'additional_payment',
+      'security_deposit',
+      'additional_costs',
+      'final_cleaning',
+      'first_contact_date',
+      'offer_sent',
+      'contract_sent',
+      'welcome_guide_sent',
+      'admin_briefed',
+      'status',
+      'notes',
+      'cleaning_cash',
+      'utilities_cash',
+      'kurtaxe_cash',
+      'is_private',
+      'private_config',
+      'beds24_booking_id',
+      'expected_checkin_time',
+      'late_checkin_requested',
+      'checkin_time_source',
     ];
 
     // Check which columns actually exist in the table (handles pending migrations)
     let availableFields = allFields;
     try {
       const tableInfo = await db.prepare('PRAGMA table_info(bookings)').all<{ name: string }>();
-      const existingColumns = new Set((tableInfo.results || []).map(col => col.name));
-      availableFields = allFields.filter(f => existingColumns.has(f));
+      const existingColumns = new Set((tableInfo.results || []).map((col) => col.name));
+      availableFields = allFields.filter((f) => existingColumns.has(f));
     } catch {
       // If PRAGMA fails, try all fields
     }
@@ -234,14 +279,20 @@ export async function PUT(request: NextRequest) {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(data.id);
 
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       UPDATE bookings SET ${updates.join(', ')} WHERE id = ?
-    `).bind(...values).run();
+    `,
+      )
+      .bind(...values)
+      .run();
 
     // Fetch updated booking
-    const booking = await db.prepare(
-      'SELECT * FROM bookings WHERE id = ?'
-    ).bind(data.id).first<Booking>();
+    const booking = await db
+      .prepare('SELECT * FROM bookings WHERE id = ?')
+      .bind(data.id)
+      .first<Booking>();
 
     return NextResponse.json({ booking });
   } catch (error) {

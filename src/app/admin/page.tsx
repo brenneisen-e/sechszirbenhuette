@@ -13,6 +13,8 @@ import {
   Star,
   Smartphone,
   Tag,
+  Link2,
+  Settings,
 } from 'lucide-react';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
@@ -56,6 +58,14 @@ const RentalPricesEditor = dynamic(() => import('@/components/admin/RentalPrices
   ssr: false,
   loading: AdminLoadingFallback,
 });
+const Beds24Panel = dynamic(() => import('@/components/admin/Beds24Panel'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
 
 function FullScreenLoader() {
   return (
@@ -83,7 +93,9 @@ type AdminTab =
   | 'passwords'
   | 'blog'
   | 'reviews'
-  | 'guestapp';
+  | 'guestapp'
+  | 'beds24'
+  | 'system';
 
 const TABS: {
   id: AdminTab;
@@ -100,6 +112,8 @@ const TABS: {
   { id: 'blog', label: 'Blog', shortLabel: 'Blog', icon: FileText },
   { id: 'reviews', label: 'Bewertungen', shortLabel: 'Reviews', icon: Star },
   { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
+  { id: 'beds24', label: 'Beds24', shortLabel: 'B24', icon: Link2 },
+  { id: 'system', label: 'System', shortLabel: 'System', icon: Settings },
 ];
 
 function getInitialTab(): AdminTab {
@@ -291,12 +305,17 @@ function AdminPageContent() {
           {activeTab === 'reviews' && <ReviewsManager />}
 
           {activeTab === 'guestapp' && <GuestAppEditor />}
+
+          {activeTab === 'beds24' && <Beds24Panel />}
+
+          {activeTab === 'system' && <LogViewer />}
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-bottom">
-        <div className="grid grid-cols-9 h-14">
+        {/* Scrollbare Leiste statt gequetschter Spalten — min. 64px Touchziel pro Tab */}
+        <div className="flex h-14 overflow-x-auto">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -304,7 +323,7 @@ function AdminPageContent() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                className={`flex flex-col items-center justify-center gap-0.5 shrink-0 w-16 transition-colors ${
                   isActive ? 'text-green-600' : 'text-gray-400 active:text-gray-600'
                 }`}
               >

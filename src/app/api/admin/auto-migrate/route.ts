@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+import { APP_LOGS_TABLE_SQL } from '@/lib/server/appLog';
+import { BEDS24_BOOKING_COLUMNS } from '@/lib/server/beds24Columns';
+
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
   run(): Promise<unknown>;
@@ -66,6 +69,10 @@ export async function POST() {
     await addColumn('bookings', 'preferred_language', 'TEXT');
     await addColumn('bookings', 'early_checkin', 'TEXT');
     await addColumn('bookings', 'late_checkout', 'TEXT');
+    // Beds24-Anbindung (Webhook + Cockpit)
+    for (const [column, type] of BEDS24_BOOKING_COLUMNS) {
+      await addColumn('bookings', column, type);
+    }
 
     // =============================================
     // GUESTS TABLE — additional fields
@@ -101,7 +108,8 @@ export async function POST() {
     // =============================================
     // REVIEWS TABLE — ensure it exists
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS reviews (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         gast_name TEXT NOT NULL,
@@ -114,12 +122,15 @@ export async function POST() {
         sichtbar BOOLEAN DEFAULT TRUE,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, 'reviews');
+    `,
+      'reviews',
+    );
 
     // =============================================
     // MEDIA CATEGORIES — junction table
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS media_categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         media_id TEXT NOT NULL,
@@ -129,12 +140,15 @@ export async function POST() {
         FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
         UNIQUE(media_id, category)
       )
-    `, 'media_categories');
+    `,
+      'media_categories',
+    );
 
     // =============================================
     // CONTENT TEXTS — editable text/headlines
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS content_texts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         text_key TEXT NOT NULL UNIQUE,
@@ -147,24 +161,30 @@ export async function POST() {
         text_type TEXT DEFAULT 'body',
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, 'content_texts');
+    `,
+      'content_texts',
+    );
 
     // =============================================
     // SITE SETTINGS — styling settings
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS site_settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         setting_key TEXT NOT NULL UNIQUE,
         setting_value TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, 'site_settings');
+    `,
+      'site_settings',
+    );
 
     // =============================================
     // BLOG POSTS
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS blog_posts (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
         slug TEXT UNIQUE NOT NULL,
@@ -184,9 +204,12 @@ export async function POST() {
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       )
-    `, 'blog_posts');
+    `,
+      'blog_posts',
+    );
 
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS blog_post_images (
         id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
         post_id TEXT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
@@ -196,12 +219,15 @@ export async function POST() {
         display_order INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now'))
       )
-    `, 'blog_post_images');
+    `,
+      'blog_post_images',
+    );
 
     // =============================================
     // GUEST APP — categories, cards, access tokens, sessions
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS guest_app_categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -211,9 +237,12 @@ export async function POST() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, 'guest_app_categories');
+    `,
+      'guest_app_categories',
+    );
 
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS guest_app_cards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         category_id INTEGER NOT NULL,
@@ -227,9 +256,12 @@ export async function POST() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (category_id) REFERENCES guest_app_categories(id) ON DELETE CASCADE
       )
-    `, 'guest_app_cards');
+    `,
+      'guest_app_cards',
+    );
 
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS guest_access_tokens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         booking_id INTEGER NOT NULL,
@@ -242,12 +274,15 @@ export async function POST() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
       )
-    `, 'guest_access_tokens');
+    `,
+      'guest_access_tokens',
+    );
 
     // =============================================
     // RENTAL PRICES — seasonal pricing periods
     // =============================================
-    await createTable(`
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS rental_prices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -260,38 +295,45 @@ export async function POST() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, 'rental_prices');
+    `,
+      'rental_prices',
+    );
 
     // Seed rental_prices with 2026 data if table is empty
     try {
-      const count = await db.prepare('SELECT COUNT(*) as cnt FROM rental_prices').first<{ cnt: number }>();
+      const count = await db
+        .prepare('SELECT COUNT(*) as cnt FROM rental_prices')
+        .first<{ cnt: number }>();
       if (count && count.cnt === 0) {
         const seedData = [
           // Chronologisch 2026 — Woche = Samstag bis Samstag
-          ['Standard',                          '2026-01-03', '2026-02-06', 120, 7],
-          ['Faschingswoche/Semester Kärnten',    '2026-02-07', '2026-02-20', 129, 7],
-          ['Standard',                          '2026-02-21', '2026-04-03', 120, 7],
-          ['Schlechte Saison',                  '2026-04-04', '2026-05-01', 100, 3],
-          ['Standard',                          '2026-05-02', '2026-10-30', 120, 7],
-          ['Schlechte Saison',                  '2026-10-31', '2026-12-11', 100, 3],
-          ['Vorweihnachtswoche',                '2026-12-12', '2026-12-18', 114, 7],
-          ['Weihnachten',                       '2026-12-19', '2026-12-25', 357, 7],
-          ['Silvester',                         '2026-12-26', '2027-01-01', 371, 7],
+          ['Standard', '2026-01-03', '2026-02-06', 120, 7],
+          ['Faschingswoche/Semester Kärnten', '2026-02-07', '2026-02-20', 129, 7],
+          ['Standard', '2026-02-21', '2026-04-03', 120, 7],
+          ['Schlechte Saison', '2026-04-04', '2026-05-01', 100, 3],
+          ['Standard', '2026-05-02', '2026-10-30', 120, 7],
+          ['Schlechte Saison', '2026-10-31', '2026-12-11', 100, 3],
+          ['Vorweihnachtswoche', '2026-12-12', '2026-12-18', 114, 7],
+          ['Weihnachten', '2026-12-19', '2026-12-25', 357, 7],
+          ['Silvester', '2026-12-26', '2027-01-01', 371, 7],
           // 2027 — gleiche Preise, Samstag-Samstag
-          ['Standard',                          '2027-01-02', '2027-02-05', 120, 7],
-          ['Faschingswoche/Semester Kärnten',    '2027-02-06', '2027-02-19', 129, 7],
-          ['Standard',                          '2027-02-20', '2027-04-02', 120, 7],
-          ['Schlechte Saison',                  '2027-04-03', '2027-04-30', 100, 3],
-          ['Standard',                          '2027-05-01', '2027-10-29', 120, 7],
-          ['Schlechte Saison',                  '2027-10-30', '2027-12-10', 100, 3],
-          ['Vorweihnachtswoche',                '2027-12-11', '2027-12-17', 114, 7],
-          ['Weihnachten',                       '2027-12-18', '2027-12-24', 357, 7],
-          ['Silvester',                         '2027-12-25', '2027-12-31', 371, 7],
+          ['Standard', '2027-01-02', '2027-02-05', 120, 7],
+          ['Faschingswoche/Semester Kärnten', '2027-02-06', '2027-02-19', 129, 7],
+          ['Standard', '2027-02-20', '2027-04-02', 120, 7],
+          ['Schlechte Saison', '2027-04-03', '2027-04-30', 100, 3],
+          ['Standard', '2027-05-01', '2027-10-29', 120, 7],
+          ['Schlechte Saison', '2027-10-30', '2027-12-10', 100, 3],
+          ['Vorweihnachtswoche', '2027-12-11', '2027-12-17', 114, 7],
+          ['Weihnachten', '2027-12-18', '2027-12-24', 357, 7],
+          ['Silvester', '2027-12-25', '2027-12-31', 371, 7],
         ];
         for (const [name, from, to, price, minStay] of seedData) {
-          await db.prepare(
-            'INSERT INTO rental_prices (name, date_from, date_to, price_per_night, mindestaufenthalt, aktiv) VALUES (?, ?, ?, ?, ?, 1)'
-          ).bind(name, from, to, price, minStay).run();
+          await db
+            .prepare(
+              'INSERT INTO rental_prices (name, date_from, date_to, price_per_night, mindestaufenthalt, aktiv) VALUES (?, ?, ?, ?, ?, 1)',
+            )
+            .bind(name, from, to, price, minStay)
+            .run();
         }
         migrated.push('rental_prices:seed_2026');
       }
@@ -300,7 +342,23 @@ export async function POST() {
       errors.push(`rental_prices:seed: ${msg}`);
     }
 
-    await createTable(`
+    // =============================================
+    // SETTINGS (Key-Value, u.a. Beds24-Tokens) + APP LOGS
+    // =============================================
+    await createTable(
+      `
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `,
+      'settings',
+    );
+    await createTable(APP_LOGS_TABLE_SQL, 'app_logs');
+
+    await createTable(
+      `
       CREATE TABLE IF NOT EXISTS guest_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id TEXT NOT NULL UNIQUE,
@@ -309,21 +367,24 @@ export async function POST() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (token_id) REFERENCES guest_access_tokens(id) ON DELETE CASCADE
       )
-    `, 'guest_sessions');
+    `,
+      'guest_sessions',
+    );
 
     return NextResponse.json({
       success: true,
       migrated,
       errors: errors.length > 0 ? errors : undefined,
-      message: migrated.length > 0
-        ? `${migrated.length} Migrationen durchgeführt`
-        : 'Datenbank ist aktuell',
+      message:
+        migrated.length > 0
+          ? `${migrated.length} Migrationen durchgeführt`
+          : 'Datenbank ist aktuell',
     });
   } catch (error) {
     console.error('Auto-migrate error:', error);
     return NextResponse.json(
       { error: 'Migration fehlgeschlagen', details: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

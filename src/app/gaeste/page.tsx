@@ -68,7 +68,11 @@ interface Category {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 // ======== LOGIN SCREEN ========
@@ -78,7 +82,12 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    // Link aus der Willkommensnachricht (Beds24-Cockpit): /gaeste?code=XXXXXX
+    const fromLink = new URLSearchParams(window.location.search).get('code');
+    if (fromLink) setCode(fromLink.trim().toUpperCase());
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +100,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_code: code.trim() }),
       });
-      const data = await res.json() as { success?: boolean; error?: string };
+      const data = (await res.json()) as { success?: boolean; error?: string };
       if (data.success) {
         onLogin();
       } else {
@@ -122,13 +131,14 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
           >
             Willkommen
           </h1>
-          <p className="text-white/70 text-sm">
-            Geben Sie Ihren Zugangscode ein
-          </p>
+          <p className="text-white/70 text-sm">Geben Sie Ihren Zugangscode ein</p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+        >
           <input
             ref={inputRef}
             value={code}
@@ -154,11 +164,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
             disabled={loading || !code.trim()}
             className="w-full mt-4 py-3.5 bg-white text-[#2d5a27] rounded-xl font-semibold hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : (
-              <>Einloggen</>
-            )}
+            {loading ? <Loader2 size={20} className="animate-spin" /> : <>Einloggen</>}
           </button>
         </form>
 
@@ -184,9 +190,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
           Demo ansehen
         </button>
 
-        <p className="text-center text-white/40 text-xs mt-6">
-          Sechszirbenhütte · Falkertsee
-        </p>
+        <p className="text-center text-white/40 text-xs mt-6">Sechszirbenhütte · Falkertsee</p>
       </motion.div>
     </div>
   );
@@ -216,13 +220,14 @@ function CardCarousel({ cards }: { cards: Card[] }) {
         ref={scrollRef}
         onScroll={handleScroll}
         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
       >
         {cards.map((card) => (
-          <div
-            key={card.id}
-            className="snap-start flex-shrink-0 w-[85%] md:w-[45%]"
-          >
+          <div key={card.id} className="snap-start flex-shrink-0 w-[85%] md:w-[45%]">
             <SingleCard card={card} />
           </div>
         ))}
@@ -300,8 +305,15 @@ function Dashboard() {
 
   useEffect(() => {
     fetch('/api/guest')
-      .then(res => res.json() as Promise<{ authenticated: boolean; guest?: GuestInfo; content?: Category[] }>)
-      .then(data => {
+      .then(
+        (res) =>
+          res.json() as Promise<{
+            authenticated: boolean;
+            guest?: GuestInfo;
+            content?: Category[];
+          }>,
+      )
+      .then((data) => {
         if (data.authenticated) {
           setGuest(data.guest || null);
           setContent(data.content || []);
@@ -328,7 +340,7 @@ function Dashboard() {
     );
   }
 
-  const selected = content.find(c => c.id === selectedCategory);
+  const selected = content.find((c) => c.id === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -345,10 +357,7 @@ function Dashboard() {
             </button>
           ) : (
             <div>
-              <h1
-                className="text-xl"
-                style={{ fontFamily: 'FeelingPassionate, cursive' }}
-              >
+              <h1 className="text-xl" style={{ fontFamily: 'FeelingPassionate, cursive' }}>
                 {guest?.name ? `Hallo, ${guest.name.split(' ')[0]}!` : 'Willkommen!'}
               </h1>
             </div>
@@ -376,7 +385,9 @@ function Dashboard() {
               {/* Booking Info Card */}
               {guest?.arrival_date && (
                 <div className="mt-4 bg-white rounded-2xl shadow-sm p-5">
-                  <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Ihr Aufenthalt</h3>
+                  <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">
+                    Ihr Aufenthalt
+                  </h3>
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 text-sm">
                       <Calendar size={16} className="text-[#2d5a27]" />
@@ -384,11 +395,12 @@ function Dashboard() {
                         {formatDate(guest.arrival_date)} — {formatDate(guest.departure_date)}
                       </span>
                     </div>
-                    {(guest.adults > 0) && (
+                    {guest.adults > 0 && (
                       <div className="flex items-center gap-3 text-sm">
                         <Users size={16} className="text-[#2d5a27]" />
                         <span className="text-gray-600">
-                          {guest.adults} Erwachsene{guest.children > 0 ? `, ${guest.children} Kinder` : ''}
+                          {guest.adults} Erwachsene
+                          {guest.children > 0 ? `, ${guest.children} Kinder` : ''}
                         </span>
                       </div>
                     )}
@@ -414,7 +426,7 @@ function Dashboard() {
                       seen.add(g);
                       groups.push({ name: g, cats: [] });
                     }
-                    groups.find(gr => gr.name === g)!.cats.push(cat);
+                    groups.find((gr) => gr.name === g)!.cats.push(cat);
                   }
                   let globalIndex = 0;
                   return groups.map((group) => (
@@ -444,7 +456,9 @@ function Dashboard() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-gray-800">{cat.title}</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">{cat.cards.length} Info{cat.cards.length !== 1 ? 's' : ''}</p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                  {cat.cards.length} Info{cat.cards.length !== 1 ? 's' : ''}
+                                </p>
                               </div>
                               <ChevronRight size={20} className="text-gray-300" />
                             </motion.button>
@@ -486,7 +500,9 @@ function Dashboard() {
                   ) : selected.cards.length === 1 && selected.cards[0] ? (
                     <SingleCard card={selected.cards[0]} />
                   ) : (
-                    <p className="text-gray-400 text-center py-8">Keine Infos in dieser Kategorie</p>
+                    <p className="text-gray-400 text-center py-8">
+                      Keine Infos in dieser Kategorie
+                    </p>
                   )}
                 </>
               )}
@@ -504,8 +520,8 @@ export default function GaestePage() {
 
   useEffect(() => {
     fetch('/api/guest')
-      .then(res => res.json() as Promise<{ authenticated: boolean }>)
-      .then(data => setAuthenticated(data.authenticated))
+      .then((res) => res.json() as Promise<{ authenticated: boolean }>)
+      .then((data) => setAuthenticated(data.authenticated))
       .catch(() => setAuthenticated(false));
   }, []);
 

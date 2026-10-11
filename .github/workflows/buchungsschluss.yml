@@ -1,0 +1,23 @@
+name: Buchungsschluss
+
+# Sperrt kurz nach Mitternacht (Wiener Zeit) den neuen Tag bei Beds24, wenn im
+# Admin Center (Beds24 → Einstellungen) „Buchungen bis zum Vortag“ eingestellt
+# ist. Die Logik steht in src/lib/server/bookingCutoff.ts; ist die Einstellung
+# aus, passiert nichts.
+#
+# Mehrere Läufe pro Nacht, weil GitHub geplante Läufe verzögern oder
+# auslassen kann und Mitternacht in Wien je nach Sommer-/Winterzeit auf
+# 22 oder 23 Uhr UTC fällt. Die Route arbeitet pro Tag nur einmal.
+
+on:
+  schedule:
+    - cron: '7 22,23 * * *'
+    - cron: '7 0-4 * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Buchungsschluss auslösen
+        run: curl -fsS --retry 3 --retry-delay 20 -X POST https://sechszirbenhuette.com/api/booking-cutoff
