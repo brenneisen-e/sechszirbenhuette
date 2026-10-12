@@ -22,9 +22,9 @@ interface PositionCategoryRecord {
 }
 
 async function tableExists(db: D1Database): Promise<boolean> {
-  const result = await db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='position_categories'"
-  ).first();
+  const result = await db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='position_categories'")
+    .first();
   return !!result;
 }
 
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { results } = await env.DB.prepare(
-      'SELECT * FROM position_categories ORDER BY sort_order ASC, id ASC'
+      'SELECT * FROM position_categories ORDER BY sort_order ASC, id ASC',
     ).all<PositionCategoryRecord>();
 
     return NextResponse.json({ categories: results || [], tableExists: true });
@@ -72,27 +72,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as Partial<PositionCategoryRecord>;
+    const body = (await request.json()) as Partial<PositionCategoryRecord>;
 
     if (!body.name) {
       return NextResponse.json({ error: 'name is required' }, { status: 400 });
     }
 
     // Generate slug from name if not provided
-    const slug = body.slug || body.name.toLowerCase()
-      .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug =
+      body.slug ||
+      body.name
+        .toLowerCase()
+        .replace(/[äÄ]/g, 'ae')
+        .replace(/[öÖ]/g, 'oe')
+        .replace(/[üÜ]/g, 'ue')
+        .replace(/ß/g, 'ss')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
 
     const result = await env.DB.prepare(
       `INSERT INTO position_categories (name, slug, icon, color, sort_order)
-       VALUES (?, ?, ?, ?, ?)`
-    ).bind(
-      body.name,
-      slug,
-      body.icon || null,
-      body.color || null,
-      body.sort_order || 0
-    ).run();
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+      .bind(body.name, slug, body.icon || null, body.color || null, body.sort_order || 0)
+      .run();
 
     return NextResponse.json({ success: true, id: result.meta.last_row_id });
   } catch (error) {
@@ -119,7 +122,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as Partial<PositionCategoryRecord> & { id: number };
+    const body = (await request.json()) as Partial<PositionCategoryRecord> & { id: number };
 
     if (!body.id) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
@@ -127,14 +130,10 @@ export async function PUT(request: NextRequest) {
 
     await env.DB.prepare(
       `UPDATE position_categories SET name = ?, icon = ?, color = ?, sort_order = ?
-       WHERE id = ?`
-    ).bind(
-      body.name,
-      body.icon || null,
-      body.color || null,
-      body.sort_order || 0,
-      body.id
-    ).run();
+       WHERE id = ?`,
+    )
+      .bind(body.name, body.icon || null, body.color || null, body.sort_order || 0, body.id)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

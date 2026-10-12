@@ -50,19 +50,73 @@ async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
 // Uses actual existing images to avoid 404 errors
 const PLACEHOLDER_MEDIA = {
   innen: [
-    { id: '1', url: '/images/innen/Wohnzimmer_01.jpg', alt_text: 'Wohnzimmer Sechszirbenhütte', title: 'Gemütliches Wohnzimmer', media_type: 'image' as const },
-    { id: '2', url: '/images/innen/Küche_01.jpg', alt_text: 'Küche Sechszirbenhütte', title: 'Voll ausgestattete Küche', media_type: 'image' as const },
-    { id: '3', url: '/images/innen/Schlafzimmer_groß.jpg', alt_text: 'Schlafzimmer Sechszirbenhütte', title: 'Schlafzimmer mit Doppelbett', media_type: 'image' as const },
-    { id: '4', url: '/images/innen/Sauna.jpg', alt_text: 'Sauna Sechszirbenhütte', title: 'Privater Saunabereich', media_type: 'image' as const },
+    {
+      id: '1',
+      url: '/images/innen/Wohnzimmer_01.jpg',
+      alt_text: 'Wohnzimmer Sechszirbenhütte',
+      title: 'Gemütliches Wohnzimmer',
+      media_type: 'image' as const,
+    },
+    {
+      id: '2',
+      url: '/images/innen/Küche_01.jpg',
+      alt_text: 'Küche Sechszirbenhütte',
+      title: 'Voll ausgestattete Küche',
+      media_type: 'image' as const,
+    },
+    {
+      id: '3',
+      url: '/images/innen/Schlafzimmer_groß.jpg',
+      alt_text: 'Schlafzimmer Sechszirbenhütte',
+      title: 'Schlafzimmer mit Doppelbett',
+      media_type: 'image' as const,
+    },
+    {
+      id: '4',
+      url: '/images/innen/Sauna.jpg',
+      alt_text: 'Sauna Sechszirbenhütte',
+      title: 'Privater Saunabereich',
+      media_type: 'image' as const,
+    },
   ],
   aussen: [
-    { id: '5', url: '/images/aussen/Aussen-Sommer.jpg', alt_text: 'Außenansicht Sechszirbenhütte', title: 'Hütte im Sommer', media_type: 'image' as const },
-    { id: '6', url: '/images/aussen/Balkon.jpg', alt_text: 'Balkon Sechszirbenhütte', title: 'Umlaufender Balkon', media_type: 'image' as const },
-    { id: '7', url: '/images/aussen/Nockberge.jpg', alt_text: 'Umgebung Sechszirbenhütte', title: 'Blick auf die Nockberge', media_type: 'image' as const },
-    { id: '8', url: '/images/aussen/Herbst.jpg', alt_text: 'Herbstansicht', title: 'Die Hütte im Herbst', media_type: 'image' as const },
+    {
+      id: '5',
+      url: '/images/aussen/Aussen-Sommer.jpg',
+      alt_text: 'Außenansicht Sechszirbenhütte',
+      title: 'Hütte im Sommer',
+      media_type: 'image' as const,
+    },
+    {
+      id: '6',
+      url: '/images/aussen/Balkon.jpg',
+      alt_text: 'Balkon Sechszirbenhütte',
+      title: 'Umlaufender Balkon',
+      media_type: 'image' as const,
+    },
+    {
+      id: '7',
+      url: '/images/aussen/Nockberge.jpg',
+      alt_text: 'Umgebung Sechszirbenhütte',
+      title: 'Blick auf die Nockberge',
+      media_type: 'image' as const,
+    },
+    {
+      id: '8',
+      url: '/images/aussen/Herbst.jpg',
+      alt_text: 'Herbstansicht',
+      title: 'Die Hütte im Herbst',
+      media_type: 'image' as const,
+    },
   ],
   header: [
-    { id: '9', url: '/images/aussen/Sommerhütte.jpg', alt_text: 'Sechszirbenhütte Header', title: 'Sechszirbenhütte am Falkert', media_type: 'image' as const },
+    {
+      id: '9',
+      url: '/images/aussen/Sommerhütte.jpg',
+      alt_text: 'Sechszirbenhütte Header',
+      title: 'Sechszirbenhütte am Falkert',
+      media_type: 'image' as const,
+    },
   ],
   hero: [],
   umgebung: [],
@@ -117,19 +171,21 @@ export async function GET(request: NextRequest) {
 
       // Fetch additional categories from junction table
       try {
-        const mediaIds = mediaList.map(m => m.id);
+        const mediaIds = mediaList.map((m) => m.id);
         const placeholders = mediaIds.map(() => '?').join(',');
         const catResult = await env.DB.prepare(
-          `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`
-        ).bind(...mediaIds).all<MediaCategoryRecord>();
+          `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`,
+        )
+          .bind(...mediaIds)
+          .all<MediaCategoryRecord>();
 
         const categoriesMap: Record<string, string[]> = {};
-        (catResult.results || []).forEach(row => {
+        (catResult.results || []).forEach((row) => {
           if (!categoriesMap[row.media_id]) categoriesMap[row.media_id] = [];
           categoriesMap[row.media_id]!.push(row.category);
         });
 
-        mediaList.forEach(m => {
+        mediaList.forEach((m) => {
           m.categories = categoriesMap[m.id] || [];
         });
       } catch {
@@ -142,7 +198,7 @@ export async function GET(request: NextRequest) {
           headers: {
             'Cache-Control': `public, max-age=${cacheMaxAge}, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,
           },
-        }
+        },
       );
     }
 
@@ -153,7 +209,7 @@ export async function GET(request: NextRequest) {
         headers: {
           'Cache-Control': 'public, max-age=10, s-maxage=10',
         },
-      }
+      },
     );
   } catch (error) {
     console.error('Error fetching from D1, using placeholders:', error);
@@ -164,7 +220,7 @@ export async function GET(request: NextRequest) {
         headers: {
           'Cache-Control': 'public, max-age=10, s-maxage=10',
         },
-      }
+      },
     );
   }
 }
@@ -178,7 +234,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: string;
       category?: string;
       alt_text?: string;
@@ -217,7 +273,9 @@ export async function PATCH(request: NextRequest) {
     params.push(body.id);
     const query = `UPDATE media SET ${updates.join(', ')} WHERE id = ?`;
 
-    await env.DB.prepare(query).bind(...params).run();
+    await env.DB.prepare(query)
+      .bind(...params)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -226,7 +284,11 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-function getPlaceholderResponse(category: string | null, type: string | null, cacheMaxAge: number = 300) {
+function getPlaceholderResponse(
+  category: string | null,
+  type: string | null,
+  cacheMaxAge: number = 300,
+) {
   let media: Array<{
     id: string;
     url: string;
@@ -243,7 +305,7 @@ function getPlaceholderResponse(category: string | null, type: string | null, ca
 
   // Filter by type if specified
   if (type) {
-    media = media.filter(m => m.media_type === type);
+    media = media.filter((m) => m.media_type === type);
   }
 
   return NextResponse.json(
@@ -252,6 +314,6 @@ function getPlaceholderResponse(category: string | null, type: string | null, ca
       headers: {
         'Cache-Control': `public, max-age=${cacheMaxAge}, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,
       },
-    }
+    },
   );
 }

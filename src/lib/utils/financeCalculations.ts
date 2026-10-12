@@ -13,9 +13,23 @@
  * ============================================================================
  */
 
-import { calculateUtilityCostsForBooking, type BookingCostResult } from '@/components/admin/utility-costs/calculations';
-import type { BookingPosition, ResolvedPosition, KurtaxeRate, CategoryGroup, PositionCategoryRecord } from '@/lib/types/positions';
-import { resolvePositions, summarizePositions, type PositionCalcContext, type PositionSummary } from '@/lib/utils/positionCalculator';
+import {
+  calculateUtilityCostsForBooking,
+  type BookingCostResult,
+} from '@/components/admin/utility-costs/calculations';
+import type {
+  BookingPosition,
+  ResolvedPosition,
+  KurtaxeRate,
+  CategoryGroup,
+  PositionCategoryRecord,
+} from '@/lib/types/positions';
+import {
+  resolvePositions,
+  summarizePositions,
+  type PositionCalcContext,
+  type PositionSummary,
+} from '@/lib/utils/positionCalculator';
 import type { PricingSettings } from '@/components/admin/utility-costs/types';
 
 // ============================================================================
@@ -34,16 +48,16 @@ export interface PlatformFees {
 
 // Komfortpaket: Handtücher, Bettwäsche, etc.
 export interface KomfortpaketData {
-  enabled: boolean;           // Komfortpaket gewünscht?
-  persons: number;            // Für wie viele Personen
-  guestPaid: boolean;         // Hat der Gast bezahlt?
-  pricePerPerson: number;     // Preis pro Person (Standard: 25€)
-  paidAmount?: number;        // Optional: tatsächlich gezahlter Betrag
+  enabled: boolean; // Komfortpaket gewünscht?
+  persons: number; // Für wie viele Personen
+  guestPaid: boolean; // Hat der Gast bezahlt?
+  pricePerPerson: number; // Preis pro Person (Standard: 25€)
+  paidAmount?: number; // Optional: tatsächlich gezahlter Betrag
 }
 
 // Konstanten für Komfortpaket
-export const KOMFORTPAKET_COST_PER_PERSON = 16;  // Kosten pro Person
-export const KOMFORTPAKET_DEFAULT_PRICE = 25;    // Standard-Preis für Gast
+export const KOMFORTPAKET_COST_PER_PERSON = 16; // Kosten pro Person
+export const KOMFORTPAKET_DEFAULT_PRICE = 25; // Standard-Preis für Gast
 
 export interface MieteCalculationParams {
   // Plattform-Daten
@@ -107,7 +121,10 @@ export function getPaymentProcessingFees(platformFees: PlatformFees): number {
 /**
  * Berechnet den effektiven Auszahlungsbetrag aus verschiedenen Quellen
  */
-export function getEffectivePayoutAmount(platformFees: PlatformFees, fallbackRentalPrice: number): number {
+export function getEffectivePayoutAmount(
+  platformFees: PlatformFees,
+  fallbackRentalPrice: number,
+): number {
   // Erste Priorität: direkter payout_amount
   if (platformFees.payout_amount && platformFees.payout_amount > 0) {
     return platformFees.payout_amount;
@@ -240,7 +257,11 @@ export function calculateProvision(miete: number, fees: number = 0): number {
 /**
  * Berechnet Gesamteinzahlung = Miete + NK + Reinigung
  */
-export function calculateGesamteinzahlung(miete: number, nkEinnahmen: number, reinigungEinnahmen: number): number {
+export function calculateGesamteinzahlung(
+  miete: number,
+  nkEinnahmen: number,
+  reinigungEinnahmen: number,
+): number {
   return miete + nkEinnahmen + reinigungEinnahmen;
 }
 
@@ -252,7 +273,7 @@ export function calculateGesamtertrag(
   nkEinnahmen: number,
   reinigungEinnahmen: number,
   calculatedCosts: number,
-  provision: number
+  provision: number,
 ): number {
   const gesamteinzahlung = calculateGesamteinzahlung(miete, nkEinnahmen, reinigungEinnahmen);
   const gesamtbelastung = calculatedCosts + provision;
@@ -271,10 +292,10 @@ export function calculateGesamtertrag(
  * Bestimmt, welche Kosten/Einnahmen bei einer privaten Buchung anfallen.
  */
 export interface PrivateBookingConfig {
-  miete_zero: boolean;          // Miete = 0 EUR?
-  nk_paid: boolean;             // Nebenkosten werden bezahlt (kalkulatorische Höhe)?
-  kurtaxe_paid: boolean;        // Kurtaxe wird bezahlt?
-  provision_charged: boolean;   // Provision wird berechnet?
+  miete_zero: boolean; // Miete = 0 EUR?
+  nk_paid: boolean; // Nebenkosten werden bezahlt (kalkulatorische Höhe)?
+  kurtaxe_paid: boolean; // Kurtaxe wird bezahlt?
+  provision_charged: boolean; // Provision wird berechnet?
 }
 
 export const DEFAULT_PRIVATE_CONFIG: PrivateBookingConfig = {
@@ -297,7 +318,7 @@ export interface BookingFinanceParams {
   // Flags
   hasDog: boolean;
   isPrivate: boolean;
-  skipNk: boolean;  // no_nebenkosten Flag
+  skipNk: boolean; // no_nebenkosten Flag
   isCleaningCash: boolean;
   isUtilitiesCash: boolean;
   isKurtaxeCash?: boolean;
@@ -359,14 +380,14 @@ export interface BookingFinanceResult {
   gesamtauszahlung: number;
 
   // Einzahlungen
-  barNk: number;  // NK wenn bar bezahlt
-  barReinigung: number;  // Reinigung wenn bar bezahlt
-  barKurtaxe: number;  // Kurtaxe wenn bar bezahlt (separat von barNk)
-  gesamteinzahlung: number;  // Miete + NK + Reinigung + Bar-Zahlungen
+  barNk: number; // NK wenn bar bezahlt
+  barReinigung: number; // Reinigung wenn bar bezahlt
+  barKurtaxe: number; // Kurtaxe wenn bar bezahlt (separat von barNk)
+  gesamteinzahlung: number; // Miete + NK + Reinigung + Bar-Zahlungen
 
   // Kosten
-  totalNkCosts: number;  // baseCosts + kurtaxe (ohne Reinigung)
-  gesamtbelastung: number;  // NK + Kurtaxe + Reinigung + Provision
+  totalNkCosts: number; // baseCosts + kurtaxe (ohne Reinigung)
+  gesamtbelastung: number; // NK + Kurtaxe + Reinigung + Provision
 
   // Ertrag
   gesamtertrag: number;
@@ -377,8 +398,8 @@ export interface BookingFinanceResult {
   isPlatformWithIncludedCosts: boolean;
 
   // Komfortpaket
-  komfortpaketCosts: number;    // Kosten: persons × 16€
-  komfortpaketIncome: number;   // Einnahmen: persons × pricePerPerson (wenn bezahlt)
+  komfortpaketCosts: number; // Kosten: persons × 16€
+  komfortpaketIncome: number; // Einnahmen: persons × pricePerPerson (wenn bezahlt)
   komfortpaketEnabled: boolean; // Aktiviert?
 
   // === NEW: Position system results ===
@@ -428,7 +449,7 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   // === Granulare Privat-Konfiguration ===
   // Wenn isPrivate=true und privateConfig vorhanden: granulare Steuerung
   // Wenn isPrivate=true ohne privateConfig: altes Verhalten (alles deaktiviert)
-  const pCfg = isPrivate ? (privateConfig || DEFAULT_PRIVATE_CONFIG) : null;
+  const pCfg = isPrivate ? privateConfig || DEFAULT_PRIVATE_CONFIG : null;
   // Private Buchung: NK nur berechnen wenn nk_paid=true
   const privateSkipNk = isPrivate && !pCfg?.nk_paid;
   // Private Buchung: Kurtaxe nur berechnen wenn kurtaxe_paid=true
@@ -442,7 +463,7 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   const isPlatformWithIncludedCosts = isBookingCom || isAirbnb;
 
   // === Guard: Wenn Positionen bestimmte Kategorien enthalten, Legacy-Werte deaktivieren ===
-  const positionCategories = new Set(positions?.map(p => p.category) || []);
+  const positionCategories = new Set(positions?.map((p) => p.category) || []);
   const hasPositionReinigung = positionCategories.has('reinigung');
   const hasPositionKomfortpaket = positionCategories.has('komfortpaket');
   const hasPositionKurtaxe = positionCategories.has('kurtaxe');
@@ -451,41 +472,46 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   // So wird z.B. bei einer Position für "NK Strom" nur die Legacy-Strom-Berechnung
   // deaktiviert, nicht Wasser/Müll/Holz.
   const positionCalcRuleTypes = new Set(
-    positions?.map(p => p.calc_rule?.type).filter(Boolean) || []
+    positions?.map((p) => p.calc_rule?.type).filter(Boolean) || [],
   );
   const hasPositionStrom = positionCalcRuleTypes.has('nk_strom');
   const hasPositionWasser = positionCalcRuleTypes.has('nk_wasser');
   const hasPositionMuell = positionCalcRuleTypes.has('nk_muell');
   const hasPositionHolz = positionCalcRuleTypes.has('nk_holz');
   // If ALL four NK components are covered by positions, disable legacy NK entirely
-  const hasAllNkPositions = hasPositionStrom && hasPositionWasser && hasPositionMuell && hasPositionHolz;
+  const hasAllNkPositions =
+    hasPositionStrom && hasPositionWasser && hasPositionMuell && hasPositionHolz;
   // If ANY NK component is covered by a position, we need granular handling
-  const hasAnyNkPosition = hasPositionStrom || hasPositionWasser || hasPositionMuell || hasPositionHolz;
+  const hasAnyNkPosition =
+    hasPositionStrom || hasPositionWasser || hasPositionMuell || hasPositionHolz;
 
   // === Komfortpaket berechnen (Legacy-Pfad nur wenn keine Positionen dafür existieren) ===
-  const komfortpaketEnabled = hasPositionKomfortpaket ? false : (komfortpaket?.enabled || false);
-  const komfortpaketPersons = komfortpaketEnabled ? (komfortpaket?.persons || 0) : 0;
+  const komfortpaketEnabled = hasPositionKomfortpaket ? false : komfortpaket?.enabled || false;
+  const komfortpaketPersons = komfortpaketEnabled ? komfortpaket?.persons || 0 : 0;
   const komfortpaketCosts = komfortpaketPersons * KOMFORTPAKET_COST_PER_PERSON;
-  const komfortpaketIncome = komfortpaketEnabled && komfortpaket?.guestPaid
-    ? (komfortpaket?.paidAmount || (komfortpaketPersons * (komfortpaket?.pricePerPerson || KOMFORTPAKET_DEFAULT_PRICE)))
-    : 0;
+  const komfortpaketIncome =
+    komfortpaketEnabled && komfortpaket?.guestPaid
+      ? komfortpaket?.paidAmount ||
+        komfortpaketPersons * (komfortpaket?.pricePerPerson || KOMFORTPAKET_DEFAULT_PRICE)
+      : 0;
 
   // === Utility Costs berechnen ===
   // Bei Privat-Buchungen: Berechne NK wenn nk_paid=true (Gast zahlt kalkulatorische NK)
   // childrenAges wird für Kurtaxe-Berechnung übergeben (nur >= 16 Jahre zahlen)
-  const utilityCosts = arrivalDate && departureDate && !privateSkipNk && !skipNk
-    ? calculateUtilityCostsForBooking(
-        arrivalDate,
-        departureDate,
-        adults || 2,
-        pricingSettings as Parameters<typeof calculateUtilityCostsForBooking>[3],
-        hasDog,
-        childrenAges
-      )
-    : null;
+  const utilityCosts =
+    arrivalDate && departureDate && !privateSkipNk && !skipNk
+      ? calculateUtilityCostsForBooking(
+          arrivalDate,
+          departureDate,
+          adults || 2,
+          pricingSettings as Parameters<typeof calculateUtilityCostsForBooking>[3],
+          hasDog,
+          childrenAges,
+        )
+      : null;
 
   // === Reinigungskosten (Legacy-Pfad nur wenn keine Positionen dafür existieren) ===
-  const cleaningCost = hasPositionReinigung ? 0 : (hasDog ? 125 : 100);
+  const cleaningCost = hasPositionReinigung ? 0 : hasDog ? 125 : 100;
 
   // === Nebenkosten OHNE Reinigung und OHNE Komfortpaket (Komfortpaket wird separat ausgewiesen) ===
   // Granulare NK-Guard: Nur die spezifischen NK-Komponenten deaktivieren, für die
@@ -496,17 +522,18 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
     baseCosts = 0;
   } else if (hasAnyNkPosition && utilityCosts) {
     // Granulare Deaktivierung: Nur die Komponenten abziehen, die NICHT durch Positionen abgedeckt sind
-    const legacyStrom = hasPositionStrom ? 0 : (utilityCosts.breakdown.electricity || 0);
-    const legacyWasser = hasPositionWasser ? 0 : (utilityCosts.breakdown.water || 0);
-    const legacyMuell = hasPositionMuell ? 0 : (utilityCosts.breakdown.trash || 0);
-    const legacyHolz = hasPositionHolz ? 0 : (utilityCosts.breakdown.holz || 0);
+    const legacyStrom = hasPositionStrom ? 0 : utilityCosts.breakdown.electricity || 0;
+    const legacyWasser = hasPositionWasser ? 0 : utilityCosts.breakdown.water || 0;
+    const legacyMuell = hasPositionMuell ? 0 : utilityCosts.breakdown.trash || 0;
+    const legacyHolz = hasPositionHolz ? 0 : utilityCosts.breakdown.holz || 0;
     baseCosts = legacyStrom + legacyWasser + legacyMuell + legacyHolz;
   } else {
     // Kein NK-Position vorhanden: volle Legacy-Berechnung (costs enthält Reinigung, daher abziehen)
     baseCosts = (utilityCosts?.costs || 0) - (utilityCosts?.reinigung || 0);
   }
   // Kurtaxe KOSTEN - immer auto-kalkuliert (was an die Gemeinde gezahlt werden muss)
-  const kurtaxe = (privateSkipKurtaxe || skipNk || hasPositionKurtaxe) ? 0 : (utilityCosts?.kurtaxe || 0);
+  const kurtaxe =
+    privateSkipKurtaxe || skipNk || hasPositionKurtaxe ? 0 : utilityCosts?.kurtaxe || 0;
 
   // === Bar-Zahlungen berechnen (VOR calculateMiete, da sie dort gebraucht werden) ===
   // Booking.com/Airbnb: Kurtaxe ist IMMER bar (nie im Payout enthalten)
@@ -514,12 +541,13 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   // Booking.com/Airbnb: Kurtaxe BAR-EINNAHME aus manueller Eingabe im Wizard,
   // NICHT aus Auto-Berechnung. Der Nutzer gibt den tatsächlich bar kassierten Betrag ein.
   // Wenn kurtaxe_income undefined → Legacy-Buchung ohne Eingabe → Fallback auf kurtaxe (kalkuliert).
-  const kurtaxeBarAmount = (isPlatformWithIncludedCosts && platformFees.kurtaxe_income !== undefined)
-    ? platformFees.kurtaxe_income
-    : kurtaxe;
+  const kurtaxeBarAmount =
+    isPlatformWithIncludedCosts && platformFees.kurtaxe_income !== undefined
+      ? platformFees.kurtaxe_income
+      : kurtaxe;
   // barNk: NK-Barzahlung - wenn utilities_cash: alles inkl. Kurtaxe, wenn nur kurtaxe_cash: nur Kurtaxe
-  const barNk = isUtilitiesCash ? (baseCosts + kurtaxe) : (effectiveKurtaxeCash ? kurtaxeBarAmount : 0);
-  const barKurtaxe = (!isUtilitiesCash && effectiveKurtaxeCash) ? kurtaxeBarAmount : 0;  // Separat für Anzeige
+  const barNk = isUtilitiesCash ? baseCosts + kurtaxe : effectiveKurtaxeCash ? kurtaxeBarAmount : 0;
+  const barKurtaxe = !isUtilitiesCash && effectiveKurtaxeCash ? kurtaxeBarAmount : 0; // Separat für Anzeige
   const barReinigung = isCleaningCash ? cleaningCost : 0;
 
   // === Kalkulatorische Kosten für Mieterlös-Berechnung ===
@@ -535,11 +563,12 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   // Bei Nicht-Plattformen (FeWo, Feratel, etc.) wird barReinigung NICHT zur
   // Gesamteinzahlung addiert. Daher darf cleaningCost bei Bar-Reinigung nicht abgezogen
   // werden, sonst wird der Mieterlös fälschlicherweise reduziert (analog zu NK-Bar).
-  const effectiveCleaningCost = (isCleaningCash && !isPlatformWithIncludedCosts) ? 0 : cleaningCost;
-  const calculatedCostsForMieterlos = (isUtilitiesCash ? 0 : baseCosts) +
-                                       ((isUtilitiesCash || (!isPlatformWithIncludedCosts && effectiveKurtaxeCash)) ? 0 : kurtaxe) +
-                                       effectiveCleaningCost +
-                                       komfortpaketCosts;
+  const effectiveCleaningCost = isCleaningCash && !isPlatformWithIncludedCosts ? 0 : cleaningCost;
+  const calculatedCostsForMieterlos =
+    (isUtilitiesCash ? 0 : baseCosts) +
+    (isUtilitiesCash || (!isPlatformWithIncludedCosts && effectiveKurtaxeCash) ? 0 : kurtaxe) +
+    effectiveCleaningCost +
+    komfortpaketCosts;
 
   // === Zentrale Miete-Berechnung ===
   const mieteResult = calculateMiete({
@@ -574,10 +603,16 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   // Für andere: Gesamteinzahlung = Miete + NK-Einnahmen + Reinigung-Einnahmen + Kurtaxe-Einnahmen + Bar-Zahlungen
   let gesamteinzahlung = isPlatformWithIncludedCosts
     ? gesamtauszahlung + barNk + barReinigung + komfortpaketIncome
-    : mieteResult.miete + nkEinnahmen + reinigungEinnahmen + kurtaxeEinnahmen + barNk + barReinigung + komfortpaketIncome;
+    : mieteResult.miete +
+      nkEinnahmen +
+      reinigungEinnahmen +
+      kurtaxeEinnahmen +
+      barNk +
+      barReinigung +
+      komfortpaketIncome;
 
   // === Kosten berechnen ===
-  const totalNkCosts = baseCosts + kurtaxe;  // NK ohne Reinigung und ohne Komfortpaket für Anzeige
+  const totalNkCosts = baseCosts + kurtaxe; // NK ohne Reinigung und ohne Komfortpaket für Anzeige
   // Gesamtbelastung = NK + Kurtaxe + Reinigung + Komfortpaket + Provision (immer die echten Kosten)
   let gesamtbelastung = baseCosts + kurtaxe + cleaningCost + komfortpaketCosts + provision;
 
@@ -601,8 +636,8 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
       platform,
       pricingSettings: pricingSettings as PricingSettings | undefined,
       kurtaxeRates,
-      komfortpaketPersons: komfortpaketEnabled ? (komfortpaket?.persons || 0) : 0,
-      komfortpaketGuestPaid: komfortpaketEnabled && komfortpaket?.guestPaid || false,
+      komfortpaketPersons: komfortpaketEnabled ? komfortpaket?.persons || 0 : 0,
+      komfortpaketGuestPaid: (komfortpaketEnabled && komfortpaket?.guestPaid) || false,
     };
 
     resolvedPositions = resolvePositions(positions, calcCtx);
@@ -622,7 +657,7 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
     const categories = params.positionCategories || [];
     byCategory = {};
     for (const [key, catPositions] of categoryMap) {
-      const catRecord = categories.find(c => c.slug === key);
+      const catRecord = categories.find((c) => c.slug === key);
       byCategory[key] = {
         category: catRecord
           ? { id: catRecord.id, name: catRecord.name, icon: catRecord.icon }
@@ -640,7 +675,12 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
         // Booking.com/Airbnb: Payout enthält bereits guest_platform/included_payout Einnahmen.
         // Nur Bar- und Direkt-Einnahmen aus Positionen hinzufügen (nicht im Payout enthalten).
         const extraPositionIncome = (resolvedPositions || [])
-          .filter(p => p.type === 'income' && p.paid_by !== 'guest_platform' && p.paid_by !== 'included_payout')
+          .filter(
+            (p) =>
+              p.type === 'income' &&
+              p.paid_by !== 'guest_platform' &&
+              p.paid_by !== 'included_payout',
+          )
           .reduce((sum, p) => sum + p.resolvedAmount, 0);
         gesamteinzahlung += extraPositionIncome;
       } else {
@@ -664,7 +704,8 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
       provision = privateSkipProvision ? 0 : Math.round(mieterlos * 0.1 * 100) / 100;
 
       // Gesamtbelastung mit aktualisierter Provision neu berechnen
-      gesamtbelastung = baseCosts + kurtaxe + cleaningCost + komfortpaketCosts + posExpenses + provision;
+      gesamtbelastung =
+        baseCosts + kurtaxe + cleaningCost + komfortpaketCosts + posExpenses + provision;
       gesamtertrag = gesamteinzahlung - gesamtbelastung;
     }
   }
@@ -684,7 +725,7 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
   }
 
   // Kurtaxe-paying persons count
-  const qualifyingChildren = (childrenAges || []).filter(a => a >= 16).length;
+  const qualifyingChildren = (childrenAges || []).filter((a) => a >= 16).length;
   const kurtaxePersons = Math.min(8, Math.max(1, adults + qualifyingChildren));
 
   return {
@@ -722,10 +763,12 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
 
     // Kosten
     totalNkCosts,
-    gesamtbelastung: privateSkipProvision ? (gesamtbelastung - provision) : gesamtbelastung,
+    gesamtbelastung: privateSkipProvision ? gesamtbelastung - provision : gesamtbelastung,
 
     // Ertrag
-    gesamtertrag: privateSkipProvision ? (gesamteinzahlung - (gesamtbelastung - provision)) : gesamtertrag,
+    gesamtertrag: privateSkipProvision
+      ? gesamteinzahlung - (gesamtbelastung - provision)
+      : gesamtertrag,
 
     // Flags
     isBookingCom,
@@ -752,7 +795,9 @@ export function calculateBookingFinances(params: BookingFinanceParams): BookingF
 /**
  * Hilfsfunktion: Parst private_config JSON String zu PrivateBookingConfig
  */
-export function parsePrivateConfig(configJson: string | null | undefined): PrivateBookingConfig | undefined {
+export function parsePrivateConfig(
+  configJson: string | null | undefined,
+): PrivateBookingConfig | undefined {
   if (!configJson) return undefined;
   try {
     const parsed = JSON.parse(configJson);
@@ -770,7 +815,9 @@ export function parsePrivateConfig(configJson: string | null | undefined): Priva
 /**
  * Hilfsfunktion: Parst additional_costs JSON und extrahiert PlatformFees
  */
-export function parsePlatformFeesFromJson(additionalCostsJson: string | null | undefined): PlatformFees {
+export function parsePlatformFeesFromJson(
+  additionalCostsJson: string | null | undefined,
+): PlatformFees {
   const defaultFees: PlatformFees = {
     payout_amount: 0,
     nebenkosten_income: 0,
@@ -800,7 +847,9 @@ export function parsePlatformFeesFromJson(additionalCostsJson: string | null | u
 /**
  * Hilfsfunktion: Parst Komfortpaket-Daten aus additional_costs JSON
  */
-export function parseKomfortpaketFromJson(additionalCostsJson: string | null | undefined): KomfortpaketData | undefined {
+export function parseKomfortpaketFromJson(
+  additionalCostsJson: string | null | undefined,
+): KomfortpaketData | undefined {
   if (!additionalCostsJson) return undefined;
 
   try {
@@ -892,8 +941,8 @@ export function parseChildrenAges(childrenAgesStr: string | null | undefined): n
   try {
     return childrenAgesStr
       .split(',')
-      .map(a => parseInt(a.trim()))
-      .filter(a => !isNaN(a) && a >= 0);
+      .map((a) => parseInt(a.trim()))
+      .filter((a) => !isNaN(a) && a >= 0);
   } catch {
     return [];
   }

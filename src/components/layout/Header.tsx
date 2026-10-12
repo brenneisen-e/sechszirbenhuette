@@ -93,9 +93,14 @@ export function Header() {
   const isNavItemActive = (sectionId: string) => {
     // Map nav item sections to actual section IDs
     if (sectionId === 'buchung' && activeSection === 'buchung') return true;
-    if (sectionId === 'ferienhaus' && (activeSection === 'ferienhaus' || activeSection === 'introtext')) return true;
+    if (
+      sectionId === 'ferienhaus' &&
+      (activeSection === 'ferienhaus' || activeSection === 'introtext')
+    )
+      return true;
     if (sectionId === 'galerie' && activeSection === 'galerie') return true;
-    if (sectionId === 'umgebung' && (activeSection === 'umgebung' || activeSection === 'lage')) return true;
+    if (sectionId === 'umgebung' && (activeSection === 'umgebung' || activeSection === 'lage'))
+      return true;
     return false;
   };
 
@@ -118,9 +123,9 @@ export function Header() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible',
-        (isScrolled || isSubpage)
+        isScrolled || isSubpage
           ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
-          : 'bg-transparent py-3'
+          : 'bg-transparent py-3',
       )}
     >
       <div className="container">
@@ -141,20 +146,24 @@ export function Header() {
                     href={item.href}
                     className={cn(
                       'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                      (isScrolled || isSubpage)
+                      isScrolled || isSubpage
                         ? 'text-gray-700 hover:text-logo-green'
                         : 'text-white hover:text-white/80',
-                      isCurrentBlog && 'font-bold'
+                      isCurrentBlog && 'font-bold',
                     )}
-                    style={isCurrentBlog ? {
-                      color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white',
-                    } : undefined}
+                    style={
+                      isCurrentBlog
+                        ? {
+                            color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
+                          }
+                        : undefined
+                    }
                   >
                     {t.navigation[item.key]}
                     {isCurrentBlog && (
                       <span
                         className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                        style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
+                        style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
                       />
                     )}
                   </Link>
@@ -167,21 +176,25 @@ export function Header() {
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
                     'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    (isScrolled || isSubpage)
+                    isScrolled || isSubpage
                       ? 'text-gray-700 hover:text-logo-green'
                       : 'text-white hover:text-white/80',
-                    isActive && 'font-bold'
+                    isActive && 'font-bold',
                   )}
-                  style={isActive ? {
-                    color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white',
-                  } : undefined}
+                  style={
+                    isActive
+                      ? {
+                          color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
+                        }
+                      : undefined
+                  }
                 >
                   {t.navigation[item.key]}
                   {/* Active indicator line */}
                   {isActive && (
                     <span
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
+                      style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
                     />
                   )}
                 </button>
@@ -200,10 +213,7 @@ export function Header() {
                 alt="Sechszirbenhütte"
                 width={240}
                 height={100}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-16" : "h-20"
-                )}
+                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-16' : 'h-20')}
                 priority
               />
             </button>
@@ -217,10 +227,7 @@ export function Header() {
                 alt="Sechszirbenhütte"
                 width={240}
                 height={100}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-16" : "h-20"
-                )}
+                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-16' : 'h-20')}
                 priority
               />
             </Link>
@@ -252,21 +259,25 @@ export function Header() {
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
                     'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    (isScrolled || isSubpage)
+                    isScrolled || isSubpage
                       ? 'text-gray-700 hover:text-logo-green'
                       : 'text-white hover:text-white/80',
-                    (isActive || isAnfrageHighlighted) && 'font-bold'
+                    (isActive || isAnfrageHighlighted) && 'font-bold',
                   )}
-                  style={(isActive || isAnfrageHighlighted) ? {
-                    color: (isScrolled || isSubpage) ? LOGO_GREEN : 'white'
-                  } : undefined}
+                  style={
+                    isActive || isAnfrageHighlighted
+                      ? {
+                          color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
+                        }
+                      : undefined
+                  }
                 >
                   {t.navigation[item.key]}
                   {/* Active indicator line */}
                   {(isActive || isAnfrageHighlighted) && (
                     <span
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: (isScrolled || isSubpage) ? LOGO_GREEN : 'white' }}
+                      style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
                     />
                   )}
                 </button>
@@ -283,7 +294,7 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={cn(
               'p-2 rounded-lg transition-colors',
-              (isScrolled || isSubpage) ? 'text-gray-700' : 'text-white'
+              isScrolled || isSubpage ? 'text-gray-700' : 'text-white',
             )}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -300,27 +311,18 @@ export function Header() {
                 alt="Sechszirbenhütte"
                 width={160}
                 height={60}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-12" : "h-14"
-                )}
+                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-12' : 'h-14')}
                 priority
               />
             </button>
           ) : (
-            <Link
-              href="/"
-              className="transition-transform hover:scale-105"
-            >
+            <Link href="/" className="transition-transform hover:scale-105">
               <Image
                 src="/images/logo.svg"
                 alt="Sechszirbenhütte"
                 width={160}
                 height={60}
-                className={cn(
-                  "w-auto transition-all duration-300",
-                  isScrolled ? "h-12" : "h-14"
-                )}
+                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-12' : 'h-14')}
                 priority
               />
             </Link>
@@ -364,11 +366,15 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
-                      isCurrentBlog && 'font-bold bg-logo-green/10'
+                      isCurrentBlog && 'font-bold bg-logo-green/10',
                     )}
-                    style={isCurrentBlog ? {
-                      color: LOGO_GREEN
-                    } : undefined}
+                    style={
+                      isCurrentBlog
+                        ? {
+                            color: LOGO_GREEN,
+                          }
+                        : undefined
+                    }
                   >
                     {t.navigation[item.key]}
                   </Link>
@@ -381,11 +387,15 @@ export function Header() {
                   onClick={() => scrollToSection(item.href)}
                   className={cn(
                     'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
-                    (isActive || isAnfrageHighlighted) && 'font-bold bg-logo-green/10'
+                    (isActive || isAnfrageHighlighted) && 'font-bold bg-logo-green/10',
                   )}
-                  style={(isActive || isAnfrageHighlighted) ? {
-                    color: LOGO_GREEN
-                  } : undefined}
+                  style={
+                    isActive || isAnfrageHighlighted
+                      ? {
+                          color: LOGO_GREEN,
+                        }
+                      : undefined
+                  }
                 >
                   {t.navigation[item.key]}
                 </button>

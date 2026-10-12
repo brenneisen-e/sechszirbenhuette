@@ -12,8 +12,7 @@ interface KurtaxeRate {
   min_age: number;
 }
 
-interface KurtaxeRatesEditorProps {
-}
+interface KurtaxeRatesEditorProps {}
 
 export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
   const [rates, setRates] = useState<KurtaxeRate[]>([]);
@@ -34,7 +33,7 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
   const fetchRates = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/kurtaxe-rates');
-      const data = await res.json() as { rates?: KurtaxeRate[]; tableExists?: boolean };
+      const data = (await res.json()) as { rates?: KurtaxeRate[]; tableExists?: boolean };
       setRates(data.rates || []);
       setTableExists(data.tableExists !== false);
     } catch (err) {
@@ -107,7 +106,7 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
     try {
       await fetch(`/api/admin/kurtaxe-rates?id=${id}`, {
         method: 'DELETE',
-        });
+      });
       await fetchRates();
     } catch (err) {
       console.error('Failed to delete kurtaxe rate:', err);
@@ -130,7 +129,9 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
           <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-medium text-amber-800">Kurtaxe-Tabelle nicht vorhanden</p>
-            <p className="text-xs text-amber-600 mt-1">Bitte führen Sie die Datenbank-Migration im System-Tab aus.</p>
+            <p className="text-xs text-amber-600 mt-1">
+              Bitte führen Sie die Datenbank-Migration im System-Tab aus.
+            </p>
           </div>
         </div>
       </div>
@@ -148,9 +149,15 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Gültig ab</th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Gültig bis</th>
-              <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Satz pro Person/Tag</th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Gültig ab
+              </th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Gültig bis
+              </th>
+              <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Satz pro Person/Tag
+              </th>
               <th className="w-20 px-4 py-3"></th>
             </tr>
           </thead>
@@ -163,7 +170,9 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                       <input
                         type="date"
                         value={editForm.valid_from}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, valid_from: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, valid_from: e.target.value }))
+                        }
                         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                       />
                     </td>
@@ -171,7 +180,9 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                       <input
                         type="date"
                         value={editForm.valid_to}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, valid_to: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, valid_to: e.target.value }))
+                        }
                         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                         placeholder="unbegrenzt"
                       />
@@ -182,7 +193,12 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                           type="number"
                           step="0.01"
                           value={editForm.rate_per_person_per_day}
-                          onChange={(e) => setEditForm(prev => ({ ...prev, rate_per_person_per_day: e.target.value }))}
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              rate_per_person_per_day: e.target.value,
+                            }))
+                          }
                           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-24 text-right font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                         />
                         <span className="text-xs text-gray-400">€</span>
@@ -190,10 +206,21 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={saveRate} disabled={saving} className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors">
-                          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-xs font-medium">OK</span>}
+                        <button
+                          onClick={saveRate}
+                          disabled={saving}
+                          className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors"
+                        >
+                          {saving ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <span className="text-xs font-medium">OK</span>
+                          )}
                         </button>
-                        <button onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors">
+                        <button
+                          onClick={cancelEdit}
+                          className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors"
+                        >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -205,10 +232,11 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                       {new Date(rate.valid_from).toLocaleDateString('de-DE')}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {rate.valid_to
-                        ? new Date(rate.valid_to).toLocaleDateString('de-DE')
-                        : <span className="text-gray-400">–</span>
-                      }
+                      {rate.valid_to ? (
+                        new Date(rate.valid_to).toLocaleDateString('de-DE')
+                      ) : (
+                        <span className="text-gray-400">–</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm font-mono text-gray-900 text-right tabular-nums">
                       {formatCurrency(rate.rate_per_person_per_day)}
@@ -241,7 +269,9 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                   <input
                     type="date"
                     value={editForm.valid_from}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, valid_from: e.target.value }))}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, valid_from: e.target.value }))
+                    }
                     className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                   />
                 </td>
@@ -249,7 +279,7 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                   <input
                     type="date"
                     value={editForm.valid_to}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, valid_to: e.target.value }))}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, valid_to: e.target.value }))}
                     className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                   />
                 </td>
@@ -259,7 +289,12 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                       type="number"
                       step="0.01"
                       value={editForm.rate_per_person_per_day}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, rate_per_person_per_day: e.target.value }))}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          rate_per_person_per_day: e.target.value,
+                        }))
+                      }
                       className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-24 text-right font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
                       placeholder="0.00"
                     />
@@ -268,10 +303,21 @@ export default function KurtaxeRatesEditor({}: KurtaxeRatesEditorProps) {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-1 justify-end">
-                    <button onClick={saveRate} disabled={saving} className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors">
-                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-xs font-medium">OK</span>}
+                    <button
+                      onClick={saveRate}
+                      disabled={saving}
+                      className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors"
+                    >
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <span className="text-xs font-medium">OK</span>
+                      )}
                     </button>
-                    <button onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors">
+                    <button
+                      onClick={cancelEdit}
+                      className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </div>

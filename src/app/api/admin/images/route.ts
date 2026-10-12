@@ -30,29 +30,27 @@ interface ImageRecord {
 
 // Valid categories - matching Gallery component structure
 const VALID_CATEGORIES = [
-  'hero',           // Hero slider images
-  'exterior',       // Auenansichten (aussen)
-  'living',         // Wohnbereich (wohnen)
-  'bedrooms',       // Schlafzimmer (schlafen)
-  'kitchen',        // Kueche (kueche)
-  'bathroom',       // Badezimmer (bad)
-  'wellness',       // Sauna & Wellness (bad)
-  'surroundings',   // Umgebung (umgebung)
-  'extras',         // Extras
-  'summer',         // Summer activity backgrounds
-  'winter',         // Winter activity backgrounds
-  'hosts',          // Gastgeber Bild
+  'hero', // Hero slider images
+  'exterior', // Auenansichten (aussen)
+  'living', // Wohnbereich (wohnen)
+  'bedrooms', // Schlafzimmer (schlafen)
+  'kitchen', // Kueche (kueche)
+  'bathroom', // Badezimmer (bad)
+  'wellness', // Sauna & Wellness (bad)
+  'surroundings', // Umgebung (umgebung)
+  'extras', // Extras
+  'summer', // Summer activity backgrounds
+  'winter', // Winter activity backgrounds
+  'hosts', // Gastgeber Bild
 ];
 
 /** Ensure cf_image_id column exists on the images table */
 async function ensureCfImageIdColumn(db: D1Database): Promise<void> {
   try {
-    await db.prepare("SELECT cf_image_id FROM images LIMIT 1").first();
+    await db.prepare('SELECT cf_image_id FROM images LIMIT 1').first();
   } catch {
     // Column doesn't exist - add it
-    await db.prepare(
-      "ALTER TABLE images ADD COLUMN cf_image_id TEXT DEFAULT NULL"
-    ).run();
+    await db.prepare('ALTER TABLE images ADD COLUMN cf_image_id TEXT DEFAULT NULL').run();
   }
 }
 
@@ -68,9 +66,9 @@ function imageUrl(img: ImageRecord, accountHash: string | null): string {
 /** Try to extract the account hash from any existing CF Images URL in the DB */
 async function discoverAccountHash(db: D1Database): Promise<string | null> {
   try {
-    const row = await db.prepare(
-      "SELECT image_key FROM images WHERE cf_image_id IS NOT NULL LIMIT 1"
-    ).first<{ image_key: string }>();
+    const row = await db
+      .prepare('SELECT image_key FROM images WHERE cf_image_id IS NOT NULL LIMIT 1')
+      .first<{ image_key: string }>();
     if (row) {
       const parsed = parseImageUrl(row.image_key);
       if (parsed) return parsed.accountHash;
@@ -96,19 +94,25 @@ export async function GET(request: NextRequest) {
       const ctx = await getCloudflareContext();
 
       if (!ctx) {
-        return NextResponse.json({
-          status: 'error',
-          error: 'getCloudflareContext() returned null/undefined'
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            status: 'error',
+            error: 'getCloudflareContext() returned null/undefined',
+          },
+          { status: 500 },
+        );
       }
 
       const env = (ctx as { env: Env }).env;
 
       if (!env) {
-        return NextResponse.json({
-          status: 'error',
-          error: 'No env object in request context'
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            status: 'error',
+            error: 'No env object in request context',
+          },
+          { status: 500 },
+        );
       }
 
       // Test D1 connection
@@ -132,27 +136,33 @@ export async function GET(request: NextRequest) {
         hasAdminPassword: !!env.ADMIN_PASSWORD,
         hasCfImagesCredentials: !!creds,
         tableExists,
-        tableError: tableError || undefined
+        tableError: tableError || undefined,
       });
     } catch (e) {
-      return NextResponse.json({
-        status: 'error',
-        error: e instanceof Error ? e.message : 'Health check failed',
-        stack: e instanceof Error ? e.stack : undefined
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          status: 'error',
+          error: e instanceof Error ? e.message : 'Health check failed',
+          stack: e instanceof Error ? e.stack : undefined,
+        },
+        { status: 500 },
+      );
     }
   }
 
   try {
-
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
     if (!env.DB) {
-      return NextResponse.json({
-        error: 'D1 Database binding not configured. Check wrangler.toml and Cloudflare Pages settings.',
-        images: []
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error:
+            'D1 Database binding not configured. Check wrangler.toml and Cloudflare Pages settings.',
+          images: [],
+        },
+        { status: 500 },
+      );
     }
 
     await ensureCfImageIdColumn(env.DB);
@@ -180,9 +190,7 @@ export async function GET(request: NextRequest) {
     // Sort by is_hero first (hero images on top), then by display_order
     query += ' ORDER BY is_hero DESC, display_order ASC, created_at DESC';
 
-    const stmt = params.length > 0
-      ? env.DB.prepare(query).bind(...params)
-      : env.DB.prepare(query);
+    const stmt = params.length > 0 ? env.DB.prepare(query).bind(...params) : env.DB.prepare(query);
 
     const { results } = await stmt.all<ImageRecord>();
 
@@ -196,9 +204,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Generate URLs for each image
-    const images = (results || []).map(img => ({
+    const images = (results || []).map((img) => ({
       ...img,
-      image_url: imageUrl(img, accountHash)
+      image_url: imageUrl(img, accountHash),
     }));
 
     return NextResponse.json({ images });
@@ -213,14 +221,13 @@ export async function GET(request: NextRequest) {
 // POST - Upload new image
 export async function POST(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
-
+    const { env } = (await getCloudflareContext()) as { env: Env };
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const altText = formData.get('altText') as string;
-    const category = formData.get('category') as string || 'exterior';
-    const displayOrder = parseInt(formData.get('displayOrder') as string || '999');
+    const category = (formData.get('category') as string) || 'exterior';
+    const displayOrder = parseInt((formData.get('displayOrder') as string) || '999');
     const isHeroParam = formData.get('isHero');
 
     // Auto-determine is_hero: if explicitly set, use that; otherwise based on category
@@ -238,9 +245,12 @@ export async function POST(request: NextRequest) {
 
     // Validate category
     if (!VALID_CATEGORIES.includes(category)) {
-      return NextResponse.json({
-        error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}`
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}`,
+        },
+        { status: 400 },
+      );
     }
 
     await ensureCfImageIdColumn(env.DB);
@@ -280,15 +290,17 @@ export async function POST(request: NextRequest) {
 
       await env.IMAGES_BUCKET.put(imageKey, fileBuffer, {
         httpMetadata: {
-          contentType: file.type
-        }
+          contentType: file.type,
+        },
       });
     }
 
     // Save metadata to D1 (including is_hero and cf_image_id)
     const result = await env.DB.prepare(
-      'INSERT INTO images (image_key, alt_text, category, display_order, is_hero, cf_image_id) VALUES (?, ?, ?, ?, ?, ?) RETURNING *'
-    ).bind(imageKey, altText || 'Bild', category, displayOrder, isHero, cfImageId).first<ImageRecord>();
+      'INSERT INTO images (image_key, alt_text, category, display_order, is_hero, cf_image_id) VALUES (?, ?, ?, ?, ?, ?) RETURNING *',
+    )
+      .bind(imageKey, altText || 'Bild', category, displayOrder, isHero, cfImageId)
+      .first<ImageRecord>();
 
     if (!result) {
       // Rollback: delete uploaded file
@@ -302,12 +314,15 @@ export async function POST(request: NextRequest) {
 
     const resultUrl = deliveryUrl || `/api/admin/images/file/${result.image_key}`;
 
-    return NextResponse.json({
-      image: {
-        ...result,
-        image_url: resultUrl
-      }
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        image: {
+          ...result,
+          image_url: resultUrl,
+        },
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('Unexpected error:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
@@ -318,10 +333,15 @@ export async function POST(request: NextRequest) {
 // PUT - Update image metadata (category, alt_text, display_order)
 export async function PUT(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
+    const { env } = (await getCloudflareContext()) as { env: Env };
 
-
-    const body = await request.json() as { id?: string; alt_text?: string; category?: string; display_order?: number; is_hero?: boolean };
+    const body = (await request.json()) as {
+      id?: string;
+      alt_text?: string;
+      category?: string;
+      display_order?: number;
+      is_hero?: boolean;
+    };
     const { id, alt_text, category, display_order, is_hero } = body;
 
     if (!id) {
@@ -330,9 +350,12 @@ export async function PUT(request: NextRequest) {
 
     // Validate category if provided
     if (category && !VALID_CATEGORIES.includes(category)) {
-      return NextResponse.json({
-        error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}`
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}`,
+        },
+        { status: 400 },
+      );
     }
 
     // Build update query dynamically
@@ -365,8 +388,10 @@ export async function PUT(request: NextRequest) {
     values.push(id);
 
     const result = await env.DB.prepare(
-      `UPDATE images SET ${updates.join(', ')} WHERE id = ? RETURNING *`
-    ).bind(...values).first<ImageRecord>();
+      `UPDATE images SET ${updates.join(', ')} WHERE id = ? RETURNING *`,
+    )
+      .bind(...values)
+      .first<ImageRecord>();
 
     if (!result) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
@@ -382,8 +407,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       image: {
         ...result,
-        image_url: imageUrl(result, accountHash)
-      }
+        image_url: imageUrl(result, accountHash),
+      },
     });
   } catch (error) {
     console.error('Unexpected error:', error);
@@ -395,8 +420,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete image
 export async function DELETE(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
-
+    const { env } = (await getCloudflareContext()) as { env: Env };
 
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('id');
@@ -408,9 +432,9 @@ export async function DELETE(request: NextRequest) {
     await ensureCfImageIdColumn(env.DB);
 
     // Get image details first
-    const image = await env.DB.prepare(
-      'SELECT * FROM images WHERE id = ?'
-    ).bind(imageId).first<ImageRecord>();
+    const image = await env.DB.prepare('SELECT * FROM images WHERE id = ?')
+      .bind(imageId)
+      .first<ImageRecord>();
 
     if (!image) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
@@ -435,9 +459,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete from D1
-    await env.DB.prepare(
-      'DELETE FROM images WHERE id = ?'
-    ).bind(imageId).run();
+    await env.DB.prepare('DELETE FROM images WHERE id = ?').bind(imageId).run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

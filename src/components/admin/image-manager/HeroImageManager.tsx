@@ -28,8 +28,7 @@ interface HeroImageRecord {
   created_at: string;
 }
 
-interface HeroImageManagerProps {
-}
+interface HeroImageManagerProps {}
 
 interface AspectRatioSlot {
   ratio: string;
@@ -42,9 +41,33 @@ interface AspectRatioSlot {
 }
 
 const ASPECT_RATIO_SLOTS: AspectRatioSlot[] = [
-  { ratio: '21:9', label: '21:9', device: 'Desktop / Laptop', icon: Monitor, width: 2520, height: 1080, previewAspect: 'aspect-[21/9]' },
-  { ratio: '16:9', label: '16:9', device: 'Tablet', icon: Tablet, width: 1920, height: 1080, previewAspect: 'aspect-video' },
-  { ratio: '4:5', label: '4:5', device: 'Mobil / Handy', icon: Smartphone, width: 1080, height: 1350, previewAspect: 'aspect-[4/5]' },
+  {
+    ratio: '21:9',
+    label: '21:9',
+    device: 'Desktop / Laptop',
+    icon: Monitor,
+    width: 2520,
+    height: 1080,
+    previewAspect: 'aspect-[21/9]',
+  },
+  {
+    ratio: '16:9',
+    label: '16:9',
+    device: 'Tablet',
+    icon: Tablet,
+    width: 1920,
+    height: 1080,
+    previewAspect: 'aspect-video',
+  },
+  {
+    ratio: '4:5',
+    label: '4:5',
+    device: 'Mobil / Handy',
+    icon: Smartphone,
+    width: 1080,
+    height: 1350,
+    previewAspect: 'aspect-[4/5]',
+  },
 ];
 
 const SIDES = [
@@ -57,7 +80,11 @@ const SIDES = [
  * Example: A 16:9 photo uploaded to the 21:9 slot gets cropped
  * to 21:9 (top/bottom trimmed) so it fills the hero without CSS cropping.
  */
-async function compressForAspectRatio(file: File, targetWidth: number, targetHeight: number): Promise<Blob> {
+async function compressForAspectRatio(
+  file: File,
+  targetWidth: number,
+  targetHeight: number,
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -117,7 +144,7 @@ async function compressForAspectRatio(file: File, targetWidth: number, targetHei
             }
           },
           'image/jpeg',
-          quality
+          quality,
         );
       };
       tryCompress();
@@ -153,7 +180,9 @@ export function HeroImageManager({}: HeroImageManagerProps) {
   }, [loadHeroImages]);
 
   const getImage = (side: string, ratio: string): HeroImageRecord | undefined => {
-    return heroImages.find((img: HeroImageRecord) => img.side === side && img.aspect_ratio === ratio);
+    return heroImages.find(
+      (img: HeroImageRecord) => img.side === side && img.aspect_ratio === ratio,
+    );
   };
 
   const handleUpload = async (side: string, ratio: string, file: File) => {
@@ -163,7 +192,7 @@ export function HeroImageManager({}: HeroImageManagerProps) {
     setSuccessMsg('');
 
     try {
-      const slot = ASPECT_RATIO_SLOTS.find(s => s.ratio === ratio);
+      const slot = ASPECT_RATIO_SLOTS.find((s) => s.ratio === ratio);
       if (!slot) throw new Error('Unknown aspect ratio');
 
       // Compress image for the target resolution
@@ -173,7 +202,10 @@ export function HeroImageManager({}: HeroImageManagerProps) {
       formData.append('file', compressedBlob, file.name.replace(/\.[^/.]+$/, '.jpg'));
       formData.append('side', side);
       formData.append('aspectRatio', ratio);
-      formData.append('altText', `Sechszirbenhütte - ${side === 'nord' ? 'Nordseite' : 'Südseite'}`);
+      formData.append(
+        'altText',
+        `Sechszirbenhütte - ${side === 'nord' ? 'Nordseite' : 'Südseite'}`,
+      );
 
       const response = await fetch('/api/admin/hero-images', {
         method: 'POST',
@@ -181,7 +213,7 @@ export function HeroImageManager({}: HeroImageManagerProps) {
       });
 
       if (!response.ok) {
-        const data = await response.json() as { error?: string };
+        const data = (await response.json()) as { error?: string };
         throw new Error(data.error || 'Upload fehlgeschlagen');
       }
 
@@ -203,9 +235,12 @@ export function HeroImageManager({}: HeroImageManagerProps) {
 
     setError('');
     try {
-      const response = await fetch(`/api/admin/hero-images?side=${side}&ratio=${encodeURIComponent(ratio)}`, {
-        method: 'DELETE',
-        });
+      const response = await fetch(
+        `/api/admin/hero-images?side=${side}&ratio=${encodeURIComponent(ratio)}`,
+        {
+          method: 'DELETE',
+        },
+      );
 
       if (!response.ok) throw new Error('Löschen fehlgeschlagen');
       await loadHeroImages();
@@ -216,7 +251,7 @@ export function HeroImageManager({}: HeroImageManagerProps) {
   };
 
   const getCompletionCount = (side: string): number => {
-    return ASPECT_RATIO_SLOTS.filter(slot => getImage(side, slot.ratio)).length;
+    return ASPECT_RATIO_SLOTS.filter((slot) => getImage(side, slot.ratio)).length;
   };
 
   return (
@@ -232,9 +267,7 @@ export function HeroImageManager({}: HeroImageManagerProps) {
             <p className="text-sm text-gray-500">Nordseite & Südseite in 3 Formaten</p>
           </div>
         </div>
-        <div className="text-sm text-gray-500">
-          {heroImages.length} / 6 Bilder
-        </div>
+        <div className="text-sm text-gray-500">{heroImages.length} / 6 Bilder</div>
       </div>
 
       {/* Info Banner */}
@@ -244,9 +277,15 @@ export function HeroImageManager({}: HeroImageManagerProps) {
           <div className="text-sm text-emerald-800">
             <p className="font-medium mb-1">Optimale Bildgrößen:</p>
             <ul className="space-y-1 text-emerald-700">
-              <li><strong>21:9</strong> Desktop/Laptop — min. 2520×1080 px</li>
-              <li><strong>16:9</strong> Tablet — min. 1920×1080 px</li>
-              <li><strong>4:5</strong> Mobil/Handy — min. 1080×1350 px</li>
+              <li>
+                <strong>21:9</strong> Desktop/Laptop — min. 2520×1080 px
+              </li>
+              <li>
+                <strong>16:9</strong> Tablet — min. 1920×1080 px
+              </li>
+              <li>
+                <strong>4:5</strong> Mobil/Handy — min. 1080×1350 px
+              </li>
             </ul>
           </div>
         </div>
@@ -285,7 +324,9 @@ export function HeroImageManager({}: HeroImageManagerProps) {
           const headerText = color === 'blue' ? 'text-blue-800' : 'text-amber-800';
           const badgeBg = isComplete
             ? 'bg-green-100 text-green-700'
-            : color === 'blue' ? 'bg-blue-200 text-blue-700' : 'bg-amber-200 text-amber-700';
+            : color === 'blue'
+              ? 'bg-blue-200 text-blue-700'
+              : 'bg-amber-200 text-amber-700';
 
           return (
             <div key={side} className={`border ${borderColor} rounded-xl overflow-hidden`}>
@@ -310,7 +351,10 @@ export function HeroImageManager({}: HeroImageManagerProps) {
                     const Icon = slot.icon;
 
                     return (
-                      <div key={slot.ratio} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <div
+                        key={slot.ratio}
+                        className="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                      >
                         {/* Slot Header */}
                         <div className="px-3 py-2 bg-gray-50 border-b flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -324,7 +368,9 @@ export function HeroImageManager({}: HeroImageManagerProps) {
                         <div className="p-3">
                           {image ? (
                             <div className="space-y-2">
-                              <div className={`relative ${slot.previewAspect} w-full rounded overflow-hidden bg-gray-100`}>
+                              <div
+                                className={`relative ${slot.previewAspect} w-full rounded overflow-hidden bg-gray-100`}
+                              >
                                 <Image
                                   src={image.image_url}
                                   alt={image.alt_text}
@@ -376,14 +422,18 @@ export function HeroImageManager({}: HeroImageManagerProps) {
                                 }}
                                 disabled={isUploading}
                               />
-                              <div className={`${slot.previewAspect} w-full rounded border-2 border-dashed border-gray-300 hover:border-emerald-400 flex flex-col items-center justify-center text-gray-400 hover:text-emerald-500 transition-colors`}>
+                              <div
+                                className={`${slot.previewAspect} w-full rounded border-2 border-dashed border-gray-300 hover:border-emerald-400 flex flex-col items-center justify-center text-gray-400 hover:text-emerald-500 transition-colors`}
+                              >
                                 {isUploading ? (
                                   <Loader2 className="w-8 h-8 animate-spin" />
                                 ) : (
                                   <>
                                     <ImageIcon className="w-8 h-8 mb-1" />
                                     <span className="text-xs">Bild hochladen</span>
-                                    <span className="text-xs text-gray-300">{slot.width}×{slot.height}</span>
+                                    <span className="text-xs text-gray-300">
+                                      {slot.width}×{slot.height}
+                                    </span>
                                   </>
                                 )}
                               </div>

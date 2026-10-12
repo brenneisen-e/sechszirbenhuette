@@ -117,7 +117,9 @@ export function Reviews() {
               <div className="text-left">
                 <div className="text-sm text-gray-500">{t.reviews?.source || 'Bewertung auf'}</div>
                 <div className="font-semibold text-gray-800">Google</div>
-                <div className="text-xs text-gray-400 mt-0.5">{t.reviews?.basedOn || 'basierend auf Gästebewertungen'}</div>
+                <div className="text-xs text-gray-400 mt-0.5">
+                  {t.reviews?.basedOn || 'basierend auf Gästebewertungen'}
+                </div>
               </div>
             </a>
 
@@ -137,7 +139,9 @@ export function Reviews() {
               <div className="text-left">
                 <div className="text-sm text-gray-500">{t.reviews?.source || 'Bewertung auf'}</div>
                 <div className="font-semibold text-gray-800">Fewo-direkt</div>
-                <div className="text-xs text-gray-400 mt-0.5">{t.reviews?.basedOn || 'basierend auf Gästebewertungen'}</div>
+                <div className="text-xs text-gray-400 mt-0.5">
+                  {t.reviews?.basedOn || 'basierend auf Gästebewertungen'}
+                </div>
               </div>
             </div>
           </div>

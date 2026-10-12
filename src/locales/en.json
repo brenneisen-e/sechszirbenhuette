@@ -92,7 +92,14 @@
     },
     "kitchen": {
       "title": "Kitchen",
-      "items": ["Fully equipped kitchen", "Dishwasher", "Refrigerator with freezer", "Coffee maker", "Kettle", "Toaster"]
+      "items": [
+        "Fully equipped kitchen",
+        "Dishwasher",
+        "Refrigerator with freezer",
+        "Coffee maker",
+        "Kettle",
+        "Toaster"
+      ]
     },
     "bathroom": {
       "title": "Bathroom",
@@ -100,11 +107,24 @@
     },
     "sauna": {
       "title": "Sauna",
-      "items": ["Private sauna annex", "Finnish sauna", "Relaxation room with loungers", "Floor-level rain shower", "Private terrace", "Underfloor heating"]
+      "items": [
+        "Private sauna annex",
+        "Finnish sauna",
+        "Relaxation room with loungers",
+        "Floor-level rain shower",
+        "Private terrace",
+        "Underfloor heating"
+      ]
     },
     "living": {
       "title": "Living Area",
-      "items": ["Cozy seating area", "Dining table", "Modern wood pellet stove", "Satellite TV", "WiFi"]
+      "items": [
+        "Cozy seating area",
+        "Dining table",
+        "Modern wood pellet stove",
+        "Satellite TV",
+        "WiFi"
+      ]
     },
     "outdoor": {
       "title": "Outdoor Area",
@@ -246,7 +266,16 @@
     },
     "included": {
       "title": "Included",
-      "items": ["Electricity (20 kWh/night)", "Heating", "Water", "Waste disposal", "Final cleaning (without dog)", "WiFi", "Tourist tax (adults)", "Sauna use"]
+      "items": [
+        "Electricity (20 kWh/night)",
+        "Heating",
+        "Water",
+        "Waste disposal",
+        "Final cleaning (without dog)",
+        "WiFi",
+        "Tourist tax (adults)",
+        "Sauna use"
+      ]
     },
     "form": {
       "title": "Booking Request",
@@ -381,12 +410,22 @@
     },
     "rooms": {
       "title": "Bedrooms",
-      "items": ["1 gallery room (2 single beds)", "1 double bedroom", "1 room with 2 bunk beds", "Space for 5 people"],
+      "items": [
+        "1 gallery room (2 single beds)",
+        "1 double bedroom",
+        "1 room with 2 bunk beds",
+        "Space for 5 people"
+      ],
       "hint": "Bring your own bedding or book comfort package"
     },
     "sauna": {
       "title": "Sauna & Wellness",
-      "items": ["Sauna with sanarium", "Relaxation room with loungers", "Extra shower with Kneipp hose", "Underfloor heating"]
+      "items": [
+        "Sauna with sanarium",
+        "Relaxation room with loungers",
+        "Extra shower with Kneipp hose",
+        "Underfloor heating"
+      ]
     },
     "bathroom": {
       "title": "Bathroom",
@@ -395,7 +434,12 @@
     },
     "outdoor": {
       "title": "Outdoor Area",
-      "items": ["15m² balcony with external stairs", "650m² property", "2 parking spaces", "BBQ & garden furniture"]
+      "items": [
+        "15m² balcony with external stairs",
+        "650m² property",
+        "2 parking spaces",
+        "BBQ & garden furniture"
+      ]
     },
     "equipment": {
       "title": "Amenities",
@@ -403,7 +447,12 @@
     },
     "location": {
       "title": "Location",
-      "items": ["Falkert ski area on site", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Many hiking trails"]
+      "items": [
+        "Falkert ski area on site",
+        "Turracher Höhe (20 min.)",
+        "Bad Kleinkirchheim (25 min.)",
+        "Many hiking trails"
+      ]
     }
   },
   "blog": {

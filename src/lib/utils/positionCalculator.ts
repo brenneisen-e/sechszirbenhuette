@@ -5,9 +5,19 @@
  * This is the computation layer for the dynamic position system.
  */
 
-import type { BookingPosition, ResolvedPosition, CalcRule, KurtaxeRate } from '@/lib/types/positions';
+import type {
+  BookingPosition,
+  ResolvedPosition,
+  CalcRule,
+  KurtaxeRate,
+} from '@/lib/types/positions';
 import { DEFAULT_PRICING } from '@/components/admin/utility-costs/constants';
-import { calcStrom, calcWasser, calcMuell, calcHolz } from '@/components/admin/utility-costs/calculations';
+import {
+  calcStrom,
+  calcWasser,
+  calcMuell,
+  calcHolz,
+} from '@/components/admin/utility-costs/calculations';
 import type { PricingSettings, Season, AdultsCount } from '@/components/admin/utility-costs/types';
 
 /** Format number in German locale for display in descriptions */
@@ -34,18 +44,15 @@ export interface PositionCalcContext {
  */
 export function resolvePositions(
   positions: BookingPosition[],
-  context: PositionCalcContext
+  context: PositionCalcContext,
 ): ResolvedPosition[] {
-  return positions.map(pos => resolvePosition(pos, context));
+  return positions.map((pos) => resolvePosition(pos, context));
 }
 
 /**
  * Resolve a single position
  */
-function resolvePosition(
-  pos: BookingPosition,
-  ctx: PositionCalcContext
-): ResolvedPosition {
+function resolvePosition(pos: BookingPosition, ctx: PositionCalcContext): ResolvedPosition {
   if (!pos.auto_calculate || !pos.calc_rule) {
     return {
       ...pos,
@@ -67,7 +74,7 @@ function resolvePosition(
  */
 function calculateFromRule(
   rule: CalcRule,
-  ctx: PositionCalcContext
+  ctx: PositionCalcContext,
 ): { amount: number; description: string } {
   const { days, weeks, season, cappedAdults } = getBookingMetrics(ctx);
 
@@ -91,9 +98,7 @@ function calculateFromRule(
       const base = rule.params.base ?? 100;
       const surcharge = ctx.hasDog ? (rule.params.dogSurcharge ?? 25) : 0;
       const amount = base + surcharge;
-      const desc = ctx.hasDog
-        ? `${base} € + ${surcharge} € (Hund)`
-        : `${base} €`;
+      const desc = ctx.hasDog ? `${base} € + ${surcharge} € (Hund)` : `${base} €`;
       return { amount, description: desc };
     }
 
@@ -123,9 +128,7 @@ function calculateFromRule(
       };
 
     case 'per_person': {
-      const persons = rule.params.countChildren
-        ? ctx.adults + ctx.children
-        : ctx.adults;
+      const persons = rule.params.countChildren ? ctx.adults + ctx.children : ctx.adults;
       const amount = persons * rule.params.pricePerPerson;
       return {
         amount,
@@ -141,7 +144,7 @@ function calculateFromRule(
 
     case 'per_person_per_night': {
       const minAge = rule.params.minAge ?? 0;
-      const qualifyingChildren = ctx.childrenAges.filter(a => a >= minAge).length;
+      const qualifyingChildren = ctx.childrenAges.filter((a) => a >= minAge).length;
       const persons = ctx.adults + qualifyingChildren;
       const amount = persons * days * rule.params.price;
       return {
@@ -178,19 +181,24 @@ function getBookingMetrics(ctx: PositionCalcContext) {
 function calculateKurtaxe(
   ctx: PositionCalcContext,
   days: number,
-  minAge: number
+  minAge: number,
 ): { amount: number; description: string } {
   if (!ctx.arrivalDate || !ctx.departureDate || days === 0) {
     return { amount: 0, description: 'Keine Daten' };
   }
 
   // Count kurtaxe-paying persons (adults + children >= minAge)
-  const qualifyingChildren = ctx.childrenAges.filter(a => a >= minAge).length;
+  const qualifyingChildren = ctx.childrenAges.filter((a) => a >= minAge).length;
   const persons = Math.min(8, Math.max(1, ctx.adults + qualifyingChildren));
 
   // Use kurtaxeRates from DB if available, otherwise fall back to pricing settings
   if (ctx.kurtaxeRates && ctx.kurtaxeRates.length > 0) {
-    return calculateKurtaxeFromDBRates(ctx.arrivalDate, ctx.departureDate, persons, ctx.kurtaxeRates);
+    return calculateKurtaxeFromDBRates(
+      ctx.arrivalDate,
+      ctx.departureDate,
+      persons,
+      ctx.kurtaxeRates,
+    );
   }
 
   // Fall back to pricing settings
@@ -212,7 +220,7 @@ function calculateKurtaxeFromDBRates(
   arrivalDate: string,
   departureDate: string,
   persons: number,
-  rates: KurtaxeRate[]
+  rates: KurtaxeRate[],
 ): { amount: number; description: string } {
   const arrival = new Date(arrivalDate);
   const departure = new Date(departureDate);
@@ -255,14 +263,14 @@ function getDBRateForDate(dateStr: string, rates: KurtaxeRate[]): number {
   }
   // Fallback to last known rate
   const lastRate = rates[rates.length - 1];
-  return lastRate ? lastRate.rate_per_person_per_day : 2.70;
+  return lastRate ? lastRate.rate_per_person_per_day : 2.7;
 }
 
 function calculateKurtaxeWithDateRates(
   arrivalDate: string,
   departureDate: string,
   persons: number,
-  pricing: PricingSettings
+  pricing: PricingSettings,
 ): { amount: number; description: string } {
   const arrival = new Date(arrivalDate);
   const departure = new Date(departureDate);
@@ -309,42 +317,54 @@ function calculateStrom(
   ctx: PositionCalcContext,
   weeks: number,
   season: Season,
-  cappedAdults: AdultsCount
+  cappedAdults: AdultsCount,
 ): { amount: number; description: string } {
   const pricing = ctx.pricingSettings || { ...DEFAULT_PRICING };
   const { kwh, amount } = calcStrom(weeks, season, cappedAdults, pricing);
-  return { amount, description: `${kwh} kWh × ${fmtNum(pricing.electricity ?? DEFAULT_PRICING.electricity)} €/kWh` };
+  return {
+    amount,
+    description: `${kwh} kWh × ${fmtNum(pricing.electricity ?? DEFAULT_PRICING.electricity)} €/kWh`,
+  };
 }
 
 function calculateWasser(
   ctx: PositionCalcContext,
   weeks: number,
-  cappedAdults: AdultsCount
+  cappedAdults: AdultsCount,
 ): { amount: number; description: string } {
   const pricing = ctx.pricingSettings || { ...DEFAULT_PRICING };
   const amount = calcWasser(weeks, cappedAdults, pricing);
-  return { amount, description: `${cappedAdults} Pers. × ${fmtNum(weeks, 1)} Wo. × ${fmtNum(pricing.water ?? DEFAULT_PRICING.water)} €` };
+  return {
+    amount,
+    description: `${cappedAdults} Pers. × ${fmtNum(weeks, 1)} Wo. × ${fmtNum(pricing.water ?? DEFAULT_PRICING.water)} €`,
+  };
 }
 
 function calculateMuell(
   ctx: PositionCalcContext,
   weeks: number,
   season: Season,
-  cappedAdults: AdultsCount
+  cappedAdults: AdultsCount,
 ): { amount: number; description: string } {
   const pricing = ctx.pricingSettings || { ...DEFAULT_PRICING };
   const { bags, amount } = calcMuell(weeks, season, cappedAdults, pricing);
-  return { amount, description: `${bags} Säcke × ${fmtNum(pricing.trash ?? DEFAULT_PRICING.trash)} €` };
+  return {
+    amount,
+    description: `${bags} Säcke × ${fmtNum(pricing.trash ?? DEFAULT_PRICING.trash)} €`,
+  };
 }
 
 function calculateHolz(
   ctx: PositionCalcContext,
   weeks: number,
-  season: Season
+  season: Season,
 ): { amount: number; description: string } {
   const pricing = ctx.pricingSettings || { ...DEFAULT_PRICING };
   const { buendel, amount } = calcHolz(weeks, season, pricing);
-  return { amount, description: `${buendel} Bündel × ${fmtNum(pricing.holz ?? DEFAULT_PRICING.holz)} €` };
+  return {
+    amount,
+    description: `${buendel} Bündel × ${fmtNum(pricing.holz ?? DEFAULT_PRICING.holz)} €`,
+  };
 }
 
 // ============================================================================
@@ -368,8 +388,8 @@ export interface PositionSummary {
  * Summarize resolved positions into aggregated financial data
  */
 export function summarizePositions(positions: ResolvedPosition[]): PositionSummary {
-  const expenses = positions.filter(p => p.type === 'expense');
-  const incomes = positions.filter(p => p.type === 'income');
+  const expenses = positions.filter((p) => p.type === 'expense');
+  const incomes = positions.filter((p) => p.type === 'income');
 
   const totalExpenses = expenses.reduce((sum, p) => sum + p.resolvedAmount, 0);
   const totalIncome = incomes.reduce((sum, p) => sum + p.resolvedAmount, 0);
@@ -385,17 +405,17 @@ export function summarizePositions(positions: ResolvedPosition[]): PositionSumma
   }
 
   const barItems = positions
-    .filter(p => p.paid_by === 'guest_cash')
-    .map(p => ({ name: p.name, amount: p.resolvedAmount }));
+    .filter((p) => p.paid_by === 'guest_cash')
+    .map((p) => ({ name: p.name, amount: p.resolvedAmount }));
 
   const directItems = positions
-    .filter(p => p.paid_by === 'guest_direct')
-    .map(p => ({ name: p.name, amount: p.resolvedAmount }));
+    .filter((p) => p.paid_by === 'guest_direct')
+    .map((p) => ({ name: p.name, amount: p.resolvedAmount }));
 
-  const separatePositions = positions.filter(p => p.show_separate);
+  const separatePositions = positions.filter((p) => p.show_separate);
 
   const mieterlosAffectingExpenses = expenses
-    .filter(p => p.affects_mieterlos)
+    .filter((p) => p.affects_mieterlos)
     .reduce((sum, p) => sum + p.resolvedAmount, 0);
 
   return {

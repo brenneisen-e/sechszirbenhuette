@@ -51,14 +51,14 @@ export async function GET(request: NextRequest) {
       // Direct R2 key access (for documents stored in booking additional_costs)
       r2Key = key;
       // Try to find document in database for metadata
-      doc = await env.DB.prepare(
-        'SELECT * FROM guest_documents WHERE r2_key = ?'
-      ).bind(key).first<DocumentRecord>();
+      doc = await env.DB.prepare('SELECT * FROM guest_documents WHERE r2_key = ?')
+        .bind(key)
+        .first<DocumentRecord>();
     } else {
       // Get document metadata from database by ID
-      doc = await env.DB.prepare(
-        'SELECT * FROM guest_documents WHERE id = ?'
-      ).bind(id).first<DocumentRecord>();
+      doc = await env.DB.prepare('SELECT * FROM guest_documents WHERE id = ?')
+        .bind(id)
+        .first<DocumentRecord>();
 
       if (!doc) {
         return NextResponse.json({ error: 'Document not found' }, { status: 404 });
@@ -76,7 +76,8 @@ export async function GET(request: NextRequest) {
     // Return the file with appropriate headers
     const headers = new Headers();
     // Use metadata from database if available, otherwise infer from key
-    const fileType = doc?.file_type || (r2Key.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+    const fileType =
+      doc?.file_type || (r2Key.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
     const filename = doc?.original_filename || r2Key.split('/').pop() || 'document';
     headers.set('Content-Type', fileType);
     headers.set('Content-Disposition', `inline; filename="${filename}"`);

@@ -29,7 +29,9 @@ interface BankPaymentRecord {
 
 // Helper function to ensure table exists
 async function ensureTableExists(db: D1Database) {
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     CREATE TABLE IF NOT EXISTS bank_transactions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       guest_id INTEGER,
@@ -42,15 +44,27 @@ async function ensureTableExists(db: D1Database) {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (guest_id) REFERENCES guests(id) ON DELETE SET NULL
     )
-  `).run();
+  `,
+    )
+    .run();
 
   // Create index
-  await db.prepare('CREATE INDEX IF NOT EXISTS idx_bank_transactions_date ON bank_transactions(payment_date)').run();
-  await db.prepare('CREATE INDEX IF NOT EXISTS idx_bank_transactions_guest ON bank_transactions(guest_id)').run();
+  await db
+    .prepare(
+      'CREATE INDEX IF NOT EXISTS idx_bank_transactions_date ON bank_transactions(payment_date)',
+    )
+    .run();
+  await db
+    .prepare(
+      'CREATE INDEX IF NOT EXISTS idx_bank_transactions_guest ON bank_transactions(guest_id)',
+    )
+    .run();
 
   // Add is_cash column if it doesn't exist (for existing tables)
   try {
-    await db.prepare('ALTER TABLE bank_transactions ADD COLUMN is_cash INTEGER NOT NULL DEFAULT 0').run();
+    await db
+      .prepare('ALTER TABLE bank_transactions ADD COLUMN is_cash INTEGER NOT NULL DEFAULT 0')
+      .run();
   } catch {
     // Column likely already exists
   }
@@ -65,10 +79,13 @@ export async function GET(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
 
     if (!env.DB) {
-      return NextResponse.json({
-        error: 'D1 Database binding not configured.',
-        payments: []
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'D1 Database binding not configured.',
+          payments: [],
+        },
+        { status: 500 },
+      );
     }
 
     // Ensure table exists first
@@ -105,9 +122,7 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY rp.payment_date DESC';
 
-    const stmt = params.length > 0
-      ? env.DB.prepare(query).bind(...params)
-      : env.DB.prepare(query);
+    const stmt = params.length > 0 ? env.DB.prepare(query).bind(...params) : env.DB.prepare(query);
 
     const { results } = await stmt.all<BankPaymentRecord>();
 
@@ -140,7 +155,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       guest_id: number | null;
       amount: number;
       payment_date: string;
@@ -156,15 +171,17 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await env.DB.prepare(
-      `INSERT INTO bank_transactions (guest_id, amount, payment_date, notes, is_unknown_booking, is_cash) VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(
-      guest_id || null,
-      amount,
-      payment_date,
-      notes || null,
-      is_unknown_booking ? 1 : 0,
-      is_cash ? 1 : 0
-    ).run();
+      `INSERT INTO bank_transactions (guest_id, amount, payment_date, notes, is_unknown_booking, is_cash) VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        guest_id || null,
+        amount,
+        payment_date,
+        notes || null,
+        is_unknown_booking ? 1 : 0,
+        is_cash ? 1 : 0,
+      )
+      .run();
 
     return NextResponse.json({ success: true, id: result.meta.last_row_id });
   } catch (error) {
@@ -195,7 +212,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       guest_id?: number | null;
       amount?: number;
@@ -256,9 +273,9 @@ export async function PUT(request: NextRequest) {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     params.push(id);
 
-    await env.DB.prepare(
-      `UPDATE bank_transactions SET ${updates.join(', ')} WHERE id = ?`
-    ).bind(...params).run();
+    await env.DB.prepare(`UPDATE bank_transactions SET ${updates.join(', ')} WHERE id = ?`)
+      .bind(...params)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

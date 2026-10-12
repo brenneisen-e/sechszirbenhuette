@@ -9,16 +9,52 @@
 
 // Demo guest names pool
 const DEMO_FIRST_NAMES = [
-  'Max', 'Anna', 'Peter', 'Maria', 'Thomas', 'Laura', 'Stefan', 'Julia',
-  'Michael', 'Sarah', 'Andreas', 'Lisa', 'Markus', 'Sandra', 'Christian',
-  'Claudia', 'Daniel', 'Eva', 'Martin', 'Nina', 'Tobias', 'Monika',
-  'Florian', 'Katharina', 'Sebastian', 'Petra', 'Johannes', 'Sabine',
+  'Max',
+  'Anna',
+  'Peter',
+  'Maria',
+  'Thomas',
+  'Laura',
+  'Stefan',
+  'Julia',
+  'Michael',
+  'Sarah',
+  'Andreas',
+  'Lisa',
+  'Markus',
+  'Sandra',
+  'Christian',
+  'Claudia',
+  'Daniel',
+  'Eva',
+  'Martin',
+  'Nina',
+  'Tobias',
+  'Monika',
+  'Florian',
+  'Katharina',
+  'Sebastian',
+  'Petra',
+  'Johannes',
+  'Sabine',
 ];
 
 const DEMO_LAST_NAMES = [
-  'Mustermann', 'Beispiel', 'Muster', 'Demo', 'Testgast', 'Probegast',
-  'Mustergast', 'Testname', 'Platzhalter', 'Beispielgast', 'Demogast',
-  'Testkunde', 'Musterkunde', 'Musterfrau', 'Testbesucher',
+  'Mustermann',
+  'Beispiel',
+  'Muster',
+  'Demo',
+  'Testgast',
+  'Probegast',
+  'Mustergast',
+  'Testname',
+  'Platzhalter',
+  'Beispielgast',
+  'Demogast',
+  'Testkunde',
+  'Musterkunde',
+  'Musterfrau',
+  'Testbesucher',
 ];
 
 // Consistent mapping: same input always produces same output
@@ -26,7 +62,7 @@ function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
   return Math.abs(hash);
@@ -74,7 +110,13 @@ export function anonymizeAddress(address: string | null): string {
  */
 export function anonymizeBookingNumber(bookingNumber: string | null): string {
   if (!bookingNumber) return null as unknown as string;
-  return 'DEMO-' + bookingNumber.slice(-4).replace(/./g, 'X') + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return (
+    'DEMO-' +
+    bookingNumber.slice(-4).replace(/./g, 'X') +
+    Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0')
+  );
 }
 
 /**

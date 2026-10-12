@@ -1,6 +1,14 @@
 // Shared types for GuestDatabase components
 
-export type SortColumn = 'id' | 'guest_name' | 'platform' | 'arrival_date' | 'departure_date' | 'rental_price' | 'status' | null;
+export type SortColumn =
+  | 'id'
+  | 'guest_name'
+  | 'platform'
+  | 'arrival_date'
+  | 'departure_date'
+  | 'rental_price'
+  | 'status'
+  | null;
 export type SortDirection = 'asc' | 'desc';
 export type GuestProfileTab = 'overview' | 'bookings' | 'tasks' | 'documents' | 'notes';
 
@@ -65,10 +73,10 @@ export interface Task {
  * Bestimmt, welche Kosten/Einnahmen bei einer privaten Buchung anfallen.
  */
 export interface PrivateBookingConfig {
-  miete_zero: boolean;          // Miete = 0 EUR?
-  nk_paid: boolean;             // Nebenkosten werden bezahlt (kalkulatorische Höhe)?
-  kurtaxe_paid: boolean;        // Kurtaxe wird bezahlt?
-  provision_charged: boolean;   // Provision wird berechnet?
+  miete_zero: boolean; // Miete = 0 EUR?
+  nk_paid: boolean; // Nebenkosten werden bezahlt (kalkulatorische Höhe)?
+  kurtaxe_paid: boolean; // Kurtaxe wird bezahlt?
+  provision_charged: boolean; // Provision wird berechnet?
 }
 
 /** Default: Miete 0, keine NK, keine Kurtaxe, keine Provision */
@@ -111,7 +119,7 @@ export interface Booking {
   utilities_cash: number;
   kurtaxe_cash: number;
   is_private: number;
-  private_config: string | null;  // JSON string of PrivateBookingConfig
+  private_config: string | null; // JSON string of PrivateBookingConfig
   created_at: string;
   updated_at: string;
 }
@@ -183,12 +191,12 @@ export interface BookingsResponse {
 
 // Transaction from payment plan (Zahlungsplan)
 export interface PaymentTransaction {
-  date: string;           // YYYY-MM-DD
-  amount: number;         // Positive for payments, positive for refunds
+  date: string; // YYYY-MM-DD
+  amount: number; // Positive for payments, positive for refunds
   type: 'payment' | 'refund';
   status: 'paid' | 'refunded' | 'pending';
   description?: string;
-  fee?: number;           // Processing fee (positive for payments, negative for refund fee credits)
+  fee?: number; // Processing fee (positive for payments, negative for refund fee credits)
 }
 
 export interface ScreenshotAnalysisResponse {

@@ -3,14 +3,66 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 // Category keywords for intelligent classification
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  'exterior': ['außen', 'fassade', 'haus', 'hütte', 'gebäude', 'dach', 'balkon', 'terrasse', 'eingang', 'outside', 'exterior', 'building', 'house', 'cabin', 'chalet'],
-  'living': ['wohnzimmer', 'wohnbereich', 'sofa', 'couch', 'kamin', 'ofen', 'fernseher', 'living', 'lounge', 'fireplace'],
-  'kitchen': ['küche', 'kochen', 'herd', 'ofen', 'spüle', 'kühlschrank', 'esstisch', 'kitchen', 'cooking', 'dining'],
-  'bedrooms': ['schlafzimmer', 'bett', 'betten', 'schlafen', 'bedroom', 'bed', 'sleeping'],
-  'bathroom': ['bad', 'badezimmer', 'dusche', 'sauna', 'wellness', 'bathroom', 'shower', 'bath'],
-  'surroundings': ['landschaft', 'berge', 'alpen', 'natur', 'wald', 'wiese', 'panorama', 'aussicht', 'mountains', 'landscape', 'nature', 'view', 'alps'],
-  'summer': ['sommer', 'wandern', 'grün', 'blumen', 'summer', 'hiking', 'green'],
-  'winter': ['winter', 'schnee', 'ski', 'snow', 'skiing', 'weiß'],
+  exterior: [
+    'außen',
+    'fassade',
+    'haus',
+    'hütte',
+    'gebäude',
+    'dach',
+    'balkon',
+    'terrasse',
+    'eingang',
+    'outside',
+    'exterior',
+    'building',
+    'house',
+    'cabin',
+    'chalet',
+  ],
+  living: [
+    'wohnzimmer',
+    'wohnbereich',
+    'sofa',
+    'couch',
+    'kamin',
+    'ofen',
+    'fernseher',
+    'living',
+    'lounge',
+    'fireplace',
+  ],
+  kitchen: [
+    'küche',
+    'kochen',
+    'herd',
+    'ofen',
+    'spüle',
+    'kühlschrank',
+    'esstisch',
+    'kitchen',
+    'cooking',
+    'dining',
+  ],
+  bedrooms: ['schlafzimmer', 'bett', 'betten', 'schlafen', 'bedroom', 'bed', 'sleeping'],
+  bathroom: ['bad', 'badezimmer', 'dusche', 'sauna', 'wellness', 'bathroom', 'shower', 'bath'],
+  surroundings: [
+    'landschaft',
+    'berge',
+    'alpen',
+    'natur',
+    'wald',
+    'wiese',
+    'panorama',
+    'aussicht',
+    'mountains',
+    'landscape',
+    'nature',
+    'view',
+    'alps',
+  ],
+  summer: ['sommer', 'wandern', 'grün', 'blumen', 'summer', 'hiking', 'green'],
+  winter: ['winter', 'schnee', 'ski', 'snow', 'skiing', 'weiß'],
 };
 
 // POST - Analyze image with AI and suggest description + category
@@ -19,11 +71,14 @@ export async function POST(request: NextRequest) {
     const { env } = await getCloudflareContext();
 
     if (!env.AI) {
-      return NextResponse.json({
-        error: 'AI binding not configured',
-        suggestion: 'Bild der Sechszirbenhütte',
-        category: 'exterior'
-      }, { status: 200 });
+      return NextResponse.json(
+        {
+          error: 'AI binding not configured',
+          suggestion: 'Bild der Sechszirbenhütte',
+          category: 'exterior',
+        },
+        { status: 200 },
+      );
     }
 
     const formData = await request.formData();
@@ -41,7 +96,7 @@ export async function POST(request: NextRequest) {
     const response = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
       image: [...imageArray],
       prompt: `Beschreibe dieses Bild in einem kurzen deutschen Satz (maximal 10 Wörter). Das Bild zeigt wahrscheinlich eine Berghütte, Landschaft, Innenraum oder Aktivitäten in den Alpen. Gib auch an, ob es sich um einen Außenbereich, Wohnzimmer, Küche, Schlafzimmer, Bad/Sauna, Landschaft oder sonstiges handelt. Antworte nur mit der Beschreibung, ohne Einleitung.`,
-      max_tokens: 100
+      max_tokens: 100,
     });
 
     // Extract the description from the response
@@ -57,7 +112,10 @@ export async function POST(request: NextRequest) {
 
     // Clean up the suggestion
     suggestion = suggestion
-      .replace(/^(Das Bild zeigt|Dieses Bild zeigt|Auf dem Bild ist|Auf dem Bild sieht man)\s*/i, '')
+      .replace(
+        /^(Das Bild zeigt|Dieses Bild zeigt|Auf dem Bild ist|Auf dem Bild sieht man)\s*/i,
+        '',
+      )
       .replace(/\.$/, '')
       .trim();
 
@@ -72,7 +130,7 @@ export async function POST(request: NextRequest) {
     let maxMatches = 0;
 
     for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-      const matches = keywords.filter(kw => textToAnalyze.includes(kw)).length;
+      const matches = keywords.filter((kw) => textToAnalyze.includes(kw)).length;
       if (matches > maxMatches) {
         maxMatches = matches;
         detectedCategory = category;
@@ -81,7 +139,8 @@ export async function POST(request: NextRequest) {
 
     // Determine if image should be in hero slider
     // Hero candidates: exterior shots, landscape shots with good views
-    const isHeroCandidate = ['exterior', 'surroundings'].includes(detectedCategory) ||
+    const isHeroCandidate =
+      ['exterior', 'surroundings'].includes(detectedCategory) ||
       textToAnalyze.includes('hütte') ||
       textToAnalyze.includes('panorama') ||
       textToAnalyze.includes('aussicht');
@@ -89,7 +148,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       suggestion,
       category: detectedCategory,
-      isHeroCandidate
+      isHeroCandidate,
     });
   } catch (error) {
     console.error('AI analysis error:', error);
@@ -98,7 +157,7 @@ export async function POST(request: NextRequest) {
       suggestion: 'Bild der Sechszirbenhütte',
       category: 'exterior',
       isHeroCandidate: true,
-      error: error instanceof Error ? error.message : 'AI analysis failed'
+      error: error instanceof Error ? error.message : 'AI analysis failed',
     });
   }
 }

@@ -25,14 +25,14 @@ interface MediaRecord {
 
 // Valid main categories the AI can assign
 const VALID_CATEGORIES = [
-  'wohnen',     // Wohnzimmer, Stube, Essbereich
-  'schlafen',   // Schlafzimmer, Betten
-  'kueche',     // Küche, Küchengeräte
-  'bad',        // Bad, Sauna, Wellness, Dusche, WC, Ruheraum
-  'aussen',     // Außenansicht der Hütte, Balkon, Terrasse
-  'umgebung',   // Berge, Natur, See, Landschaft, Wanderwege
-  'extras',     // Aktivitäten, Skifahren, Tiere, Sonstiges
-  'gastgeber',  // Personen, Gastgeber-Portraits
+  'wohnen', // Wohnzimmer, Stube, Essbereich
+  'schlafen', // Schlafzimmer, Betten
+  'kueche', // Küche, Küchengeräte
+  'bad', // Bad, Sauna, Wellness, Dusche, WC, Ruheraum
+  'aussen', // Außenansicht der Hütte, Balkon, Terrasse
+  'umgebung', // Berge, Natur, See, Landschaft, Wanderwege
+  'extras', // Aktivitäten, Skifahren, Tiere, Sonstiges
+  'gastgeber', // Personen, Gastgeber-Portraits
 ];
 
 // Meta-flags auto-applied
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DB not available' }, { status: 503 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       media_ids?: string[];
       api_key?: string;
     };
@@ -82,21 +82,28 @@ export async function POST(request: NextRequest) {
           const col = table === 'settings' ? 'key' : 'setting_key';
           const valCol = table === 'settings' ? 'value' : 'setting_value';
           const setting = await env.DB.prepare(
-            `SELECT ${valCol} as val FROM ${table} WHERE ${col} = 'anthropic_api_key'`
-          ).bind().all<{ val: string }>();
+            `SELECT ${valCol} as val FROM ${table} WHERE ${col} = 'anthropic_api_key'`,
+          )
+            .bind()
+            .all<{ val: string }>();
           if (setting.results?.[0]?.val) {
             apiKey = setting.results[0].val;
             break;
           }
-        } catch { /* table might not exist */ }
+        } catch {
+          /* table might not exist */
+        }
       }
     }
 
     if (!apiKey) {
-      return NextResponse.json({
-        error: 'Kein Anthropic API-Key konfiguriert. Bitte unter Zugang → API-Key eintragen.',
-        success: false,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Kein Anthropic API-Key konfiguriert. Bitte unter Zugang → API-Key eintragen.',
+          success: false,
+        },
+        { status: 400 },
+      );
     }
 
     // Fetch media to categorize
@@ -105,30 +112,48 @@ export async function POST(request: NextRequest) {
     if (body.media_ids && body.media_ids.length > 0) {
       const placeholders = body.media_ids.map(() => '?').join(',');
       const result = await env.DB.prepare(
-        `SELECT id, url, alt_text, title, category, media_type FROM media WHERE id IN (${placeholders}) AND media_type = 'image'`
-      ).bind(...body.media_ids).all<MediaRecord>();
+        `SELECT id, url, alt_text, title, category, media_type FROM media WHERE id IN (${placeholders}) AND media_type = 'image'`,
+      )
+        .bind(...body.media_ids)
+        .all<MediaRecord>();
       mediaItems = result.results || [];
     } else {
       // All images (skip videos)
       const result = await env.DB.prepare(
-        "SELECT id, url, alt_text, title, category, media_type FROM media WHERE media_type = 'image'"
+        "SELECT id, url, alt_text, title, category, media_type FROM media WHERE media_type = 'image'",
       ).all<MediaRecord>();
       mediaItems = result.results || [];
     }
 
     if (mediaItems.length === 0) {
-      return NextResponse.json({ error: 'Keine Bilder zum Kategorisieren gefunden', success: false }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Keine Bilder zum Kategorisieren gefunden', success: false },
+        { status: 404 },
+      );
     }
 
     const client = new Anthropic({ apiKey });
 
-    const results: { id: string; old_category: string; new_category: string; alt_text: string; success: boolean; error?: string }[] = [];
+    const results: {
+      id: string;
+      old_category: string;
+      new_category: string;
+      alt_text: string;
+      success: boolean;
+      error?: string;
+    }[] = [];
 
     for (const item of mediaItems) {
       try {
         // Skip hero images — don't re-categorize those
         if (item.category.startsWith('hero')) {
-          results.push({ id: item.id, old_category: item.category, new_category: item.category, alt_text: item.alt_text, success: true });
+          results.push({
+            id: item.id,
+            old_category: item.category,
+            new_category: item.category,
+            alt_text: item.alt_text,
+            success: true,
+          });
           continue;
         }
 
@@ -136,11 +161,20 @@ export async function POST(request: NextRequest) {
         let imageBase64: string;
         let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/jpeg';
 
-        const imageUrl = item.url.startsWith('http') ? item.url : `https://sechszirbenhuette.pages.dev${item.url}`;
+        const imageUrl = item.url.startsWith('http')
+          ? item.url
+          : `https://sechszirbenhuette.pages.dev${item.url}`;
 
         const imgResponse = await fetch(imageUrl);
         if (!imgResponse.ok) {
-          results.push({ id: item.id, old_category: item.category, new_category: item.category, alt_text: item.alt_text, success: false, error: `HTTP ${imgResponse.status}` });
+          results.push({
+            id: item.id,
+            old_category: item.category,
+            new_category: item.category,
+            alt_text: item.alt_text,
+            success: false,
+            error: `HTTP ${imgResponse.status}`,
+          });
           continue;
         }
 
@@ -178,9 +212,16 @@ export async function POST(request: NextRequest) {
         });
 
         // Parse response
-        const textContent = response.content.find(c => c.type === 'text');
+        const textContent = response.content.find((c) => c.type === 'text');
         if (!textContent || textContent.type !== 'text') {
-          results.push({ id: item.id, old_category: item.category, new_category: item.category, alt_text: item.alt_text, success: false, error: 'Keine Antwort' });
+          results.push({
+            id: item.id,
+            old_category: item.category,
+            new_category: item.category,
+            alt_text: item.alt_text,
+            success: false,
+            error: 'Keine Antwort',
+          });
           continue;
         }
 
@@ -192,14 +233,21 @@ export async function POST(request: NextRequest) {
         const parsed = JSON.parse(jsonStr) as { category: string; alt_text: string };
 
         if (!VALID_CATEGORIES.includes(parsed.category)) {
-          results.push({ id: item.id, old_category: item.category, new_category: item.category, alt_text: item.alt_text, success: false, error: `Ungültige Kategorie: ${parsed.category}` });
+          results.push({
+            id: item.id,
+            old_category: item.category,
+            new_category: item.category,
+            alt_text: item.alt_text,
+            success: false,
+            error: `Ungültige Kategorie: ${parsed.category}`,
+          });
           continue;
         }
 
         // Update media record
-        await env.DB.prepare(
-          'UPDATE media SET category = ?, alt_text = ? WHERE id = ?'
-        ).bind(parsed.category, parsed.alt_text || item.alt_text, item.id).run();
+        await env.DB.prepare('UPDATE media SET category = ?, alt_text = ? WHERE id = ?')
+          .bind(parsed.category, parsed.alt_text || item.alt_text, item.id)
+          .run();
 
         // Update meta-flags in junction table
         const metaFlags: string[] = [];
@@ -209,16 +257,22 @@ export async function POST(request: NextRequest) {
         if (metaFlags.length > 0) {
           // Delete existing meta-flags for this media
           await env.DB.prepare(
-            "DELETE FROM media_categories WHERE media_id = ? AND category IN ('innen', 'aussen')"
-          ).bind(item.id).run();
+            "DELETE FROM media_categories WHERE media_id = ? AND category IN ('innen', 'aussen')",
+          )
+            .bind(item.id)
+            .run();
 
           // Insert new meta-flags
           for (const flag of metaFlags) {
             try {
               await env.DB.prepare(
-                'INSERT OR IGNORE INTO media_categories (media_id, category) VALUES (?, ?)'
-              ).bind(item.id, flag).run();
-            } catch { /* ignore duplicate */ }
+                'INSERT OR IGNORE INTO media_categories (media_id, category) VALUES (?, ?)',
+              )
+                .bind(item.id, flag)
+                .run();
+            } catch {
+              /* ignore duplicate */
+            }
           }
         }
 
@@ -241,9 +295,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const successCount = results.filter(r => r.success && r.old_category !== r.new_category).length;
-    const skippedCount = results.filter(r => r.success && r.old_category === r.new_category).length;
-    const errorCount = results.filter(r => !r.success).length;
+    const successCount = results.filter(
+      (r) => r.success && r.old_category !== r.new_category,
+    ).length;
+    const skippedCount = results.filter(
+      (r) => r.success && r.old_category === r.new_category,
+    ).length;
+    const errorCount = results.filter((r) => !r.success).length;
 
     return NextResponse.json({
       success: true,
@@ -260,7 +318,7 @@ export async function POST(request: NextRequest) {
     console.error('Auto-categorize error:', error);
     return NextResponse.json(
       { error: 'Kategorisierung fehlgeschlagen', details: String(error), success: false },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

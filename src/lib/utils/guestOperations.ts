@@ -90,7 +90,13 @@ export async function fetchTasks(adminPassword: string, guestId: number) {
 
 export async function createTask(
   adminPassword: string,
-  taskData: { guest_id: number; title: string; description?: string; assignee?: string; due_date?: string },
+  taskData: {
+    guest_id: number;
+    title: string;
+    description?: string;
+    assignee?: string;
+    due_date?: string;
+  },
 ) {
   const response = await fetch(`${API_BASE}/tasks`, {
     method: 'POST',

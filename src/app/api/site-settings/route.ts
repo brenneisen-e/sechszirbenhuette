@@ -50,7 +50,7 @@ export async function GET() {
     }
 
     const result = await env.DB.prepare(
-      'SELECT setting_key, setting_value FROM site_settings'
+      'SELECT setting_key, setting_value FROM site_settings',
     ).all<SiteSetting>();
 
     const settings: Record<string, string> = { ...defaultSettings };
@@ -70,20 +70,14 @@ export async function POST(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json(
-        { error: 'Database not available' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    const body = await request.json() as { settings?: Record<string, string> };
+    const body = (await request.json()) as { settings?: Record<string, string> };
     const { settings } = body;
 
     if (!settings || typeof settings !== 'object') {
-      return NextResponse.json(
-        { error: 'Invalid settings data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid settings data' }, { status: 400 });
     }
 
     // Update each setting
@@ -94,17 +88,16 @@ export async function POST(request: NextRequest) {
            VALUES (?, ?, datetime('now'))
            ON CONFLICT(setting_key) DO UPDATE SET
            setting_value = excluded.setting_value,
-           updated_at = datetime('now')`
-        ).bind(key, value).run();
+           updated_at = datetime('now')`,
+        )
+          .bind(key, value)
+          .run();
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating site settings:', error);
-    return NextResponse.json(
-      { error: 'Failed to update settings' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
   }
 }

@@ -26,9 +26,9 @@ interface PayoutTracking {
 
 // Check if table exists
 async function tableExists(db: D1Database): Promise<boolean> {
-  const result = await db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='payout_tracking'"
-  ).first();
+  const result = await db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='payout_tracking'")
+    .first();
   return !!result;
 }
 
@@ -53,8 +53,10 @@ export async function GET(request: NextRequest) {
 
     if (bookingId) {
       const { results } = await env.DB.prepare(
-        'SELECT * FROM payout_tracking WHERE booking_id = ? ORDER BY expected_date ASC'
-      ).bind(parseInt(bookingId)).all<PayoutTracking>();
+        'SELECT * FROM payout_tracking WHERE booking_id = ? ORDER BY expected_date ASC',
+      )
+        .bind(parseInt(bookingId))
+        .all<PayoutTracking>();
       return NextResponse.json({ payouts: results || [], tableExists: true });
     }
 
@@ -65,13 +67,15 @@ export async function GET(request: NextRequest) {
          JOIN bookings b ON pt.booking_id = b.id
          JOIN guests g ON b.guest_id = g.id
          WHERE pt.expected_date LIKE ?
-         ORDER BY pt.expected_date ASC`
-      ).bind(`${year}%`).all();
+         ORDER BY pt.expected_date ASC`,
+      )
+        .bind(`${year}%`)
+        .all();
       return NextResponse.json({ payouts: results || [], tableExists: true });
     }
 
     const { results } = await env.DB.prepare(
-      'SELECT * FROM payout_tracking ORDER BY expected_date ASC'
+      'SELECT * FROM payout_tracking ORDER BY expected_date ASC',
     ).all<PayoutTracking>();
 
     return NextResponse.json({ payouts: results || [], tableExists: true });
@@ -99,7 +103,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as Partial<PayoutTracking>;
+    const body = (await request.json()) as Partial<PayoutTracking>;
 
     if (!body.booking_id) {
       return NextResponse.json({ error: 'booking_id is required' }, { status: 400 });
@@ -107,16 +111,18 @@ export async function POST(request: NextRequest) {
 
     const result = await env.DB.prepare(
       `INSERT INTO payout_tracking (booking_id, expected_date, expected_amount, received, received_date, payment_type, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      body.booking_id,
-      body.expected_date || null,
-      body.expected_amount || null,
-      body.received || 0,
-      body.received_date || null,
-      body.payment_type || 'payout',
-      body.notes || null
-    ).run();
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        body.booking_id,
+        body.expected_date || null,
+        body.expected_amount || null,
+        body.received || 0,
+        body.received_date || null,
+        body.payment_type || 'payout',
+        body.notes || null,
+      )
+      .run();
 
     return NextResponse.json({ success: true, id: result.meta.last_row_id });
   } catch (error) {
@@ -143,7 +149,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as Partial<PayoutTracking> & { id: number };
+    const body = (await request.json()) as Partial<PayoutTracking> & { id: number };
 
     if (!body.id) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
@@ -180,9 +186,9 @@ export async function PUT(request: NextRequest) {
     fields.push("updated_at = datetime('now')");
     values.push(body.id);
 
-    await env.DB.prepare(
-      `UPDATE payout_tracking SET ${fields.join(', ')} WHERE id = ?`
-    ).bind(...values).run();
+    await env.DB.prepare(`UPDATE payout_tracking SET ${fields.join(', ')} WHERE id = ?`)
+      .bind(...values)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

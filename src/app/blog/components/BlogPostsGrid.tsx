@@ -50,9 +50,7 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
       transition={{ delay: 0.05 }}
       className="mb-20"
     >
-      <h2 className="text-xl font-semibold text-gray-700 mb-6">
-        Neueste Beiträge
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-700 mb-6">Neueste Beiträge</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map((post, postIndex) => (
           <Link
@@ -62,7 +60,7 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
           >
             {/* Cover Image */}
             <div className="relative aspect-video bg-gray-100 shrink-0">
-              {(post.cover_image_url || fallbackImages[postIndex]) ? (
+              {post.cover_image_url || fallbackImages[postIndex] ? (
                 <Image
                   src={post.cover_image_url || fallbackImages[postIndex]?.url || ''}
                   alt={post.cover_image_alt || post.title}
@@ -85,14 +83,10 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
                 {post.title}
               </h3>
               {post.subtitle && (
-                <p className="text-sm text-logo-green/70 font-medium mb-2">
-                  {post.subtitle}
-                </p>
+                <p className="text-sm text-logo-green/70 font-medium mb-2">{post.subtitle}</p>
               )}
               {post.excerpt && (
-                <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                  {post.excerpt}
-                </p>
+                <p className="text-gray-600 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
               )}
               <div className="flex items-center gap-3 text-xs text-gray-400 mt-auto pt-2">
                 <span className="flex items-center gap-1">

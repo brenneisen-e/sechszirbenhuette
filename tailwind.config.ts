@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
@@ -9,15 +9,15 @@ const config: Config = {
   theme: {
     screens: {
       // Extra small devices (very small phones)
-      'xs': '360px',
+      xs: '360px',
       // Small devices (phones)
-      'sm': '640px',
+      sm: '640px',
       // Medium devices (tablets)
-      'md': '768px',
+      md: '768px',
       // Large devices (laptops/desktops)
-      'lg': '1024px',
+      lg: '1024px',
       // Extra large devices (large desktops)
-      'xl': '1280px',
+      xl: '1280px',
       // 2XL devices (extra large screens)
       '2xl': '1536px',
     },
@@ -77,5 +77,5 @@ const config: Config = {
     },
   },
   plugins: [],
-}
-export default config
+};
+export default config;

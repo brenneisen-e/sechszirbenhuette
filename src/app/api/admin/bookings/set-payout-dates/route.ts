@@ -17,12 +17,14 @@ export async function POST() {
 
     // Get all bookings with platform 'booking' or 'fewo' (case insensitive)
     const bookings = await db
-      .prepare(`
+      .prepare(
+        `
         SELECT id, platform, departure_date, additional_costs
         FROM bookings
         WHERE LOWER(platform) IN ('booking', 'booking.com', 'fewo', 'fewo-direkt', 'vrbo')
           AND departure_date IS NOT NULL
-      `)
+      `,
+      )
       .all<{
         id: number;
         platform: string;
@@ -84,7 +86,7 @@ export async function POST() {
     console.error('Error setting payout dates:', error);
     return NextResponse.json(
       { error: 'Failed to set payout dates', details: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -30,7 +30,7 @@ export async function uploadImage(
   creds: CloudflareCredentials,
   file: ArrayBuffer | Uint8Array,
   filename: string,
-  metadata?: Record<string, string>
+  metadata?: Record<string, string>,
 ): Promise<CFImageUploadResult> {
   const formData = new FormData();
   formData.append('file', new Blob([file as BlobPart]), filename);
@@ -39,16 +39,13 @@ export async function uploadImage(
     formData.append('metadata', JSON.stringify(metadata));
   }
 
-  const res = await fetch(
-    `${CF_API_BASE}/${creds.accountId}/images/v1`,
-    {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${creds.apiToken}` },
-      body: formData,
-    }
-  );
+  const res = await fetch(`${CF_API_BASE}/${creds.accountId}/images/v1`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${creds.apiToken}` },
+    body: formData,
+  });
 
-  const data = await res.json() as {
+  const data = (await res.json()) as {
     success: boolean;
     errors?: { message: string }[];
     result?: { id: string; filename: string; variants: string[] };
@@ -64,20 +61,14 @@ export async function uploadImage(
 /**
  * Delete an image from Cloudflare Images
  */
-export async function deleteImage(
-  creds: CloudflareCredentials,
-  imageId: string
-): Promise<void> {
-  const res = await fetch(
-    `${CF_API_BASE}/${creds.accountId}/images/v1/${imageId}`,
-    {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${creds.apiToken}` },
-    }
-  );
+export async function deleteImage(creds: CloudflareCredentials, imageId: string): Promise<void> {
+  const res = await fetch(`${CF_API_BASE}/${creds.accountId}/images/v1/${imageId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${creds.apiToken}` },
+  });
 
   if (!res.ok) {
-    const data = await res.json() as { errors?: { message: string }[] };
+    const data = (await res.json()) as { errors?: { message: string }[] };
     throw new Error(`CF Images delete failed: ${data.errors?.[0]?.message || res.statusText}`);
   }
 }
@@ -97,7 +88,9 @@ export function getImageUrl(imageId: string, variant: string = 'public'): string
  * Extract the account hash from a Cloudflare Images variant URL
  * URL format: https://imagedelivery.net/{accountHash}/{imageId}/{variant}
  */
-export function parseImageUrl(variantUrl: string): { accountHash: string; imageId: string; variant: string } | null {
+export function parseImageUrl(
+  variantUrl: string,
+): { accountHash: string; imageId: string; variant: string } | null {
   const match = variantUrl.match(/imagedelivery\.net\/([^/]+)\/([^/]+)\/([^/]+)/);
   if (!match?.[1] || !match[2] || !match[3]) return null;
   return { accountHash: match[1], imageId: match[2], variant: match[3] };
@@ -106,7 +99,11 @@ export function parseImageUrl(variantUrl: string): { accountHash: string; imageI
 /**
  * Build delivery URL from account hash + image ID
  */
-export function buildImageDeliveryUrl(accountHash: string, imageId: string, variant: string = 'public'): string {
+export function buildImageDeliveryUrl(
+  accountHash: string,
+  imageId: string,
+  variant: string = 'public',
+): string {
   return `https://imagedelivery.net/${accountHash}/${imageId}/${variant}`;
 }
 
@@ -134,7 +131,7 @@ export async function uploadVideo(
   creds: CloudflareCredentials,
   file: ArrayBuffer | Uint8Array,
   filename: string,
-  metadata?: Record<string, string>
+  metadata?: Record<string, string>,
 ): Promise<CFStreamUploadResult> {
   const formData = new FormData();
   formData.append('file', new Blob([file as BlobPart]), filename);
@@ -145,16 +142,13 @@ export async function uploadVideo(
     formData.append('meta', JSON.stringify(metadata));
   }
 
-  const res = await fetch(
-    `${CF_API_BASE}/${creds.accountId}/stream`,
-    {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${creds.apiToken}` },
-      body: formData,
-    }
-  );
+  const res = await fetch(`${CF_API_BASE}/${creds.accountId}/stream`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${creds.apiToken}` },
+    body: formData,
+  });
 
-  const data = await res.json() as {
+  const data = (await res.json()) as {
     success: boolean;
     errors?: { message: string }[];
     result?: CFStreamUploadResult;
@@ -170,17 +164,11 @@ export async function uploadVideo(
 /**
  * Delete a video from Cloudflare Stream
  */
-export async function deleteVideo(
-  creds: CloudflareCredentials,
-  streamUid: string
-): Promise<void> {
-  const res = await fetch(
-    `${CF_API_BASE}/${creds.accountId}/stream/${streamUid}`,
-    {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${creds.apiToken}` },
-    }
-  );
+export async function deleteVideo(creds: CloudflareCredentials, streamUid: string): Promise<void> {
+  const res = await fetch(`${CF_API_BASE}/${creds.accountId}/stream/${streamUid}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${creds.apiToken}` },
+  });
 
   if (!res.ok && res.status !== 404) {
     throw new Error(`CF Stream delete failed: ${res.statusText}`);
@@ -192,18 +180,15 @@ export async function deleteVideo(
  */
 export async function getVideoStatus(
   creds: CloudflareCredentials,
-  streamUid: string
+  streamUid: string,
 ): Promise<CFStreamUploadResult | null> {
-  const res = await fetch(
-    `${CF_API_BASE}/${creds.accountId}/stream/${streamUid}`,
-    {
-      headers: { 'Authorization': `Bearer ${creds.apiToken}` },
-    }
-  );
+  const res = await fetch(`${CF_API_BASE}/${creds.accountId}/stream/${streamUid}`, {
+    headers: { Authorization: `Bearer ${creds.apiToken}` },
+  });
 
   if (!res.ok) return null;
 
-  const data = await res.json() as {
+  const data = (await res.json()) as {
     success: boolean;
     result?: CFStreamUploadResult;
   };
@@ -227,7 +212,7 @@ export function getStreamHlsUrl(streamUid: string, subdomain?: string): string {
 export function getStreamThumbnailUrl(
   streamUid: string,
   subdomain?: string,
-  options?: { time?: string; width?: number; height?: number }
+  options?: { time?: string; width?: number; height?: number },
 ): string {
   const base = subdomain
     ? `https://${subdomain}/${streamUid}/thumbnails/thumbnail.jpg`
@@ -291,9 +276,9 @@ export async function getCredentialsWithDb(env: any): Promise<CloudflareCredenti
 
   try {
     const db = env.DB as D1Database;
-    const result = await db.prepare(
-      "SELECT value FROM settings WHERE key = 'cloudflare_api_token'"
-    ).first<{ value: string }>();
+    const result = await db
+      .prepare("SELECT value FROM settings WHERE key = 'cloudflare_api_token'")
+      .first<{ value: string }>();
 
     if (result?.value) {
       return {

@@ -98,9 +98,21 @@ export default function AGBPage() {
                 ? 'Folgende Rücktrittskosten werden vom Vermieter erhoben:'
                 : 'The following cancellation costs are charged by the landlord:'}
               <ul>
-                <li>{isDE ? 'bis 90 Tage vor Mietbeginn: 25% des Mietpreises' : 'up to 90 days before rental start: 25% of rental price'}</li>
-                <li>{isDE ? '89 bis 30 Tage vor Mietbeginn: 50% des Mietpreises' : '89 to 30 days before rental start: 50% of rental price'}</li>
-                <li>{isDE ? 'weniger als 30 Tage vor Mietbeginn: 100% des Mietpreises' : 'less than 30 days before rental start: 100% of rental price'}</li>
+                <li>
+                  {isDE
+                    ? 'bis 90 Tage vor Mietbeginn: 25% des Mietpreises'
+                    : 'up to 90 days before rental start: 25% of rental price'}
+                </li>
+                <li>
+                  {isDE
+                    ? '89 bis 30 Tage vor Mietbeginn: 50% des Mietpreises'
+                    : '89 to 30 days before rental start: 50% of rental price'}
+                </li>
+                <li>
+                  {isDE
+                    ? 'weniger als 30 Tage vor Mietbeginn: 100% des Mietpreises'
+                    : 'less than 30 days before rental start: 100% of rental price'}
+                </li>
               </ul>
             </li>
           </ol>
@@ -152,7 +164,7 @@ export default function AGBPage() {
           <p>
             {isDE
               ? 'Für alle Rechtsstreitigkeiten ist das Wohnsitzgericht des Vermieters zuständig. Alle Streitigkeiten aus diesem Vertragsverhältnis unterliegen im Übrigen dem Recht der Bundesrepublik Deutschland.'
-              : 'The court of the landlord\'s domicile has jurisdiction for all legal disputes. All disputes arising from this contractual relationship are otherwise subject to the law of the Federal Republic of Germany.'}
+              : "The court of the landlord's domicile has jurisdiction for all legal disputes. All disputes arising from this contractual relationship are otherwise subject to the law of the Federal Republic of Germany."}
           </p>
         </div>
       </div>

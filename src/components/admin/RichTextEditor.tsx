@@ -13,14 +13,17 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, onBlur, placeholder }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const exec = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    // Sync state after command
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-    editorRef.current?.focus();
-  }, [onChange]);
+  const exec = useCallback(
+    (command: string, value?: string) => {
+      document.execCommand(command, false, value);
+      // Sync state after command
+      if (editorRef.current) {
+        onChange(editorRef.current.innerHTML);
+      }
+      editorRef.current?.focus();
+    },
+    [onChange],
+  );
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
@@ -47,7 +50,12 @@ export function RichTextEditor({ value, onChange, onBlur, placeholder }: RichTex
     document.execCommand('insertText', false, text);
   }, []);
 
-  const ToolbarButton = ({ onClick, active, children, title }: {
+  const ToolbarButton = ({
+    onClick,
+    active,
+    children,
+    title,
+  }: {
     onClick: () => void;
     active?: boolean;
     children: React.ReactNode;
@@ -55,7 +63,10 @@ export function RichTextEditor({ value, onChange, onBlur, placeholder }: RichTex
   }) => (
     <button
       type="button"
-      onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
       className={`p-1.5 rounded hover:bg-gray-200 transition ${active ? 'bg-gray-200 text-logo-green' : 'text-gray-600'}`}
       title={title}
     >
@@ -105,9 +116,11 @@ export function RichTextEditor({ value, onChange, onBlur, placeholder }: RichTex
         dangerouslySetInnerHTML={{ __html: value || '' }}
         data-placeholder={placeholder || 'Text eingeben...'}
         style={{
-          ...((!value || value === '<br>') ? {
-            position: 'relative',
-          } : {}),
+          ...(!value || value === '<br>'
+            ? {
+                position: 'relative',
+              }
+            : {}),
         }}
       />
 

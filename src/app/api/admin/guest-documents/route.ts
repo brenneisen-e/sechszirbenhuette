@@ -28,7 +28,9 @@ interface DocumentRecord {
 
 // Helper function to ensure table exists
 async function ensureTableExists(db: D1Database) {
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     CREATE TABLE IF NOT EXISTS guest_documents (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       guest_id INTEGER NOT NULL,
@@ -44,7 +46,9 @@ async function ensureTableExists(db: D1Database) {
       FOREIGN KEY (guest_id) REFERENCES guests(id) ON DELETE CASCADE,
       FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL
     )
-  `).run();
+  `,
+    )
+    .run();
 
   // Try to add booking_id column if it doesn't exist (for existing tables)
   try {
@@ -53,8 +57,12 @@ async function ensureTableExists(db: D1Database) {
     // Column already exists - ignore error
   }
 
-  await db.prepare('CREATE INDEX IF NOT EXISTS idx_documents_guest_id ON guest_documents(guest_id)').run();
-  await db.prepare('CREATE INDEX IF NOT EXISTS idx_documents_booking_id ON guest_documents(booking_id)').run();
+  await db
+    .prepare('CREATE INDEX IF NOT EXISTS idx_documents_guest_id ON guest_documents(guest_id)')
+    .run();
+  await db
+    .prepare('CREATE INDEX IF NOT EXISTS idx_documents_booking_id ON guest_documents(booking_id)')
+    .run();
 }
 
 // GET - Fetch documents for a guest
@@ -66,10 +74,13 @@ export async function GET(request: NextRequest) {
     const env = (ctx as unknown as { env: Env }).env;
 
     if (!env.DB) {
-      return NextResponse.json({
-        error: 'D1 Database binding not configured.',
-        documents: []
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'D1 Database binding not configured.',
+          documents: [],
+        },
+        { status: 500 },
+      );
     }
 
     await ensureTableExists(env.DB);
@@ -85,14 +96,18 @@ export async function GET(request: NextRequest) {
     if (bookingId) {
       // Fetch documents for a specific booking
       const query = await env.DB.prepare(
-        'SELECT * FROM guest_documents WHERE booking_id = ? ORDER BY created_at DESC'
-      ).bind(parseInt(bookingId)).all<DocumentRecord>();
+        'SELECT * FROM guest_documents WHERE booking_id = ? ORDER BY created_at DESC',
+      )
+        .bind(parseInt(bookingId))
+        .all<DocumentRecord>();
       results = query.results || [];
     } else {
       // Fetch documents for a guest
       const query = await env.DB.prepare(
-        'SELECT * FROM guest_documents WHERE guest_id = ? ORDER BY created_at DESC'
-      ).bind(parseInt(guestId!)).all<DocumentRecord>();
+        'SELECT * FROM guest_documents WHERE guest_id = ? ORDER BY created_at DESC',
+      )
+        .bind(parseInt(guestId!))
+        .all<DocumentRecord>();
       results = query.results || [];
     }
 
@@ -156,25 +171,29 @@ export async function POST(request: NextRequest) {
     });
 
     // Save to database (with optional booking_id)
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       INSERT INTO guest_documents (guest_id, booking_id, filename, original_filename, file_type, file_size, description, document_type, r2_key)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      parseInt(guestId),
-      bookingId ? parseInt(bookingId) : null,
-      safeFilename,
-      file.name,
-      file.type,
-      file.size,
-      description,
-      documentType,
-      r2Key
-    ).run();
+    `,
+    )
+      .bind(
+        parseInt(guestId),
+        bookingId ? parseInt(bookingId) : null,
+        safeFilename,
+        file.name,
+        file.type,
+        file.size,
+        description,
+        documentType,
+        r2Key,
+      )
+      .run();
 
     return NextResponse.json({
       success: true,
       id: result.meta.last_row_id,
-      r2_key: r2Key
+      r2_key: r2Key,
     });
   } catch (error) {
     console.error('POST /api/admin/guest-documents error:', error);
@@ -213,9 +232,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Get the r2_key before deleting
-    const doc = await env.DB.prepare(
-      'SELECT r2_key FROM guest_documents WHERE id = ?'
-    ).bind(id).first<{ r2_key: string }>();
+    const doc = await env.DB.prepare('SELECT r2_key FROM guest_documents WHERE id = ?')
+      .bind(id)
+      .first<{ r2_key: string }>();
 
     if (doc && env.IMAGES_BUCKET) {
       // Delete from R2

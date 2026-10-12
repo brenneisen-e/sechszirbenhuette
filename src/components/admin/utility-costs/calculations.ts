@@ -54,7 +54,7 @@ export function getKurtaxeRateForDate(date: Date, pricing: PricingSettings): num
 
   console.warn(
     `[Kurtaxe] Kein Satz fuer Datum ${dateStr} gefunden — Luecke in kurtaxe_rates. ` +
-    `Verwende naechsten Satz (${nearestRate} EUR). Bitte Kurtaxe-Saetze pruefen.`
+      `Verwende naechsten Satz (${nearestRate} EUR). Bitte Kurtaxe-Saetze pruefen.`,
   );
 
   return nearestRate;
@@ -65,7 +65,7 @@ export function calculateKurtaxeWithDateRates(
   arrivalDate: string,
   departureDate: string,
   adults: number,
-  pricing: PricingSettings
+  pricing: PricingSettings,
 ): { kurtaxe: number; kurtaxeDetails: string } {
   const arrival = new Date(arrivalDate);
   const departure = new Date(departureDate);
@@ -115,7 +115,7 @@ export function calculateUtilityCostsForBooking(
   adults: number,
   pricing?: PricingSettings,
   hasDog?: boolean,
-  childrenAges?: number[] // Optional: ages of children for Kurtaxe calculation
+  childrenAges?: number[], // Optional: ages of children for Kurtaxe calculation
 ): BookingCostResult {
   const prices = pricing || { ...DEFAULT_PRICING };
   const arrival = new Date(arrivalDate);
@@ -132,11 +132,16 @@ export function calculateUtilityCostsForBooking(
 
   // Kurtaxe: Count adults + children >= 16 years
   // Children under 16 are exempt from Kurtaxe
-  const kurtaxePayingChildren = childrenAges ? childrenAges.filter(age => age >= 16).length : 0;
+  const kurtaxePayingChildren = childrenAges ? childrenAges.filter((age) => age >= 16).length : 0;
   const kurtaxePayingPersons = Math.min(8, Math.max(1, adults + kurtaxePayingChildren));
 
   // Calculate Kurtaxe with date-based rates (using kurtaxe-paying persons)
-  const { kurtaxe, kurtaxeDetails } = calculateKurtaxeWithDateRates(arrivalDate, departureDate, kurtaxePayingPersons, prices);
+  const { kurtaxe, kurtaxeDetails } = calculateKurtaxeWithDateRates(
+    arrivalDate,
+    departureDate,
+    kurtaxePayingPersons,
+    prices,
+  );
 
   // Reinigungskosten (cleaning) per booking - fixed cost: 100€ base + 25€ if dog
   const reinigungBase = 100;
@@ -184,7 +189,17 @@ export function calculateUtilityCostsForBooking(
     reinigung,
   };
 
-  return { costs, kurtaxe, kurtaxeDetails, reinigung, season, weeks: roundedWeeks, days, details, breakdown };
+  return {
+    costs,
+    kurtaxe,
+    kurtaxeDetails,
+    reinigung,
+    season,
+    weeks: roundedWeeks,
+    days,
+    details,
+    breakdown,
+  };
 }
 
 // Calculate costs for standard weeks
@@ -192,7 +207,7 @@ export function calculateCosts(
   season: Season,
   weeks: WeeksCount,
   adults: AdultsCount,
-  pricing: PricingSettings
+  pricing: PricingSettings,
 ): CostBreakdown {
   const config = CONFIG[season].weeks[weeks];
   const days = weeks * 7;
@@ -222,7 +237,7 @@ export function calculateCostsForDays(
   season: Season,
   days: number,
   adults: AdultsCount,
-  pricing: PricingSettings
+  pricing: PricingSettings,
 ): CostBreakdownWithDetails {
   const weeks = days / 7; // Keep as decimal for proportional calculation
   const config = CONFIG[season].weeks[1]; // Use weekly config as base
@@ -269,24 +284,42 @@ export function calculateCostsForDays(
 // Shared NK calculation primitives (used by both calculations.ts and positionCalculator.ts)
 // ============================================================================
 
-export function calcHolz(weeks: number, season: Season, pricing: PricingSettings): { buendel: number; amount: number } {
+export function calcHolz(
+  weeks: number,
+  season: Season,
+  pricing: PricingSettings,
+): { buendel: number; amount: number } {
   const buendelPerWeek = season === 'summer' ? 3 : 6;
   const buendel = Math.ceil(buendelPerWeek * weeks);
   return { buendel, amount: (pricing.holz ?? DEFAULT_PRICING.holz) * buendel };
 }
 
-export function calcWasser(weeks: number, cappedAdults: AdultsCount, pricing: PricingSettings): number {
+export function calcWasser(
+  weeks: number,
+  cappedAdults: AdultsCount,
+  pricing: PricingSettings,
+): number {
   return (pricing.water ?? DEFAULT_PRICING.water) * cappedAdults * weeks;
 }
 
-export function calcMuell(weeks: number, season: Season, cappedAdults: AdultsCount, pricing: PricingSettings): { bags: number; amount: number } {
+export function calcMuell(
+  weeks: number,
+  season: Season,
+  cappedAdults: AdultsCount,
+  pricing: PricingSettings,
+): { bags: number; amount: number } {
   const config = CONFIG[season].weeks[1];
   const bagsPerWeek = config.trashBags[cappedAdults];
   const bags = Math.ceil(bagsPerWeek * weeks);
   return { bags, amount: (pricing.trash ?? DEFAULT_PRICING.trash) * bags };
 }
 
-export function calcStrom(weeks: number, season: Season, cappedAdults: AdultsCount, pricing: PricingSettings): { kwh: number; amount: number } {
+export function calcStrom(
+  weeks: number,
+  season: Season,
+  cappedAdults: AdultsCount,
+  pricing: PricingSettings,
+): { kwh: number; amount: number } {
   const config = CONFIG[season].weeks[1];
   const kwhPerWeek = config.electricityIncluded[cappedAdults];
   const kwh = Math.round(kwhPerWeek * weeks);

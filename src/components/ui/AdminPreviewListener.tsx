@@ -54,7 +54,8 @@ export function AdminPreviewListener() {
     const handleMessage = (event: MessageEvent) => {
       // Handle text updates
       if (event.data?.type === 'ADMIN_TEXT_UPDATE') {
-        const { textKey, content, fontFamily, fontSize, color, padding } = event.data as AdminTextUpdate;
+        const { textKey, content, fontFamily, fontSize, color, padding } =
+          event.data as AdminTextUpdate;
         const selector = TEXT_KEY_SELECTORS[textKey];
 
         if (selector) {
@@ -170,7 +171,7 @@ export function AdminPreviewListener() {
         const textKey = textElement.getAttribute('data-text-key');
         if (textKey) {
           // Remove previous selection
-          document.querySelectorAll('.admin-selected').forEach(el => {
+          document.querySelectorAll('.admin-selected').forEach((el) => {
             el.classList.remove('admin-selected');
           });
 
@@ -179,10 +180,13 @@ export function AdminPreviewListener() {
           setSelectedKey(textKey);
 
           // Send message to parent (admin)
-          window.parent.postMessage({
-            type: 'ADMIN_TEXT_SELECTED',
-            textKey,
-          }, '*');
+          window.parent.postMessage(
+            {
+              type: 'ADMIN_TEXT_SELECTED',
+              textKey,
+            },
+            '*',
+          );
         }
       }
     };
@@ -210,9 +214,11 @@ export function AdminPreviewListener() {
   if (!isPreview) return null;
 
   return (
-    <div className={`fixed bottom-4 right-4 text-white text-xs px-3 py-1.5 rounded-full z-[9999] shadow-lg ${
-      isInteractive ? 'bg-logo-green' : 'bg-amber-500'
-    }`}>
+    <div
+      className={`fixed bottom-4 right-4 text-white text-xs px-3 py-1.5 rounded-full z-[9999] shadow-lg ${
+        isInteractive ? 'bg-logo-green' : 'bg-amber-500'
+      }`}
+    >
       {isInteractive ? (
         <span>
           {selectedKey ? `Ausgewählt: ${selectedKey.replace(/_/g, ' ')}` : 'Klicke auf einen Text'}

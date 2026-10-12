@@ -13,8 +13,18 @@ interface GermanDateInputProps {
 }
 
 const MONTH_NAMES = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
 ];
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -43,7 +53,14 @@ function getFirstDayOfMonth(year: number, month: number): number {
   return day === 0 ? 6 : day - 1;
 }
 
-export function GermanDateInput({ value, onChange, required, className = '', min, max }: GermanDateInputProps) {
+export function GermanDateInput({
+  value,
+  onChange,
+  required,
+  className = '',
+  min,
+  max,
+}: GermanDateInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(formatToGerman(value));
   const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -135,18 +152,21 @@ export function GermanDateInput({ value, onChange, required, className = '', min
     }
   };
 
-  const selectDate = useCallback((day: number) => {
-    const m = (calendarMonth.month + 1).toString().padStart(2, '0');
-    const d = day.toString().padStart(2, '0');
-    const iso = `${calendarMonth.year}-${m}-${d}`;
-    onChange(iso);
-    setIsOpen(false);
-  }, [calendarMonth, onChange]);
+  const selectDate = useCallback(
+    (day: number) => {
+      const m = (calendarMonth.month + 1).toString().padStart(2, '0');
+      const d = day.toString().padStart(2, '0');
+      const iso = `${calendarMonth.year}-${m}-${d}`;
+      onChange(iso);
+      setIsOpen(false);
+    },
+    [calendarMonth, onChange],
+  );
 
   const prevMonth = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCalendarMonth(prev => {
+    setCalendarMonth((prev) => {
       if (prev.month === 0) return { year: prev.year - 1, month: 11 };
       return { ...prev, month: prev.month - 1 };
     });
@@ -155,36 +175,47 @@ export function GermanDateInput({ value, onChange, required, className = '', min
   const nextMonth = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCalendarMonth(prev => {
+    setCalendarMonth((prev) => {
       if (prev.month === 11) return { year: prev.year + 1, month: 0 };
       return { ...prev, month: prev.month + 1 };
     });
   }, []);
 
-  const isDateDisabled = useCallback((day: number): boolean => {
-    const m = (calendarMonth.month + 1).toString().padStart(2, '0');
-    const d = day.toString().padStart(2, '0');
-    const iso = `${calendarMonth.year}-${m}-${d}`;
-    if (min && iso < min) return true;
-    if (max && iso > max) return true;
-    return false;
-  }, [calendarMonth, min, max]);
+  const isDateDisabled = useCallback(
+    (day: number): boolean => {
+      const m = (calendarMonth.month + 1).toString().padStart(2, '0');
+      const d = day.toString().padStart(2, '0');
+      const iso = `${calendarMonth.year}-${m}-${d}`;
+      if (min && iso < min) return true;
+      if (max && iso > max) return true;
+      return false;
+    },
+    [calendarMonth, min, max],
+  );
 
-  const isSelected = useCallback((day: number): boolean => {
-    if (!value) return false;
-    const parts = value.split('-').map(Number);
-    const y = parts[0] ?? 0;
-    const m = parts[1] ?? 0;
-    const d = parts[2] ?? 0;
-    return y === calendarMonth.year && m - 1 === calendarMonth.month && d === day;
-  }, [value, calendarMonth]);
+  const isSelected = useCallback(
+    (day: number): boolean => {
+      if (!value) return false;
+      const parts = value.split('-').map(Number);
+      const y = parts[0] ?? 0;
+      const m = parts[1] ?? 0;
+      const d = parts[2] ?? 0;
+      return y === calendarMonth.year && m - 1 === calendarMonth.month && d === day;
+    },
+    [value, calendarMonth],
+  );
 
-  const isToday = useCallback((day: number): boolean => {
-    const now = new Date();
-    return now.getFullYear() === calendarMonth.year &&
-      now.getMonth() === calendarMonth.month &&
-      now.getDate() === day;
-  }, [calendarMonth]);
+  const isToday = useCallback(
+    (day: number): boolean => {
+      const now = new Date();
+      return (
+        now.getFullYear() === calendarMonth.year &&
+        now.getMonth() === calendarMonth.month &&
+        now.getDate() === day
+      );
+    },
+    [calendarMonth],
+  );
 
   const daysInMonth = getDaysInMonth(calendarMonth.year, calendarMonth.month);
   const firstDay = getFirstDayOfMonth(calendarMonth.year, calendarMonth.month);
@@ -208,7 +239,10 @@ export function GermanDateInput({ value, onChange, required, className = '', min
         />
         <button
           type="button"
-          onClick={(e) => { e.preventDefault(); setIsOpen(!isOpen); }}
+          onClick={(e) => {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           tabIndex={-1}
         >
@@ -220,28 +254,20 @@ export function GermanDateInput({ value, onChange, required, className = '', min
         <div className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-[280px]">
           {/* Month/Year navigation */}
           <div className="flex items-center justify-between mb-2">
-            <button
-              type="button"
-              onClick={prevMonth}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
+            <button type="button" onClick={prevMonth} className="p-1 hover:bg-gray-100 rounded">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="text-sm font-medium">
               {MONTH_NAMES[calendarMonth.month]} {calendarMonth.year}
             </span>
-            <button
-              type="button"
-              onClick={nextMonth}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
+            <button type="button" onClick={nextMonth} className="p-1 hover:bg-gray-100 rounded">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-0.5 mb-1">
-            {DAY_NAMES.map(d => (
+            {DAY_NAMES.map((d) => (
               <div key={d} className="text-center text-[10px] font-medium text-gray-400 py-0.5">
                 {d}
               </div>
@@ -265,7 +291,10 @@ export function GermanDateInput({ value, onChange, required, className = '', min
                   key={day}
                   type="button"
                   disabled={disabled}
-                  onClick={(e) => { e.preventDefault(); selectDate(day); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    selectDate(day);
+                  }}
                   className={`text-xs py-1.5 rounded-lg transition-colors
                     ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'}
                     ${selected ? 'bg-green-600 text-white hover:bg-green-700' : ''}

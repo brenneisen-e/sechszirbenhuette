@@ -62,14 +62,21 @@ interface NationalityFlagsProps {
   round?: boolean;
 }
 
-export function NationalityFlags({ nationality, size = 'small', round = false }: NationalityFlagsProps) {
+export function NationalityFlags({
+  nationality,
+  size = 'small',
+  round = false,
+}: NationalityFlagsProps) {
   if (!nationality) return null;
-  const codes = nationality.split(',').map(c => c.trim()).filter(Boolean);
+  const codes = nationality
+    .split(',')
+    .map((c) => c.trim())
+    .filter(Boolean);
   if (codes.length === 0) return null;
 
   return (
     <span className="inline-flex gap-1 items-center">
-      {codes.map(code => (
+      {codes.map((code) => (
         <FlagIcon key={code} code={code} size={size} round={round} />
       ))}
     </span>

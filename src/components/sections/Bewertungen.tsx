@@ -134,11 +134,18 @@ export function Bewertungen() {
             <h2
               data-text-key="bewertungen_title"
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('bewertungen_title') }}
+              style={{
+                fontFamily: 'FeelingPassionate, cursive',
+                ...getTextStyle('bewertungen_title'),
+              }}
             >
               {getText('bewertungen_title')}
             </h2>
-            <p data-text-key="bewertungen_subtitle" className="text-sm sm:text-base md:text-lg text-gray-600 mb-4" style={getTextStyle('bewertungen_subtitle')}>
+            <p
+              data-text-key="bewertungen_subtitle"
+              className="text-sm sm:text-base md:text-lg text-gray-600 mb-4"
+              style={getTextStyle('bewertungen_subtitle')}
+            >
               {getText('bewertungen_subtitle')}
             </p>
 
@@ -164,11 +171,7 @@ export function Bewertungen() {
             <div className="flex items-center justify-center gap-2 mt-6">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={28}
-                    className="text-yellow-400 fill-yellow-400"
-                  />
+                  <Star key={star} size={28} className="text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
               <span className="text-xl font-bold text-gray-900 ml-2">5.0</span>
@@ -211,7 +214,9 @@ export function Bewertungen() {
                     <Quote size={32} className="text-logo-green/30 mb-4" />
 
                     {review.titel && (
-                      <h4 className="font-bold text-gray-900 text-lg lg:text-xl mb-3">{review.titel}</h4>
+                      <h4 className="font-bold text-gray-900 text-lg lg:text-xl mb-3">
+                        {review.titel}
+                      </h4>
                     )}
 
                     <p className="text-gray-600 text-base lg:text-lg mb-6 leading-relaxed">
@@ -221,9 +226,7 @@ export function Bewertungen() {
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div>
                         <p className="font-semibold text-gray-900">{review.gast_name}</p>
-                        {review.quelle && (
-                          <p className="text-xs text-gray-500">{review.quelle}</p>
-                        )}
+                        {review.quelle && <p className="text-xs text-gray-500">{review.quelle}</p>}
                       </div>
                       <div className="flex">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -258,10 +261,7 @@ export function Bewertungen() {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               >
                 {displayReviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="w-full flex-shrink-0 px-2"
-                  >
+                  <div key={review.id} className="w-full flex-shrink-0 px-2">
                     <div className="bg-gray-50 rounded-xl p-6 shadow-sm border border-gray-100">
                       <Quote size={28} className="text-logo-green/30 mb-3" />
 
@@ -269,9 +269,7 @@ export function Bewertungen() {
                         <h4 className="font-bold text-gray-900 text-lg mb-2">{review.titel}</h4>
                       )}
 
-                      <p className="text-gray-600 text-base mb-4 leading-relaxed">
-                        {review.text}
-                      </p>
+                      <p className="text-gray-600 text-base mb-4 leading-relaxed">{review.text}</p>
 
                       <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                         <div>
@@ -324,9 +322,7 @@ export function Bewertungen() {
                     key={index}
                     onClick={() => setCurrentIndex(index)}
                     className={`h-2 rounded-full transition-all ${
-                      index === currentIndex
-                        ? 'bg-logo-green w-6'
-                        : 'bg-logo-green/30 w-2'
+                      index === currentIndex ? 'bg-logo-green w-6' : 'bg-logo-green/30 w-2'
                     }`}
                     aria-label={`Bewertung ${index + 1}`}
                   />
@@ -342,7 +338,6 @@ export function Bewertungen() {
               ← Wischen zum Blättern →
             </p>
           </div>
-
         </div>
       </div>
     </section>

@@ -9,10 +9,7 @@ interface UseGuestFilteringOptions {
   initialHideCompleted?: boolean;
 }
 
-export function useGuestFiltering(
-  guests: Guest[],
-  options: UseGuestFilteringOptions = {},
-) {
+export function useGuestFiltering(guests: Guest[], options: UseGuestFilteringOptions = {}) {
   const {
     initialSortColumn = 'arrival_date',
     initialSortDirection = 'desc',

@@ -4,7 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 interface Env {
   DB: D1Database;
   ADMIN_PASSWORD?: string;
-  ADMIN_PWD?: string;  // Fallback for development
+  ADMIN_PWD?: string; // Fallback for development
 }
 
 // Helper to get admin password from env
@@ -77,7 +77,9 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY is_completed ASC, due_date ASC, created_at DESC';
 
-    const { results } = await env.DB.prepare(query).bind(...params).all<TaskRecord>();
+    const { results } = await env.DB.prepare(query)
+      .bind(...params)
+      .all<TaskRecord>();
 
     return NextResponse.json({ tasks: results || [] });
   } catch (error) {
@@ -108,7 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       guest_id: number;
       booking_id?: number;
       title: string;
@@ -123,18 +125,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'guest_id and title are required' }, { status: 400 });
     }
 
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       INSERT INTO guest_tasks (guest_id, booking_id, title, description, assigned_to, due_date)
       VALUES (?, ?, ?, ?, ?, ?)
       RETURNING *
-    `).bind(
-      guest_id,
-      booking_id || null,
-      title,
-      description || null,
-      assigned_to || null,
-      due_date || null
-    ).first<TaskRecord>();
+    `,
+    )
+      .bind(
+        guest_id,
+        booking_id || null,
+        title,
+        description || null,
+        assigned_to || null,
+        due_date || null,
+      )
+      .first<TaskRecord>();
 
     return NextResponse.json({ task: result });
   } catch (error) {
@@ -161,7 +167,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       booking_id?: number | null;
       title?: string;
@@ -203,7 +209,7 @@ export async function PUT(request: NextRequest) {
     if (is_completed !== undefined) {
       updates.push('is_completed = ?');
       // Support 3 states: 0 = pending, 1 = completed, 2 = N/A
-      const statusValue = typeof is_completed === 'number' ? is_completed : (is_completed ? 1 : 0);
+      const statusValue = typeof is_completed === 'number' ? is_completed : is_completed ? 1 : 0;
       values.push(statusValue);
       // Set completed_at only when status is 1 (completed)
       if (statusValue === 1) {
@@ -225,8 +231,10 @@ export async function PUT(request: NextRequest) {
     values.push(id);
 
     const result = await env.DB.prepare(
-      `UPDATE guest_tasks SET ${updates.join(', ')} WHERE id = ? RETURNING *`
-    ).bind(...values).first<TaskRecord>();
+      `UPDATE guest_tasks SET ${updates.join(', ')} WHERE id = ? RETURNING *`,
+    )
+      .bind(...values)
+      .first<TaskRecord>();
 
     if (!result) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 });

@@ -17,9 +17,7 @@ export default function GaesteLayout({ children }: { children: React.ReactNode }
           display: none !important;
         }
       `}</style>
-      <div className="fixed inset-0 z-50 overflow-auto bg-gray-50">
-        {children}
-      </div>
+      <div className="fixed inset-0 z-50 overflow-auto bg-gray-50">{children}</div>
     </>
   );
 }

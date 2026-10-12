@@ -24,17 +24,26 @@ export default function DatenschutzPage() {
 
           <h2>{isDE ? 'Datenerfassung auf dieser Website' : 'Data Collection on This Website'}</h2>
 
-          <h3>{isDE ? 'Wer ist verantwortlich für die Datenerfassung?' : 'Who is responsible for data collection?'}</h3>
+          <h3>
+            {isDE
+              ? 'Wer ist verantwortlich für die Datenerfassung?'
+              : 'Who is responsible for data collection?'}
+          </h3>
           <p>
             {isDE
               ? 'Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber:'
               : 'Data processing on this website is carried out by the website operator:'}
           </p>
           <p>
-            <strong>Malte Brenneisen</strong><br />
-            {SITE_CONFIG.addressGermany?.street || SITE_CONFIG.address.street}<br />
-            {SITE_CONFIG.addressGermany?.zip || SITE_CONFIG.address.zip} {SITE_CONFIG.addressGermany?.city || SITE_CONFIG.address.city}<br />
-            {isDE ? 'Telefon' : 'Phone'}: {SITE_CONFIG.phone}<br />
+            <strong>Malte Brenneisen</strong>
+            <br />
+            {SITE_CONFIG.addressGermany?.street || SITE_CONFIG.address.street}
+            <br />
+            {SITE_CONFIG.addressGermany?.zip || SITE_CONFIG.address.zip}{' '}
+            {SITE_CONFIG.addressGermany?.city || SITE_CONFIG.address.city}
+            <br />
+            {isDE ? 'Telefon' : 'Phone'}: {SITE_CONFIG.phone}
+            <br />
             E-Mail: {SITE_CONFIG.email}
           </p>
 
@@ -52,7 +61,11 @@ export default function DatenschutzPage() {
               : 'Some of the data is collected to ensure the proper functioning of the website. Other data can be used to analyze how visitors use the site.'}
           </p>
 
-          <h3>{isDE ? 'Welche Rechte haben Sie bezüglich Ihrer Daten?' : 'What rights do you have regarding your data?'}</h3>
+          <h3>
+            {isDE
+              ? 'Welche Rechte haben Sie bezüglich Ihrer Daten?'
+              : 'What rights do you have regarding your data?'}
+          </h3>
           <p>
             {isDE
               ? 'Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen.'
@@ -65,13 +78,14 @@ export default function DatenschutzPage() {
               ? 'Diese Website wird bei einem externen Dienstleister gehostet (Hoster). Die personenbezogenen Daten, die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert.'
               : 'This website is hosted by an external service provider (hoster). Personal data collected on this website are stored on the servers of the hoster.'}
           </p>
+          <p>{isDE ? 'Wir setzen folgenden Hoster ein:' : 'We use the following hoster:'}</p>
           <p>
-            {isDE ? 'Wir setzen folgenden Hoster ein:' : 'We use the following hoster:'}
-          </p>
-          <p>
-            <strong>Cloudflare, Inc.</strong><br />
-            101 Townsend St<br />
-            San Francisco, CA 94107<br />
+            <strong>Cloudflare, Inc.</strong>
+            <br />
+            101 Townsend St
+            <br />
+            San Francisco, CA 94107
+            <br />
             USA
           </p>
 
@@ -105,8 +119,7 @@ export default function DatenschutzPage() {
           <p>
             {isDE
               ? 'Mehr Informationen zum Umgang mit Nutzerdaten finden Sie in der Datenschutzerklärung von Google:'
-              : 'For more information on how user data is handled, please refer to Google\'s privacy policy:'}
-            {' '}
+              : "For more information on how user data is handled, please refer to Google's privacy policy:"}{' '}
             <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
               https://policies.google.com/privacy
             </a>

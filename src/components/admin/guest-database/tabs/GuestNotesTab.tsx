@@ -19,7 +19,7 @@ function formatDateTime(dateString: string): string {
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 }
 
@@ -43,7 +43,7 @@ export function GuestNotesTab({
   loading,
   onAddNote,
   onUpdateNote,
-  onDeleteNote
+  onDeleteNote,
 }: GuestNotesTabProps) {
   const [newNote, setNewNote] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -156,10 +156,7 @@ export function GuestNotesTab({
       ) : (
         <div className="space-y-3">
           {notes.map((note) => (
-            <div
-              key={note.id}
-              className="bg-gray-50 rounded-lg p-4 group"
-            >
+            <div key={note.id} className="bg-gray-50 rounded-lg p-4 group">
               {editingId === note.id ? (
                 <div className="space-y-3">
                   <textarea

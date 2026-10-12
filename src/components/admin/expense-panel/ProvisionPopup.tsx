@@ -44,12 +44,21 @@ export function ProvisionPopup({
               <div className="font-medium text-gray-800 truncate max-w-[180px]">
                 {booking.guestName}
               </div>
-              <span className="font-semibold text-purple-700">{formatCurrency(booking.provision)}</span>
+              <span className="font-semibold text-purple-700">
+                {formatCurrency(booking.provision)}
+              </span>
             </div>
             <div className="flex justify-between items-center text-xs text-gray-500">
               <div>
-                {new Date(booking.arrival).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} -{' '}
-                {new Date(booking.departure).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                {new Date(booking.arrival).toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: '2-digit',
+                })}{' '}
+                -{' '}
+                {new Date(booking.departure).toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: '2-digit',
+                })}
                 {booking.platform && (
                   <span className="ml-1 px-1 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px]">
                     {booking.platform}

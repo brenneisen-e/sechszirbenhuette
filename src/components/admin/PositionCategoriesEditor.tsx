@@ -12,8 +12,7 @@ interface PositionCategory {
   sort_order: number;
 }
 
-interface PositionCategoriesEditorProps {
-}
+interface PositionCategoriesEditorProps {}
 
 export default function PositionCategoriesEditor({}: PositionCategoriesEditorProps) {
   const [categories, setCategories] = useState<PositionCategory[]>([]);
@@ -34,7 +33,7 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/position-categories');
-      const data = await res.json() as { categories?: PositionCategory[]; tableExists?: boolean };
+      const data = (await res.json()) as { categories?: PositionCategory[]; tableExists?: boolean };
       setCategories(data.categories || []);
       setTableExists(data.tableExists !== false);
     } catch (err) {
@@ -105,7 +104,7 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
     try {
       await fetch(`/api/admin/position-categories?id=${id}`, {
         method: 'DELETE',
-        });
+      });
       await fetchCategories();
     } catch (err) {
       console.error('Failed to delete position category:', err);
@@ -128,7 +127,9 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
           <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-medium text-amber-800">Kategorien-Tabelle nicht vorhanden</p>
-            <p className="text-xs text-amber-600 mt-1">Bitte führen Sie die Datenbank-Migration im System-Tab aus.</p>
+            <p className="text-xs text-amber-600 mt-1">
+              Bitte führen Sie die Datenbank-Migration im System-Tab aus.
+            </p>
           </div>
         </div>
       </div>
@@ -148,10 +149,18 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Name</th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Slug</th>
-              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Icon</th>
-              <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">Sortierung</th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Name
+              </th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Slug
+              </th>
+              <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Icon
+              </th>
+              <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-4 py-3">
+                Sortierung
+              </th>
               <th className="w-20 px-4 py-3"></th>
             </tr>
           </thead>
@@ -159,19 +168,35 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
             {categories.map((cat) => (
               <tr key={cat.id} className="admin-row hover:bg-gray-50 transition-colors">
                 {editingId === cat.id ? (
-                  <EditRow form={editForm} setForm={setEditForm} onSave={saveCategory} onCancel={cancelEdit} saving={saving} />
+                  <EditRow
+                    form={editForm}
+                    setForm={setEditForm}
+                    onSave={saveCategory}
+                    onCancel={cancelEdit}
+                    saving={saving}
+                  />
                 ) : (
                   <>
                     <td className="px-4 py-3 text-sm text-gray-900">{cat.name}</td>
                     <td className="px-4 py-3 text-xs font-mono text-gray-500">{cat.slug}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{cat.icon || <span className="text-gray-300">–</span>}</td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-500 text-right tabular-nums">{cat.sort_order}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">
+                      {cat.icon || <span className="text-gray-300">–</span>}
+                    </td>
+                    <td className="px-4 py-3 text-sm font-mono text-gray-500 text-right tabular-nums">
+                      {cat.sort_order}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end admin-row-actions">
-                        <button onClick={() => startEdit(cat)} className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors">
+                        <button
+                          onClick={() => startEdit(cat)}
+                          className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors"
+                        >
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => deleteCategory(cat.id)} className="text-gray-400 hover:text-red-500 rounded p-1 transition-colors">
+                        <button
+                          onClick={() => deleteCategory(cat.id)}
+                          className="text-gray-400 hover:text-red-500 rounded p-1 transition-colors"
+                        >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -183,7 +208,13 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
 
             {showAdd && (
               <tr className="bg-gray-50">
-                <EditRow form={editForm} setForm={setEditForm} onSave={saveCategory} onCancel={cancelEdit} saving={saving} />
+                <EditRow
+                  form={editForm}
+                  setForm={setEditForm}
+                  onSave={saveCategory}
+                  onCancel={cancelEdit}
+                  saving={saving}
+                />
               </tr>
             )}
           </tbody>
@@ -191,7 +222,10 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
       </div>
 
       {!showAdd && (
-        <button onClick={startAdd} className="admin-add-button w-full flex items-center justify-center gap-2">
+        <button
+          onClick={startAdd}
+          className="admin-add-button w-full flex items-center justify-center gap-2"
+        >
           <Plus className="w-4 h-4" />
           <span className="text-sm">Neue Kategorie hinzufügen</span>
         </button>
@@ -200,7 +234,13 @@ export default function PositionCategoriesEditor({}: PositionCategoriesEditorPro
   );
 }
 
-function EditRow({ form, setForm, onSave, onCancel, saving }: {
+function EditRow({
+  form,
+  setForm,
+  onSave,
+  onCancel,
+  saving,
+}: {
   form: { name: string; slug: string; icon: string; color: string; sort_order: string };
   setForm: React.Dispatch<React.SetStateAction<typeof form>>;
   onSave: () => void;
@@ -213,7 +253,7 @@ function EditRow({ form, setForm, onSave, onCancel, saving }: {
         <input
           type="text"
           value={form.name}
-          onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Kategoriename"
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
@@ -222,7 +262,7 @@ function EditRow({ form, setForm, onSave, onCancel, saving }: {
         <input
           type="text"
           value={form.slug}
-          onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
           placeholder="auto"
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-mono w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
@@ -231,7 +271,7 @@ function EditRow({ form, setForm, onSave, onCancel, saving }: {
         <input
           type="text"
           value={form.icon}
-          onChange={(e) => setForm(prev => ({ ...prev, icon: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, icon: e.target.value }))}
           placeholder="z.B. zap"
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs w-full focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
@@ -240,16 +280,27 @@ function EditRow({ form, setForm, onSave, onCancel, saving }: {
         <input
           type="number"
           value={form.sort_order}
-          onChange={(e) => setForm(prev => ({ ...prev, sort_order: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, sort_order: e.target.value }))}
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-16 text-right font-mono focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none"
         />
       </td>
       <td className="px-4 py-2">
         <div className="flex items-center gap-1 justify-end">
-          <button onClick={onSave} disabled={saving} className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-xs font-medium">OK</span>}
+          <button
+            onClick={onSave}
+            disabled={saving}
+            className="text-green-600 hover:bg-green-50 rounded p-1 transition-colors"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <span className="text-xs font-medium">OK</span>
+            )}
           </button>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors">
+          <button
+            onClick={onCancel}
+            className="text-gray-400 hover:text-gray-600 rounded p-1 transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>

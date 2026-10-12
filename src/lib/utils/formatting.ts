@@ -52,9 +52,7 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat('de-DE', {
  */
 export function formatCurrency(amount: number | null | undefined, showDecimals = true): string {
   if (amount === null || amount === undefined) return '0,00 €';
-  return showDecimals
-    ? euroFormatter.format(amount)
-    : euroFormatterNoDecimals.format(amount);
+  return showDecimals ? euroFormatter.format(amount) : euroFormatterNoDecimals.format(amount);
 }
 
 /**

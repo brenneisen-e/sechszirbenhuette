@@ -44,12 +44,15 @@ export async function GET() {
   try {
     const db = await getDb();
     if (!db) {
-      return NextResponse.json({ error: 'Database not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Database not available', success: false },
+        { status: 503 },
+      );
     }
 
-    const result = await db.prepare(
-      'SELECT * FROM reviews ORDER BY created_at DESC'
-    ).all<ReviewRecord>();
+    const result = await db
+      .prepare('SELECT * FROM reviews ORDER BY created_at DESC')
+      .all<ReviewRecord>();
 
     return NextResponse.json({
       reviews: result.results || [],
@@ -66,10 +69,13 @@ export async function POST(request: NextRequest) {
   try {
     const db = await getDb();
     if (!db) {
-      return NextResponse.json({ error: 'Database not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Database not available', success: false },
+        { status: 503 },
+      );
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       gast_name: string;
       bewertung: number;
       titel?: string;
@@ -81,27 +87,38 @@ export async function POST(request: NextRequest) {
     };
 
     if (!body.gast_name || !body.bewertung) {
-      return NextResponse.json({ error: 'gast_name and bewertung are required', success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: 'gast_name and bewertung are required', success: false },
+        { status: 400 },
+      );
     }
 
     if (body.bewertung < 1 || body.bewertung > 5) {
-      return NextResponse.json({ error: 'bewertung must be between 1 and 5', success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: 'bewertung must be between 1 and 5', success: false },
+        { status: 400 },
+      );
     }
 
-    const result = await db.prepare(`
+    const result = await db
+      .prepare(
+        `
       INSERT INTO reviews (gast_name, bewertung, titel, text, aufenthalt_von, aufenthalt_bis, quelle, sichtbar)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       RETURNING *
-    `).bind(
-      body.gast_name,
-      body.bewertung,
-      body.titel || null,
-      body.text || null,
-      body.aufenthalt_von || null,
-      body.aufenthalt_bis || null,
-      body.quelle || null,
-      body.sichtbar !== false ? 1 : 0
-    ).first<ReviewRecord>();
+    `,
+      )
+      .bind(
+        body.gast_name,
+        body.bewertung,
+        body.titel || null,
+        body.text || null,
+        body.aufenthalt_von || null,
+        body.aufenthalt_bis || null,
+        body.quelle || null,
+        body.sichtbar !== false ? 1 : 0,
+      )
+      .first<ReviewRecord>();
 
     return NextResponse.json({ review: result, success: true }, { status: 201 });
   } catch (error) {
@@ -115,10 +132,13 @@ export async function PUT(request: NextRequest) {
   try {
     const db = await getDb();
     if (!db) {
-      return NextResponse.json({ error: 'Database not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Database not available', success: false },
+        { status: 503 },
+      );
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       gast_name?: string;
       bewertung?: number;
@@ -135,29 +155,57 @@ export async function PUT(request: NextRequest) {
     }
 
     if (body.bewertung !== undefined && (body.bewertung < 1 || body.bewertung > 5)) {
-      return NextResponse.json({ error: 'bewertung must be between 1 and 5', success: false }, { status: 400 });
+      return NextResponse.json(
+        { error: 'bewertung must be between 1 and 5', success: false },
+        { status: 400 },
+      );
     }
 
     const updates: string[] = [];
     const params: (string | number | null)[] = [];
 
-    if (body.gast_name !== undefined) { updates.push('gast_name = ?'); params.push(body.gast_name); }
-    if (body.bewertung !== undefined) { updates.push('bewertung = ?'); params.push(body.bewertung); }
-    if (body.titel !== undefined) { updates.push('titel = ?'); params.push(body.titel || null); }
-    if (body.text !== undefined) { updates.push('text = ?'); params.push(body.text || null); }
-    if (body.aufenthalt_von !== undefined) { updates.push('aufenthalt_von = ?'); params.push(body.aufenthalt_von || null); }
-    if (body.aufenthalt_bis !== undefined) { updates.push('aufenthalt_bis = ?'); params.push(body.aufenthalt_bis || null); }
-    if (body.quelle !== undefined) { updates.push('quelle = ?'); params.push(body.quelle || null); }
-    if (body.sichtbar !== undefined) { updates.push('sichtbar = ?'); params.push(body.sichtbar ? 1 : 0); }
+    if (body.gast_name !== undefined) {
+      updates.push('gast_name = ?');
+      params.push(body.gast_name);
+    }
+    if (body.bewertung !== undefined) {
+      updates.push('bewertung = ?');
+      params.push(body.bewertung);
+    }
+    if (body.titel !== undefined) {
+      updates.push('titel = ?');
+      params.push(body.titel || null);
+    }
+    if (body.text !== undefined) {
+      updates.push('text = ?');
+      params.push(body.text || null);
+    }
+    if (body.aufenthalt_von !== undefined) {
+      updates.push('aufenthalt_von = ?');
+      params.push(body.aufenthalt_von || null);
+    }
+    if (body.aufenthalt_bis !== undefined) {
+      updates.push('aufenthalt_bis = ?');
+      params.push(body.aufenthalt_bis || null);
+    }
+    if (body.quelle !== undefined) {
+      updates.push('quelle = ?');
+      params.push(body.quelle || null);
+    }
+    if (body.sichtbar !== undefined) {
+      updates.push('sichtbar = ?');
+      params.push(body.sichtbar ? 1 : 0);
+    }
 
     if (updates.length === 0) {
       return NextResponse.json({ error: 'No fields to update', success: false }, { status: 400 });
     }
 
     params.push(body.id);
-    const result = await db.prepare(
-      `UPDATE reviews SET ${updates.join(', ')} WHERE id = ? RETURNING *`
-    ).bind(...params).first<ReviewRecord>();
+    const result = await db
+      .prepare(`UPDATE reviews SET ${updates.join(', ')} WHERE id = ? RETURNING *`)
+      .bind(...params)
+      .first<ReviewRecord>();
 
     if (!result) {
       return NextResponse.json({ error: 'Review not found', success: false }, { status: 404 });
@@ -175,7 +223,10 @@ export async function DELETE(request: NextRequest) {
   try {
     const db = await getDb();
     if (!db) {
-      return NextResponse.json({ error: 'Database not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Database not available', success: false },
+        { status: 503 },
+      );
     }
 
     const { searchParams } = new URL(request.url);

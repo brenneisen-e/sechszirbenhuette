@@ -23,9 +23,9 @@ interface KurtaxeRate {
 
 // Ensure kurtaxe_rates table exists
 async function ensureTable(db: D1Database) {
-  const exists = await db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='kurtaxe_rates'"
-  ).first();
+  const exists = await db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='kurtaxe_rates'")
+    .first();
   return !!exists;
 }
 
@@ -35,17 +35,17 @@ async function detectGaps(
   db: D1Database,
   newFrom: string,
   newTo: string | null,
-  excludeId?: number
+  excludeId?: number,
 ): Promise<string[]> {
-  const { results } = await db.prepare(
-    'SELECT id, valid_from, valid_to FROM kurtaxe_rates ORDER BY valid_from ASC'
-  ).all<{ id: number; valid_from: string; valid_to: string | null }>();
+  const { results } = await db
+    .prepare('SELECT id, valid_from, valid_to FROM kurtaxe_rates ORDER BY valid_from ASC')
+    .all<{ id: number; valid_from: string; valid_to: string | null }>();
 
   if (!results || results.length === 0) return [];
 
   // Build the full list including the new/updated rate
   type RateRow = { id: number; valid_from: string; valid_to: string | null };
-  const allRates = (results as RateRow[] || [])
+  const allRates = ((results as RateRow[]) || [])
     .filter((r: RateRow) => r.id !== excludeId)
     .map((r: RateRow) => ({ from: r.valid_from, to: r.valid_to }));
   allRates.push({ from: newFrom, to: newTo });
@@ -68,7 +68,7 @@ async function detectGaps(
 
     if (diffDays > 1) {
       warnings.push(
-        `Luecke erkannt: ${currentTo} bis ${nextFrom} (${Math.floor(diffDays - 1)} Tag(e) ohne Kurtaxe-Satz)`
+        `Luecke erkannt: ${currentTo} bis ${nextFrom} (${Math.floor(diffDays - 1)} Tag(e) ohne Kurtaxe-Satz)`,
       );
     }
   }
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { results } = await env.DB.prepare(
-      'SELECT * FROM kurtaxe_rates ORDER BY valid_from ASC'
+      'SELECT * FROM kurtaxe_rates ORDER BY valid_from ASC',
     ).all<KurtaxeRate>();
 
     return NextResponse.json({ rates: results || [], tableExists: true });
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       valid_from: string;
       valid_to?: string | null;
       rate_per_person_per_day: number;
@@ -129,18 +129,23 @@ export async function POST(request: NextRequest) {
     };
 
     if (!body.valid_from || body.rate_per_person_per_day === undefined) {
-      return NextResponse.json({ error: 'valid_from and rate_per_person_per_day are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'valid_from and rate_per_person_per_day are required' },
+        { status: 400 },
+      );
     }
 
     const result = await env.DB.prepare(
       `INSERT INTO kurtaxe_rates (valid_from, valid_to, rate_per_person_per_day, min_age)
-       VALUES (?, ?, ?, ?)`
-    ).bind(
-      body.valid_from,
-      body.valid_to || null,
-      body.rate_per_person_per_day,
-      body.min_age ?? 16
-    ).run();
+       VALUES (?, ?, ?, ?)`,
+    )
+      .bind(
+        body.valid_from,
+        body.valid_to || null,
+        body.rate_per_person_per_day,
+        body.min_age ?? 16,
+      )
+      .run();
 
     // Detect gaps after insert
     const gapWarnings = await detectGaps(env.DB, body.valid_from, body.valid_to || null);
@@ -170,7 +175,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       valid_from: string;
       valid_to?: string | null;
@@ -185,14 +190,16 @@ export async function PUT(request: NextRequest) {
     await env.DB.prepare(
       `UPDATE kurtaxe_rates
        SET valid_from = ?, valid_to = ?, rate_per_person_per_day = ?, min_age = ?, updated_at = datetime('now')
-       WHERE id = ?`
-    ).bind(
-      body.valid_from,
-      body.valid_to || null,
-      body.rate_per_person_per_day,
-      body.min_age ?? 16,
-      body.id
-    ).run();
+       WHERE id = ?`,
+    )
+      .bind(
+        body.valid_from,
+        body.valid_to || null,
+        body.rate_per_person_per_day,
+        body.min_age ?? 16,
+        body.id,
+      )
+      .run();
 
     // Detect gaps after update
     const gapWarnings = await detectGaps(env.DB, body.valid_from, body.valid_to || null, body.id);

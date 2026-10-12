@@ -32,7 +32,7 @@ export async function GET() {
 
     // Check if table exists
     const exists = await env.DB.prepare(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='rental_prices'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='rental_prices'",
     ).first();
 
     if (!exists) {
@@ -40,7 +40,7 @@ export async function GET() {
     }
 
     const { results } = await env.DB.prepare(
-      'SELECT * FROM rental_prices ORDER BY date_from ASC'
+      'SELECT * FROM rental_prices ORDER BY date_from ASC',
     ).all<RentalPrice>();
 
     return NextResponse.json({ prices: results || [], tableExists: true });
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       name: string;
       date_from: string;
       date_to: string;
@@ -72,21 +72,26 @@ export async function POST(request: NextRequest) {
     };
 
     if (!body.name || !body.date_from || !body.date_to || body.price_per_night === undefined) {
-      return NextResponse.json({ error: 'name, date_from, date_to, and price_per_night are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'name, date_from, date_to, and price_per_night are required' },
+        { status: 400 },
+      );
     }
 
     const result = await env.DB.prepare(
       `INSERT INTO rental_prices (name, date_from, date_to, price_per_night, nebenkosten_pro_person, mindestaufenthalt, aktiv)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      body.name,
-      body.date_from,
-      body.date_to,
-      body.price_per_night,
-      body.nebenkosten_pro_person ?? 0,
-      body.mindestaufenthalt ?? 3,
-      body.aktiv !== false ? 1 : 0
-    ).run();
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        body.name,
+        body.date_from,
+        body.date_to,
+        body.price_per_night,
+        body.nebenkosten_pro_person ?? 0,
+        body.mindestaufenthalt ?? 3,
+        body.aktiv !== false ? 1 : 0,
+      )
+      .run();
 
     return NextResponse.json({ success: true, id: result.meta.last_row_id });
   } catch (error) {
@@ -106,7 +111,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       name: string;
       date_from: string;
@@ -124,17 +129,19 @@ export async function PUT(request: NextRequest) {
     await env.DB.prepare(
       `UPDATE rental_prices
        SET name = ?, date_from = ?, date_to = ?, price_per_night = ?, nebenkosten_pro_person = ?, mindestaufenthalt = ?, aktiv = ?, updated_at = datetime('now')
-       WHERE id = ?`
-    ).bind(
-      body.name,
-      body.date_from,
-      body.date_to,
-      body.price_per_night,
-      body.nebenkosten_pro_person ?? 0,
-      body.mindestaufenthalt ?? 3,
-      body.aktiv !== false ? 1 : 0,
-      body.id
-    ).run();
+       WHERE id = ?`,
+    )
+      .bind(
+        body.name,
+        body.date_from,
+        body.date_to,
+        body.price_per_night,
+        body.nebenkosten_pro_person ?? 0,
+        body.mindestaufenthalt ?? 3,
+        body.aktiv !== false ? 1 : 0,
+        body.id,
+      )
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

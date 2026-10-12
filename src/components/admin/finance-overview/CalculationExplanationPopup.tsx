@@ -40,10 +40,12 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="px-4 py-2 border font-medium text-green-700">Mietpreis (Brutto)</td>
+                    <td className="px-4 py-2 border font-medium text-green-700">
+                      Mietpreis (Brutto)
+                    </td>
                     <td className="px-4 py-2 border">
-                      Der Gesamtpreis, den der Gast bezahlt. Bei Direktbuchungen ist dies der volle Betrag. Bei
-                      Plattformen wie FeWo ist dies der Betrag nach Plattform-Gebühren.
+                      Der Gesamtpreis, den der Gast bezahlt. Bei Direktbuchungen ist dies der volle
+                      Betrag. Bei Plattformen wie FeWo ist dies der Betrag nach Plattform-Gebühren.
                     </td>
                   </tr>
                   <tr>
@@ -52,7 +54,8 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                       <strong>Mietpreis − alle kalkulatorischen Kosten</strong>
                       <br />
                       <span className="text-xs text-gray-500">
-                        Kalkulatorische Kosten = Kurtaxe + Holz + Wasser + Müll + Strom (+ Reinigung wenn nicht bar)
+                        Kalkulatorische Kosten = Kurtaxe + Holz + Wasser + Müll + Strom (+ Reinigung
+                        wenn nicht bar)
                       </span>
                     </td>
                   </tr>
@@ -61,11 +64,14 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                     <td className="px-4 py-2 border">
                       Anteil für Malte & Eike (Verwaltung/Marketing):
                       <br />
-                      <strong>10% der Nettomiete</strong> (nach Abzug aller kalkulatorischen Kosten).
+                      <strong>10% der Nettomiete</strong> (nach Abzug aller kalkulatorischen
+                      Kosten).
                     </td>
                   </tr>
                   <tr className="bg-gray-50">
-                    <td className="px-4 py-2 border font-medium text-orange-700">Kalkulatorische Nebenkosten</td>
+                    <td className="px-4 py-2 border font-medium text-orange-700">
+                      Kalkulatorische Nebenkosten
+                    </td>
                     <td className="px-4 py-2 border">
                       Geschätzte Kosten für den Betrieb:
                       <br />
@@ -84,7 +90,9 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                         Nettomiete − Provision + NK (bar) + Reinigung (bar)
                       </code>
                       <br />
-                      <span className="text-xs text-gray-500">NK und Reinigung werden addiert wenn bar vor Ort bezahlt</span>
+                      <span className="text-xs text-gray-500">
+                        NK und Reinigung werden addiert wenn bar vor Ort bezahlt
+                      </span>
                     </td>
                   </tr>
                 </tbody>
@@ -109,7 +117,9 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                   </tr>
                   <tr>
                     <td className="py-1 text-gray-600">− Kalkulatorische Kosten:</td>
-                    <td className="py-1 text-right font-mono text-red-600">−{formatCurrency(286)}</td>
+                    <td className="py-1 text-right font-mono text-red-600">
+                      −{formatCurrency(286)}
+                    </td>
                   </tr>
                   <tr className="text-xs text-gray-400">
                     <td className="pl-4">Kurtaxe (7×4×2,70€)</td>
@@ -129,20 +139,27 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
                   </tr>
                   <tr className="border-t border-blue-200 font-medium">
                     <td className="py-1 text-blue-700">= Nettomiete:</td>
-                    <td className="py-1 text-right font-mono text-blue-700">{formatCurrency(1014)}</td>
+                    <td className="py-1 text-right font-mono text-blue-700">
+                      {formatCurrency(1014)}
+                    </td>
                   </tr>
                   <tr>
                     <td className="py-1">− Provision (10%):</td>
-                    <td className="py-1 text-right font-mono text-purple-600">−{formatCurrency(101.4)}</td>
+                    <td className="py-1 text-right font-mono text-purple-600">
+                      −{formatCurrency(101.4)}
+                    </td>
                   </tr>
                   <tr className="border-t border-blue-300 font-bold">
                     <td className="py-2 text-emerald-700">= Ertrag:</td>
-                    <td className="py-2 text-right font-mono text-emerald-700">{formatCurrency(912.6)}</td>
+                    <td className="py-2 text-right font-mono text-emerald-700">
+                      {formatCurrency(912.6)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
               <p className="text-xs text-gray-500 mt-3">
-                Hinweis: Die kalkulatorischen Kosten werden geschätzt und können vom tatsächlichen Verbrauch abweichen.
+                Hinweis: Die kalkulatorischen Kosten werden geschätzt und können vom tatsächlichen
+                Verbrauch abweichen.
               </p>
             </div>
           </div>
@@ -192,7 +209,8 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
               </table>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              * Kurtaxe und Reinigung werden separat berechnet und sind nicht in den Nebenkosten enthalten.
+              * Kurtaxe und Reinigung werden separat berechnet und sind nicht in den Nebenkosten
+              enthalten.
             </p>
           </div>
 
@@ -206,15 +224,15 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
               <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                 <h4 className="font-semibold text-green-800 mb-2">✓ In Nebenkosten enthalten</h4>
                 <p className="text-sm text-green-700">
-                  Die Reinigungskosten (100 €) werden von der Miete abgezogen und reduzieren den Ertrag. Der Gast
-                  bezahlt nichts extra vor Ort.
+                  Die Reinigungskosten (100 €) werden von der Miete abgezogen und reduzieren den
+                  Ertrag. Der Gast bezahlt nichts extra vor Ort.
                 </p>
               </div>
               <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
                 <h4 className="font-semibold text-amber-800 mb-2">💵 Bar vor Ort bezahlt</h4>
                 <p className="text-sm text-amber-700">
-                  Die Reinigung wird bar vom Gast vor Ort bezahlt. Sie wird NICHT von der Miete abgezogen und erhöht
-                  somit den Ertrag.
+                  Die Reinigung wird bar vom Gast vor Ort bezahlt. Sie wird NICHT von der Miete
+                  abgezogen und erhöht somit den Ertrag.
                 </p>
               </div>
             </div>
@@ -230,7 +248,8 @@ export function CalculationExplanationPopup({ onClose }: CalculationExplanationP
               <strong>10% der Nettomiete</strong> – nach Abzug aller kalkulatorischen Kosten.
             </p>
             <p className="text-xs text-purple-600 mt-2">
-              Kalkulatorische Kosten = Kurtaxe + Holz + Wasser + Müll + Strom (+ Reinigung wenn nicht bar).
+              Kalkulatorische Kosten = Kurtaxe + Holz + Wasser + Müll + Strom (+ Reinigung wenn
+              nicht bar).
             </p>
           </div>
         </div>

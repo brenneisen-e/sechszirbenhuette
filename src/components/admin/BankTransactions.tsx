@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Euro, Loader2, ChevronLeft, ChevronRight, Printer, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Euro,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Printer,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { anonymizeGuestName, roundDemoAmount } from '@/lib/utils/demoMode';
 
 // Helper to parse various date formats
@@ -72,8 +81,18 @@ interface BankTransactionsProps {
 }
 
 const MONTHS = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
 ];
 
 export default function BankTransactions({ demoMode = false }: BankTransactionsProps) {
@@ -90,7 +109,9 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
   const [loading, setLoading] = useState(true);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [expandedMonths, setExpandedMonths] = useState<Set<number>>(new Set([new Date().getMonth()]));
+  const [expandedMonths, setExpandedMonths] = useState<Set<number>>(
+    new Set([new Date().getMonth()]),
+  );
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -105,17 +126,19 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
         fetch('/api/admin/bookings'),
       ]);
 
-      const guestsData = (await guestsRes.json()) as { guests?: { id: number; guest_name: string }[] };
+      const guestsData = (await guestsRes.json()) as {
+        guests?: { id: number; guest_name: string }[];
+      };
       const bookingsData = (await bookingsRes.json()) as { bookings?: BookingWithTransactions[] };
 
       const allGuests = guestsData.guests || [];
       const allBookings = bookingsData.bookings || [];
 
-      const guestNameMap = new Map(allGuests.map(g => [g.id, g.guest_name]));
+      const guestNameMap = new Map(allGuests.map((g) => [g.id, g.guest_name]));
 
       const extractedDeposits: Deposit[] = [];
 
-      allBookings.forEach(booking => {
+      allBookings.forEach((booking) => {
         if (!booking.additional_costs) return;
 
         try {
@@ -124,26 +147,31 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
 
           // Check if we have explicit transactions
           if (Array.isArray(transactions) && transactions.length > 0) {
-            transactions.forEach((t: { date?: string; amount?: number; type?: string; description?: string }, idx: number) => {
-              if (!t.date || t.amount === undefined) return;
+            transactions.forEach(
+              (
+                t: { date?: string; amount?: number; type?: string; description?: string },
+                idx: number,
+              ) => {
+                if (!t.date || t.amount === undefined) return;
 
-              const txDate = parseDate(t.date);
-              const txYear = txDate.getFullYear();
-              if (isNaN(txYear) || txYear !== selectedYear) return;
+                const txDate = parseDate(t.date);
+                const txYear = txDate.getFullYear();
+                if (isNaN(txYear) || txYear !== selectedYear) return;
 
-              extractedDeposits.push({
-                id: `${booking.id}-${idx}`,
-                amount: t.amount,
-                date: t.date,
-                guest_name: booking.guest_name || guestNameMap.get(booking.guest_id),
-                booking_number: booking.booking_number || undefined,
-                arrival_date: booking.arrival_date || undefined,
-                departure_date: booking.departure_date || undefined,
-                platform: booking.platform || undefined,
-                description: t.description,
-                type: t.type === 'refund' ? 'refund' : 'payout',
-              });
-            });
+                extractedDeposits.push({
+                  id: `${booking.id}-${idx}`,
+                  amount: t.amount,
+                  date: t.date,
+                  guest_name: booking.guest_name || guestNameMap.get(booking.guest_id),
+                  booking_number: booking.booking_number || undefined,
+                  arrival_date: booking.arrival_date || undefined,
+                  departure_date: booking.departure_date || undefined,
+                  platform: booking.platform || undefined,
+                  description: t.description,
+                  type: t.type === 'refund' ? 'refund' : 'payout',
+                });
+              },
+            );
           } else if (additionalCosts.payout_date && additionalCosts.payout_amount) {
             // Fallback: Use payout_date + payout_amount when no explicit transactions exist
             const payoutDate = parseDate(additionalCosts.payout_date);
@@ -181,7 +209,7 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
   };
 
   const toggleMonth = (month: number) => {
-    setExpandedMonths(prev => {
+    setExpandedMonths((prev) => {
       const next = new Set(prev);
       if (next.has(month)) {
         next.delete(month);
@@ -193,17 +221,24 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
   };
 
   // Group deposits by month
-  const depositsByMonth = deposits.reduce((acc, deposit) => {
-    const date = parseDate(deposit.date);
-    const month = date.getMonth();
-    if (!acc[month]) acc[month] = [];
-    acc[month].push(deposit);
-    return acc;
-  }, {} as Record<number, Deposit[]>);
+  const depositsByMonth = deposits.reduce(
+    (acc, deposit) => {
+      const date = parseDate(deposit.date);
+      const month = date.getMonth();
+      if (!acc[month]) acc[month] = [];
+      acc[month].push(deposit);
+      return acc;
+    },
+    {} as Record<number, Deposit[]>,
+  );
 
   // Calculate totals
-  const totalPayouts = deposits.filter(d => d.type === 'payout').reduce((sum, d) => sum + d.amount, 0);
-  const totalRefunds = deposits.filter(d => d.type === 'refund').reduce((sum, d) => sum + Math.abs(d.amount), 0);
+  const totalPayouts = deposits
+    .filter((d) => d.type === 'payout')
+    .reduce((sum, d) => sum + d.amount, 0);
+  const totalRefunds = deposits
+    .filter((d) => d.type === 'refund')
+    .reduce((sum, d) => sum + Math.abs(d.amount), 0);
   const netTotal = totalPayouts - totalRefunds;
 
   const getAvailableYears = () => {
@@ -230,10 +265,10 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-medium text-gray-900">
-              Kontoauszug {selectedYear}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">Übersicht aller eingegangenen Einzahlungen nach Buchungen</p>
+            <h2 className="text-lg font-medium text-gray-900">Kontoauszug {selectedYear}</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Übersicht aller eingegangenen Einzahlungen nach Buchungen
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -279,18 +314,34 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Einzahlungen</p>
-            <p className="text-2xl font-semibold font-mono tabular-nums text-green-700 mt-1">{formatCurrency(totalPayouts)}</p>
-            <p className="text-xs text-gray-400 mt-1">{deposits.filter(d => d.type === 'payout').length} Transaktionen</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Einzahlungen
+            </p>
+            <p className="text-2xl font-semibold font-mono tabular-nums text-green-700 mt-1">
+              {formatCurrency(totalPayouts)}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {deposits.filter((d) => d.type === 'payout').length} Transaktionen
+            </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Rückerstattungen</p>
-            <p className="text-2xl font-semibold font-mono tabular-nums text-red-600 mt-1">-{formatCurrency(totalRefunds)}</p>
-            <p className="text-xs text-gray-400 mt-1">{deposits.filter(d => d.type === 'refund').length} Transaktionen</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Rückerstattungen
+            </p>
+            <p className="text-2xl font-semibold font-mono tabular-nums text-red-600 mt-1">
+              -{formatCurrency(totalRefunds)}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {deposits.filter((d) => d.type === 'refund').length} Transaktionen
+            </p>
           </div>
           <div className="border border-gray-200 rounded-lg p-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Netto Gesamt</p>
-            <p className="text-2xl font-semibold font-mono tabular-nums text-gray-900 mt-1">{formatCurrency(netTotal)}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Netto Gesamt
+            </p>
+            <p className="text-2xl font-semibold font-mono tabular-nums text-gray-900 mt-1">
+              {formatCurrency(netTotal)}
+            </p>
             <p className="text-xs text-gray-400 mt-1">{deposits.length} Transaktionen insgesamt</p>
           </div>
         </div>
@@ -306,7 +357,10 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
       <div className="space-y-4">
         {MONTHS.map((monthName, monthIndex) => {
           const monthDeposits = depositsByMonth[monthIndex] || [];
-          const monthTotal = monthDeposits.reduce((sum, d) => sum + (d.type === 'payout' ? d.amount : -Math.abs(d.amount)), 0);
+          const monthTotal = monthDeposits.reduce(
+            (sum, d) => sum + (d.type === 'payout' ? d.amount : -Math.abs(d.amount)),
+            0,
+          );
           const isExpanded = expandedMonths.has(monthIndex);
 
           if (monthDeposits.length === 0) return null;
@@ -320,11 +374,17 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
               >
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-gray-400" />
-                  <span className="font-semibold text-gray-900">{monthName} {selectedYear}</span>
-                  <span className="text-sm text-gray-500">({monthDeposits.length} Einzahlungen)</span>
+                  <span className="font-semibold text-gray-900">
+                    {monthName} {selectedYear}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    ({monthDeposits.length} Einzahlungen)
+                  </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`font-bold ${monthTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span
+                    className={`font-bold ${monthTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {formatCurrency(monthTotal)}
                   </span>
                   {isExpanded ? (
@@ -341,11 +401,21 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Datum</th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Gast / Buchung</th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Zeitraum</th>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">Plattform</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">Betrag</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                          Datum
+                        </th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                          Gast / Buchung
+                        </th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                          Zeitraum
+                        </th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                          Plattform
+                        </th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">
+                          Betrag
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -355,14 +425,19 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
                             {formatDate(deposit.date)}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-gray-900">{demoName(deposit.guest_name) || 'Unbekannt'}</div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {demoName(deposit.guest_name) || 'Unbekannt'}
+                            </div>
                             {deposit.booking_number && (
                               <div className="text-xs text-gray-500">#{deposit.booking_number}</div>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-600">
                             {deposit.arrival_date && deposit.departure_date ? (
-                              <>{formatDate(deposit.arrival_date)} - {formatDate(deposit.departure_date)}</>
+                              <>
+                                {formatDate(deposit.arrival_date)} -{' '}
+                                {formatDate(deposit.departure_date)}
+                              </>
                             ) : deposit.arrival_date ? (
                               formatDate(deposit.arrival_date)
                             ) : (
@@ -376,10 +451,13 @@ export default function BankTransactions({ demoMode = false }: BankTransactionsP
                               </span>
                             )}
                           </td>
-                          <td className={`px-4 py-3 text-sm font-semibold text-right ${
-                            deposit.type === 'payout' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {deposit.type === 'refund' ? '-' : '+'}{formatCurrency(Math.abs(deposit.amount))}
+                          <td
+                            className={`px-4 py-3 text-sm font-semibold text-right ${
+                              deposit.type === 'payout' ? 'text-green-600' : 'text-red-600'
+                            }`}
+                          >
+                            {deposit.type === 'refund' ? '-' : '+'}
+                            {formatCurrency(Math.abs(deposit.amount))}
                           </td>
                         </tr>
                       ))}

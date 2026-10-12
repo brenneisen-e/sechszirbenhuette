@@ -153,7 +153,10 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
         const departure = parseLocalDate(b.departure_date);
         return arrival <= yearEnd && departure >= yearStart;
       })
-      .sort((a, b) => parseLocalDate(a.arrival_date).getTime() - parseLocalDate(b.arrival_date).getTime());
+      .sort(
+        (a, b) =>
+          parseLocalDate(a.arrival_date).getTime() - parseLocalDate(b.arrival_date).getTime(),
+      );
 
     const gaps: Array<{ start: Date; end: Date; days: number }> = [];
     let lastEnd = yearStart;
@@ -164,7 +167,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
       const effectiveArrival = arrival < yearStart ? yearStart : arrival;
 
       if (effectiveArrival > lastEnd) {
-        const gapDays = Math.ceil((effectiveArrival.getTime() - lastEnd.getTime()) / (1000 * 60 * 60 * 24));
+        const gapDays = Math.ceil(
+          (effectiveArrival.getTime() - lastEnd.getTime()) / (1000 * 60 * 60 * 24),
+        );
         if (gapDays >= 1) {
           gaps.push({ start: new Date(lastEnd), end: new Date(effectiveArrival), days: gapDays });
         }
@@ -188,7 +193,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
   const significantGaps = calculateGaps();
 
   const sameDay = (d1: Date, d2: Date) =>
-    d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
 
   return (
     <div className="space-y-4">
@@ -232,7 +239,10 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
         </div>
       </div>
 
-      <UnregisteredBookingsAlert bookings={unregisteredBookings} onSwitchToGuests={onSwitchToGuests} />
+      <UnregisteredBookingsAlert
+        bookings={unregisteredBookings}
+        onSwitchToGuests={onSwitchToGuests}
+      />
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* Calendar Grid */}
@@ -293,9 +303,13 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                 return currentDate >= arrival && currentDate < departure;
               });
 
-              const arrivingBooking = monthCalendarBookings.find((b) => sameDay(currentDate, parseLocalDate(b.arrival_date)));
+              const arrivingBooking = monthCalendarBookings.find((b) =>
+                sameDay(currentDate, parseLocalDate(b.arrival_date)),
+              );
               const departingBooking = monthCalendarBookings.find(
-                (b) => sameDay(currentDate, parseLocalDate(b.departure_date)) && b.id !== arrivingBooking?.id
+                (b) =>
+                  sameDay(currentDate, parseLocalDate(b.departure_date)) &&
+                  b.id !== arrivingBooking?.id,
               );
 
               let isStart = false;
@@ -313,7 +327,8 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                 booking: localBooking || departingBooking, // Include departing booking for display
                 isBooked: !!localBooking || !!portalBooking || !!departingBooking,
                 isPortal: !localBooking && !departingBooking && !!portalBooking,
-                isAdditionalBooking: localBooking?.isAdditionalBooking || departingBooking?.isAdditionalBooking,
+                isAdditionalBooking:
+                  localBooking?.isAdditionalBooking || departingBooking?.isAdditionalBooking,
                 portalSummary: portalBooking?.summary,
                 isStart,
                 isEnd,
@@ -347,7 +362,8 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                     if (status.booking) {
                       // All local bookings (main + additional) use the same green color
                       if (status.isStart && status.isEnd) {
-                        bgClass = 'bg-green-200 text-green-900 border-l-4 border-r-4 border-green-600';
+                        bgClass =
+                          'bg-green-200 text-green-900 border-l-4 border-r-4 border-green-600';
                         roundedClass = 'rounded';
                       } else if (status.isStart) {
                         bgClass = 'bg-green-200 text-green-900 border-l-4 border-green-600';
@@ -413,8 +429,11 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                     }
 
                     const clickableGuestId =
-                      status.booking?.guest_id || status.arrivingBooking?.guest_id || status.departingBooking?.guest_id;
-                    const clickableBooking = status.booking || status.arrivingBooking || status.departingBooking;
+                      status.booking?.guest_id ||
+                      status.arrivingBooking?.guest_id ||
+                      status.departingBooking?.guest_id;
+                    const clickableBooking =
+                      status.booking || status.arrivingBooking || status.departingBooking;
                     const isClickable = !!clickableGuestId || !!clickableBooking;
 
                     return (
@@ -425,7 +444,7 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                           if (!clickableBooking) return;
 
                           const guestId = clickableBooking.guest_id;
-                          const guest = guests.find(g => g.id === guestId);
+                          const guest = guests.find((g) => g.id === guestId);
                           if (!guest) {
                             // Fallback to navigating to guest if we can't find guest data
                             if (onSelectGuest && guestId) {
@@ -436,7 +455,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
 
                           // Check if this is an additional booking from the bookings table
                           if (clickableBooking.isAdditionalBooking) {
-                            const booking = additionalBookings.find(b => b.id === clickableBooking.id);
+                            const booking = additionalBookings.find(
+                              (b) => b.id === clickableBooking.id,
+                            );
                             if (booking) {
                               setSelectedBooking(booking);
                               setSelectedGuest(guest);
@@ -445,7 +466,9 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                           }
 
                           // Try to find an actual booking for this guest (prefer bookings table data)
-                          const guestBooking = additionalBookings.find(b => b.guest_id === guest.id);
+                          const guestBooking = additionalBookings.find(
+                            (b) => b.guest_id === guest.id,
+                          );
                           if (guestBooking) {
                             setSelectedBooking(guestBooking);
                             setSelectedGuest(guest);
@@ -511,9 +534,15 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
                                       loading="eager"
                                     />
                                   )}
-                                  {entry.isPortal && <span className="text-cyan-300 flex-shrink-0">[Portal]</span>}
-                                  {entry.isDeparting && <span className="text-red-300 flex-shrink-0">◂ </span>}
-                                  {entry.isArriving && <span className="text-green-300 flex-shrink-0">▸ </span>}
+                                  {entry.isPortal && (
+                                    <span className="text-cyan-300 flex-shrink-0">[Portal]</span>
+                                  )}
+                                  {entry.isDeparting && (
+                                    <span className="text-red-300 flex-shrink-0">◂ </span>
+                                  )}
+                                  {entry.isArriving && (
+                                    <span className="text-green-300 flex-shrink-0">▸ </span>
+                                  )}
                                   <span className="truncate">{entry.name}</span>
                                 </div>
                               ))}
@@ -533,14 +562,14 @@ export function AdminCalendar({ guests, onSwitchToGuests, onSelectGuest }: Admin
       </div>
 
       <YearlyBookingsList
-          guests={guests}
-          bookings={additionalBookings}
-          year={calendarYear}
-          onSelectBooking={(booking, guest) => {
-            setSelectedBooking(booking);
-            setSelectedGuest(guest);
-          }}
-        />
+        guests={guests}
+        bookings={additionalBookings}
+        year={calendarYear}
+        onSelectBooking={(booking, guest) => {
+          setSelectedBooking(booking);
+          setSelectedGuest(guest);
+        }}
+      />
 
       {selectedBooking && selectedGuest && (
         <BookingDetailPopup

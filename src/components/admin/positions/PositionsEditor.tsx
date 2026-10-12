@@ -1,8 +1,27 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Plus, MoreVertical, ChevronDown, Info, Zap, Droplets, Trash2, TreePine, FileText, Sparkles, Package, CreditCard, X } from 'lucide-react';
-import type { BookingPosition, ResolvedPosition, PositionCategory, PaidBy } from '@/lib/types/positions';
+import {
+  Plus,
+  MoreVertical,
+  ChevronDown,
+  Info,
+  Zap,
+  Droplets,
+  Trash2,
+  TreePine,
+  FileText,
+  Sparkles,
+  Package,
+  CreditCard,
+  X,
+} from 'lucide-react';
+import type {
+  BookingPosition,
+  ResolvedPosition,
+  PositionCategory,
+  PaidBy,
+} from '@/lib/types/positions';
 import { PAID_BY_LABELS } from '@/lib/types/positions';
 import { formatCurrency } from '@/lib/utils/formatting';
 import type { PositionCalcContext } from '@/lib/utils/positionCalculator';
@@ -61,37 +80,128 @@ const TEMPLATE_GROUPS: TemplateGroup[] = [
   {
     label: 'Nebenkosten',
     templates: [
-      { name: 'NK Strom', category: 'nk', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"nk_strom","params":{}}', affects_mieterlos: false, show_separate: false },
-      { name: 'NK Wasser', category: 'nk', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"nk_wasser","params":{}}', affects_mieterlos: false, show_separate: false },
-      { name: 'NK Müll', category: 'nk', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"nk_muell","params":{}}', affects_mieterlos: false, show_separate: false },
-      { name: 'NK Holz', category: 'nk', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"nk_holz","params":{}}', affects_mieterlos: false, show_separate: false },
+      {
+        name: 'NK Strom',
+        category: 'nk',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"nk_strom","params":{}}',
+        affects_mieterlos: false,
+        show_separate: false,
+      },
+      {
+        name: 'NK Wasser',
+        category: 'nk',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"nk_wasser","params":{}}',
+        affects_mieterlos: false,
+        show_separate: false,
+      },
+      {
+        name: 'NK Müll',
+        category: 'nk',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"nk_muell","params":{}}',
+        affects_mieterlos: false,
+        show_separate: false,
+      },
+      {
+        name: 'NK Holz',
+        category: 'nk',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"nk_holz","params":{}}',
+        affects_mieterlos: false,
+        show_separate: false,
+      },
     ],
   },
   {
     label: 'Buchungskosten',
     templates: [
-      { name: 'Kurtaxe', category: 'kurtaxe', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"kurtaxe","params":{"minAge":16}}', affects_mieterlos: false, show_separate: true },
-      { name: 'Reinigung', category: 'reinigung', type: 'expense', paid_by: 'guest_platform', auto_calculate: true, calc_rule: '{"type":"reinigung","params":{"base":100,"dogSurcharge":25}}', affects_mieterlos: false, show_separate: true },
-      { name: 'Komfortpaket', category: 'komfortpaket', type: 'income', paid_by: 'guest_cash', auto_calculate: false, calc_rule: null, affects_mieterlos: false, show_separate: true },
+      {
+        name: 'Kurtaxe',
+        category: 'kurtaxe',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"kurtaxe","params":{"minAge":16}}',
+        affects_mieterlos: false,
+        show_separate: true,
+      },
+      {
+        name: 'Reinigung',
+        category: 'reinigung',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: true,
+        calc_rule: '{"type":"reinigung","params":{"base":100,"dogSurcharge":25}}',
+        affects_mieterlos: false,
+        show_separate: true,
+      },
+      {
+        name: 'Komfortpaket',
+        category: 'komfortpaket',
+        type: 'income',
+        paid_by: 'guest_cash',
+        auto_calculate: false,
+        calc_rule: null,
+        affects_mieterlos: false,
+        show_separate: true,
+      },
     ],
   },
   {
     label: 'Gebühren',
     templates: [
-      { name: 'Service Fee', category: 'gebuehr', type: 'expense', paid_by: 'guest_platform', auto_calculate: false, calc_rule: null, affects_mieterlos: false, show_separate: false },
-      { name: 'Zahlungsgebühr', category: 'gebuehr', type: 'expense', paid_by: 'guest_platform', auto_calculate: false, calc_rule: null, affects_mieterlos: true, show_separate: false },
+      {
+        name: 'Service Fee',
+        category: 'gebuehr',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: false,
+        calc_rule: null,
+        affects_mieterlos: false,
+        show_separate: false,
+      },
+      {
+        name: 'Zahlungsgebühr',
+        category: 'gebuehr',
+        type: 'expense',
+        paid_by: 'guest_platform',
+        auto_calculate: false,
+        calc_rule: null,
+        affects_mieterlos: true,
+        show_separate: false,
+      },
     ],
   },
 ];
 
-export default function PositionsEditor({ positions, onChange, calcContext, payoutAmount, rentalPrice, financeSummary }: PositionsEditorProps) {
+export default function PositionsEditor({
+  positions,
+  onChange,
+  calcContext,
+  payoutAmount,
+  rentalPrice,
+  financeSummary,
+}: PositionsEditorProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [menuIndex, setMenuIndex] = useState<number | null>(null);
 
   // Resolve all positions
-  const resolved = useMemo(() => resolvePositions(positions, calcContext), [positions, calcContext]);
+  const resolved = useMemo(
+    () => resolvePositions(positions, calcContext),
+    [positions, calcContext],
+  );
   const summary = useMemo(() => summarizePositions(resolved), [resolved]);
 
   // Calculate financial summary
@@ -103,7 +213,7 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
   const provision = isPrivate ? 0 : mieterlos * 0.1;
   const gewinn = payout + summary.totalIncome - totalExpenses - provision;
 
-  const addFromTemplate = (template: typeof TEMPLATE_GROUPS[0]['templates'][0]) => {
+  const addFromTemplate = (template: (typeof TEMPLATE_GROUPS)[0]['templates'][0]) => {
     const newPos: BookingPosition = {
       booking_id: 0,
       name: template.name,
@@ -151,7 +261,7 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
   };
 
   const updatePosition = (index: number, updates: Partial<BookingPosition>) => {
-    const updated = positions.map((p, i) => i === index ? { ...p, ...updates } : p);
+    const updated = positions.map((p, i) => (i === index ? { ...p, ...updates } : p));
     onChange(updated);
   };
 
@@ -170,7 +280,9 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
       {/* Payout/Rental Price Input */}
       <div>
         <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-          {calcContext.platform?.toLowerCase() === 'booking.com' ? 'Plattform-Auszahlung' : 'Mietpreis'}
+          {calcContext.platform?.toLowerCase() === 'booking.com'
+            ? 'Plattform-Auszahlung'
+            : 'Mietpreis'}
         </label>
         <div className="mt-1 text-2xl font-semibold font-mono text-gray-900 tabular-nums">
           {formatCurrency(payout || rentalPrice || 0)}
@@ -203,20 +315,29 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
                   onClick={() => setEditingIndex(isEditing ? null : index)}
                 >
                   <Icon className="w-4 h-4 text-gray-300 shrink-0" />
-                  <span className="text-sm text-gray-900 flex-1 min-w-0 truncate">{pos.name || 'Neue Position'}</span>
+                  <span className="text-sm text-gray-900 flex-1 min-w-0 truncate">
+                    {pos.name || 'Neue Position'}
+                  </span>
                   <span className="text-sm font-mono text-gray-900 tabular-nums shrink-0">
                     {formatCurrency(resolvedPos?.resolvedAmount || pos.amount || 0)}
                   </span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded ${pos.type === 'expense' ? 'text-gray-500' : 'text-green-700 bg-green-50'}`}>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded ${pos.type === 'expense' ? 'text-gray-500' : 'text-green-700 bg-green-50'}`}
+                  >
                     {pos.type === 'expense' ? 'Ausgabe' : 'Einnahme'}
                   </span>
                   <span className="text-xs text-gray-400">{PAID_BY_LABELS[pos.paid_by]}</span>
                   {pos.auto_calculate && (
-                    <span className="text-xs text-gray-400 bg-gray-100 rounded px-1 py-0.5">auto</span>
+                    <span className="text-xs text-gray-400 bg-gray-100 rounded px-1 py-0.5">
+                      auto
+                    </span>
                   )}
                   <div className="admin-row-actions relative">
                     <button
-                      onClick={(e) => { e.stopPropagation(); setMenuIndex(menuIndex === index ? null : index); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuIndex(menuIndex === index ? null : index);
+                      }}
                       className="text-gray-400 hover:text-gray-600 p-1 rounded"
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -224,13 +345,20 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
                     {menuIndex === index && (
                       <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[160px]">
                         <button
-                          onClick={(e) => { e.stopPropagation(); setEditingIndex(index); setMenuIndex(null); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingIndex(index);
+                            setMenuIndex(null);
+                          }}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           Bearbeiten
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); deletePosition(index); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePosition(index);
+                          }}
                           className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
                           Löschen
@@ -298,14 +426,16 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
                       {group.label}
                     </div>
                     {group.templates.map((template) => {
-                      const exists = positions.some(p => p.name === template.name);
+                      const exists = positions.some((p) => p.name === template.name);
                       return (
                         <button
                           key={template.name}
                           onClick={() => !exists && addFromTemplate(template)}
                           disabled={exists}
                           className={`w-full text-left px-4 py-2 text-sm ${
-                            exists ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'
+                            exists
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
                           {template.name} {exists && '(bereits vorhanden)'}
@@ -322,17 +452,40 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
 
       {/* Click-away handler for dropdown */}
       {(showDropdown || menuIndex !== null) && (
-        <div className="fixed inset-0 z-[5]" onClick={() => { setShowDropdown(false); setShowTemplates(false); setMenuIndex(null); }} />
+        <div
+          className="fixed inset-0 z-[5]"
+          onClick={() => {
+            setShowDropdown(false);
+            setShowTemplates(false);
+            setMenuIndex(null);
+          }}
+        />
       )}
 
       {/* Summary */}
       <div className="border-t border-gray-100 pt-4 space-y-2">
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Zusammenfassung</h4>
+        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          Zusammenfassung
+        </h4>
         <div className="space-y-1.5">
-          <SummaryRow label="Gesamteinzahlung" amount={financeSummary?.gesamteinzahlung ?? (payout + summary.barTotal + summary.directTotal + summary.totalIncome)} />
-          <SummaryRow label="Kalkulierte Kosten" amount={-(financeSummary?.gesamtbelastung ?? totalExpenses)} muted />
+          <SummaryRow
+            label="Gesamteinzahlung"
+            amount={
+              financeSummary?.gesamteinzahlung ??
+              payout + summary.barTotal + summary.directTotal + summary.totalIncome
+            }
+          />
+          <SummaryRow
+            label="Kalkulierte Kosten"
+            amount={-(financeSummary?.gesamtbelastung ?? totalExpenses)}
+            muted
+          />
           <SummaryRow label="Mieterlös" amount={financeSummary?.mieterlos ?? mieterlos} />
-          <SummaryRow label={`Provision (10%)`} amount={-(financeSummary?.provision ?? provision)} muted />
+          <SummaryRow
+            label={`Provision (10%)`}
+            amount={-(financeSummary?.provision ?? provision)}
+            muted
+          />
           <div className="border-t border-gray-200 pt-2">
             <SummaryRow label="Ertrag" amount={financeSummary?.gesamtertrag ?? gewinn} bold />
           </div>
@@ -341,7 +494,9 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
         {/* Bar items */}
         {summary.barItems.length > 0 && (
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Barzahlungen</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+              Barzahlungen
+            </p>
             {summary.barItems.map((item, i) => (
               <SummaryRow key={i} label={item.name} amount={item.amount} muted />
             ))}
@@ -353,7 +508,13 @@ export default function PositionsEditor({ positions, onChange, calcContext, payo
   );
 }
 
-function SummaryRow({ label, amount, bold, highlight, muted }: {
+function SummaryRow({
+  label,
+  amount,
+  bold,
+  highlight,
+  muted,
+}: {
   label: string;
   amount: number;
   bold?: boolean;
@@ -362,21 +523,36 @@ function SummaryRow({ label, amount, bold, highlight, muted }: {
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className={`text-sm ${muted ? 'text-gray-400' : bold ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
+      <span
+        className={`text-sm ${muted ? 'text-gray-400' : bold ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}
+      >
         {label}
       </span>
-      <span className={`text-sm font-mono tabular-nums ${
-        highlight ? 'text-gray-900 font-medium' :
-        bold ? 'text-gray-900 font-semibold' :
-        muted ? 'text-gray-400' : 'text-gray-900'
-      }`}>
-        {amount < 0 ? '−' : ''}{formatCurrency(Math.abs(amount))}
+      <span
+        className={`text-sm font-mono tabular-nums ${
+          highlight
+            ? 'text-gray-900 font-medium'
+            : bold
+              ? 'text-gray-900 font-semibold'
+              : muted
+                ? 'text-gray-400'
+                : 'text-gray-900'
+        }`}
+      >
+        {amount < 0 ? '−' : ''}
+        {formatCurrency(Math.abs(amount))}
       </span>
     </div>
   );
 }
 
-function InlineEditor({ position, resolvedPosition, onChange, onDelete, onClose }: {
+function InlineEditor({
+  position,
+  resolvedPosition,
+  onChange,
+  onDelete,
+  onClose,
+}: {
   position: BookingPosition;
   resolvedPosition?: ResolvedPosition;
   onChange: (updates: Partial<BookingPosition>) => void;
@@ -407,7 +583,11 @@ function InlineEditor({ position, resolvedPosition, onChange, onDelete, onClose 
             <input
               type="number"
               step="0.01"
-              value={position.auto_calculate ? Math.round((resolvedPosition?.resolvedAmount || 0) * 100) / 100 : position.amount}
+              value={
+                position.auto_calculate
+                  ? Math.round((resolvedPosition?.resolvedAmount || 0) * 100) / 100
+                  : position.amount
+              }
               onChange={(e) => onChange({ amount: parseFloat(e.target.value) || 0 })}
               disabled={position.auto_calculate}
               className={`border border-gray-200 rounded-lg px-3 py-2 text-sm w-full font-mono text-right focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none ${
@@ -482,7 +662,9 @@ function InlineEditor({ position, resolvedPosition, onChange, onDelete, onClose 
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
       >
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? '' : '-rotate-90'}`} />
+        <ChevronDown
+          className={`w-3.5 h-3.5 transition-transform ${showAdvanced ? '' : '-rotate-90'}`}
+        />
         Erweitert
       </button>
 
@@ -495,7 +677,9 @@ function InlineEditor({ position, resolvedPosition, onChange, onDelete, onClose 
               onChange={(e) => onChange({ affects_mieterlos: e.target.checked })}
               className="rounded border-gray-300 text-green-600 focus:ring-green-500"
             />
-            <span className="text-xs text-gray-600">Wirkt sich auf Mieterlös aus (beeinflusst Provision)</span>
+            <span className="text-xs text-gray-600">
+              Wirkt sich auf Mieterlös aus (beeinflusst Provision)
+            </span>
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -520,14 +704,23 @@ function InlineEditor({ position, resolvedPosition, onChange, onDelete, onClose 
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-2">
-        <button onClick={onDelete} className="text-sm text-red-500 hover:bg-red-50 rounded-lg px-3 py-1.5 transition-colors">
+        <button
+          onClick={onDelete}
+          className="text-sm text-red-500 hover:bg-red-50 rounded-lg px-3 py-1.5 transition-colors"
+        >
           Löschen
         </button>
         <div className="flex items-center gap-2">
-          <button onClick={onClose} className="text-sm text-gray-500 hover:bg-gray-100 rounded-lg px-3 py-1.5 transition-colors">
+          <button
+            onClick={onClose}
+            className="text-sm text-gray-500 hover:bg-gray-100 rounded-lg px-3 py-1.5 transition-colors"
+          >
             Abbrechen
           </button>
-          <button onClick={onClose} className="text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg px-4 py-1.5 transition-colors font-medium">
+          <button
+            onClick={onClose}
+            className="text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg px-4 py-1.5 transition-colors font-medium"
+          >
             Fertig
           </button>
         </div>

@@ -46,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     if (response.ok) {
-      const data = await response.json() as { posts?: BlogPost[] };
+      const data = (await response.json()) as { posts?: BlogPost[] };
       if (data.posts && data.posts.length > 0) {
         blogPages = data.posts.map((post) => ({
           url: `${baseUrl}/blog/${post.slug}`,

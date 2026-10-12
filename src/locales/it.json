@@ -92,7 +92,14 @@
     },
     "kitchen": {
       "title": "Cucina",
-      "items": ["Cucina completamente attrezzata", "Lavastoviglie", "Frigorifero con congelatore", "Macchina del caffè", "Bollitore", "Tostapane"]
+      "items": [
+        "Cucina completamente attrezzata",
+        "Lavastoviglie",
+        "Frigorifero con congelatore",
+        "Macchina del caffè",
+        "Bollitore",
+        "Tostapane"
+      ]
     },
     "bathroom": {
       "title": "Bagno",
@@ -100,15 +107,33 @@
     },
     "sauna": {
       "title": "Sauna",
-      "items": ["Annesso sauna privato", "Sauna finlandese", "Sala relax con lettini", "Doccia a pioggia", "Terrazza privata", "Riscaldamento a pavimento"]
+      "items": [
+        "Annesso sauna privato",
+        "Sauna finlandese",
+        "Sala relax con lettini",
+        "Doccia a pioggia",
+        "Terrazza privata",
+        "Riscaldamento a pavimento"
+      ]
     },
     "living": {
       "title": "Zona Giorno",
-      "items": ["Accogliente area salotto", "Tavolo da pranzo", "Moderna stufa a pellet", "TV satellitare", "WiFi"]
+      "items": [
+        "Accogliente area salotto",
+        "Tavolo da pranzo",
+        "Moderna stufa a pellet",
+        "TV satellitare",
+        "WiFi"
+      ]
     },
     "outdoor": {
       "title": "Area Esterna",
-      "items": ["Balcone panoramico", "Mobili da giardino", "Parcheggio privato", "Cantina per sci e slittini"]
+      "items": [
+        "Balcone panoramico",
+        "Mobili da giardino",
+        "Parcheggio privato",
+        "Cantina per sci e slittini"
+      ]
     }
   },
   "umgebung": {
@@ -246,7 +271,16 @@
     },
     "included": {
       "title": "Incluso",
-      "items": ["Elettricità (20 kWh/notte)", "Riscaldamento", "Acqua", "Smaltimento rifiuti", "Pulizia finale (senza cane)", "WiFi", "Tassa di soggiorno (adulti)", "Uso sauna"]
+      "items": [
+        "Elettricità (20 kWh/notte)",
+        "Riscaldamento",
+        "Acqua",
+        "Smaltimento rifiuti",
+        "Pulizia finale (senza cane)",
+        "WiFi",
+        "Tassa di soggiorno (adulti)",
+        "Uso sauna"
+      ]
     },
     "form": {
       "title": "Richiesta di Prenotazione",
@@ -361,16 +395,31 @@
     },
     "kitchen": {
       "title": "Cucina",
-      "items": ["Completamente attrezzata", "Lavastoviglie", "Piano cottura & forno", "Microonde con grill"]
+      "items": [
+        "Completamente attrezzata",
+        "Lavastoviglie",
+        "Piano cottura & forno",
+        "Microonde con grill"
+      ]
     },
     "rooms": {
       "title": "Camere da Letto",
-      "items": ["1 camera soppalco (2 letti singoli)", "1 camera matrimoniale", "1 camera con 2 letti a castello", "Posto per 5 persone"],
+      "items": [
+        "1 camera soppalco (2 letti singoli)",
+        "1 camera matrimoniale",
+        "1 camera con 2 letti a castello",
+        "Posto per 5 persone"
+      ],
       "hint": "Portare biancheria propria o prenotare pacchetto comfort"
     },
     "sauna": {
       "title": "Sauna & Wellness",
-      "items": ["Sauna con sanarium", "Sala relax con lettini", "Doccia extra con tubo Kneipp", "Riscaldamento a pavimento"]
+      "items": [
+        "Sauna con sanarium",
+        "Sala relax con lettini",
+        "Doccia extra con tubo Kneipp",
+        "Riscaldamento a pavimento"
+      ]
     },
     "bathroom": {
       "title": "Bagno",
@@ -379,7 +428,12 @@
     },
     "outdoor": {
       "title": "Area Esterna",
-      "items": ["Balcone di 15m² con scala esterna", "Terreno di 650m²", "2 posti auto", "BBQ & mobili da giardino"]
+      "items": [
+        "Balcone di 15m² con scala esterna",
+        "Terreno di 650m²",
+        "2 posti auto",
+        "BBQ & mobili da giardino"
+      ]
     },
     "equipment": {
       "title": "Dotazioni",
@@ -387,7 +441,12 @@
     },
     "location": {
       "title": "Posizione",
-      "items": ["Comprensorio Falkert in loco", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Molti sentieri escursionistici"]
+      "items": [
+        "Comprensorio Falkert in loco",
+        "Turracher Höhe (20 min.)",
+        "Bad Kleinkirchheim (25 min.)",
+        "Molti sentieri escursionistici"
+      ]
     }
   },
   "blog": {

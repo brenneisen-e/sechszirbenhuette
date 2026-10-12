@@ -44,7 +44,9 @@ export function CostTable({ season, weeks, pricing }: CostTableProps) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="px-4 py-2 text-gray-600">Kurtaxe ({formatCurrency(pricing.kurtaxe)}/Tag/Erw.)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Kurtaxe ({formatCurrency(pricing.kurtaxe)}/Tag/Erw.)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCosts(season, weeks, a, pricing);
                 return (
@@ -68,7 +70,9 @@ export function CostTable({ season, weeks, pricing }: CostTableProps) {
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Wasser ({formatCurrency(pricing.water)}/Person/Woche)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Wasser ({formatCurrency(pricing.water)}/Person/Woche)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCosts(season, weeks, a, pricing);
                 return (
@@ -79,7 +83,9 @@ export function CostTable({ season, weeks, pricing }: CostTableProps) {
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Müll ({formatCurrency(pricing.trash)}/Sack)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Müll ({formatCurrency(pricing.trash)}/Sack)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCosts(season, weeks, a, pricing);
                 return (
@@ -90,7 +96,9 @@ export function CostTable({ season, weeks, pricing }: CostTableProps) {
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Strom ({formatCurrency(pricing.electricity)}/kWh)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Strom ({formatCurrency(pricing.electricity)}/kWh)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCosts(season, weeks, a, pricing);
                 return (
@@ -180,7 +188,9 @@ export function DayBasedCostTable({ season, days, pricing }: DayBasedCostTablePr
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="px-4 py-2 text-gray-600">Kurtaxe ({formatCurrency(pricing.kurtaxe)}/Tag/Erw.)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Kurtaxe ({formatCurrency(pricing.kurtaxe)}/Tag/Erw.)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCostsForDays(season, days, a, pricing);
                 return (
@@ -204,7 +214,9 @@ export function DayBasedCostTable({ season, days, pricing }: DayBasedCostTablePr
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Wasser ({formatCurrency(pricing.water)}/Person/Woche)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Wasser ({formatCurrency(pricing.water)}/Person/Woche)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCostsForDays(season, days, a, pricing);
                 return (
@@ -215,7 +227,9 @@ export function DayBasedCostTable({ season, days, pricing }: DayBasedCostTablePr
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Müll ({formatCurrency(pricing.trash)}/Sack)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Müll ({formatCurrency(pricing.trash)}/Sack)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCostsForDays(season, days, a, pricing);
                 return (
@@ -227,7 +241,9 @@ export function DayBasedCostTable({ season, days, pricing }: DayBasedCostTablePr
               })}
             </tr>
             <tr>
-              <td className="px-4 py-2 text-gray-600">Strom ({formatCurrency(pricing.electricity)}/kWh)</td>
+              <td className="px-4 py-2 text-gray-600">
+                Strom ({formatCurrency(pricing.electricity)}/kWh)
+              </td>
               {ADULTS_OPTIONS.map((a) => {
                 const costs = calculateCostsForDays(season, days, a, pricing);
                 return (

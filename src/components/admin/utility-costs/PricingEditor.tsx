@@ -29,7 +29,6 @@ export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
   };
 
   const handleSave = async () => {
-
     setSaving(true);
     setSaveError('');
     try {
@@ -59,39 +58,53 @@ export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
       </div>
 
       {saveError && (
-        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{saveError}</div>
+        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+          {saveError}
+        </div>
       )}
 
       {isEditing ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Kurtaxe (€/Tag/Erw.)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Kurtaxe (€/Tag/Erw.)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={editedPricing.kurtaxe}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, kurtaxe: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, kurtaxe: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Holz (€/Bündel)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Holz (€/Bündel)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={editedPricing.holz}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, holz: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, holz: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Wasser (€/P./Wo.)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Wasser (€/P./Wo.)
+              </label>
               <input
                 type="number"
                 step="0.01"
                 value={editedPricing.water}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, water: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, water: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
@@ -101,7 +114,9 @@ export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
                 type="number"
                 step="0.01"
                 value={editedPricing.trash}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, trash: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, trash: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
@@ -111,17 +126,23 @@ export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
                 type="number"
                 step="0.01"
                 value={editedPricing.electricity}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, electricity: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, electricity: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Reinigung (€/Buchung)</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Reinigung (€/Buchung)
+              </label>
               <input
                 type="number"
                 step="1"
                 value={editedPricing.reinigung}
-                onChange={(e) => setEditedPricing((p) => ({ ...p, reinigung: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditedPricing((p) => ({ ...p, reinigung: parseFloat(e.target.value) || 0 }))
+                }
                 className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-gray-400"
               />
             </div>
@@ -148,27 +169,39 @@ export function PricingEditor({ pricing, onSave }: PricingEditorProps) {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
           <div>
             <span className="text-gray-500">Kurtaxe:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.kurtaxe)}/Tag</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.kurtaxe)}/Tag
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Holz:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.holz)}/Bündel</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.holz)}/Bündel
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Wasser:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.water)}/P./Wo.</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.water)}/P./Wo.
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Müll:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.trash)}/Sack</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.trash)}/Sack
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Strom:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.electricity)}/kWh</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.electricity)}/kWh
+            </span>
           </div>
           <div>
             <span className="text-gray-500">Reinigung:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(pricing.reinigung)}/Buchung</span>
+            <span className="ml-2 font-medium text-gray-900">
+              {formatCurrency(pricing.reinigung)}/Buchung
+            </span>
           </div>
         </div>
       )}

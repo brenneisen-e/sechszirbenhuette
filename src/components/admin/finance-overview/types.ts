@@ -13,11 +13,11 @@ export interface FinanceGuest {
 
   // === FINANCIAL DATA - ONLY FROM BOOKINGS TABLE ===
   // All financial calculations use booking_additional_costs JSON
-  rental_price: number;  // From bookings.rental_price
-  booking_additional_costs?: string | null;  // JSON with payout_amount, fees, etc.
-  utilities_cash?: number;  // From bookings.utilities_cash
-  cleaning_cash?: number;   // From bookings.cleaning_cash
-  kurtaxe_cash?: number;    // From bookings.kurtaxe_cash
+  rental_price: number; // From bookings.rental_price
+  booking_additional_costs?: string | null; // JSON with payout_amount, fees, etc.
+  utilities_cash?: number; // From bookings.utilities_cash
+  cleaning_cash?: number; // From bookings.cleaning_cash
+  kurtaxe_cash?: number; // From bookings.kurtaxe_cash
 
   // === DEPRECATED - NOT USED FOR CALCULATIONS ===
   // These fields exist in guests table but are NOT used for financial calculations
@@ -31,7 +31,7 @@ export interface FinanceGuest {
 
   // === NON-FINANCIAL GUEST DATA ===
   additional_costs: string | null; // NK notes (e.g., "vor Ort")
-  final_cleaning: string | null;   // ER notes (e.g., "vor Ort")
+  final_cleaning: string | null; // ER notes (e.g., "vor Ort")
   deposit_amount: number;
   deposit_paid: number;
   final_payment: number;

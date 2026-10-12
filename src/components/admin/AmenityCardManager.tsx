@@ -65,13 +65,22 @@ export function AmenityCardManager() {
         fetch('/api/admin/amenity-images'),
         fetch('/api/admin/media'),
       ]);
-      const assignData = await assignRes.json() as { assignments?: Assignment[] };
-      const mediaData = await mediaRes.json() as { media?: MediaRecord[] };
+      const assignData = (await assignRes.json()) as { assignments?: Assignment[] };
+      const mediaData = (await mediaRes.json()) as { media?: MediaRecord[] };
       setAssignments(assignData.assignments || []);
-      const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
-      setAllMedia((mediaData.media || []).filter((m: MediaRecord) =>
-        m.url && !m.url.includes('video') && !HERO_CATS.has(m.category || '')
-      ));
+      const HERO_CATS = new Set([
+        'hero',
+        'hero-thumbnail',
+        'hero-1080p',
+        'hero-720p',
+        'hero-480p',
+        'hero-360p',
+      ]);
+      setAllMedia(
+        (mediaData.media || []).filter(
+          (m: MediaRecord) => m.url && !m.url.includes('video') && !HERO_CATS.has(m.category || ''),
+        ),
+      );
     } catch {
       // ignore
     } finally {
@@ -126,10 +135,10 @@ export function AmenityCardManager() {
     const card = CARD_KEYS.find((c) => c.key === cardKey);
     const suggested = card?.suggestedCategory || '';
     const cats = Object.keys(groupedMedia).sort((a, b) =>
-      (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b)
+      (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b),
     );
     if (suggested && groupedMedia[suggested]) {
-      return [suggested, ...cats.filter(c => c !== suggested)];
+      return [suggested, ...cats.filter((c) => c !== suggested)];
     }
     return cats;
   };
@@ -147,7 +156,9 @@ export function AmenityCardManager() {
     <div className="space-y-3">
       <div>
         <h3 className="text-sm font-semibold text-gray-700">Ferienhaus-Karten Bilder</h3>
-        <p className="text-xs text-gray-400">Bilder für die Ausstattungs-Karten auf der Startseite</p>
+        <p className="text-xs text-gray-400">
+          Bilder für die Ausstattungs-Karten auf der Startseite
+        </p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -211,11 +222,12 @@ export function AmenityCardManager() {
                 <h3 className="font-semibold text-gray-900">
                   Bild wählen: {CARD_KEYS.find((c) => c.key === selectingFor)?.label}
                 </h3>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Klicke auf ein Bild um es zuzuweisen
-                </p>
+                <p className="text-xs text-gray-400 mt-0.5">Klicke auf ein Bild um es zuzuweisen</p>
               </div>
-              <button onClick={() => setSelectingFor(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setSelectingFor(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
@@ -228,21 +240,29 @@ export function AmenityCardManager() {
                   const isSuggested = card?.suggestedCategory === cat;
                   return (
                     <div key={cat}>
-                      <h4 className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
-                        isSuggested ? 'text-green-600' : 'text-gray-500'
-                      }`}>
+                      <h4
+                        className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+                          isSuggested ? 'text-green-600' : 'text-gray-500'
+                        }`}
+                      >
                         {CATEGORY_LABELS[cat] || cat} ({items.length})
-                        {isSuggested && <span className="ml-1 normal-case text-green-500">— empfohlen</span>}
+                        {isSuggested && (
+                          <span className="ml-1 normal-case text-green-500">— empfohlen</span>
+                        )}
                       </h4>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                         {items.map((m) => {
-                          const isAssigned = assignments.some((a) => a.card_key === selectingFor && a.media_id === m.id);
+                          const isAssigned = assignments.some(
+                            (a) => a.card_key === selectingFor && a.media_id === m.id,
+                          );
                           return (
                             <button
                               key={m.id}
                               onClick={() => assignImage(selectingFor, m.id)}
                               className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition ${
-                                isAssigned ? 'border-green-500 ring-2 ring-green-200' : 'border-transparent hover:border-gray-300'
+                                isAssigned
+                                  ? 'border-green-500 ring-2 ring-green-200'
+                                  : 'border-transparent hover:border-gray-300'
                               }`}
                             >
                               <Image

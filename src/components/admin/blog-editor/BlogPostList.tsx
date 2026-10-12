@@ -31,7 +31,6 @@ const formatDate = (dateString: string | null) => {
 export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
   return (
     <div className="space-y-4">
-
       {posts.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
@@ -76,19 +75,25 @@ export function BlogPostList({ posts, onEdit, onDelete }: BlogPostListProps) {
                 {post.status === 'published' ? 'Veröffentlicht' : 'Entwurf'}
               </span>
             </div>
-            {post.excerpt && (
-              <p className="text-sm text-gray-500 truncate">{post.excerpt}</p>
-            )}
+            {post.excerpt && <p className="text-sm text-gray-500 truncate">{post.excerpt}</p>}
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 {formatDate(post.published_at || post.created_at)}
               </span>
               <span className="flex items-center gap-1">
-                {post.layout === 'carousel' ? <LayoutGrid className="w-3 h-3" /> :
-                 post.layout === 'tabs' ? <Layers className="w-3 h-3" /> :
-                 <List className="w-3 h-3" />}
-                {post.layout === 'carousel' ? 'Karussell' : post.layout === 'tabs' ? 'Tabs' : 'Standard'}
+                {post.layout === 'carousel' ? (
+                  <LayoutGrid className="w-3 h-3" />
+                ) : post.layout === 'tabs' ? (
+                  <Layers className="w-3 h-3" />
+                ) : (
+                  <List className="w-3 h-3" />
+                )}
+                {post.layout === 'carousel'
+                  ? 'Karussell'
+                  : post.layout === 'tabs'
+                    ? 'Tabs'
+                    : 'Standard'}
               </span>
             </div>
           </div>

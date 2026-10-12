@@ -31,7 +31,7 @@ import { nightsBetween } from './formatting';
  * (not rentalPrice * 0.10). See financeCalculations.ts.
  * NOT imported anywhere in the codebase.
  */
-export const COMMISSION_RATE = 0.10;
+export const COMMISSION_RATE = 0.1;
 
 /**
  * Kurtaxe (tourist tax) per adult per night
@@ -40,7 +40,7 @@ export const COMMISSION_RATE = 0.10;
  * See positionCalculator.ts and utility-costs/calculations.ts.
  * NOT imported anywhere in the codebase.
  */
-export const KURTAXE_PER_ADULT_PER_NIGHT = 3.10;
+export const KURTAXE_PER_ADULT_PER_NIGHT = 3.1;
 
 /**
  * Default cleaning cost
@@ -210,9 +210,7 @@ export function calculateRemainingPayment(rentalPrice: number, depositAmount: nu
  * anywhere in the codebase. Consider moving to a general-purpose utils file
  * if needed in new code.
  */
-export function groupByQuarter<T extends { arrival_date?: string }>(
-  items: T[],
-): Map<string, T[]> {
+export function groupByQuarter<T extends { arrival_date?: string }>(items: T[]): Map<string, T[]> {
   return items.reduce((acc, item) => {
     if (!item.arrival_date) return acc;
     const date = new Date(item.arrival_date);
@@ -233,9 +231,7 @@ export function groupByQuarter<T extends { arrival_date?: string }>(
  * anywhere in the codebase. Consider moving to a general-purpose utils file
  * if needed in new code.
  */
-export function groupByMonth<T extends { arrival_date?: string }>(
-  items: T[],
-): Map<string, T[]> {
+export function groupByMonth<T extends { arrival_date?: string }>(items: T[]): Map<string, T[]> {
   return items.reduce((acc, item) => {
     if (!item.arrival_date) return acc;
     const date = new Date(item.arrival_date);
@@ -268,19 +264,22 @@ export interface BookingTotals {
  * @deprecated Uses legacy calculateUtilityCosts and calculateMietertrag
  * with outdated rates. NOT imported anywhere in the codebase.
  */
-export function calculateBookingTotals<T extends {
-  rental_price?: number | null;
-  arrival_date?: string;
-  departure_date?: string;
-  adults?: number;
-  children?: number;
-}>(bookings: T[], settings?: UtilityCostSettings): BookingTotals {
+export function calculateBookingTotals<
+  T extends {
+    rental_price?: number | null;
+    arrival_date?: string;
+    departure_date?: string;
+    adults?: number;
+    children?: number;
+  },
+>(bookings: T[], settings?: UtilityCostSettings): BookingTotals {
   return bookings.reduce(
     (acc, booking) => {
       const rentalPrice = booking.rental_price ?? 0;
-      const nights = booking.arrival_date && booking.departure_date
-        ? calculateNights(booking.arrival_date, booking.departure_date)
-        : 0;
+      const nights =
+        booking.arrival_date && booking.departure_date
+          ? calculateNights(booking.arrival_date, booking.departure_date)
+          : 0;
       const adults = booking.adults ?? 2;
       const children = booking.children ?? 0;
 

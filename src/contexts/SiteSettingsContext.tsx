@@ -8,7 +8,7 @@ export interface SiteSettings {
   headingFont: string;
   bodyFont: string;
   headingSize: string; // e.g., "48", "56", "64", "72"
-  bodySize: string;    // e.g., "14", "16", "18", "20"
+  bodySize: string; // e.g., "14", "16", "18", "20"
   sectionSpacing: 'compact' | 'normal' | 'spacious';
 }
 
@@ -53,7 +53,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     async function fetchSettings() {
       try {
         const response = await fetch('/api/site-settings');
-        const data = await response.json() as { settings?: Record<string, string> };
+        const data = (await response.json()) as { settings?: Record<string, string> };
         if (data.settings) {
           setSettings({
             ...defaultSettings,
@@ -87,7 +87,10 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     // Sizes (in pixels)
     root.style.setProperty('--heading-size', settings.headingSize + 'px');
     root.style.setProperty('--body-size', settings.bodySize + 'px');
-    root.style.setProperty('--section-spacing', sectionSpacingMap[settings.sectionSpacing] || '5rem');
+    root.style.setProperty(
+      '--section-spacing',
+      sectionSpacingMap[settings.sectionSpacing] || '5rem',
+    );
   }, [settings, isMounted]);
 
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {

@@ -17,22 +17,30 @@ export default function ImpressumPage() {
         <div className="prose prose-gray max-w-none">
           <h2>{isDE ? 'Angaben gemäß § 5 TMG' : 'Information according to § 5 TMG'}</h2>
           <p>
-            {SITE_CONFIG.owners}<br />
-            {SITE_CONFIG.address.street}<br />
-            {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}<br />
+            {SITE_CONFIG.owners}
+            <br />
+            {SITE_CONFIG.address.street}
+            <br />
+            {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}
+            <br />
             {SITE_CONFIG.address.country}
           </p>
 
           <h2>{isDE ? 'Kontakt' : 'Contact'}</h2>
           <p>
-            {isDE ? 'Telefon' : 'Phone'}: {SITE_CONFIG.phone}<br />
+            {isDE ? 'Telefon' : 'Phone'}: {SITE_CONFIG.phone}
+            <br />
             E-Mail: {SITE_CONFIG.email}
           </p>
 
-          <h2>{isDE ? 'Konzeption, Gestaltung und Programmierung' : 'Concept, Design and Development'}</h2>
+          <h2>
+            {isDE ? 'Konzeption, Gestaltung und Programmierung' : 'Concept, Design and Development'}
+          </h2>
           <p>
-            agentur etcetera GmbH & Co.KG<br />
-            Marketing & Kommunikation<br />
+            agentur etcetera GmbH & Co.KG
+            <br />
+            Marketing & Kommunikation
+            <br />
             <a href="https://www.agentur-etcetera.de" target="_blank" rel="noopener noreferrer">
               www.agentur-etcetera.de
             </a>

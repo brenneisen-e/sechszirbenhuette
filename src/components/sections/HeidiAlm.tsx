@@ -73,9 +73,7 @@ export function HeidiAlm() {
                 className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg"
               >
                 <div className="flex-shrink-0 w-2 h-2 rounded-full bg-logo-green" />
-                <span className="text-gray-700">
-                  {t.winter.activities[activity]}
-                </span>
+                <span className="text-gray-700">{t.winter.activities[activity]}</span>
               </motion.div>
             ))}
           </div>

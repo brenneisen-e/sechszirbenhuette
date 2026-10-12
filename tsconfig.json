@@ -1,13 +1,7 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "types": [
-      "@cloudflare/workers-types"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["@cloudflare/workers-types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -25,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "target": "ES2022",
 
@@ -39,13 +31,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleDetection": "force"
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

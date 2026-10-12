@@ -15,16 +15,16 @@ function getAdminPassword(env: Env): string | undefined {
 const ICAL_SOURCES = [
   {
     name: 'Feratel',
-    url: 'https://ical.deskline.net/KTN/services/35981ad0-78ba-48f7-9ebc-3260e1ea446b/4d3167ef-4067-4c33-9483-a005b3dbdd17.ics'
+    url: 'https://ical.deskline.net/KTN/services/35981ad0-78ba-48f7-9ebc-3260e1ea446b/4d3167ef-4067-4c33-9483-a005b3dbdd17.ics',
   },
   {
     name: 'FeWo-Direkt',
-    url: 'https://www.fewo-direkt.de/icalendar/69e49db18b094f38956a712f7c455189.ics?nonTentative'
+    url: 'https://www.fewo-direkt.de/icalendar/69e49db18b094f38956a712f7c455189.ics?nonTentative',
   },
   {
     name: 'Booking.com',
-    url: 'https://ical.booking.com/v1/export?t=f5f44162-4f91-434b-bf41-73381f708169'
-  }
+    url: 'https://ical.booking.com/v1/export?t=f5f44162-4f91-434b-bf41-73381f708169',
+  },
 ];
 
 interface BookedPeriod {
@@ -73,8 +73,10 @@ function parseICalData(icalData: string, sourceName: string): BookedPeriod[] {
       events.push({
         start,
         end,
-        summary: summaryMatch?.[1] ? `[${sourceName}] ${summaryMatch[1].trim()}` : `[${sourceName}]`,
-        source: sourceName
+        summary: summaryMatch?.[1]
+          ? `[${sourceName}] ${summaryMatch[1].trim()}`
+          : `[${sourceName}]`,
+        source: sourceName,
       });
     }
   }
@@ -83,20 +85,24 @@ function parseICalData(icalData: string, sourceName: string): BookedPeriod[] {
 }
 
 // Fetch iCal data from a single source
-async function fetchICalFromSource(source: { name: string; url: string }): Promise<{ periods: BookedPeriod[]; error?: string }> {
+async function fetchICalFromSource(source: {
+  name: string;
+  url: string;
+}): Promise<{ periods: BookedPeriod[]; error?: string }> {
   try {
     // Use browser-like headers to avoid 403 blocking
     const response = await fetch(source.url, {
       headers: {
-        'Accept': 'text/calendar, text/plain, */*',
+        Accept: 'text/calendar, text/plain, */*',
         'Accept-Language': 'de-DE,de;q=0.9,en;q=0.8',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        Pragma: 'no-cache',
       },
       // 10 second timeout
       signal: AbortSignal.timeout(10000),
-      redirect: 'follow'
+      redirect: 'follow',
     });
 
     console.log(`${source.name} iCal response status:`, response.status);
@@ -109,7 +115,10 @@ async function fetchICalFromSource(source: { name: string; url: string }): Promi
         console.log(`${source.name}: Found ${periods.length} bookings`);
         return { periods };
       }
-      console.log(`${source.name} response not iCal format, first 200 chars:`, data.substring(0, 200));
+      console.log(
+        `${source.name} response not iCal format, first 200 chars:`,
+        data.substring(0, 200),
+      );
       return { periods: [], error: `${source.name}: Ungültiges Format` };
     } else {
       console.log(`${source.name} iCal response not OK:`, response.status, response.statusText);
@@ -129,9 +138,7 @@ export async function GET(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
-    const results = await Promise.all(
-      ICAL_SOURCES.map(source => fetchICalFromSource(source))
-    );
+    const results = await Promise.all(ICAL_SOURCES.map((source) => fetchICalFromSource(source)));
 
     const allPeriods: BookedPeriod[] = [];
     const successfulSources: string[] = [];
@@ -162,19 +169,21 @@ export async function GET(request: NextRequest) {
         success: response.success,
         sources: response.sources,
         periodCount: allPeriods.length,
-        errors: response.errors
+        errors: response.errors,
       });
     }
 
     return NextResponse.json(response);
-
   } catch (error) {
     console.error('GET /api/admin/feratel-calendar error:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json({
-      success: false,
-      bookedPeriods: [],
-      error: message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        bookedPeriods: [],
+        error: message,
+      },
+      { status: 500 },
+    );
   }
 }

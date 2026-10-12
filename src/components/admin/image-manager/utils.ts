@@ -36,7 +36,7 @@ export async function compressImage(file: File): Promise<Blob> {
             }
           },
           'image/jpeg',
-          quality
+          quality,
         );
       };
       tryCompress();
@@ -70,7 +70,9 @@ export async function calculateImageHash(imageSource: string | File): Promise<st
 
       const pixels: number[] = [];
       for (let i = 0; i < imageData.data.length; i += 4) {
-        const gray = ((imageData.data[i] ?? 0) + (imageData.data[i + 1] ?? 0) + (imageData.data[i + 2] ?? 0)) / 3;
+        const gray =
+          ((imageData.data[i] ?? 0) + (imageData.data[i + 1] ?? 0) + (imageData.data[i + 2] ?? 0)) /
+          3;
         pixels.push(gray);
       }
 
@@ -137,6 +139,7 @@ export function inferCategoryFromFilename(filename: string): string {
   if (lowerFilename.includes('bad') || lowerFilename.includes('sauna')) return 'bathroom';
   if (lowerFilename.includes('schlaf') || lowerFilename.includes('bett')) return 'bedrooms';
   if (lowerFilename.includes('wohn') || lowerFilename.includes('living')) return 'living';
-  if (lowerFilename.includes('umgebung') || lowerFilename.includes('landschaft')) return 'surroundings';
+  if (lowerFilename.includes('umgebung') || lowerFilename.includes('landschaft'))
+    return 'surroundings';
   return 'exterior';
 }

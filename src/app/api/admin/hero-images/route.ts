@@ -33,12 +33,10 @@ const VALID_RATIOS = ['21:9', '16:9', '4:5'];
 /** Ensure cf_image_id column exists on the hero_images table */
 async function ensureCfImageIdColumn(db: D1Database): Promise<void> {
   try {
-    await db.prepare("SELECT cf_image_id FROM hero_images LIMIT 1").first();
+    await db.prepare('SELECT cf_image_id FROM hero_images LIMIT 1').first();
   } catch {
     // Column doesn't exist - add it
-    await db.prepare(
-      "ALTER TABLE hero_images ADD COLUMN cf_image_id TEXT DEFAULT NULL"
-    ).run();
+    await db.prepare('ALTER TABLE hero_images ADD COLUMN cf_image_id TEXT DEFAULT NULL').run();
   }
 }
 
@@ -47,9 +45,9 @@ async function discoverAccountHash(db: D1Database): Promise<string | null> {
   // Check hero_images first, then images table as fallback
   for (const table of ['hero_images', 'images']) {
     try {
-      const row = await db.prepare(
-        `SELECT image_key FROM ${table} WHERE cf_image_id IS NOT NULL LIMIT 1`
-      ).first<{ image_key: string }>();
+      const row = await db
+        .prepare(`SELECT image_key FROM ${table} WHERE cf_image_id IS NOT NULL LIMIT 1`)
+        .first<{ image_key: string }>();
       if (row) {
         const parsed = parseImageUrl(row.image_key);
         if (parsed) return parsed.accountHash;
@@ -77,7 +75,10 @@ export async function GET() {
     const env = (ctx as { env: Env }).env;
 
     if (!env.DB) {
-      return NextResponse.json({ error: 'Database not configured', heroImages: [] }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Database not configured', heroImages: [] },
+        { status: 500 },
+      );
     }
 
     // Ensure table exists
@@ -91,7 +92,7 @@ export async function GET() {
     await ensureCfImageIdColumn(env.DB);
 
     const { results } = await env.DB.prepare(
-      'SELECT * FROM hero_images ORDER BY side ASC, aspect_ratio ASC'
+      'SELECT * FROM hero_images ORDER BY side ASC, aspect_ratio ASC',
     ).all<HeroImageRecord>();
 
     // Determine account hash for CF Images delivery URLs
@@ -103,7 +104,7 @@ export async function GET() {
 
     const heroImages = (results || []).map((img: HeroImageRecord) => ({
       ...img,
-      image_url: heroImageUrl(img, accountHash)
+      image_url: heroImageUrl(img, accountHash),
     }));
 
     return NextResponse.json({ heroImages });
@@ -116,27 +117,33 @@ export async function GET() {
 // POST - Upload a hero image for a specific side + aspect ratio
 export async function POST(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
-
+    const { env } = (await getCloudflareContext()) as { env: Env };
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const side = formData.get('side') as string;
     const aspectRatio = formData.get('aspectRatio') as string;
-    const altText = formData.get('altText') as string || 'Hero Bild';
+    const altText = (formData.get('altText') as string) || 'Hero Bild';
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
     if (!VALID_SIDES.includes(side)) {
-      return NextResponse.json({ error: `Invalid side. Must be one of: ${VALID_SIDES.join(', ')}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Invalid side. Must be one of: ${VALID_SIDES.join(', ')}` },
+        { status: 400 },
+      );
     }
     if (!VALID_RATIOS.includes(aspectRatio)) {
-      return NextResponse.json({ error: `Invalid aspect ratio. Must be one of: ${VALID_RATIOS.join(', ')}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Invalid aspect ratio. Must be one of: ${VALID_RATIOS.join(', ')}` },
+        { status: 400 },
+      );
     }
 
     // Ensure table exists (with cf_image_id column)
-    await env.DB.prepare(`
+    await env.DB.prepare(
+      `
       CREATE TABLE IF NOT EXISTS hero_images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         side TEXT NOT NULL CHECK(side IN ('nord', 'sued')),
@@ -147,14 +154,17 @@ export async function POST(request: NextRequest) {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(side, aspect_ratio)
       )
-    `).run();
+    `,
+    ).run();
 
     await ensureCfImageIdColumn(env.DB);
 
     // Check if there's an existing image for this slot
     const existing = await env.DB.prepare(
-      'SELECT * FROM hero_images WHERE side = ? AND aspect_ratio = ?'
-    ).bind(side, aspectRatio).first<HeroImageRecord>();
+      'SELECT * FROM hero_images WHERE side = ? AND aspect_ratio = ?',
+    )
+      .bind(side, aspectRatio)
+      .first<HeroImageRecord>();
 
     // Delete old image if exists
     if (existing) {
@@ -208,14 +218,16 @@ export async function POST(request: NextRequest) {
       // Fallback to R2
       imageKey = uniqueName;
       await env.IMAGES_BUCKET.put(imageKey, fileBuffer, {
-        httpMetadata: { contentType: file.type }
+        httpMetadata: { contentType: file.type },
       });
     }
 
     // Save metadata
     const result = await env.DB.prepare(
-      'INSERT INTO hero_images (side, aspect_ratio, image_key, alt_text, cf_image_id) VALUES (?, ?, ?, ?, ?) RETURNING *'
-    ).bind(side, aspectRatio, imageKey, altText, cfImageId).first<HeroImageRecord>();
+      'INSERT INTO hero_images (side, aspect_ratio, image_key, alt_text, cf_image_id) VALUES (?, ?, ?, ?, ?) RETURNING *',
+    )
+      .bind(side, aspectRatio, imageKey, altText, cfImageId)
+      .first<HeroImageRecord>();
 
     if (!result) {
       if (cfImageId && creds) {
@@ -228,9 +240,12 @@ export async function POST(request: NextRequest) {
 
     const resultUrl = deliveryUrl || `/api/admin/images/file/${result.image_key}`;
 
-    return NextResponse.json({
-      heroImage: { ...result, image_url: resultUrl }
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        heroImage: { ...result, image_url: resultUrl },
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('POST /api/admin/hero-images error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -240,8 +255,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove a hero image for a specific side + aspect ratio
 export async function DELETE(request: NextRequest) {
   try {
-    const { env } = await getCloudflareContext() as { env: Env };
-
+    const { env } = (await getCloudflareContext()) as { env: Env };
 
     const { searchParams } = new URL(request.url);
     const side = searchParams.get('side');
@@ -254,8 +268,10 @@ export async function DELETE(request: NextRequest) {
     await ensureCfImageIdColumn(env.DB);
 
     const existing = await env.DB.prepare(
-      'SELECT * FROM hero_images WHERE side = ? AND aspect_ratio = ?'
-    ).bind(side, aspectRatio).first<HeroImageRecord>();
+      'SELECT * FROM hero_images WHERE side = ? AND aspect_ratio = ?',
+    )
+      .bind(side, aspectRatio)
+      .first<HeroImageRecord>();
 
     if (!existing) {
       return NextResponse.json({ error: 'Hero image not found' }, { status: 404 });

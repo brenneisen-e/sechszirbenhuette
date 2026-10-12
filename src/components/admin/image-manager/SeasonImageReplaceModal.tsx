@@ -76,7 +76,11 @@ export function SeasonImageReplaceModal({
                     : 'bg-blue-500 hover:bg-blue-600'
                 } disabled:opacity-50`}
               >
-                {isReplacing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {isReplacing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
                 {replacement.existingImage ? 'Ersetzen' : 'Hinzufügen'}
               </button>
             </div>

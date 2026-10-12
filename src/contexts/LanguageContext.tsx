@@ -12,7 +12,7 @@ const translations = {
   de,
   en,
   it,
-  sl
+  sl,
 };
 
 type TranslationType = typeof de;
@@ -52,14 +52,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = {
     language,
     setLanguage,
-    t: translations[language]
+    t: translations[language],
   };
 
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {

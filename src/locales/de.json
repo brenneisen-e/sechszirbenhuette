@@ -92,7 +92,14 @@
     },
     "kitchen": {
       "title": "Küche",
-      "items": ["Vollausgestattete Küche", "Geschirrspüler", "Kühlschrank mit Gefrierfach", "Kaffeemaschine", "Wasserkocher", "Toaster"]
+      "items": [
+        "Vollausgestattete Küche",
+        "Geschirrspüler",
+        "Kühlschrank mit Gefrierfach",
+        "Kaffeemaschine",
+        "Wasserkocher",
+        "Toaster"
+      ]
     },
     "bathroom": {
       "title": "Bad",
@@ -100,7 +107,14 @@
     },
     "sauna": {
       "title": "Sauna",
-      "items": ["Privater Sauna-Anbau", "Finnische Sauna", "Ruheraum mit Liegen", "Bodentiefe Regendusche", "Eigene Terrasse", "Fußbodenheizung"]
+      "items": [
+        "Privater Sauna-Anbau",
+        "Finnische Sauna",
+        "Ruheraum mit Liegen",
+        "Bodentiefe Regendusche",
+        "Eigene Terrasse",
+        "Fußbodenheizung"
+      ]
     },
     "living": {
       "title": "Wohnbereich",
@@ -108,7 +122,12 @@
     },
     "outdoor": {
       "title": "Außenbereich",
-      "items": ["Umlaufender Balkon", "Gartenmöbel", "Eigener Parkplatz", "Ski- und Schlittenkeller"]
+      "items": [
+        "Umlaufender Balkon",
+        "Gartenmöbel",
+        "Eigener Parkplatz",
+        "Ski- und Schlittenkeller"
+      ]
     }
   },
   "umgebung": {
@@ -246,7 +265,16 @@
     },
     "included": {
       "title": "Inklusive",
-      "items": ["Strom (20 kWh/Nacht)", "Heizung", "Wasser", "Müllentsorgung", "Endreinigung (ohne Hund)", "WLAN", "Ortstaxe (Erwachsene)", "Sauna-Nutzung"]
+      "items": [
+        "Strom (20 kWh/Nacht)",
+        "Heizung",
+        "Wasser",
+        "Müllentsorgung",
+        "Endreinigung (ohne Hund)",
+        "WLAN",
+        "Ortstaxe (Erwachsene)",
+        "Sauna-Nutzung"
+      ]
     },
     "form": {
       "title": "Buchungsanfrage",
@@ -381,12 +409,22 @@
     },
     "rooms": {
       "title": "Schlafzimmer",
-      "items": ["1 Galeriezimmer (2 Einzelbetten)", "1 Doppelbettzimmer", "1 Zimmer mit 2 Stockbetten", "Platz für 5 Personen"],
+      "items": [
+        "1 Galeriezimmer (2 Einzelbetten)",
+        "1 Doppelbettzimmer",
+        "1 Zimmer mit 2 Stockbetten",
+        "Platz für 5 Personen"
+      ],
       "hint": "Bettwäsche selbst mitbringen oder Komfort-Paket buchen"
     },
     "sauna": {
       "title": "Sauna & Wellness",
-      "items": ["Sauna mit Sanarium", "Ruheraum mit Liegen", "Extra Dusche mit Kneipp-Schlauch", "Fußbodenheizung"]
+      "items": [
+        "Sauna mit Sanarium",
+        "Ruheraum mit Liegen",
+        "Extra Dusche mit Kneipp-Schlauch",
+        "Fußbodenheizung"
+      ]
     },
     "bathroom": {
       "title": "Badezimmer",
@@ -395,7 +433,12 @@
     },
     "outdoor": {
       "title": "Außenbereich",
-      "items": ["15m² Balkon mit Außentreppe", "650m² Grundstück", "2 Parkplätze", "Grill & Gartenmöbel"]
+      "items": [
+        "15m² Balkon mit Außentreppe",
+        "650m² Grundstück",
+        "2 Parkplätze",
+        "Grill & Gartenmöbel"
+      ]
     },
     "equipment": {
       "title": "Ausstattung",
@@ -403,7 +446,12 @@
     },
     "location": {
       "title": "Lage",
-      "items": ["Skigebiet Falkert vor Ort", "Turracher Höhe (20 Min.)", "Bad Kleinkirchheim (25 Min.)", "Viele Wanderwege"]
+      "items": [
+        "Skigebiet Falkert vor Ort",
+        "Turracher Höhe (20 Min.)",
+        "Bad Kleinkirchheim (25 Min.)",
+        "Viele Wanderwege"
+      ]
     }
   },
   "blog": {

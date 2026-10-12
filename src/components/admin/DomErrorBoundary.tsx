@@ -36,7 +36,10 @@ export class DomErrorBoundary extends React.Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.warn('[DomErrorBoundary] Caught DOM reconciliation error, auto-recovering...', error.message);
+    console.warn(
+      '[DomErrorBoundary] Caught DOM reconciliation error, auto-recovering...',
+      error.message,
+    );
     // Auto-recover after a brief delay
     setTimeout(() => {
       this.setState({ hasError: false });

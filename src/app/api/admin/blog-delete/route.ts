@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 });
     }
 
-    const body = await request.json() as { id?: string };
+    const body = (await request.json()) as { id?: string };
     const id = body.id;
 
     if (!id) {

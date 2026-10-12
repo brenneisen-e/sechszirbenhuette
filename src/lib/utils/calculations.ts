@@ -8,12 +8,12 @@ import { nightsBetween } from './formatting';
 /**
  * Commission rate for Malte & Eike (always 10% of rental price)
  */
-export const COMMISSION_RATE = 0.10;
+export const COMMISSION_RATE = 0.1;
 
 /**
  * Kurtaxe (tourist tax) per adult per night
  */
-export const KURTAXE_PER_ADULT_PER_NIGHT = 3.10;
+export const KURTAXE_PER_ADULT_PER_NIGHT = 3.1;
 
 /**
  * Default cleaning cost
@@ -143,9 +143,7 @@ export function calculateRemainingPayment(rentalPrice: number, depositAmount: nu
 /**
  * Group bookings by quarter
  */
-export function groupByQuarter<T extends { arrival_date?: string }>(
-  items: T[],
-): Map<string, T[]> {
+export function groupByQuarter<T extends { arrival_date?: string }>(items: T[]): Map<string, T[]> {
   return items.reduce((acc, item) => {
     if (!item.arrival_date) return acc;
     const date = new Date(item.arrival_date);
@@ -163,9 +161,7 @@ export function groupByQuarter<T extends { arrival_date?: string }>(
 /**
  * Group bookings by month
  */
-export function groupByMonth<T extends { arrival_date?: string }>(
-  items: T[],
-): Map<string, T[]> {
+export function groupByMonth<T extends { arrival_date?: string }>(items: T[]): Map<string, T[]> {
   return items.reduce((acc, item) => {
     if (!item.arrival_date) return acc;
     const date = new Date(item.arrival_date);
@@ -192,19 +188,22 @@ export interface BookingTotals {
   totalNights: number;
 }
 
-export function calculateBookingTotals<T extends {
-  rental_price?: number | null;
-  arrival_date?: string;
-  departure_date?: string;
-  adults?: number;
-  children?: number;
-}>(bookings: T[], settings?: UtilityCostSettings): BookingTotals {
+export function calculateBookingTotals<
+  T extends {
+    rental_price?: number | null;
+    arrival_date?: string;
+    departure_date?: string;
+    adults?: number;
+    children?: number;
+  },
+>(bookings: T[], settings?: UtilityCostSettings): BookingTotals {
   return bookings.reduce(
     (acc, booking) => {
       const rentalPrice = booking.rental_price ?? 0;
-      const nights = booking.arrival_date && booking.departure_date
-        ? calculateNights(booking.arrival_date, booking.departure_date)
-        : 0;
+      const nights =
+        booking.arrival_date && booking.departure_date
+          ? calculateNights(booking.arrival_date, booking.departure_date)
+          : 0;
       const adults = booking.adults ?? 2;
       const children = booking.children ?? 0;
 

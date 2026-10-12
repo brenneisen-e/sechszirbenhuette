@@ -31,20 +31,14 @@ export async function POST(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json(
-        { error: 'Server nicht verfügbar' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Server nicht verfügbar' }, { status: 500 });
     }
 
-    const body = await request.json() as { password?: string };
+    const body = (await request.json()) as { password?: string };
     const { password } = body;
 
     if (!password) {
-      return NextResponse.json(
-        { error: 'Passwort erforderlich' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Passwort erforderlich' }, { status: 400 });
     }
 
     // Check password against environment variable
@@ -52,16 +46,16 @@ export async function POST(request: NextRequest) {
 
     if (!adminPassword) {
       return NextResponse.json(
-        { error: 'Admin-Passwort nicht konfiguriert. Bitte ADMIN_PASSWORD als Environment Variable setzen.' },
-        { status: 500 }
+        {
+          error:
+            'Admin-Passwort nicht konfiguriert. Bitte ADMIN_PASSWORD als Environment Variable setzen.',
+        },
+        { status: 500 },
       );
     }
 
     if (password !== adminPassword) {
-      return NextResponse.json(
-        { error: 'Falsches Passwort' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Falsches Passwort' }, { status: 401 });
     }
 
     // Create session
@@ -70,23 +64,29 @@ export async function POST(request: NextRequest) {
 
     // Ensure admin_sessions table exists
     try {
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         CREATE TABLE IF NOT EXISTS admin_sessions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           session_id TEXT NOT NULL UNIQUE,
           expires_at DATETIME NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-      `).run();
+      `,
+      ).run();
     } catch (tableError) {
       console.error('Error creating admin_sessions table:', tableError);
     }
 
     // Store session in database
-    await env.DB.prepare(`
+    await env.DB.prepare(
+      `
       INSERT INTO admin_sessions (session_id, expires_at)
       VALUES (?, ?)
-    `).bind(sessionId, expiresAt.toISOString()).run();
+    `,
+    )
+      .bind(sessionId, expiresAt.toISOString())
+      .run();
 
     // Set cookie
     const response = NextResponse.json({ success: true });
@@ -101,10 +101,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Login fehlgeschlagen' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Login fehlgeschlagen' }, { status: 500 });
   }
 }
 
@@ -122,8 +119,10 @@ export async function GET(request: NextRequest) {
     }
 
     const session = await env.DB.prepare(
-      'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")'
-    ).bind(sessionId).first();
+      'SELECT * FROM admin_sessions WHERE session_id = ? AND expires_at > datetime("now")',
+    )
+      .bind(sessionId)
+      .first();
 
     return NextResponse.json({ authenticated: !!session });
   } catch (error) {
@@ -139,9 +138,7 @@ export async function DELETE(request: NextRequest) {
     const sessionId = request.cookies.get('admin_session')?.value;
 
     if (env && sessionId) {
-      await env.DB.prepare(
-        'DELETE FROM admin_sessions WHERE session_id = ?'
-      ).bind(sessionId).run();
+      await env.DB.prepare('DELETE FROM admin_sessions WHERE session_id = ?').bind(sessionId).run();
     }
 
     const response = NextResponse.json({ success: true });

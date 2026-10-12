@@ -18,7 +18,7 @@ interface CloudflareEnv {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
+  { params }: { params: Promise<{ path: string[] }> },
 ) {
   try {
     const ctx = await getCloudflareContext();

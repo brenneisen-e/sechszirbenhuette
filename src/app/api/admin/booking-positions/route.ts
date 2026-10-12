@@ -33,9 +33,9 @@ interface BookingPosition {
 
 // Check if table exists
 async function tableExists(db: D1Database): Promise<boolean> {
-  const result = await db.prepare(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='booking_positions'"
-  ).first();
+  const result = await db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='booking_positions'")
+    .first();
   return !!result;
 }
 
@@ -59,14 +59,16 @@ export async function GET(request: NextRequest) {
 
     if (bookingId) {
       const { results } = await env.DB.prepare(
-        'SELECT * FROM booking_positions WHERE booking_id = ? ORDER BY sort_order ASC, id ASC'
-      ).bind(parseInt(bookingId)).all<BookingPosition>();
+        'SELECT * FROM booking_positions WHERE booking_id = ? ORDER BY sort_order ASC, id ASC',
+      )
+        .bind(parseInt(bookingId))
+        .all<BookingPosition>();
       return NextResponse.json({ positions: results || [], tableExists: true });
     }
 
     // If no booking_id, return all positions (for migration/admin purposes)
     const { results } = await env.DB.prepare(
-      'SELECT * FROM booking_positions ORDER BY booking_id, sort_order ASC, id ASC'
+      'SELECT * FROM booking_positions ORDER BY booking_id, sort_order ASC, id ASC',
     ).all<BookingPosition>();
 
     return NextResponse.json({ positions: results || [], tableExists: true });
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       positions?: Array<Partial<BookingPosition>>;
       position?: Partial<BookingPosition>;
     };
@@ -114,23 +116,25 @@ export async function POST(request: NextRequest) {
 
       const result = await env.DB.prepare(
         `INSERT INTO booking_positions (booking_id, name, category, type, amount, paid_by, paid, affects_mieterlos, affects_gewinn, show_separate, auto_calculate, calc_rule, sort_order, notes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(
-        pos.booking_id,
-        pos.name,
-        pos.category || 'custom',
-        pos.type,
-        pos.amount || 0,
-        pos.paid_by || 'guest_platform',
-        pos.paid || 0,
-        pos.affects_mieterlos || 0,
-        pos.affects_gewinn ?? 1,
-        pos.show_separate || 0,
-        pos.auto_calculate || 0,
-        pos.calc_rule || null,
-        pos.sort_order || 0,
-        pos.notes || null
-      ).run();
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+        .bind(
+          pos.booking_id,
+          pos.name,
+          pos.category || 'custom',
+          pos.type,
+          pos.amount || 0,
+          pos.paid_by || 'guest_platform',
+          pos.paid || 0,
+          pos.affects_mieterlos || 0,
+          pos.affects_gewinn ?? 1,
+          pos.show_separate || 0,
+          pos.auto_calculate || 0,
+          pos.calc_rule || null,
+          pos.sort_order || 0,
+          pos.notes || null,
+        )
+        .run();
 
       if (result.meta.last_row_id) {
         insertedIds.push(result.meta.last_row_id as number);
@@ -162,7 +166,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
     }
 
-    const body = await request.json() as Partial<BookingPosition> & { id: number };
+    const body = (await request.json()) as Partial<BookingPosition> & { id: number };
 
     if (!body.id) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
@@ -201,9 +205,9 @@ export async function PUT(request: NextRequest) {
     fields.push("updated_at = datetime('now')");
     values.push(body.id);
 
-    await env.DB.prepare(
-      `UPDATE booking_positions SET ${fields.join(', ')} WHERE id = ?`
-    ).bind(...values).run();
+    await env.DB.prepare(`UPDATE booking_positions SET ${fields.join(', ')} WHERE id = ?`)
+      .bind(...values)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -237,9 +241,14 @@ export async function DELETE(request: NextRequest) {
     if (id) {
       await env.DB.prepare('DELETE FROM booking_positions WHERE id = ?').bind(parseInt(id)).run();
     } else if (bookingId) {
-      await env.DB.prepare('DELETE FROM booking_positions WHERE booking_id = ?').bind(parseInt(bookingId)).run();
+      await env.DB.prepare('DELETE FROM booking_positions WHERE booking_id = ?')
+        .bind(parseInt(bookingId))
+        .run();
     } else {
-      return NextResponse.json({ error: 'id or booking_id parameter is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'id or booking_id parameter is required' },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json({ success: true });

@@ -24,11 +24,7 @@ const COLUMNS: ColumnConfig[] = [
   { key: 'status', label: 'Status' },
 ];
 
-export function GuestTableHeader({
-  sortColumn,
-  sortDirection,
-  onSort,
-}: GuestTableHeaderProps) {
+export function GuestTableHeader({ sortColumn, sortDirection, onSort }: GuestTableHeaderProps) {
   const getSortIcon = (column: SortColumn) => {
     if (sortColumn !== column) {
       return <ArrowUpDown className="w-3 h-3 text-gray-400" />;

@@ -2,7 +2,14 @@
  * Types for the dynamic booking positions system
  */
 
-export type PositionCategory = 'nk' | 'reinigung' | 'kurtaxe' | 'komfortpaket' | 'gebuehr' | 'custom' | string;
+export type PositionCategory =
+  | 'nk'
+  | 'reinigung'
+  | 'kurtaxe'
+  | 'komfortpaket'
+  | 'gebuehr'
+  | 'custom'
+  | string;
 export type PositionType = 'income' | 'expense';
 export type PaidBy = 'guest_platform' | 'guest_cash' | 'guest_direct' | 'owner' | 'included_payout';
 
@@ -134,7 +141,9 @@ export function recordToPosition(record: BookingPositionRecord): BookingPosition
   if (record.calc_rule) {
     try {
       calcRule = JSON.parse(record.calc_rule) as CalcRule;
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return {

@@ -25,7 +25,9 @@ export function MonthlyOverview({ year, getColumnTotal }: MonthlyOverviewProps) 
           return (
             <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <p className="text-sm text-gray-600">{monthName}</p>
-              <p className={`text-lg font-bold ${monthTotal > 0 ? 'text-red-700' : 'text-gray-400'}`}>
+              <p
+                className={`text-lg font-bold ${monthTotal > 0 ? 'text-red-700' : 'text-gray-400'}`}
+              >
                 {monthTotal > 0 ? formatCurrency(monthTotal) : '-'}
               </p>
             </div>

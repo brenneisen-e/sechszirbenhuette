@@ -23,7 +23,11 @@ interface R2Object {
 
 interface R2Bucket {
   get(key: string): Promise<R2Object | null>;
-  put(key: string, value: ArrayBuffer | ReadableStream | string, options?: { httpMetadata?: { contentType?: string } }): Promise<R2Object>;
+  put(
+    key: string,
+    value: ArrayBuffer | ReadableStream | string,
+    options?: { httpMetadata?: { contentType?: string } },
+  ): Promise<R2Object>;
   delete(key: string): Promise<void>;
 }
 
@@ -85,16 +89,12 @@ interface MediaCategoryRecord {
  */
 async function ensureCfColumns(db: D1Database): Promise<void> {
   try {
-    await db.prepare(
-      "ALTER TABLE media ADD COLUMN cf_image_id TEXT DEFAULT NULL"
-    ).run();
+    await db.prepare('ALTER TABLE media ADD COLUMN cf_image_id TEXT DEFAULT NULL').run();
   } catch {
     // Column already exists – ignore
   }
   try {
-    await db.prepare(
-      "ALTER TABLE media ADD COLUMN cf_stream_uid TEXT DEFAULT NULL"
-    ).run();
+    await db.prepare('ALTER TABLE media ADD COLUMN cf_stream_uid TEXT DEFAULT NULL').run();
   } catch {
     // Column already exists – ignore
   }
@@ -105,7 +105,10 @@ export async function GET(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Cloudflare environment not available', success: false },
+        { status: 503 },
+      );
     }
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -139,7 +142,7 @@ export async function GET(request: NextRequest) {
     const result = await (params.length > 0 ? stmt.bind(...params) : stmt).all<MediaRecord>();
     // Deduplicate by ID to prevent any duplicate entries
     const seenIds = new Set<string>();
-    const mediaList = (result.results || []).filter(m => {
+    const mediaList = (result.results || []).filter((m) => {
       if (seenIds.has(m.id)) return false;
       seenIds.add(m.id);
       return true;
@@ -147,35 +150,34 @@ export async function GET(request: NextRequest) {
 
     // Fetch all additional categories for the media items
     if (mediaList.length > 0) {
-      const mediaIds = mediaList.map(m => m.id);
+      const mediaIds = mediaList.map((m) => m.id);
       const placeholders = mediaIds.map(() => '?').join(',');
       const catResult = await env.DB.prepare(
-        `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`
-      ).bind(...mediaIds).all<MediaCategoryRecord>();
+        `SELECT media_id, category FROM media_categories WHERE media_id IN (${placeholders})`,
+      )
+        .bind(...mediaIds)
+        .all<MediaCategoryRecord>();
 
       // Group categories by media_id
       const categoriesMap: Record<string, string[]> = {};
-      (catResult.results || []).forEach(row => {
+      (catResult.results || []).forEach((row) => {
         if (!categoriesMap[row.media_id]) categoriesMap[row.media_id] = [];
         categoriesMap[row.media_id]!.push(row.category);
       });
 
       // Attach categories to each media item
-      mediaList.forEach(m => {
+      mediaList.forEach((m) => {
         m.categories = categoriesMap[m.id] || [];
       });
     }
 
     return NextResponse.json({
       media: mediaList,
-      success: true
+      success: true,
     });
   } catch (error) {
     console.error('Error fetching media:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch media', success: false },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch media', success: false }, { status: 500 });
   }
 }
 
@@ -184,7 +186,10 @@ export async function POST(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Cloudflare environment not available', success: false },
+        { status: 503 },
+      );
     }
 
     // Ensure cf_image_id / cf_stream_uid columns exist
@@ -194,14 +199,11 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
-    const category = formData.get('category') as string || 'aussen';
-    const altText = formData.get('alt_text') as string || '';
+    const category = (formData.get('category') as string) || 'aussen';
+    const altText = (formData.get('alt_text') as string) || '';
 
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'No files provided', success: false },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No files provided', success: false }, { status: 400 });
     }
 
     const uploadedMedia: MediaRecord[] = [];
@@ -243,7 +245,13 @@ export async function POST(request: NextRequest) {
         });
         cfImageId = imgResult.id;
         // Use the first variant URL returned by Cloudflare Images
-        url = imgResult.variants[0] || buildImageDeliveryUrl(env.CLOUDFLARE_IMAGES_ACCOUNT_HASH || 'VR8seCaTFFzHRDFZQKPkeQ', imgResult.id, 'public');
+        url =
+          imgResult.variants[0] ||
+          buildImageDeliveryUrl(
+            env.CLOUDFLARE_IMAGES_ACCOUNT_HASH || 'VR8seCaTFFzHRDFZQKPkeQ',
+            imgResult.id,
+            'public',
+          );
       } else {
         // Fallback to R2 when credentials are missing or file type is unknown
         await env.R2.put(fileKey, arrayBuffer, {
@@ -254,19 +262,32 @@ export async function POST(request: NextRequest) {
 
       // Get current max display_order for this category
       const orderResult = await env.DB.prepare(
-        'SELECT MAX(display_order) as max_order FROM media WHERE category = ?'
-      ).bind(category).first<{ max_order: number | null }>();
+        'SELECT MAX(display_order) as max_order FROM media WHERE category = ?',
+      )
+        .bind(category)
+        .first<{ max_order: number | null }>();
       const nextOrder = (orderResult?.max_order ?? -1) + 1;
 
       // Insert into D1
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         INSERT INTO media (id, file_key, url, alt_text, title, category, media_type, display_order, created_at, cf_image_id, cf_stream_uid)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
-      `).bind(
-        id, fileKey, url, altText || file.name, file.name,
-        category, mediaType, nextOrder,
-        cfImageId, cfStreamUid
-      ).run();
+      `,
+      )
+        .bind(
+          id,
+          fileKey,
+          url,
+          altText || file.name,
+          file.name,
+          category,
+          mediaType,
+          nextOrder,
+          cfImageId,
+          cfStreamUid,
+        )
+        .run();
 
       uploadedMedia.push({
         id,
@@ -286,14 +307,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       media: uploadedMedia,
       success: true,
-      message: `${uploadedMedia.length} file(s) uploaded successfully`
+      message: `${uploadedMedia.length} file(s) uploaded successfully`,
     });
   } catch (error) {
     console.error('Error uploading media:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload media', success: false },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload media', success: false }, { status: 500 });
   }
 }
 
@@ -302,9 +320,12 @@ export async function PUT(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Cloudflare environment not available', success: false },
+        { status: 503 },
+      );
     }
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id?: string;
       alt_text?: string;
       title?: string;
@@ -315,10 +336,7 @@ export async function PUT(request: NextRequest) {
     const { id, alt_text, title, category, categories, display_order } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Media ID is required', success: false },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Media ID is required', success: false }, { status: 400 });
     }
 
     const updates: string[] = [];
@@ -344,9 +362,9 @@ export async function PUT(request: NextRequest) {
     // Update main media table if there are changes
     if (updates.length > 0) {
       params.push(id);
-      await env.DB.prepare(
-        `UPDATE media SET ${updates.join(', ')} WHERE id = ?`
-      ).bind(...params).run();
+      await env.DB.prepare(`UPDATE media SET ${updates.join(', ')} WHERE id = ?`)
+        .bind(...params)
+        .run();
     }
 
     // Handle additional categories (junction table)
@@ -356,22 +374,19 @@ export async function PUT(request: NextRequest) {
 
       // Insert new categories
       for (const cat of categories) {
-        await env.DB.prepare(
-          'INSERT INTO media_categories (media_id, category) VALUES (?, ?)'
-        ).bind(id, cat).run();
+        await env.DB.prepare('INSERT INTO media_categories (media_id, category) VALUES (?, ?)')
+          .bind(id, cat)
+          .run();
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Media updated successfully'
+      message: 'Media updated successfully',
     });
   } catch (error) {
     console.error('Error updating media:', error);
-    return NextResponse.json(
-      { error: 'Failed to update media', success: false },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update media', success: false }, { status: 500 });
   }
 }
 
@@ -380,16 +395,20 @@ export async function PATCH(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Cloudflare environment not available', success: false },
+        { status: 503 },
+      );
     }
 
-    const body = await request.json() as { action?: string };
+    const body = (await request.json()) as { action?: string };
     const { action } = body;
 
     if (action === 'cleanup_category_duplicates') {
       // Remove entries from media_categories where the category matches the primary category of the media
       // This cleans up the junction table by removing redundant entries
-      const result = await env.DB.prepare(`
+      const result = await env.DB.prepare(
+        `
         DELETE FROM media_categories
         WHERE media_id IN (
           SELECT mc.media_id
@@ -402,17 +421,20 @@ export async function PATCH(request: NextRequest) {
           FROM media m
           WHERE m.id = media_categories.media_id
         )
-      `).run();
+      `,
+      ).run();
 
       // Also remove exact duplicate entries in the junction table (same media_id + category pair)
       // Note: This requires a different approach since SQLite doesn't support DELETE with self-join easily
       // We'll find duplicates and delete them individually
-      const duplicates = await env.DB.prepare(`
+      const duplicates = await env.DB.prepare(
+        `
         SELECT media_id, category, COUNT(*) as cnt
         FROM media_categories
         GROUP BY media_id, category
         HAVING COUNT(*) > 1
-      `).all<{ media_id: string; category: string; cnt: number }>();
+      `,
+      ).all<{ media_id: string; category: string; cnt: number }>();
 
       let deletedDuplicates = 0;
       if (duplicates.results && duplicates.results.length > 0) {
@@ -420,33 +442,34 @@ export async function PATCH(request: NextRequest) {
           // Delete all but one entry for each duplicate pair
           const toDelete = dup.cnt - 1;
           // SQLite workaround: delete using ROWID
-          await env.DB.prepare(`
+          await env.DB.prepare(
+            `
             DELETE FROM media_categories
             WHERE ROWID IN (
               SELECT ROWID FROM media_categories
               WHERE media_id = ? AND category = ?
               LIMIT ?
             )
-          `).bind(dup.media_id, dup.category, toDelete).run();
+          `,
+          )
+            .bind(dup.media_id, dup.category, toDelete)
+            .run();
           deletedDuplicates += toDelete;
         }
       }
 
       return NextResponse.json({
         success: true,
-        message: `Category duplicates cleaned up. Removed ${deletedDuplicates} duplicate junction entries.`
+        message: `Category duplicates cleaned up. Removed ${deletedDuplicates} duplicate junction entries.`,
       });
     }
 
-    return NextResponse.json(
-      { error: 'Unknown action', success: false },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Unknown action', success: false }, { status: 400 });
   } catch (error) {
     console.error('Error in PATCH operation:', error);
     return NextResponse.json(
       { error: 'Failed to perform operation', success: false },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -456,28 +479,27 @@ export async function DELETE(request: NextRequest) {
   try {
     const env = await getCloudflareEnv();
     if (!env) {
-      return NextResponse.json({ error: 'Cloudflare environment not available', success: false }, { status: 503 });
+      return NextResponse.json(
+        { error: 'Cloudflare environment not available', success: false },
+        { status: 503 },
+      );
     }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Media ID is required', success: false },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Media ID is required', success: false }, { status: 400 });
     }
 
     // Get file key and CF IDs before deleting
     const media = await env.DB.prepare(
-      'SELECT file_key, cf_image_id, cf_stream_uid FROM media WHERE id = ?'
-    ).bind(id).first<{ file_key: string; cf_image_id?: string | null; cf_stream_uid?: string | null }>();
+      'SELECT file_key, cf_image_id, cf_stream_uid FROM media WHERE id = ?',
+    )
+      .bind(id)
+      .first<{ file_key: string; cf_image_id?: string | null; cf_stream_uid?: string | null }>();
 
     if (!media) {
-      return NextResponse.json(
-        { error: 'Media not found', success: false },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Media not found', success: false }, { status: 404 });
     }
 
     const creds = await getCredentialsWithDb(env);
@@ -502,13 +524,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Media deleted successfully'
+      message: 'Media deleted successfully',
     });
   } catch (error) {
     console.error('Error deleting media:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete media', success: false },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete media', success: false }, { status: 500 });
   }
 }

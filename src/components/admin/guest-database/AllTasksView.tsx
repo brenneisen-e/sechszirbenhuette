@@ -1,8 +1,13 @@
 'use client';
 
 import {
-  ListTodo, RefreshCw, Loader2, CheckCircle2,
-  UserCircle, Check, ExternalLink
+  ListTodo,
+  RefreshCw,
+  Loader2,
+  CheckCircle2,
+  UserCircle,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import type { Task, Guest } from './types';
 
@@ -55,17 +60,20 @@ export function AllTasksView({
         <div className="divide-y divide-gray-100">
           {/* Group tasks by guest */}
           {(() => {
-            const tasksByGuest = allTasks.reduce((acc, task) => {
-              if (!acc[task.guest_id]) {
-                acc[task.guest_id] = [];
-              }
-              acc[task.guest_id]!.push(task);
-              return acc;
-            }, {} as Record<number, Task[]>);
+            const tasksByGuest = allTasks.reduce(
+              (acc, task) => {
+                if (!acc[task.guest_id]) {
+                  acc[task.guest_id] = [];
+                }
+                acc[task.guest_id]!.push(task);
+                return acc;
+              },
+              {} as Record<number, Task[]>,
+            );
 
             return Object.entries(tasksByGuest).map(([guestIdStr, tasks]) => {
               const guestId = parseInt(guestIdStr);
-              const guest = guests.find(g => g.id === guestId);
+              const guest = guests.find((g) => g.id === guestId);
               if (!guest) return null;
 
               return (
@@ -95,7 +103,7 @@ export function AllTasksView({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                        {tasks.filter(t => t.is_completed === 0).length} offen
+                        {tasks.filter((t) => t.is_completed === 0).length} offen
                       </span>
                       <ExternalLink className="w-4 h-4 text-gray-400" />
                     </div>
@@ -103,11 +111,13 @@ export function AllTasksView({
 
                   {/* Task List */}
                   <div className="ml-13 space-y-2">
-                    {tasks.map(task => (
+                    {tasks.map((task) => (
                       <div
                         key={task.id}
                         className={`flex items-center gap-3 p-2 rounded-lg ${
-                          task.is_completed ? 'bg-gray-50 opacity-60' : 'bg-white border border-gray-200'
+                          task.is_completed
+                            ? 'bg-gray-50 opacity-60'
+                            : 'bg-white border border-gray-200'
                         }`}
                       >
                         <button
@@ -124,7 +134,9 @@ export function AllTasksView({
                           {task.is_completed ? <Check className="w-3 h-3" /> : null}
                         </button>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm ${task.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                          <p
+                            className={`text-sm ${task.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}`}
+                          >
                             {task.title}
                           </p>
                           {task.due_date && (

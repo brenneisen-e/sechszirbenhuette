@@ -4,7 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 interface Env {
   DB: D1Database;
   ADMIN_PASSWORD?: string;
-  ADMIN_PWD?: string;  // Fallback for development
+  ADMIN_PWD?: string; // Fallback for development
 }
 
 // Helper to get admin password from env (checks both secret and fallback)
@@ -36,9 +36,9 @@ interface GuestRecord {
   net_rent: number | null;
   cleaning_cash: number;
   additional_costs: string | null;
-  ancillary_costs_amount: number;  // Numeric NK value
+  ancillary_costs_amount: number; // Numeric NK value
   final_cleaning: string | null;
-  final_cleaning_amount: number;   // Numeric ER value
+  final_cleaning_amount: number; // Numeric ER value
   other_notes: string | null;
   first_contact_date: string | null;
   offer_sent: number;
@@ -66,10 +66,13 @@ export async function GET(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
 
     if (!env.DB) {
-      return NextResponse.json({
-        error: 'D1 Database binding not configured.',
-        guests: []
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'D1 Database binding not configured.',
+          guests: [],
+        },
+        { status: 500 },
+      );
     }
 
     const year = searchParams.get('year');
@@ -79,9 +82,9 @@ export async function GET(request: NextRequest) {
 
     // Single guest lookup
     if (id) {
-      const guest = await env.DB.prepare(
-        'SELECT * FROM guests WHERE id = ?'
-      ).bind(id).first<GuestRecord>();
+      const guest = await env.DB.prepare('SELECT * FROM guests WHERE id = ?')
+        .bind(id)
+        .first<GuestRecord>();
 
       if (!guest) {
         return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
@@ -116,9 +119,7 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY arrival_date DESC, created_at DESC';
 
-    const stmt = params.length > 0
-      ? env.DB.prepare(query).bind(...params)
-      : env.DB.prepare(query);
+    const stmt = params.length > 0 ? env.DB.prepare(query).bind(...params) : env.DB.prepare(query);
 
     const { results } = await stmt.all<GuestRecord>();
 
@@ -148,7 +149,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as { guests?: Partial<GuestRecord>[]; [key: string]: unknown };
+    const body = (await request.json()) as {
+      guests?: Partial<GuestRecord>[];
+      [key: string]: unknown;
+    };
 
     // Bulk import
     if (Array.isArray(body.guests)) {
@@ -158,10 +162,14 @@ export async function POST(request: NextRequest) {
           const result = await insertGuest(env.DB, guest);
           results.push({ success: true, guest: result });
         } catch (e) {
-          results.push({ success: false, error: e instanceof Error ? e.message : 'Unknown error', guest_name: guest.guest_name });
+          results.push({
+            success: false,
+            error: e instanceof Error ? e.message : 'Unknown error',
+            guest_name: guest.guest_name,
+          });
         }
       }
-      return NextResponse.json({ results, imported: results.filter(r => r.success).length });
+      return NextResponse.json({ results, imported: results.filter((r) => r.success).length });
     }
 
     // Single guest insert
@@ -175,7 +183,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function insertGuest(db: D1Database, guest: Partial<GuestRecord>) {
-  const result = await db.prepare(`
+  const result = await db
+    .prepare(
+      `
     INSERT INTO guests (
       booking_number, month, year, guest_name, address, phone, email,
       is_returning_guest, is_private, no_nebenkosten, platform, arrival_date, departure_date,
@@ -186,47 +196,50 @@ async function insertGuest(db: D1Database, guest: Partial<GuestRecord>) {
       electricity_flat, additional_payment, security_deposit, admin_briefed, status
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     RETURNING *
-  `).bind(
-    guest.booking_number || null,
-    guest.month || null,
-    guest.year || null,
-    guest.guest_name || 'Unbekannter Gast',
-    guest.address || null,
-    guest.phone || null,
-    guest.email || null,
-    guest.is_returning_guest ? 1 : 0,
-    guest.is_private ? 1 : 0,
-    guest.no_nebenkosten ? 1 : 0,
-    guest.platform || null,
-    guest.arrival_date || null,
-    guest.departure_date || null,
-    guest.adults || 0,
-    guest.children || 0,
-    guest.children_ages || null,
-    guest.nationality || null,
-    guest.pets || null,
-    guest.rental_price || 0,
-    guest.net_rent || null,
-    guest.cleaning_cash ? 1 : 0,
-    guest.additional_costs || null,
-    guest.ancillary_costs_amount || 0,  // Numeric NK value
-    guest.final_cleaning || null,
-    guest.final_cleaning_amount || 0,   // Numeric ER value
-    guest.other_notes || null,
-    guest.first_contact_date || null,
-    guest.offer_sent ? 1 : 0,
-    guest.contract_sent ? 1 : 0,
-    guest.welcome_guide_sent ? 1 : 0,
-    guest.deposit_amount || 0,
-    guest.deposit_paid ? 1 : 0,
-    guest.final_payment || 0,
-    guest.final_payment_paid ? 1 : 0,
-    guest.electricity_flat || 0,
-    guest.additional_payment || 0,
-    guest.security_deposit || 0,
-    guest.admin_briefed ? 1 : 0,
-    guest.status || 'active'
-  ).first<GuestRecord>();
+  `,
+    )
+    .bind(
+      guest.booking_number || null,
+      guest.month || null,
+      guest.year || null,
+      guest.guest_name || 'Unbekannter Gast',
+      guest.address || null,
+      guest.phone || null,
+      guest.email || null,
+      guest.is_returning_guest ? 1 : 0,
+      guest.is_private ? 1 : 0,
+      guest.no_nebenkosten ? 1 : 0,
+      guest.platform || null,
+      guest.arrival_date || null,
+      guest.departure_date || null,
+      guest.adults || 0,
+      guest.children || 0,
+      guest.children_ages || null,
+      guest.nationality || null,
+      guest.pets || null,
+      guest.rental_price || 0,
+      guest.net_rent || null,
+      guest.cleaning_cash ? 1 : 0,
+      guest.additional_costs || null,
+      guest.ancillary_costs_amount || 0, // Numeric NK value
+      guest.final_cleaning || null,
+      guest.final_cleaning_amount || 0, // Numeric ER value
+      guest.other_notes || null,
+      guest.first_contact_date || null,
+      guest.offer_sent ? 1 : 0,
+      guest.contract_sent ? 1 : 0,
+      guest.welcome_guide_sent ? 1 : 0,
+      guest.deposit_amount || 0,
+      guest.deposit_paid ? 1 : 0,
+      guest.final_payment || 0,
+      guest.final_payment_paid ? 1 : 0,
+      guest.electricity_flat || 0,
+      guest.additional_payment || 0,
+      guest.security_deposit || 0,
+      guest.admin_briefed ? 1 : 0,
+      guest.status || 'active',
+    )
+    .first<GuestRecord>();
 
   return result;
 }
@@ -242,17 +255,20 @@ export async function PUT(request: NextRequest) {
 
     if (!envPassword) {
       console.error('ADMIN_PASSWORD not found. Available keys:', Object.keys(env || {}));
-      return NextResponse.json({
-        error: 'ADMIN_PASSWORD is not configured',
-        debug: { availableEnvKeys: Object.keys(env || {}) }
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'ADMIN_PASSWORD is not configured',
+          debug: { availableEnvKeys: Object.keys(env || {}) },
+        },
+        { status: 500 },
+      );
     }
 
     if (adminPassword !== envPassword) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as Partial<GuestRecord> & { id: number };
+    const body = (await request.json()) as Partial<GuestRecord> & { id: number };
     const { id, ...updates } = body;
 
     if (!id) {
@@ -326,8 +342,10 @@ export async function PUT(request: NextRequest) {
     values.push(id);
 
     const result = await env.DB.prepare(
-      `UPDATE guests SET ${updateFields.join(', ')} WHERE id = ? RETURNING *`
-    ).bind(...values).first<GuestRecord>();
+      `UPDATE guests SET ${updateFields.join(', ')} WHERE id = ? RETURNING *`,
+    )
+      .bind(...values)
+      .first<GuestRecord>();
 
     if (!result) {
       return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
@@ -366,18 +384,16 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if guest exists
-    const guest = await env.DB.prepare(
-      'SELECT * FROM guests WHERE id = ?'
-    ).bind(guestId).first<GuestRecord>();
+    const guest = await env.DB.prepare('SELECT * FROM guests WHERE id = ?')
+      .bind(guestId)
+      .first<GuestRecord>();
 
     if (!guest) {
       return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
     }
 
     // Delete guest
-    await env.DB.prepare(
-      'DELETE FROM guests WHERE id = ?'
-    ).bind(guestId).run();
+    await env.DB.prepare('DELETE FROM guests WHERE id = ?').bind(guestId).run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -37,12 +37,8 @@ export function Features() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-4">
                   <Icon size={32} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </motion.div>
             );
           })}

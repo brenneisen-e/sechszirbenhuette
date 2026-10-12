@@ -44,7 +44,8 @@ export function Instagram() {
                   Folgen Sie uns auf Instagram
                 </h3>
                 <p className="text-white/80 text-sm sm:text-base mb-3">
-                  Entdecken Sie aktuelle Bilder und Reels aus der Sechszirbenhütte und den Nockbergen
+                  Entdecken Sie aktuelle Bilder und Reels aus der Sechszirbenhütte und den
+                  Nockbergen
                 </p>
                 <span className="inline-flex items-center gap-2 text-white/90 font-medium text-sm group-hover:text-white transition-colors">
                   @sechszirbenhuette

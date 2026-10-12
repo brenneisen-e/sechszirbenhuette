@@ -26,7 +26,8 @@ export const SITE_CONFIG = {
 
 export const DESKLINE_CONFIG = {
   widgetId: 'bb1aac18-a855-4fce-b506-324d5503e60d',
-  scriptUrl: 'https://web5.deskline.net/start/ACCOKTN/bb1aac18-a855-4fce-b506-324d5503e60d/index.js',
+  scriptUrl:
+    'https://web5.deskline.net/start/ACCOKTN/bb1aac18-a855-4fce-b506-324d5503e60d/index.js',
 };
 
 export const FEATURES = [

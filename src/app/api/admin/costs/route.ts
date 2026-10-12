@@ -63,7 +63,9 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY created_at DESC';
 
-    const { results } = await env.DB.prepare(query).bind(...params).all<CostRecord>();
+    const { results } = await env.DB.prepare(query)
+      .bind(...params)
+      .all<CostRecord>();
 
     return NextResponse.json({ costs: results || [] });
   } catch (error) {
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       guest_id: number;
       booking_id?: number;
       cost_type: string;
@@ -105,21 +107,28 @@ export async function POST(request: NextRequest) {
     const { guest_id, booking_id, cost_type, cost_category, amount, description } = body;
 
     if (!guest_id || !cost_type || amount === undefined) {
-      return NextResponse.json({ error: 'guest_id, cost_type, and amount are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'guest_id, cost_type, and amount are required' },
+        { status: 400 },
+      );
     }
 
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       INSERT INTO guest_costs (guest_id, booking_id, cost_type, cost_category, amount, description)
       VALUES (?, ?, ?, ?, ?, ?)
       RETURNING *
-    `).bind(
-      guest_id,
-      booking_id || null,
-      cost_type,
-      cost_category || null,
-      amount,
-      description || null
-    ).first<CostRecord>();
+    `,
+    )
+      .bind(
+        guest_id,
+        booking_id || null,
+        cost_type,
+        cost_category || null,
+        amount,
+        description || null,
+      )
+      .first<CostRecord>();
 
     return NextResponse.json({ cost: result });
   } catch (error) {
@@ -146,7 +155,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       id: number;
       cost_type?: string;
       cost_category?: string;
@@ -190,8 +199,10 @@ export async function PUT(request: NextRequest) {
     values.push(id);
 
     const result = await env.DB.prepare(
-      `UPDATE guest_costs SET ${updates.join(', ')} WHERE id = ? RETURNING *`
-    ).bind(...values).first<CostRecord>();
+      `UPDATE guest_costs SET ${updates.join(', ')} WHERE id = ? RETURNING *`,
+    )
+      .bind(...values)
+      .first<CostRecord>();
 
     if (!result) {
       return NextResponse.json({ error: 'Cost not found' }, { status: 404 });

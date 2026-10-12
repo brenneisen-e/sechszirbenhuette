@@ -92,7 +92,14 @@
     },
     "kitchen": {
       "title": "Kuhinja",
-      "items": ["Popolnoma opremljena kuhinja", "Pomivalni stroj", "Hladilnik z zamrzovalnikom", "Kavni aparat", "Kuhalnik vode", "Opekač kruha"]
+      "items": [
+        "Popolnoma opremljena kuhinja",
+        "Pomivalni stroj",
+        "Hladilnik z zamrzovalnikom",
+        "Kavni aparat",
+        "Kuhalnik vode",
+        "Opekač kruha"
+      ]
     },
     "bathroom": {
       "title": "Kopalnica",
@@ -100,15 +107,33 @@
     },
     "sauna": {
       "title": "Savna",
-      "items": ["Zasebni savna prizidek", "Finska savna", "Prostor za sprostitev z ležalniki", "Dežna prha", "Zasebna terasa", "Talno ogrevanje"]
+      "items": [
+        "Zasebni savna prizidek",
+        "Finska savna",
+        "Prostor za sprostitev z ležalniki",
+        "Dežna prha",
+        "Zasebna terasa",
+        "Talno ogrevanje"
+      ]
     },
     "living": {
       "title": "Dnevni Prostor",
-      "items": ["Prijetna sedežna garnitura", "Jedilna miza", "Moderna peč na pelete", "Satelitska TV", "WiFi"]
+      "items": [
+        "Prijetna sedežna garnitura",
+        "Jedilna miza",
+        "Moderna peč na pelete",
+        "Satelitska TV",
+        "WiFi"
+      ]
     },
     "outdoor": {
       "title": "Zunanjost",
-      "items": ["Panoramski balkon", "Vrtno pohištvo", "Zasebno parkirišče", "Klet za smuči in sanke"]
+      "items": [
+        "Panoramski balkon",
+        "Vrtno pohištvo",
+        "Zasebno parkirišče",
+        "Klet za smuči in sanke"
+      ]
     }
   },
   "umgebung": {
@@ -246,7 +271,16 @@
     },
     "included": {
       "title": "Vključeno",
-      "items": ["Elektrika (20 kWh/noč)", "Ogrevanje", "Voda", "Odvoz odpadkov", "Končno čiščenje (brez psa)", "WiFi", "Turistična taksa (odrasli)", "Uporaba savne"]
+      "items": [
+        "Elektrika (20 kWh/noč)",
+        "Ogrevanje",
+        "Voda",
+        "Odvoz odpadkov",
+        "Končno čiščenje (brez psa)",
+        "WiFi",
+        "Turistična taksa (odrasli)",
+        "Uporaba savne"
+      ]
     },
     "form": {
       "title": "Povpraševanje za Rezervacijo",
@@ -361,16 +395,31 @@
     },
     "kitchen": {
       "title": "Kuhinja",
-      "items": ["Popolnoma opremljena", "Pomivalni stroj", "Keramična plošča & pečica", "Mikrovalovna z žarom"]
+      "items": [
+        "Popolnoma opremljena",
+        "Pomivalni stroj",
+        "Keramična plošča & pečica",
+        "Mikrovalovna z žarom"
+      ]
     },
     "rooms": {
       "title": "Spalnice",
-      "items": ["1 galerijska soba (2 enojni postelji)", "1 dvoposteljna soba", "1 soba z 2 pogradi", "Prostor za 5 oseb"],
+      "items": [
+        "1 galerijska soba (2 enojni postelji)",
+        "1 dvoposteljna soba",
+        "1 soba z 2 pogradi",
+        "Prostor za 5 oseb"
+      ],
       "hint": "Prinesite lastno posteljnino ali rezervirajte paket udobja"
     },
     "sauna": {
       "title": "Savna & Wellness",
-      "items": ["Savna s sanarijem", "Prostor za sprostitev z ležalniki", "Dodatna prha s Kneipp cevjo", "Talno ogrevanje"]
+      "items": [
+        "Savna s sanarijem",
+        "Prostor za sprostitev z ležalniki",
+        "Dodatna prha s Kneipp cevjo",
+        "Talno ogrevanje"
+      ]
     },
     "bathroom": {
       "title": "Kopalnica",
@@ -379,7 +428,12 @@
     },
     "outdoor": {
       "title": "Zunanjost",
-      "items": ["15m² balkon z zunanjim stopniščem", "650m² zemljišče", "2 parkirni mesti", "Žar & vrtno pohištvo"]
+      "items": [
+        "15m² balkon z zunanjim stopniščem",
+        "650m² zemljišče",
+        "2 parkirni mesti",
+        "Žar & vrtno pohištvo"
+      ]
     },
     "equipment": {
       "title": "Oprema",
@@ -387,7 +441,12 @@
     },
     "location": {
       "title": "Lokacija",
-      "items": ["Smučišče Falkert na mestu", "Turracher Höhe (20 min.)", "Bad Kleinkirchheim (25 min.)", "Številne pohodniške poti"]
+      "items": [
+        "Smučišče Falkert na mestu",
+        "Turracher Höhe (20 min.)",
+        "Bad Kleinkirchheim (25 min.)",
+        "Številne pohodniške poti"
+      ]
     }
   },
   "blog": {

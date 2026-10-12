@@ -1,6 +1,9 @@
 'use client';
 
-import { BookingDetailPopup as SharedBookingDetailPopup, type BookingDetailData } from '../../shared/BookingDetailPopup';
+import {
+  BookingDetailPopup as SharedBookingDetailPopup,
+  type BookingDetailData,
+} from '../../shared/BookingDetailPopup';
 import type { Guest, Booking } from '../types';
 
 interface BookingDetailPopupProps {
@@ -36,7 +39,12 @@ function toBookingDetailData(booking: Booking, guest: Guest): BookingDetailData 
   };
 }
 
-export function BookingDetailPopup({ booking, guest, onClose, onNavigateToGuest }: BookingDetailPopupProps) {
+export function BookingDetailPopup({
+  booking,
+  guest,
+  onClose,
+  onNavigateToGuest,
+}: BookingDetailPopupProps) {
   return (
     <SharedBookingDetailPopup
       data={toBookingDetailData(booking, guest)}

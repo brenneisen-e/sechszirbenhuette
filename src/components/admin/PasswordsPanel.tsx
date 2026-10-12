@@ -1,7 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Key, Copy, CheckCircle, ExternalLink, Database, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Key,
+  Copy,
+  CheckCircle,
+  ExternalLink,
+  Database,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+} from 'lucide-react';
 
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '';
 
@@ -36,7 +45,6 @@ const BOOKING_SERVICES = [
   },
 ];
 
-
 interface ImportResult {
   message: string;
   total: number;
@@ -53,7 +61,11 @@ export function PasswordsPanel() {
   const [importError, setImportError] = useState<string | null>(null);
 
   const handleImportGuests = async () => {
-    if (!confirm('Möchtest du die Gästedaten aus der PDF importieren/aktualisieren?\n\nDies wird:\n- Neue Gäste hinzufügen\n- Bestehende Gäste aktualisieren (nach Name + Anreisedatum)')) {
+    if (
+      !confirm(
+        'Möchtest du die Gästedaten aus der PDF importieren/aktualisieren?\n\nDies wird:\n- Neue Gäste hinzufügen\n- Bestehende Gäste aktualisieren (nach Name + Anreisedatum)',
+      )
+    ) {
       return;
     }
 
@@ -64,12 +76,10 @@ export function PasswordsPanel() {
     try {
       const response = await fetch('/api/admin/import-guests', {
         method: 'POST',
-        headers: {ADMIN_PASSWORD,
-          'Content-Type': 'application/json',
-        },
+        headers: { ADMIN_PASSWORD, 'Content-Type': 'application/json' },
       });
 
-      const data = await response.json() as ImportResult | { error: string };
+      const data = (await response.json()) as ImportResult | { error: string };
 
       if (!response.ok) {
         throw new Error('error' in data ? data.error : 'Import fehlgeschlagen');
@@ -107,13 +117,20 @@ export function PasswordsPanel() {
 
       {/* Booking Portals */}
       <div className="mb-6 sm:mb-8">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Buchungsportale</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
+          Buchungsportale
+        </h3>
         <div className="space-y-3 sm:space-y-4">
           {BOOKING_SERVICES.map((service) => (
-            <div key={service.name} className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+            <div
+              key={service.name}
+              className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200"
+            >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-base sm:text-lg font-medium text-gray-900">{service.name}</span>
+                  <span className="text-base sm:text-lg font-medium text-gray-900">
+                    {service.name}
+                  </span>
                   {service.note && (
                     <span className="text-[10px] sm:text-xs bg-gray-200 text-gray-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium">
                       {service.note}
@@ -152,9 +169,13 @@ export function PasswordsPanel() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">Benutzername</label>
+                  <label className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">
+                    Benutzername
+                  </label>
                   <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                    <code className="flex-1 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded border text-xs sm:text-sm font-mono truncate">{service.user}</code>
+                    <code className="flex-1 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded border text-xs sm:text-sm font-mono truncate">
+                      {service.user}
+                    </code>
                     <button
                       onClick={() => copyToClipboard(service.user, `${service.name}-user`)}
                       className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors"
@@ -169,9 +190,13 @@ export function PasswordsPanel() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">Passwort</label>
+                  <label className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">
+                    Passwort
+                  </label>
                   <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                    <code className="flex-1 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded border text-xs sm:text-sm font-mono truncate">{service.password}</code>
+                    <code className="flex-1 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded border text-xs sm:text-sm font-mono truncate">
+                      {service.password}
+                    </code>
                     <button
                       onClick={() => copyToClipboard(service.password, `${service.name}-pass`)}
                       className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors"
@@ -199,10 +224,13 @@ export function PasswordsPanel() {
         </h3>
         <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
           <div className="mb-3 sm:mb-4">
-            <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-1.5 sm:mb-2">Gästedaten aus PDF importieren</h4>
+            <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-1.5 sm:mb-2">
+              Gästedaten aus PDF importieren
+            </h4>
             <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-              Importiert alle Gästedaten aus der Excel/PDF (2024-2026). Booking.com-Buchungen sind nicht enthalten.
-              Bestehende Gäste werden aktualisiert (Mietpreis, Nebenkosten, Endreinigung).
+              Importiert alle Gästedaten aus der Excel/PDF (2024-2026). Booking.com-Buchungen sind
+              nicht enthalten. Bestehende Gäste werden aktualisiert (Mietpreis, Nebenkosten,
+              Endreinigung).
             </p>
             <button
               onClick={handleImportGuests}
@@ -243,15 +271,21 @@ export function PasswordsPanel() {
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3">
                 <div className="text-center p-1.5 sm:p-2 bg-white rounded border">
-                  <div className="text-lg sm:text-2xl font-bold text-blue-600">{importResult.inserted}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                    {importResult.inserted}
+                  </div>
                   <div className="text-[10px] sm:text-xs text-gray-500">Neu</div>
                 </div>
                 <div className="text-center p-1.5 sm:p-2 bg-white rounded border">
-                  <div className="text-lg sm:text-2xl font-bold text-green-600">{importResult.updated}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-green-600">
+                    {importResult.updated}
+                  </div>
                   <div className="text-[10px] sm:text-xs text-gray-500">Aktualisiert</div>
                 </div>
                 <div className="text-center p-1.5 sm:p-2 bg-white rounded border">
-                  <div className="text-lg sm:text-2xl font-bold text-red-600">{importResult.failed}</div>
+                  <div className="text-lg sm:text-2xl font-bold text-red-600">
+                    {importResult.failed}
+                  </div>
                   <div className="text-[10px] sm:text-xs text-gray-500">Fehler</div>
                 </div>
               </div>

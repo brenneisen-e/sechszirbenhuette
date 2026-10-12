@@ -26,7 +26,12 @@ interface MediaPickerModalProps {
   onMediaUploaded?: () => void;
 }
 
-export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUploaded }: MediaPickerModalProps) {
+export function MediaPickerModal({
+  availableMedia,
+  onSelect,
+  onClose,
+  onMediaUploaded,
+}: MediaPickerModalProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('');
@@ -34,7 +39,7 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
 
   // Group valid media by category
   const { grouped, categories, allMedia } = useMemo(() => {
-    const valid = availableMedia.filter(m => m.url && m.url.startsWith('https://'));
+    const valid = availableMedia.filter((m) => m.url && m.url.startsWith('https://'));
     const grp: Record<string, MediaItem[]> = {};
     for (const m of valid) {
       const cat = m.category || 'sonstige';
@@ -42,12 +47,12 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
       grp[cat].push(m);
     }
     const cats = Object.keys(grp).sort((a, b) =>
-      (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b)
+      (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b),
     );
     return { grouped: grp, categories: cats, allMedia: valid };
   }, [availableMedia]);
 
-  const displayMedia = activeCategory ? (grouped[activeCategory] || []) : allMedia;
+  const displayMedia = activeCategory ? grouped[activeCategory] || [] : allMedia;
 
   const handleUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -69,7 +74,7 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
       });
 
       if (!res.ok) {
-        const data = await res.json() as { error?: string };
+        const data = (await res.json()) as { error?: string };
         throw new Error(data.error || 'Upload fehlgeschlagen');
       }
 
@@ -96,7 +101,9 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
             alt={media.alt_text || ''}
             className="w-full h-full object-cover"
             loading="eager"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
         </button>
       ))}
@@ -118,8 +125,15 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
           <div
             className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-logo-green transition cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleUpload(e.dataTransfer.files); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleUpload(e.dataTransfer.files);
+            }}
           >
             {uploading ? (
               <div className="flex items-center justify-center gap-2 text-logo-green">
@@ -150,17 +164,21 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
             <button
               onClick={() => setActiveCategory('')}
               className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
-                !activeCategory ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                !activeCategory
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               Alle ({allMedia.length})
             </button>
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
-                  activeCategory === cat ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  activeCategory === cat
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {CATEGORY_LABELS[cat] || cat} ({grouped[cat]?.length ?? 0})
@@ -175,7 +193,7 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
             renderMediaGrid(displayMedia)
           ) : (
             <div className="space-y-5">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <div key={cat}>
                   <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                     {CATEGORY_LABELS[cat] || cat} ({grouped[cat]?.length ?? 0})
@@ -188,7 +206,8 @@ export function MediaPickerModal({ availableMedia, onSelect, onClose, onMediaUpl
 
           {allMedia.length === 0 && (
             <p className="text-center text-gray-500 py-8">
-              Keine Bilder verfügbar. Laden Sie oben Bilder hoch oder nutzen Sie die Bilderverwaltung.
+              Keine Bilder verfügbar. Laden Sie oben Bilder hoch oder nutzen Sie die
+              Bilderverwaltung.
             </p>
           )}
         </div>

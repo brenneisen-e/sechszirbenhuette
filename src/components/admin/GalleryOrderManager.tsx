@@ -13,7 +13,14 @@ interface MediaRecord {
   display_order: number;
 }
 
-const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+const HERO_CATS = new Set([
+  'hero',
+  'hero-thumbnail',
+  'hero-1080p',
+  'hero-720p',
+  'hero-480p',
+  'hero-360p',
+]);
 
 const CATEGORY_LABELS: Record<string, string> = {
   aussen: 'Außen',
@@ -47,7 +54,7 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/media');
-      const data = await res.json() as { media?: MediaRecord[] };
+      const data = (await res.json()) as { media?: MediaRecord[] };
       const all = (data.media || [])
         .filter((m: MediaRecord) => m.url && !HERO_CATS.has(m.category) && !m.url.includes('.m3u8'))
         .sort((a: MediaRecord, b: MediaRecord) => a.display_order - b.display_order);
@@ -59,7 +66,9 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
     }
   }, []);
 
-  useEffect(() => { loadImages(); }, [loadImages]);
+  useEffect(() => {
+    loadImages();
+  }, [loadImages]);
 
   const handleDragStart = (index: number) => {
     setDragIndex(index);
@@ -77,7 +86,7 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
       return;
     }
 
-    setImages(prev => {
+    setImages((prev) => {
       const updated = [...prev];
       const [moved] = updated.splice(dragIndex, 1);
       if (moved) updated.splice(targetIndex, 0, moved);
@@ -134,7 +143,11 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
                 disabled={saving}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
                 Speichern
               </button>
             )}
@@ -165,7 +178,10 @@ export function GalleryOrderManager({ onClose }: GalleryOrderManagerProps) {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={() => handleDrop(index)}
-                  onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                  onDragEnd={() => {
+                    setDragIndex(null);
+                    setDragOverIndex(null);
+                  }}
                   className={`relative aspect-square rounded-lg overflow-hidden cursor-grab active:cursor-grabbing border-2 transition group ${
                     dragOverIndex === index
                       ? 'border-green-500 scale-105'

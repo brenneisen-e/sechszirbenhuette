@@ -31,8 +31,7 @@ export interface DuplicateGroup {
   images: ImageRecord[];
 }
 
-export interface ImageManagerProps {
-}
+export interface ImageManagerProps {}
 
 export interface CategoryOption {
   value: string;

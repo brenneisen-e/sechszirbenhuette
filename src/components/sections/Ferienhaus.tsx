@@ -42,51 +42,66 @@ const amenityCards: AmenityCard[] = [
     key: 'living',
     icon: Sofa,
     galleryCategory: 'wohnen',
-    items: ['Schwedenofen', 'Essecke für 8-10 Personen', 'Satellit-TV & DVD', 'Stereoanlage']
+    items: ['Schwedenofen', 'Essecke für 8-10 Personen', 'Satellit-TV & DVD', 'Stereoanlage'],
   },
   {
     key: 'kitchen',
     icon: UtensilsCrossed,
     galleryCategory: 'kueche',
-    items: ['Voll ausgestattet', 'Spülmaschine', 'Ceranherd & Backofen', 'Mikrowelle mit Grill']
+    items: ['Voll ausgestattet', 'Spülmaschine', 'Ceranherd & Backofen', 'Mikrowelle mit Grill'],
   },
   {
     key: 'rooms',
     icon: Bed,
     galleryCategory: 'schlafen',
     items: ['2 Doppelbetten', '1 Einzelbett', '1 Zimmer mit 2 Stockbetten', 'Platz für 5 Personen'],
-    hint: 'Bettwäsche selbst mitbringen oder Komfort-Paket buchen'
+    hint: 'Bettwäsche selbst mitbringen oder Komfort-Paket buchen',
   },
   {
     key: 'sauna',
     icon: Flame,
     galleryCategory: 'bad',
-    items: ['Sauna mit Sanarium', 'Ruheraum mit Liegen', 'Extra Dusche mit Kneipp-Schlauch', 'Fußbodenheizung']
+    items: [
+      'Sauna mit Sanarium',
+      'Ruheraum mit Liegen',
+      'Extra Dusche mit Kneipp-Schlauch',
+      'Fußbodenheizung',
+    ],
   },
   {
     key: 'bathroom',
     icon: Bath,
     galleryCategory: 'bad',
     items: ['Dusche & WC', 'Doppelwaschbecken', 'Fußbodenheizung', 'Modern ausgestattet'],
-    hint: 'Handtücher selbst mitbringen oder Komfort-Paket buchen'
+    hint: 'Handtücher selbst mitbringen oder Komfort-Paket buchen',
   },
   {
     key: 'outdoor',
     icon: TreePine,
     galleryCategory: 'aussen',
-    items: ['15m² Balkon mit Außentreppe', '650m² Grundstück', '2 Parkplätze', 'Grill & Gartenmöbel']
+    items: [
+      '15m² Balkon mit Außentreppe',
+      '650m² Grundstück',
+      '2 Parkplätze',
+      'Grill & Gartenmöbel',
+    ],
   },
   {
     key: 'equipment',
     icon: Wifi,
     galleryCategory: null,
-    items: ['WLAN / ADSL', 'Satelliten-TV', 'Grill', 'Haustiere willkommen']
+    items: ['WLAN / ADSL', 'Satelliten-TV', 'Grill', 'Haustiere willkommen'],
   },
   {
     key: 'location',
     icon: MapPin,
     galleryCategory: 'umgebung',
-    items: ['Skigebiet Falkert vor Ort', 'Turracher Höhe (20 Min.)', 'Bad Kleinkirchheim (25 Min.)', 'Viele Wanderwege']
+    items: [
+      'Skigebiet Falkert vor Ort',
+      'Turracher Höhe (20 Min.)',
+      'Bad Kleinkirchheim (25 Min.)',
+      'Viele Wanderwege',
+    ],
   },
 ];
 
@@ -140,9 +155,9 @@ export function Ferienhaus() {
 
     if (Math.abs(diff) > threshold) {
       if (diff > 0 && mobileCardIndex < amenityCards.length - 1) {
-        setMobileCardIndex(prev => prev + 1);
+        setMobileCardIndex((prev) => prev + 1);
       } else if (diff < 0 && mobileCardIndex > 0) {
-        setMobileCardIndex(prev => prev - 1);
+        setMobileCardIndex((prev) => prev - 1);
       }
     }
   }, [mobileCardIndex]);
@@ -211,14 +226,18 @@ export function Ferienhaus() {
       if (category) {
         const filterCategory = categoryToFilter[category] || category;
         setTimeout(() => {
-          const categoryButton = document.querySelector(`#galerie button[data-category="${filterCategory}"]`) as HTMLButtonElement;
+          const categoryButton = document.querySelector(
+            `#galerie button[data-category="${filterCategory}"]`,
+          ) as HTMLButtonElement;
           if (categoryButton) {
             categoryButton.click();
           }
           // If the original category differs from the top-level filter, also click the sub-category
           if (category !== filterCategory) {
             setTimeout(() => {
-              const subButton = document.querySelector(`#galerie button[data-subcategory="${category}"]`) as HTMLButtonElement;
+              const subButton = document.querySelector(
+                `#galerie button[data-subcategory="${category}"]`,
+              ) as HTMLButtonElement;
               if (subButton) {
                 subButton.click();
               }
@@ -245,11 +264,18 @@ export function Ferienhaus() {
           <h2
             data-text-key="ferienhaus_title"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('ferienhaus_title') }}
+            style={{
+              fontFamily: 'FeelingPassionate, cursive',
+              ...getTextStyle('ferienhaus_title'),
+            }}
           >
             {getText('ferienhaus_title')}
           </h2>
-          <p data-text-key="ferienhaus_subtitle" className="text-lg text-gray-600" style={getTextStyle('ferienhaus_subtitle')}>
+          <p
+            data-text-key="ferienhaus_subtitle"
+            className="text-lg text-gray-600"
+            style={getTextStyle('ferienhaus_subtitle')}
+          >
             {getText('ferienhaus_subtitle')}
           </p>
         </motion.div>
@@ -273,10 +299,7 @@ export function Ferienhaus() {
                 const cardImage = cardImages[card.key];
 
                 return (
-                  <div
-                    key={card.key}
-                    className="w-full flex-shrink-0 px-2"
-                  >
+                  <div key={card.key} className="w-full flex-shrink-0 px-2">
                     <div
                       onClick={() => scrollToGalleryCategory(card.galleryCategory)}
                       className="bg-white rounded-2xl overflow-hidden text-left group cursor-pointer shadow-sm border border-gray-100 flex flex-col"
@@ -329,7 +352,7 @@ export function Ferienhaus() {
             {/* Navigation Arrows */}
             {mobileCardIndex > 0 && (
               <button
-                onClick={() => setMobileCardIndex(prev => prev - 1)}
+                onClick={() => setMobileCardIndex((prev) => prev - 1)}
                 className="absolute left-2 top-1/3 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-700 z-10"
               >
                 <ChevronLeft size={20} />
@@ -337,7 +360,7 @@ export function Ferienhaus() {
             )}
             {mobileCardIndex < amenityCards.length - 1 && (
               <button
-                onClick={() => setMobileCardIndex(prev => prev + 1)}
+                onClick={() => setMobileCardIndex((prev) => prev + 1)}
                 className="absolute right-2 top-1/3 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-700 z-10"
               >
                 <ChevronRight size={20} />
@@ -352,16 +375,12 @@ export function Ferienhaus() {
                 key={index}
                 onClick={() => setMobileCardIndex(index)}
                 className={`h-2 rounded-full transition-all ${
-                  mobileCardIndex === index
-                    ? 'bg-logo-green w-6'
-                    : 'bg-logo-green/30 w-2'
+                  mobileCardIndex === index ? 'bg-logo-green w-6' : 'bg-logo-green/30 w-2'
                 }`}
               />
             ))}
           </div>
-          <p className="text-center text-xs text-gray-400 mt-2">
-            ← Wischen zum Blättern →
-          </p>
+          <p className="text-center text-xs text-gray-400 mt-2">← Wischen zum Blättern →</p>
         </div>
 
         {/* Desktop Grid - 4x2 */}
@@ -410,8 +429,10 @@ export function Ferienhaus() {
                 <div className="p-5 flex-1 flex flex-col">
                   {/* Icon and Title Row */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center text-logo-green flex-shrink-0
-                      group-hover:bg-logo-green group-hover:text-white transition-all duration-300">
+                    <div
+                      className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center text-logo-green flex-shrink-0
+                      group-hover:bg-logo-green group-hover:text-white transition-all duration-300"
+                    >
                       <Icon size={20} />
                     </div>
                     <h3 className="text-base font-bold text-gray-900 group-hover:text-logo-green transition-colors">
@@ -492,7 +513,11 @@ export function Ferienhaus() {
                 >
                   <Image
                     src="/images/grundriss.jpg"
-                    alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
+                    alt={
+                      language === 'de'
+                        ? 'Grundriss der Sechszirbenhütte'
+                        : 'Floor plan of Sechszirbenhütte'
+                    }
                     fill
                     className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, 40vw"
@@ -524,7 +549,10 @@ export function Ferienhaus() {
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); prevImage(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              prevImage();
+            }}
             className="absolute left-4 text-white p-2 hover:bg-white/10 rounded-full"
           >
             <ChevronLeft size={40} />
@@ -540,7 +568,10 @@ export function Ferienhaus() {
           />
 
           <button
-            onClick={(e) => { e.stopPropagation(); nextImage(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              nextImage();
+            }}
             className="absolute right-4 text-white p-2 hover:bg-white/10 rounded-full"
           >
             <ChevronRight size={40} />
@@ -571,7 +602,11 @@ export function Ferienhaus() {
           >
             <Image
               src="/images/grundriss.jpg"
-              alt={language === 'de' ? 'Grundriss der Sechszirbenhütte' : 'Floor plan of Sechszirbenhütte'}
+              alt={
+                language === 'de'
+                  ? 'Grundriss der Sechszirbenhütte'
+                  : 'Floor plan of Sechszirbenhütte'
+              }
               width={1600}
               height={1200}
               className="w-full h-auto max-h-[85vh] object-contain p-4"

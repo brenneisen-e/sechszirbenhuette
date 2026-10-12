@@ -4,14 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import {
-  Map,
-  Mountain,
-  Globe,
-  Dog,
-  Baby,
-  ArrowRight,
-} from 'lucide-react';
+import { Map, Mountain, Globe, Dog, Baby, ArrowRight } from 'lucide-react';
 
 export function Umgebung() {
   const { t } = useLanguage();
@@ -37,12 +30,14 @@ export function Umgebung() {
           >
             {getText('umgebung_title')}
           </h2>
-          <p data-text-key="umgebung_subtitle" className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4" style={getTextStyle('umgebung_subtitle')}>
+          <p
+            data-text-key="umgebung_subtitle"
+            className="text-base sm:text-lg md:text-xl text-logo-green font-medium mb-4"
+            style={getTextStyle('umgebung_subtitle')}
+          >
             {getText('umgebung_subtitle')}
           </p>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600">
-            {t.umgebung.intro}
-          </p>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600">{t.umgebung.intro}</p>
         </motion.div>
 
         {/* Blog Banner */}
@@ -73,7 +68,8 @@ export function Umgebung() {
                       {t.blog?.bannerTitle || 'Entdecken Sie mehr in unserem Blog'}
                     </h3>
                     <p className="text-white/90 text-base md:text-lg mb-6 max-w-2xl">
-                      {t.blog?.bannerDescription || 'Ausführliche Reisetipps, Wanderrouten und die schönsten Ausflugsziele in den Nockbergen und Kärnten.'}
+                      {t.blog?.bannerDescription ||
+                        'Ausführliche Reisetipps, Wanderrouten und die schönsten Ausflugsziele in den Nockbergen und Kärnten.'}
                     </p>
 
                     {/* Feature Pills */}
@@ -97,7 +93,10 @@ export function Umgebung() {
                   <div className="flex-shrink-0">
                     <span className="inline-flex items-center gap-2 bg-white text-logo-green px-6 py-3 rounded-xl font-semibold text-base md:text-lg shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                       {t.blog?.ctaButton || 'Zum Blog'}
-                      <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight
+                        size={20}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
                     </span>
                   </div>
                 </div>

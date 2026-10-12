@@ -45,7 +45,11 @@ export function DuplicatesModal({
               disabled={selectedForDeletion.size === 0 || isDeleting}
               className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
             >
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              {isDeleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
               {selectedForDeletion.size} löschen
             </button>
           </div>
@@ -65,7 +69,12 @@ export function DuplicatesModal({
                       onClick={() => onToggleSelection(img.id)}
                     >
                       <div className="relative aspect-video">
-                        <Image src={img.image_url} alt={img.alt_text} fill className="object-cover" />
+                        <Image
+                          src={img.image_url}
+                          alt={img.alt_text}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                       {selectedForDeletion.has(img.id) && (
                         <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">

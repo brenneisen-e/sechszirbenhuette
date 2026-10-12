@@ -15,7 +15,7 @@ export function calculateNights(arrival: string | null, departure: string | null
 // Calculate Kurtaxe for a guest
 export function calculateKurtaxe(guest: Guest): number {
   const nights = calculateNights(guest.arrival_date, guest.departure_date);
-  return nights * guest.adults * 2.70;
+  return nights * guest.adults * 2.7;
 }
 
 // Normalize platform name for display
@@ -23,7 +23,8 @@ export function normalizePlatformDisplay(platform: string | null): string {
   if (!platform) return '-';
   const lower = platform.toLowerCase();
   if (lower.includes('whats')) return 'WhatsApp';
-  if (lower.includes('feratel') || lower.includes('kaernten') || lower.includes('kärnten')) return 'Feratel';
+  if (lower.includes('feratel') || lower.includes('kaernten') || lower.includes('kärnten'))
+    return 'Feratel';
   if (lower.includes('fewo') || lower.includes('ferienwohnung')) return 'FeWo';
   if (lower.includes('booking')) return 'Booking.com';
   if (lower.includes('airbnb')) return 'Airbnb';
@@ -39,22 +40,19 @@ export function getPlatformBadgeStyle(platform: string): string {
 }
 
 // Get all unique platforms for a guest (from guest record + bookings)
-export function getGuestPlatforms(
-  guest: Guest,
-  bookings: Booking[]
-): string[] {
+export function getGuestPlatforms(guest: Guest, bookings: Booking[]): string[] {
   const platforms = new Set<string>();
 
   // Add guest's main platform(s) - can be comma-separated
   if (guest.platform) {
-    guest.platform.split(',').forEach(p => {
+    guest.platform.split(',').forEach((p) => {
       const normalized = normalizePlatformDisplay(p.trim());
       if (normalized !== '-') platforms.add(normalized);
     });
   }
 
   // Add platforms from bookings
-  bookings.forEach(b => {
+  bookings.forEach((b) => {
     if (b.platform) {
       const normalized = normalizePlatformDisplay(b.platform);
       if (normalized !== '-') platforms.add(normalized);
@@ -78,7 +76,7 @@ export function formatDate(dateStr: string | null): string {
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('de-DE', {
     style: 'currency',
-    currency: 'EUR'
+    currency: 'EUR',
   }).format(amount);
 }
 
@@ -89,13 +87,16 @@ export function getEffectiveBookingAmount(booking: Booking): number {
   // but payout_amount in additional_costs has the actual value
   if (booking.additional_costs) {
     try {
-      const costs = typeof booking.additional_costs === 'string'
-        ? JSON.parse(booking.additional_costs)
-        : booking.additional_costs;
+      const costs =
+        typeof booking.additional_costs === 'string'
+          ? JSON.parse(booking.additional_costs)
+          : booking.additional_costs;
       if (costs?.payout_amount && costs.payout_amount > 0) {
         return costs.payout_amount;
       }
-    } catch { /* ignore parse errors */ }
+    } catch {
+      /* ignore parse errors */
+    }
   }
   return booking.rental_price || 0;
 }
@@ -103,7 +104,7 @@ export function getEffectiveBookingAmount(booking: Booking): number {
 // Parse guest name to extract name and address
 export function parseGuestInfo(
   guestName: string,
-  address: string | null
+  address: string | null,
 ): { name: string; address: string | null } {
   // If address field is filled, use it directly
   if (address) {
@@ -112,11 +113,16 @@ export function parseGuestInfo(
 
   // Try to extract address from combined guest_name field
   // Pattern: "Name Straße Nr PLZ Ort" or "Name + Name Straße Nr PLZ Ort"
-  const lines = guestName.split(/\s{2,}|\n/).map(s => s.trim()).filter(Boolean);
+  const lines = guestName
+    .split(/\s{2,}|\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   if (lines.length === 1) {
     // Try to find address pattern (street with number, postal code)
-    const match = guestName.match(/^(.+?)\s+([A-Za-zäöüßÄÖÜ]+(?:str(?:aße|\.)?|weg|allee|platz|gasse)\s*\.?\s*\d+.*)$/i);
+    const match = guestName.match(
+      /^(.+?)\s+([A-Za-zäöüßÄÖÜ]+(?:str(?:aße|\.)?|weg|allee|platz|gasse)\s*\.?\s*\d+.*)$/i,
+    );
     if (match?.[1] && match[2]) {
       return { name: match[1].trim(), address: match[2].trim() };
     }
@@ -140,7 +146,10 @@ export function parseGuestInfo(
  * Kann auch für Einzelbuchungen verwendet werden:
  *   getEffectiveStatus('completed', [booking])
  */
-export function getEffectiveStatus(dbStatus: string, bookings: Pick<Booking, 'status' | 'departure_date' | 'arrival_date'>[]): string {
+export function getEffectiveStatus(
+  dbStatus: string,
+  bookings: Pick<Booking, 'status' | 'departure_date' | 'arrival_date'>[],
+): string {
   if (bookings.length === 0) return dbStatus || 'completed';
 
   let hasActive = false;
@@ -150,7 +159,7 @@ export function getEffectiveStatus(dbStatus: string, bookings: Pick<Booking, 'st
     const effectiveStatus = getEffectiveBookingStatus(
       booking.status,
       booking.departure_date,
-      booking.arrival_date
+      booking.arrival_date,
     );
     if (effectiveStatus === 'active') hasActive = true;
     else if (effectiveStatus === 'completed') hasCompleted = true;
@@ -169,7 +178,11 @@ export function getEffectiveStatus(dbStatus: string, bookings: Pick<Booking, 'st
  * - Abreise in der Vergangenheit → 'completed'
  * - Abreise heute oder in der Zukunft → 'active'
  */
-export function getEffectiveBookingStatus(bookingStatus: string, departureDate: string | null, arrivalDate?: string | null): string {
+export function getEffectiveBookingStatus(
+  bookingStatus: string,
+  departureDate: string | null,
+  arrivalDate?: string | null,
+): string {
   if (bookingStatus === 'cancelled') return 'cancelled';
   if (bookingStatus === 'completed') return 'completed';
 
@@ -194,7 +207,7 @@ export function sortGuests(
   guests: Guest[],
   sortColumn: string | null,
   sortDirection: 'asc' | 'desc',
-  guestBookings: Record<number, Booking[]>
+  guestBookings: Record<number, Booking[]>,
 ): Guest[] {
   return [...guests].sort((a, b) => {
     if (!sortColumn) return 0;
@@ -220,11 +233,15 @@ export function sortGuests(
         const aBookingsForDate = guestBookings[a.id] || [];
         const bBookingsForDate = guestBookings[b.id] || [];
         const aLatest = aBookingsForDate
-          .filter(booking => booking.arrival_date)
-          .sort((x, y) => new Date(y.arrival_date!).getTime() - new Date(x.arrival_date!).getTime())[0];
+          .filter((booking) => booking.arrival_date)
+          .sort(
+            (x, y) => new Date(y.arrival_date!).getTime() - new Date(x.arrival_date!).getTime(),
+          )[0];
         const bLatest = bBookingsForDate
-          .filter(booking => booking.arrival_date)
-          .sort((x, y) => new Date(y.arrival_date!).getTime() - new Date(x.arrival_date!).getTime())[0];
+          .filter((booking) => booking.arrival_date)
+          .sort(
+            (x, y) => new Date(y.arrival_date!).getTime() - new Date(x.arrival_date!).getTime(),
+          )[0];
         aVal = aLatest?.arrival_date || a.arrival_date || '';
         bVal = bLatest?.arrival_date || b.arrival_date || '';
         break;
@@ -232,23 +249,27 @@ export function sortGuests(
       case 'rental_price': {
         const aBookings = guestBookings[a.id] || [];
         const bBookings = guestBookings[b.id] || [];
-        aVal = aBookings.length > 0
-          ? aBookings.reduce((sum, booking) => sum + (booking.rental_price || 0), 0)
-          : a.rental_price;
-        bVal = bBookings.length > 0
-          ? bBookings.reduce((sum, booking) => sum + (booking.rental_price || 0), 0)
-          : b.rental_price;
+        aVal =
+          aBookings.length > 0
+            ? aBookings.reduce((sum, booking) => sum + (booking.rental_price || 0), 0)
+            : a.rental_price;
+        bVal =
+          bBookings.length > 0
+            ? bBookings.reduce((sum, booking) => sum + (booking.rental_price || 0), 0)
+            : b.rental_price;
         break;
       }
       case 'status': {
         const aBookingsForStatus = guestBookings[a.id] || [];
         const bBookingsForStatus = guestBookings[b.id] || [];
-        aVal = aBookingsForStatus.length > 0
-          ? getEffectiveStatus(a.status, aBookingsForStatus)
-          : getEffectiveBookingStatus(a.status, a.departure_date, a.arrival_date);
-        bVal = bBookingsForStatus.length > 0
-          ? getEffectiveStatus(b.status, bBookingsForStatus)
-          : getEffectiveBookingStatus(b.status, b.departure_date, b.arrival_date);
+        aVal =
+          aBookingsForStatus.length > 0
+            ? getEffectiveStatus(a.status, aBookingsForStatus)
+            : getEffectiveBookingStatus(a.status, a.departure_date, a.arrival_date);
+        bVal =
+          bBookingsForStatus.length > 0
+            ? getEffectiveStatus(b.status, bBookingsForStatus)
+            : getEffectiveBookingStatus(b.status, b.departure_date, b.arrival_date);
         break;
       }
     }

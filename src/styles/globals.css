@@ -73,7 +73,7 @@ body.is-loading header {
 
     /* Site Settings - Default values (overridden by SiteSettingsContext) */
     --color-primary: #1e5631;
-    --color-accent: #8B7355;
+    --color-accent: #8b7355;
     --font-heading: 'FeelingPassionate', cursive;
     --font-body: system-ui, sans-serif;
     --heading-size: 64px;
@@ -123,7 +123,8 @@ body.is-loading header {
   }
 
   /* Responsive images by default */
-  img, video {
+  img,
+  video {
     max-width: 100%;
     height: auto;
   }

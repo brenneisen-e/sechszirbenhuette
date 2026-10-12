@@ -2,8 +2,24 @@
 
 import { useState } from 'react';
 import {
-  Mail, Phone, MapPin, Users, Euro, Calendar, TrendingUp, CalendarRange,
-  CheckCircle2, Clock, CreditCard, MessageSquare, Plus, Edit3, Trash2, Save, X, Loader2,
+  Mail,
+  Phone,
+  MapPin,
+  Users,
+  Euro,
+  Calendar,
+  TrendingUp,
+  CalendarRange,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  MessageSquare,
+  Plus,
+  Edit3,
+  Trash2,
+  Save,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import type { Guest, Booking, BankPayment, GuestNote } from '../types';
@@ -28,7 +44,7 @@ function formatDateTime(dateString: string): string {
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 }
 
@@ -106,7 +122,7 @@ export function GuestOverviewTab({
 
   // Berechne Gesamtstatistiken - nur aus bookings-Tabelle
   const totalBookings = bookings.length;
-  const completedBookings = bookings.filter(b => b.status === 'completed').length;
+  const completedBookings = bookings.filter((b) => b.status === 'completed').length;
 
   // Gesamtumsatz nur aus bookings-Tabelle (payout_amount für Plattform-Buchungen)
   const totalRevenue = bookings.reduce((sum, b) => sum + getEffectiveBookingAmount(b), 0);
@@ -115,9 +131,7 @@ export function GuestOverviewTab({
   const totalPayments = bankPayments.reduce((sum, p) => sum + p.amount, 0);
 
   // Erste und letzte Buchung (nur aus bookings-Tabelle)
-  const allArrivalDates = bookings
-    .map(b => b.arrival_date)
-    .filter(Boolean) as string[];
+  const allArrivalDates = bookings.map((b) => b.arrival_date).filter(Boolean) as string[];
 
   const sortedArrivalDates = allArrivalDates.sort();
   const firstBooking = sortedArrivalDates[0];
@@ -130,8 +144,10 @@ export function GuestOverviewTab({
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   };
 
-  const totalNights = bookings.reduce((sum, b) =>
-    sum + calculateNights(b.arrival_date, b.departure_date), 0);
+  const totalNights = bookings.reduce(
+    (sum, b) => sum + calculateNights(b.arrival_date, b.departure_date),
+    0,
+  );
 
   return (
     <div className="space-y-4">
@@ -199,7 +215,10 @@ export function GuestOverviewTab({
                   />
                   <div className="flex gap-2 justify-end">
                     <button
-                      onClick={() => { setIsAdding(false); setNewNote(''); }}
+                      onClick={() => {
+                        setIsAdding(false);
+                        setNewNote('');
+                      }}
                       className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded flex items-center gap-1"
                     >
                       <X className="w-3 h-3" />
@@ -210,7 +229,11 @@ export function GuestOverviewTab({
                       disabled={!newNote.trim() || isSaving}
                       className="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-primary-dark disabled:opacity-50 flex items-center gap-1"
                     >
-                      {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                      {isSaving ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Save className="w-3 h-3" />
+                      )}
                       Speichern
                     </button>
                   </div>
@@ -243,7 +266,10 @@ export function GuestOverviewTab({
                           />
                           <div className="flex gap-2 justify-end">
                             <button
-                              onClick={() => { setEditingId(null); setEditContent(''); }}
+                              onClick={() => {
+                                setEditingId(null);
+                                setEditContent('');
+                              }}
                               className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
                             >
                               Abbrechen
@@ -253,14 +279,20 @@ export function GuestOverviewTab({
                               disabled={!editContent.trim() || isSaving}
                               className="px-2 py-1 text-xs bg-primary text-white rounded disabled:opacity-50"
                             >
-                              {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Speichern'}
+                              {isSaving ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                'Speichern'
+                              )}
                             </button>
                           </div>
                         </div>
                       ) : (
                         <>
                           <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm text-gray-800 whitespace-pre-wrap flex-1">{note.content}</p>
+                            <p className="text-sm text-gray-800 whitespace-pre-wrap flex-1">
+                              {note.content}
+                            </p>
                             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={() => startEditing(note)}
@@ -275,11 +307,18 @@ export function GuestOverviewTab({
                                 className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
                                 title="Löschen"
                               >
-                                {deletingId === note.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                {deletingId === note.id ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3 h-3" />
+                                )}
                               </button>
                             </div>
                           </div>
-                          <p className="text-xs text-gray-400 mt-1" title={formatDateTime(note.created_at)}>
+                          <p
+                            className="text-xs text-gray-400 mt-1"
+                            title={formatDateTime(note.created_at)}
+                          >
                             {formatRelativeTime(note.created_at)}
                             {note.updated_at !== note.created_at && ' • bearbeitet'}
                           </p>
@@ -325,7 +364,6 @@ export function GuestOverviewTab({
           <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue, false)}</p>
           <p className="text-xs text-gray-500">Mieteinnahmen</p>
         </div>
-
       </div>
 
       {/* Buchungshistorie */}
@@ -337,9 +375,13 @@ export function GuestOverviewTab({
 
         {firstBooking && lastBooking && (
           <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-            <span>Erste Buchung: <strong>{formatDate(firstBooking)}</strong></span>
+            <span>
+              Erste Buchung: <strong>{formatDate(firstBooking)}</strong>
+            </span>
             <span>•</span>
-            <span>Letzte Buchung: <strong>{formatDate(lastBooking)}</strong></span>
+            <span>
+              Letzte Buchung: <strong>{formatDate(lastBooking)}</strong>
+            </span>
           </div>
         )}
 
@@ -347,34 +389,42 @@ export function GuestOverviewTab({
           {/* Alle Buchungen aus bookings-Tabelle */}
           {bookings.length === 0 ? (
             <p className="text-gray-500 text-sm py-2">Keine Buchungen vorhanden</p>
-          ) : bookings.map((booking) => {
-            const nights = calculateNights(booking.arrival_date, booking.departure_date);
-            return (
-              <div key={booking.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  {booking.status === 'completed' ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  ) : booking.status === 'cancelled' ? (
-                    <span className="w-5 h-5 text-red-500">✕</span>
-                  ) : (
-                    <Clock className="w-5 h-5 text-blue-500" />
-                  )}
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {formatDate(booking.arrival_date)} - {formatDate(booking.departure_date)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {nights} Nächte • {booking.adults} Erw.{booking.children > 0 && `, ${booking.children} Ki.`}
-                      {booking.platform && ` • ${booking.platform}`}
-                    </p>
+          ) : (
+            bookings.map((booking) => {
+              const nights = calculateNights(booking.arrival_date, booking.departure_date);
+              return (
+                <div
+                  key={booking.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    {booking.status === 'completed' ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : booking.status === 'cancelled' ? (
+                      <span className="w-5 h-5 text-red-500">✕</span>
+                    ) : (
+                      <Clock className="w-5 h-5 text-blue-500" />
+                    )}
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {formatDate(booking.arrival_date)} - {formatDate(booking.departure_date)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {nights} Nächte • {booking.adults} Erw.
+                        {booking.children > 0 && `, ${booking.children} Ki.`}
+                        {booking.platform && ` • ${booking.platform}`}
+                      </p>
+                    </div>
                   </div>
+                  <span
+                    className={`font-medium ${booking.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-900'}`}
+                  >
+                    {formatCurrency(getEffectiveBookingAmount(booking))}
+                  </span>
                 </div>
-                <span className={`font-medium ${booking.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                  {formatCurrency(getEffectiveBookingAmount(booking))}
-                </span>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -387,12 +437,17 @@ export function GuestOverviewTab({
           </h4>
           <div className="space-y-2">
             {bankPayments.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between p-2 bg-green-50 rounded">
+              <div
+                key={payment.id}
+                className="flex items-center justify-between p-2 bg-green-50 rounded"
+              >
                 <div className="text-sm">
                   <span className="text-gray-600">{formatDate(payment.payment_date)}</span>
                   {payment.notes && <span className="text-gray-400 ml-2">• {payment.notes}</span>}
                 </div>
-                <span className="font-medium text-green-700">+{formatCurrency(payment.amount)}</span>
+                <span className="font-medium text-green-700">
+                  +{formatCurrency(payment.amount)}
+                </span>
               </div>
             ))}
             <div className="flex justify-between pt-2 border-t border-gray-200 font-medium">

@@ -67,6 +67,6 @@ export function getLargeImageUrl(url: string): string {
 export function getResponsiveSrcSet(url: string): string {
   const sizes = [400, 800, 1200, 1600];
   return sizes
-    .map(width => `${getCloudflareImageUrl(url, { width, quality: 75 })} ${width}w`)
+    .map((width) => `${getCloudflareImageUrl(url, { width, quality: 75 })} ${width}w`)
     .join(', ');
 }

@@ -33,13 +33,15 @@ export async function GET() {
       return NextResponse.json({ assignments: [], success: true });
     }
 
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       SELECT aci.id, aci.card_key, aci.media_id, aci.display_order,
              m.url, m.title, m.alt_text
       FROM amenity_card_images aci
       LEFT JOIN media m ON aci.media_id = m.id
       ORDER BY aci.card_key, aci.display_order ASC
-    `).all<{
+    `,
+    ).all<{
       id: number;
       card_key: string;
       media_id: string;
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'DB not available' }, { status: 500 });
     }
 
-    const body = await request.json() as { card_key: string; media_id: string };
+    const body = (await request.json()) as { card_key: string; media_id: string };
     const { card_key, media_id } = body;
 
     if (!card_key || !media_id) {
@@ -76,8 +78,10 @@ export async function POST(request: NextRequest) {
 
     // Insert new assignment
     await env.DB.prepare(
-      'INSERT INTO amenity_card_images (card_key, media_id, display_order) VALUES (?, ?, 0)'
-    ).bind(card_key, media_id).run();
+      'INSERT INTO amenity_card_images (card_key, media_id, display_order) VALUES (?, ?, 0)',
+    )
+      .bind(card_key, media_id)
+      .run();
 
     return NextResponse.json({ success: true });
   } catch (error) {

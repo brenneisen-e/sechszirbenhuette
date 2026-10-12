@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import {
-  X, Plus, Upload, Loader2, Camera, FileText, ListTodo
-} from 'lucide-react';
+import { X, Plus, Upload, Loader2, Camera, FileText, ListTodo } from 'lucide-react';
 import type { Guest, ScreenshotAnalysisResponse } from './types';
 import { COUNTRIES, STANDARD_TASKS, DEFAULT_NEW_GUEST } from './constants';
 import { FlagIcon } from './FlagIcon';
@@ -20,7 +18,7 @@ interface CreateGuestModalProps {
     createStandardTasks: boolean,
     importFile: File | null,
     extractedNetRent: number | null,
-    isPlatformPayment: boolean
+    isPlatformPayment: boolean,
   ) => void;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
@@ -74,22 +72,27 @@ export function CreateGuestModal({
 
       const response = await fetch('/api/admin/analyze-booking', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
-      const result = await response.json() as ScreenshotAnalysisResponse;
+      const result = (await response.json()) as ScreenshotAnalysisResponse;
       const data = result.data;
 
       if (data) {
-        const hasAnyData = data.guest_name || data.email || data.phone ||
-                          data.arrival_date || data.departure_date ||
-                          data.platform || data.booking_number ||
-                          (data.rental_price && data.rental_price > 0);
+        const hasAnyData =
+          data.guest_name ||
+          data.email ||
+          data.phone ||
+          data.arrival_date ||
+          data.departure_date ||
+          data.platform ||
+          data.booking_number ||
+          (data.rental_price && data.rental_price > 0);
 
         if (hasAnyData) {
           // Only populate guest-level fields (personal data)
           // Booking data (dates, prices, etc.) will be entered when creating a booking
-          setNewGuest(prev => ({
+          setNewGuest((prev) => ({
             ...prev,
             guest_name: data.guest_name || prev.guest_name,
             nationality: data.nationality || prev.nationality,
@@ -99,17 +102,23 @@ export function CreateGuestModal({
             other_notes: data.notes || prev.other_notes,
           }));
 
-          onSuccess(`${isScreenshot ? 'Screenshot' : 'PDF'} analysiert! Gastdaten wurden extrahiert. Bitte prüfen. Buchungsdaten können nach dem Anlegen des Gastes in einer neuen Buchung erfasst werden.`);
+          onSuccess(
+            `${isScreenshot ? 'Screenshot' : 'PDF'} analysiert! Gastdaten wurden extrahiert. Bitte prüfen. Buchungsdaten können nach dem Anlegen des Gastes in einer neuen Buchung erfasst werden.`,
+          );
         } else {
           onError(`${isScreenshot ? 'Screenshot' : 'PDF'}-Analyse konnte keine Daten extrahieren.`);
         }
       } else if (result.error) {
         onError(`Fehler bei der Analyse: ${result.error}`);
       } else {
-        onError(`${isScreenshot ? 'Screenshot' : 'PDF'} konnte nicht analysiert werden. Bitte Daten manuell eingeben.`);
+        onError(
+          `${isScreenshot ? 'Screenshot' : 'PDF'} konnte nicht analysiert werden. Bitte Daten manuell eingeben.`,
+        );
       }
     } catch (err) {
-      onError(`Fehler bei der Analyse: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
+      onError(
+        `Fehler bei der Analyse: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`,
+      );
     } finally {
       if (isScreenshot) {
         setIsAnalyzingScreenshot(false);
@@ -120,21 +129,16 @@ export function CreateGuestModal({
   };
 
   const handleSubmit = () => {
-    onCreateGuest(
-      newGuest,
-      'new',
-      null,
-      createStandardTasks,
-      importFile,
-      null,
-      false
-    );
+    onCreateGuest(newGuest, 'new', null, createStandardTasks, importFile, null, false);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}
+    >
       <div className="bg-white rounded-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -142,7 +146,10 @@ export function CreateGuestModal({
               <Plus className="w-5 h-5 text-green-600" />
               Neuer Gast
             </h3>
-            <button onClick={handleClose} className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              onClick={handleClose}
+              className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -189,11 +196,13 @@ export function CreateGuestModal({
                     className="hidden"
                     disabled={isAnalyzingScreenshot}
                   />
-                  <div className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${
-                    isAnalyzingScreenshot
-                      ? 'border-blue-300 bg-blue-100'
-                      : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50'
-                  }`}>
+                  <div
+                    className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${
+                      isAnalyzingScreenshot
+                        ? 'border-blue-300 bg-blue-100'
+                        : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50'
+                    }`}
+                  >
                     {isAnalyzingScreenshot ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
@@ -209,7 +218,12 @@ export function CreateGuestModal({
                 </label>
                 {screenshotPreview && (
                   <div className="relative w-16 h-16 mt-2 rounded-lg overflow-hidden border border-blue-300">
-                    <img src={screenshotPreview} alt="Preview" className="w-full h-full object-cover" loading="eager" />
+                    <img
+                      src={screenshotPreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
                     <button
                       onClick={() => setScreenshotPreview(null)}
                       className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl"
@@ -237,11 +251,13 @@ export function CreateGuestModal({
                     className="hidden"
                     disabled={isAnalyzingPdf}
                   />
-                  <div className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${
-                    isAnalyzingPdf
-                      ? 'border-indigo-300 bg-indigo-100'
-                      : 'border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50'
-                  }`}>
+                  <div
+                    className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${
+                      isAnalyzingPdf
+                        ? 'border-indigo-300 bg-indigo-100'
+                        : 'border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50'
+                    }`}
+                  >
                     {isAnalyzingPdf ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
@@ -278,22 +294,27 @@ export function CreateGuestModal({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nationalität</label>
               <div className="flex flex-wrap gap-1 p-2 border border-gray-300 rounded-lg min-h-[42px]">
-                {(newGuest.nationality || '').split(',').filter(Boolean).map(code => {
-                  const country = COUNTRIES.find(c => c.code === code.trim());
-                  return country ? (
-                    <span
-                      key={code}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm cursor-pointer hover:bg-red-100"
-                      onClick={() => {
-                        const codes = (newGuest.nationality || '').split(',').filter(c => c.trim() !== code.trim());
-                        setNewGuest({ ...newGuest, nationality: codes.join(',') });
-                      }}
-                      title="Klicken zum Entfernen"
-                    >
-                      <FlagIcon code={code.trim()} size="small" /> {country.name} ×
-                    </span>
-                  ) : null;
-                })}
+                {(newGuest.nationality || '')
+                  .split(',')
+                  .filter(Boolean)
+                  .map((code) => {
+                    const country = COUNTRIES.find((c) => c.code === code.trim());
+                    return country ? (
+                      <span
+                        key={code}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm cursor-pointer hover:bg-red-100"
+                        onClick={() => {
+                          const codes = (newGuest.nationality || '')
+                            .split(',')
+                            .filter((c) => c.trim() !== code.trim());
+                          setNewGuest({ ...newGuest, nationality: codes.join(',') });
+                        }}
+                        title="Klicken zum Entfernen"
+                      >
+                        <FlagIcon code={code.trim()} size="small" /> {country.name} ×
+                      </span>
+                    ) : null;
+                  })}
                 <select
                   value=""
                   onChange={(e) => {
@@ -302,7 +323,7 @@ export function CreateGuestModal({
                       if (!current.includes(e.target.value)) {
                         setNewGuest({
                           ...newGuest,
-                          nationality: [...current, e.target.value].join(',')
+                          nationality: [...current, e.target.value].join(','),
                         });
                       }
                     }
@@ -310,8 +331,10 @@ export function CreateGuestModal({
                   className="flex-1 min-w-[120px] px-1 py-0.5 border-0 text-sm focus:ring-0 bg-transparent"
                 >
                   <option value="">+ Land hinzufügen</option>
-                  {COUNTRIES.map(c => (
-                    <option key={c.code} value={c.code}>{c.name}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -364,7 +387,9 @@ export function CreateGuestModal({
               <input
                 type="checkbox"
                 checked={newGuest.is_returning_guest === 1}
-                onChange={(e) => setNewGuest({ ...newGuest, is_returning_guest: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setNewGuest({ ...newGuest, is_returning_guest: e.target.checked ? 1 : 0 })
+                }
                 className="rounded border-gray-300"
               />
               <span className="text-sm text-gray-700">Stammgast</span>
@@ -386,7 +411,7 @@ export function CreateGuestModal({
                   Standard-Aufgaben anlegen
                 </span>
                 <p className="text-xs text-purple-700 mt-1">
-                  {STANDARD_TASKS.map(t => t.title).join(', ')}
+                  {STANDARD_TASKS.map((t) => t.title).join(', ')}
                 </p>
               </div>
             </label>

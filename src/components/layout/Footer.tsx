@@ -29,7 +29,8 @@ export function Footer() {
               {getText('footer_company') || 'Sechszirbenhütte'}
             </h3>
             <p className="text-gray-400 text-sm" style={getTextStyle('footer_description')}>
-              {getText('footer_description') || 'Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen. Über 250 Jahre alte Berghütte mit Sauna in Alleinlage.'}
+              {getText('footer_description') ||
+                'Premium-Hüttenurlaub auf 1.700 m in den Kärntner Nockbergen. Über 250 Jahre alte Berghütte mit Sauna in Alleinlage.'}
             </p>
           </div>
 
@@ -42,20 +43,28 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin size={18} className="text-wood-400 flex-shrink-0 mt-0.5" />
                 <span>
-                  {SITE_CONFIG.address.street}<br />
-                  {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}<br />
+                  {SITE_CONFIG.address.street}
+                  <br />
+                  {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}
+                  <br />
                   {SITE_CONFIG.address.country}
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={18} className="text-wood-400 flex-shrink-0" />
-                <a href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`} className="hover:text-white transition-colors">
+                <a
+                  href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
+                  className="hover:text-white transition-colors"
+                >
                   {SITE_CONFIG.phone}
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={18} className="text-wood-400 flex-shrink-0" />
-                <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-white transition-colors">
+                <a
+                  href={`mailto:${SITE_CONFIG.email}`}
+                  className="hover:text-white transition-colors"
+                >
                   {SITE_CONFIG.email}
                 </a>
               </li>
@@ -106,13 +115,17 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
           <p style={getTextStyle('footer_copyright')}>
-            {(getText('footer_copyright') || t.footer.copyright).replace('{year}', currentYear.toString())}
+            {(getText('footer_copyright') || t.footer.copyright).replace(
+              '{year}',
+              currentYear.toString(),
+            )}
           </p>
-          <p className="mt-2">
-            {SITE_CONFIG.owners}
-          </p>
+          <p className="mt-2">{SITE_CONFIG.owners}</p>
           <p className="mt-4">
-            <Link href="/admin" className="text-gray-600 hover:text-gray-400 transition-colors text-xs">
+            <Link
+              href="/admin"
+              className="text-gray-600 hover:text-gray-400 transition-colors text-xs"
+            >
               Admin
             </Link>
           </p>

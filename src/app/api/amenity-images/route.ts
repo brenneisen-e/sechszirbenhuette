@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       byCard,
-      success: true
+      success: true,
     });
   } catch (error) {
     console.error('Error fetching amenity card images:', error);

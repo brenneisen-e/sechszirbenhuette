@@ -46,10 +46,10 @@ const categoryMap: Record<string, string> = {
   'heidi-alm': 'heidi-alm',
   'turracher-hoehe': 'turracher-hoehe',
   'ossiacher-see': 'ossiacher-see',
-  'panoramaweg': 'panoramaweg',
-  'tierpark': 'tierpark',
-  'gerlitzen': 'gerlitzen',
-  'nockalm': 'nockalm',
+  panoramaweg: 'panoramaweg',
+  tierpark: 'tierpark',
+  gerlitzen: 'gerlitzen',
+  nockalm: 'nockalm',
   // Hundewanderungen
   'hund-falkert': 'hund-falkert',
   'hund-rodresnock': 'hund-rodresnock',
@@ -61,42 +61,187 @@ const categoryMap: Record<string, string> = {
 // Fallback static images from local gallery
 const fallbackImages: GalleryImage[] = [
   // Wohnbereich
-  { src: '/images/innen/Wohnzimmer_01.jpg', title: 'Gemütliche Stube', description: 'Eckbank mit Holztisch', category: 'wohnen' },
-  { src: '/images/innen/Wohnzimmer_02_Galerie.jpg', title: 'Wohnzimmer', description: 'Blick von der Galerie', category: 'wohnen' },
-  { src: '/images/innen/Stube.jpg', title: 'Wohnbereich', description: 'Bauernschrank und Treppe', category: 'wohnen' },
-  { src: '/images/innen/Stube_02.jpg', title: 'Stube', description: 'Gemütliche Atmosphäre', category: 'wohnen' },
-  { src: '/images/innen/Stube_03.jpg', title: 'Stube', description: 'Rustikales Ambiente', category: 'wohnen' },
-  { src: '/images/innen/Kamin.jpg', title: 'Kamin', description: 'Wohlige Wärme', category: 'wohnen' },
-  { src: '/images/innen/Treppenaufgang.jpg', title: 'Treppenaufgang', description: 'Zum Obergeschoss', category: 'wohnen' },
+  {
+    src: '/images/innen/Wohnzimmer_01.jpg',
+    title: 'Gemütliche Stube',
+    description: 'Eckbank mit Holztisch',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Wohnzimmer_02_Galerie.jpg',
+    title: 'Wohnzimmer',
+    description: 'Blick von der Galerie',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Stube.jpg',
+    title: 'Wohnbereich',
+    description: 'Bauernschrank und Treppe',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Stube_02.jpg',
+    title: 'Stube',
+    description: 'Gemütliche Atmosphäre',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Stube_03.jpg',
+    title: 'Stube',
+    description: 'Rustikales Ambiente',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Kamin.jpg',
+    title: 'Kamin',
+    description: 'Wohlige Wärme',
+    category: 'wohnen',
+  },
+  {
+    src: '/images/innen/Treppenaufgang.jpg',
+    title: 'Treppenaufgang',
+    description: 'Zum Obergeschoss',
+    category: 'wohnen',
+  },
   // Küche
-  { src: '/images/innen/Küche_01.jpg', title: 'Küche', description: 'Mit Bauernschrank', category: 'kueche' },
-  { src: '/images/innen/Küche_02.jpg', title: 'Küchenzeile', description: 'Voll ausgestattet', category: 'kueche' },
-  { src: '/images/innen/Kaffeemaschinen.jpg', title: 'Kaffeemaschine', description: 'Für den perfekten Kaffee', category: 'kueche' },
+  {
+    src: '/images/innen/Küche_01.jpg',
+    title: 'Küche',
+    description: 'Mit Bauernschrank',
+    category: 'kueche',
+  },
+  {
+    src: '/images/innen/Küche_02.jpg',
+    title: 'Küchenzeile',
+    description: 'Voll ausgestattet',
+    category: 'kueche',
+  },
+  {
+    src: '/images/innen/Kaffeemaschinen.jpg',
+    title: 'Kaffeemaschine',
+    description: 'Für den perfekten Kaffee',
+    category: 'kueche',
+  },
   // Schlafzimmer
-  { src: '/images/innen/Schlafzimmer_groß.jpg', title: 'Großes Schlafzimmer', description: 'Doppelbett und Einzelbett', category: 'schlafen' },
-  { src: '/images/innen/Schlafzimmer_klein.jpg', title: 'Kleines Schlafzimmer', description: 'Gemütliches Doppelbett', category: 'schlafen' },
+  {
+    src: '/images/innen/Schlafzimmer_groß.jpg',
+    title: 'Großes Schlafzimmer',
+    description: 'Doppelbett und Einzelbett',
+    category: 'schlafen',
+  },
+  {
+    src: '/images/innen/Schlafzimmer_klein.jpg',
+    title: 'Kleines Schlafzimmer',
+    description: 'Gemütliches Doppelbett',
+    category: 'schlafen',
+  },
   // Bad & Sauna
-  { src: '/images/innen/Sauna.jpg', title: 'Finnische Sauna', description: 'Eigene Sauna im Haus', category: 'bad' },
-  { src: '/images/innen/Badezimmer.jpg', title: 'Badezimmer', description: 'Mit Dusche', category: 'bad' },
+  {
+    src: '/images/innen/Sauna.jpg',
+    title: 'Finnische Sauna',
+    description: 'Eigene Sauna im Haus',
+    category: 'bad',
+  },
+  {
+    src: '/images/innen/Badezimmer.jpg',
+    title: 'Badezimmer',
+    description: 'Mit Dusche',
+    category: 'bad',
+  },
   { src: '/images/innen/WC.jpg', title: 'WC', description: 'Separates WC', category: 'bad' },
-  { src: '/images/innen/Ruheraum.jpg', title: 'Ruheraum', description: 'Entspannung nach der Sauna', category: 'bad' },
-  { src: '/images/innen/Ruheraum_02.jpg', title: 'Ruheraum', description: 'Wellness-Bereich', category: 'bad' },
-  { src: '/images/innen/Ruheraum Dusche.jpg', title: 'Dusche', description: 'Im Ruheraum', category: 'bad' },
+  {
+    src: '/images/innen/Ruheraum.jpg',
+    title: 'Ruheraum',
+    description: 'Entspannung nach der Sauna',
+    category: 'bad',
+  },
+  {
+    src: '/images/innen/Ruheraum_02.jpg',
+    title: 'Ruheraum',
+    description: 'Wellness-Bereich',
+    category: 'bad',
+  },
+  {
+    src: '/images/innen/Ruheraum Dusche.jpg',
+    title: 'Dusche',
+    description: 'Im Ruheraum',
+    category: 'bad',
+  },
   // Außenbereich
-  { src: '/images/aussen/Sommerhütte.jpg', title: 'Sechszirbenhütte', description: 'Im Sommer mit Balkon', category: 'aussen' },
-  { src: '/images/aussen/Herbst.jpg', title: 'Herbstansicht', description: 'Die Hütte im Herbst', category: 'aussen' },
-  { src: '/images/aussen/Balkon.jpg', title: 'Verschneiter Balkon', description: 'Winterstimmung', category: 'aussen' },
+  {
+    src: '/images/aussen/Sommerhütte.jpg',
+    title: 'Sechszirbenhütte',
+    description: 'Im Sommer mit Balkon',
+    category: 'aussen',
+  },
+  {
+    src: '/images/aussen/Herbst.jpg',
+    title: 'Herbstansicht',
+    description: 'Die Hütte im Herbst',
+    category: 'aussen',
+  },
+  {
+    src: '/images/aussen/Balkon.jpg',
+    title: 'Verschneiter Balkon',
+    description: 'Winterstimmung',
+    category: 'aussen',
+  },
   // Umgebung
-  { src: '/images/aussen/Nockberge.jpg', title: 'Nockberge Panorama', description: 'Atemberaubende Berglandschaft', category: 'umgebung' },
-  { src: '/images/aussen/Falkertsee_Winter.png', title: 'Falkertsee', description: 'Mystische Winterstimmung', category: 'umgebung' },
-  { src: '/images/aussen/Kühe_Rodresnock.jpg', title: 'Almkühe', description: 'Am Rodresnock', category: 'umgebung' },
+  {
+    src: '/images/aussen/Nockberge.jpg',
+    title: 'Nockberge Panorama',
+    description: 'Atemberaubende Berglandschaft',
+    category: 'umgebung',
+  },
+  {
+    src: '/images/aussen/Falkertsee_Winter.png',
+    title: 'Falkertsee',
+    description: 'Mystische Winterstimmung',
+    category: 'umgebung',
+  },
+  {
+    src: '/images/aussen/Kühe_Rodresnock.jpg',
+    title: 'Almkühe',
+    description: 'Am Rodresnock',
+    category: 'umgebung',
+  },
   // Aktivitäten
-  { src: '/images/aussen/Snowboard.jpg', title: 'Snowboarden', description: 'Im Tiefschnee', category: 'extras' },
-  { src: '/images/aussen/Skigebiet.jpeg', title: 'Skigebiet Falkert', description: 'Familiäres Skigebiet', category: 'extras' },
-  { src: '/images/aussen/Gravel.jpg', title: 'Gravelbiken', description: 'In den Lärchenwäldern', category: 'extras' },
-  { src: '/images/aussen/Nockiflitzer.jpg', title: 'Nocki-Flitzer', description: 'Sommerrodelbahn', category: 'extras' },
-  { src: '/images/aussen/Pilze.jpg', title: 'Pilze sammeln', description: 'Im Wald', category: 'extras' },
-  { src: '/images/aussen/Angeln.jpg', title: 'Angeln', description: 'Am Bergsee', category: 'extras' },
+  {
+    src: '/images/aussen/Snowboard.jpg',
+    title: 'Snowboarden',
+    description: 'Im Tiefschnee',
+    category: 'extras',
+  },
+  {
+    src: '/images/aussen/Skigebiet.jpeg',
+    title: 'Skigebiet Falkert',
+    description: 'Familiäres Skigebiet',
+    category: 'extras',
+  },
+  {
+    src: '/images/aussen/Gravel.jpg',
+    title: 'Gravelbiken',
+    description: 'In den Lärchenwäldern',
+    category: 'extras',
+  },
+  {
+    src: '/images/aussen/Nockiflitzer.jpg',
+    title: 'Nocki-Flitzer',
+    description: 'Sommerrodelbahn',
+    category: 'extras',
+  },
+  {
+    src: '/images/aussen/Pilze.jpg',
+    title: 'Pilze sammeln',
+    description: 'Im Wald',
+    category: 'extras',
+  },
+  {
+    src: '/images/aussen/Angeln.jpg',
+    title: 'Angeln',
+    description: 'Am Bergsee',
+    category: 'extras',
+  },
 ];
 
 // Parse alt_text format "Title - Description" into title and description
@@ -150,20 +295,23 @@ export function Galerie() {
     touchEndX.current = e.touches[0]?.clientX ?? 0;
   }, []);
 
-  const handleTouchEnd = useCallback((filteredLength: number) => {
-    const diff = touchStartX.current - touchEndX.current;
-    const threshold = 50;
+  const handleTouchEnd = useCallback(
+    (filteredLength: number) => {
+      const diff = touchStartX.current - touchEndX.current;
+      const threshold = 50;
 
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0 && mobileIndex < filteredLength - 1) {
-        // Swipe left - next image
-        setMobileIndex(prev => prev + 1);
-      } else if (diff < 0 && mobileIndex > 0) {
-        // Swipe right - previous image
-        setMobileIndex(prev => prev - 1);
+      if (Math.abs(diff) > threshold) {
+        if (diff > 0 && mobileIndex < filteredLength - 1) {
+          // Swipe left - next image
+          setMobileIndex((prev) => prev + 1);
+        } else if (diff < 0 && mobileIndex > 0) {
+          // Swipe right - previous image
+          setMobileIndex((prev) => prev - 1);
+        }
       }
-    }
-  }, [mobileIndex]);
+    },
+    [mobileIndex],
+  );
 
   // Reset pagination when category changes
   useEffect(() => {
@@ -179,18 +327,40 @@ export function Galerie() {
     async function fetchImages() {
       try {
         const response = await fetch('/api/media');
-        const data = await response.json() as { media?: MediaItem[] };
+        const data = (await response.json()) as { media?: MediaItem[] };
 
         if (data.media && data.media.length > 0) {
           const galleryCategories = [
-            'exterior', 'aussen', 'living', 'wohnen', 'innen', 'bedrooms', 'schlafen',
-            'kitchen', 'kueche', 'bathroom', 'bad', 'sauna', 'wellness', 'surroundings',
-            'umgebung', 'extras',
+            'exterior',
+            'aussen',
+            'living',
+            'wohnen',
+            'innen',
+            'bedrooms',
+            'schlafen',
+            'kitchen',
+            'kueche',
+            'bathroom',
+            'bad',
+            'sauna',
+            'wellness',
+            'surroundings',
+            'umgebung',
+            'extras',
             // Kinderausflüge
-            'heidi-alm', 'turracher-hoehe', 'ossiacher-see', 'panoramaweg',
-            'tierpark', 'gerlitzen', 'nockalm',
+            'heidi-alm',
+            'turracher-hoehe',
+            'ossiacher-see',
+            'panoramaweg',
+            'tierpark',
+            'gerlitzen',
+            'nockalm',
             // Hundewanderungen
-            'hund-falkert', 'hund-rodresnock', 'hund-drei-seen', 'hund-hochrindl', 'hund-millstaetter'
+            'hund-falkert',
+            'hund-rodresnock',
+            'hund-drei-seen',
+            'hund-hochrindl',
+            'hund-millstaetter',
           ];
           const allMedia = data.media;
           const dbImages: GalleryImage[] = allMedia
@@ -241,10 +411,10 @@ export function Galerie() {
     'heidi-alm': { de: 'Heidi-Alm', en: 'Heidi-Alm' },
     'turracher-hoehe': { de: 'Turracher Höhe', en: 'Turracher Höhe' },
     'ossiacher-see': { de: 'Ossiacher See', en: 'Lake Ossiach' },
-    'panoramaweg': { de: 'Panoramaweg', en: 'Panorama Trail' },
-    'tierpark': { de: 'Tierpark', en: 'Animal Park' },
-    'gerlitzen': { de: 'Gerlitzen-Alpe', en: 'Gerlitzen-Alpe' },
-    'nockalm': { de: 'Nockalm', en: 'Nockalm' },
+    panoramaweg: { de: 'Panoramaweg', en: 'Panorama Trail' },
+    tierpark: { de: 'Tierpark', en: 'Animal Park' },
+    gerlitzen: { de: 'Gerlitzen-Alpe', en: 'Gerlitzen-Alpe' },
+    nockalm: { de: 'Nockalm', en: 'Nockalm' },
     // Hundewanderungen
     'hund-falkert': { de: 'Falkert & See', en: 'Falkert & Lake' },
     'hund-rodresnock': { de: 'Rodresnock', en: 'Rodresnock' },
@@ -255,61 +425,78 @@ export function Galerie() {
 
   // Top-level categories: Alle, Innen, Außen, Extras
   const topCategories = [
-    { id: 'all', label: categoryLabels.all?.[language as 'de' | 'en'] || 'Alle', count: images.length },
+    {
+      id: 'all',
+      label: categoryLabels.all?.[language as 'de' | 'en'] || 'Alle',
+      count: images.length,
+    },
     {
       id: 'innen',
       label: language === 'de' ? 'Innen' : 'Interior',
-      count: images.filter(img => ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) || img.tags?.includes('innen')).length,
+      count: images.filter(
+        (img) =>
+          ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) ||
+          img.tags?.includes('innen'),
+      ).length,
     },
     {
       id: 'aussen',
       label: language === 'de' ? 'Außen' : 'Exterior',
-      count: images.filter(img => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen')).length,
+      count: images.filter(
+        (img) => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen'),
+      ).length,
     },
     {
       id: 'extras',
       label: categoryLabels.extras?.[language as 'de' | 'en'] || 'Extras',
-      count: images.filter(img => img.category === 'extras').length,
+      count: images.filter((img) => img.category === 'extras').length,
     },
   ];
 
   // Sub-categories for Innen and Außen
-  const innenSubCategories = ['wohnen', 'schlafen', 'kueche', 'bad'].filter(
-    id => images.some(img => img.category === id)
+  const innenSubCategories = ['wohnen', 'schlafen', 'kueche', 'bad'].filter((id) =>
+    images.some((img) => img.category === id),
   );
-  const aussenSubCategories = ['aussen', 'umgebung'].filter(
-    id => images.some(img => img.category === id)
+  const aussenSubCategories = ['aussen', 'umgebung'].filter((id) =>
+    images.some((img) => img.category === id),
   );
 
   const showSubFilters = selectedCategory === 'innen' || selectedCategory === 'aussen';
-  const subCategories = selectedCategory === 'innen' ? innenSubCategories : selectedCategory === 'aussen' ? aussenSubCategories : [];
+  const subCategories =
+    selectedCategory === 'innen'
+      ? innenSubCategories
+      : selectedCategory === 'aussen'
+        ? aussenSubCategories
+        : [];
 
   // Filter images
   const filteredImages = (() => {
     if (selectedCategory === 'all') return images;
-    if (selectedCategory === 'extras') return images.filter(img => img.category === 'extras');
+    if (selectedCategory === 'extras') return images.filter((img) => img.category === 'extras');
 
     if (selectedCategory === 'innen') {
       const innenImages = images.filter(
-        img => ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) || img.tags?.includes('innen')
+        (img) =>
+          ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) ||
+          img.tags?.includes('innen'),
       );
       if (selectedSubCategory) {
-        return innenImages.filter(img => img.category === selectedSubCategory);
+        return innenImages.filter((img) => img.category === selectedSubCategory);
       }
       return innenImages;
     }
 
     if (selectedCategory === 'aussen') {
       const aussenImages = images.filter(
-        img => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen')
+        (img) => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen'),
       );
       if (selectedSubCategory) {
-        return aussenImages.filter(img => img.category === selectedSubCategory);
+        return aussenImages.filter((img) => img.category === selectedSubCategory);
       }
       return aussenImages;
     }
 
-    return images.filter(img => img.category === selectedCategory);
+    return images.filter((img) => img.category === selectedCategory);
   })();
 
   // Calculate paginated images
@@ -334,10 +521,14 @@ export function Galerie() {
           >
             {getText('galerie_title') || (language === 'de' ? 'Galerie' : 'Gallery')}
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto" style={getTextStyle('galerie_subtitle')}>
-            {getText('galerie_subtitle') || (language === 'de'
-              ? 'Entdecken Sie die Sechszirbenhütte in Bildern'
-              : 'Discover the Sechszirbenhütte in pictures')}
+          <p
+            className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto"
+            style={getTextStyle('galerie_subtitle')}
+          >
+            {getText('galerie_subtitle') ||
+              (language === 'de'
+                ? 'Entdecken Sie die Sechszirbenhütte in Bildern'
+                : 'Discover the Sechszirbenhütte in pictures')}
           </p>
         </div>
 
@@ -357,7 +548,8 @@ export function Galerie() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {category.label} {category.count > 0 && <span className="text-sm opacity-75">({category.count})</span>}
+              {category.label}{' '}
+              {category.count > 0 && <span className="text-sm opacity-75">({category.count})</span>}
             </button>
           ))}
         </div>
@@ -376,7 +568,7 @@ export function Galerie() {
               {language === 'de' ? 'Alle' : 'All'}
             </button>
             {subCategories.map((subCat) => {
-              const count = images.filter(img => img.category === subCat).length;
+              const count = images.filter((img) => img.category === subCat).length;
               return (
                 <button
                   key={subCat}
@@ -401,7 +593,9 @@ export function Galerie() {
         {isLoading && (
           <div className="text-center py-12">
             <div className="animate-spin w-8 h-8 border-4 border-wood-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500">{language === 'de' ? 'Bilder werden geladen...' : 'Loading images...'}</p>
+            <p className="text-gray-500">
+              {language === 'de' ? 'Bilder werden geladen...' : 'Loading images...'}
+            </p>
           </div>
         )}
 
@@ -419,7 +613,10 @@ export function Galerie() {
                 >
                   {/* Current Image */}
                   <div
-                    onClick={() => { const img = filteredImages[mobileIndex]; if (img) setSelectedImage(images.indexOf(img)); }}
+                    onClick={() => {
+                      const img = filteredImages[mobileIndex];
+                      if (img) setSelectedImage(images.indexOf(img));
+                    }}
                     className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
                   >
                     <AdaptiveImage
@@ -435,7 +632,7 @@ export function Galerie() {
                   {/* Navigation Arrows */}
                   {mobileIndex > 0 && (
                     <button
-                      onClick={() => setMobileIndex(prev => prev - 1)}
+                      onClick={() => setMobileIndex((prev) => prev - 1)}
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
                     >
                       <ChevronLeft size={20} />
@@ -443,7 +640,7 @@ export function Galerie() {
                   )}
                   {mobileIndex < filteredImages.length - 1 && (
                     <button
-                      onClick={() => setMobileIndex(prev => prev + 1)}
+                      onClick={() => setMobileIndex((prev) => prev + 1)}
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
                     >
                       <ChevronRight size={20} />
@@ -458,14 +655,14 @@ export function Galerie() {
                       key={index}
                       onClick={() => setMobileIndex(index)}
                       className={`h-2 rounded-full transition-all ${
-                        mobileIndex === index
-                          ? 'bg-logo-green w-6'
-                          : 'bg-logo-green/30 w-2'
+                        mobileIndex === index ? 'bg-logo-green w-6' : 'bg-logo-green/30 w-2'
                       }`}
                     />
                   ))}
                   {filteredImages.length > 10 && (
-                    <span className="text-xs text-gray-500 ml-2">+{filteredImages.length - 10}</span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      +{filteredImages.length - 10}
+                    </span>
                   )}
                 </div>
 
@@ -477,11 +674,14 @@ export function Galerie() {
             )}
 
             {/* Desktop Grid - show always on server, then conditionally after hydration */}
-            <div className={`${isMobile === true ? 'hidden' : ''} md:block relative`} suppressHydrationWarning>
+            <div
+              className={`${isMobile === true ? 'hidden' : ''} md:block relative`}
+              suppressHydrationWarning
+            >
               {/* Previous Button (only when not expanded) */}
               {!isExpanded && filteredImages.length > imagesPerPage && (
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                  onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
                   disabled={!canGoPrev}
                   className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
@@ -492,7 +692,7 @@ export function Galerie() {
               {/* Next Button (only when not expanded) */}
               {!isExpanded && filteredImages.length > imagesPerPage && (
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
                   disabled={!canGoNext}
                   className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${!canGoNext ? 'opacity-30 cursor-not-allowed' : ''}`}
                 >
@@ -517,8 +717,12 @@ export function Galerie() {
                     />
                     {(image.title || image.description) && (
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {image.title && <p className="text-white text-sm font-semibold">{image.title}</p>}
-                        {image.description && <p className="text-white/80 text-xs">{image.description}</p>}
+                        {image.title && (
+                          <p className="text-white text-sm font-semibold">{image.title}</p>
+                        )}
+                        {image.description && (
+                          <p className="text-white/80 text-xs">{image.description}</p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -554,8 +758,12 @@ export function Galerie() {
                   className="px-4 py-2 rounded-lg font-medium text-sm bg-logo-green text-white hover:bg-logo-green/90 transition-all"
                 >
                   {isExpanded
-                    ? (language === 'de' ? 'Galerie einklappen' : 'Collapse Gallery')
-                    : (language === 'de' ? 'Galerie ausklappen' : 'Expand Gallery')}
+                    ? language === 'de'
+                      ? 'Galerie einklappen'
+                      : 'Collapse Gallery'
+                    : language === 'de'
+                      ? 'Galerie ausklappen'
+                      : 'Expand Gallery'}
                 </button>
               </div>
             )}

@@ -23,13 +23,15 @@ function getAdaptiveQuality(): number {
   if (typeof window === 'undefined') return 75;
 
   // Check Network Information API
-  const connection = (navigator as Navigator & {
-    connection?: {
-      effectiveType?: string;
-      saveData?: boolean;
-      downlink?: number;
-    };
-  }).connection;
+  const connection = (
+    navigator as Navigator & {
+      connection?: {
+        effectiveType?: string;
+        saveData?: boolean;
+        downlink?: number;
+      };
+    }
+  ).connection;
 
   if (connection) {
     // If data saver is enabled, use lowest quality
@@ -89,12 +91,14 @@ export function AdaptiveImage({
     }
 
     // Listen for connection changes
-    const connection = (navigator as Navigator & {
-      connection?: {
-        addEventListener?: (event: string, callback: () => void) => void;
-        removeEventListener?: (event: string, callback: () => void) => void;
-      };
-    }).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: {
+          addEventListener?: (event: string, callback: () => void) => void;
+          removeEventListener?: (event: string, callback: () => void) => void;
+        };
+      }
+    ).connection;
 
     if (connection?.addEventListener) {
       const handleChange = () => setQuality(getAdaptiveQuality());
@@ -126,26 +130,16 @@ export function AdaptiveImage({
     loading: priority ? undefined : ('lazy' as const),
     onClick,
     placeholder: 'blur' as const,
-    blurDataURL: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHxAAAgICAgMBAAAAAAAAAAAAAQIDBAARBSEGEjFB/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIDESH/2gAMAwEAhEDEQA/AGvcTxtNcleJViijVSxLBASQPp0GMT5Hi5oOYsxQ2JY40lZVRHOgJPQH5jBgs+Aqp8H/2Q==',
+    blurDataURL:
+      'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHxAAAgICAgMBAAAAAAAAAAAAAQIDBAARBSEGEjFB/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQADAAMAAAAAAAAAAAAAAAAAAQIDESH/2gAMAwEAhEDEQA/AGvcTxtNcleJViijVSxLBASQPp0GMT5Hi5oOYsxQ2JY40lZVRHOgJPQH5jBgs+Aqp8H/2Q==',
     sizes: sizes || '100vw',
   };
 
   if (fill) {
-    return (
-      <Image
-        {...imageProps}
-        fill
-      />
-    );
+    return <Image {...imageProps} fill />;
   }
 
-  return (
-    <Image
-      {...imageProps}
-      width={width || 800}
-      height={height || 600}
-    />
-  );
+  return <Image {...imageProps} width={width || 800} height={height || 600} />;
 }
 
 // Hook to get current network quality for display purposes
@@ -153,13 +147,15 @@ export function useNetworkQuality() {
   const [quality, setQuality] = useState<'slow' | 'medium' | 'fast' | 'unknown'>('unknown');
 
   useEffect(() => {
-    const connection = (navigator as Navigator & {
-      connection?: {
-        effectiveType?: string;
-        addEventListener?: (event: string, callback: () => void) => void;
-        removeEventListener?: (event: string, callback: () => void) => void;
-      };
-    }).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: {
+          effectiveType?: string;
+          addEventListener?: (event: string, callback: () => void) => void;
+          removeEventListener?: (event: string, callback: () => void) => void;
+        };
+      }
+    ).connection;
 
     const updateQuality = () => {
       if (!connection?.effectiveType) {

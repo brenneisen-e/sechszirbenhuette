@@ -33,11 +33,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'guest_id ist erforderlich' }, { status: 400 });
     }
 
-    const result = await db.prepare(`
+    const result = await db
+      .prepare(
+        `
       SELECT * FROM guest_notes
       WHERE guest_id = ?
       ORDER BY created_at DESC
-    `).bind(guestId).all<GuestNote>();
+    `,
+      )
+      .bind(guestId)
+      .all<GuestNote>();
 
     return NextResponse.json({ notes: result.results || [] });
   } catch (error) {
@@ -58,21 +63,30 @@ export async function POST(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    const data = await request.json() as { guest_id: number; content: string };
+    const data = (await request.json()) as { guest_id: number; content: string };
 
     if (!data.guest_id || !data.content) {
-      return NextResponse.json({ error: 'guest_id und content sind erforderlich' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'guest_id und content sind erforderlich' },
+        { status: 400 },
+      );
     }
 
-    const result = await db.prepare(`
+    const result = await db
+      .prepare(
+        `
       INSERT INTO guest_notes (guest_id, content)
       VALUES (?, ?)
-    `).bind(data.guest_id, data.content).run();
+    `,
+      )
+      .bind(data.guest_id, data.content)
+      .run();
 
     // Fetch the created note
-    const note = await db.prepare(
-      'SELECT * FROM guest_notes WHERE id = ?'
-    ).bind(result.meta.last_row_id).first<GuestNote>();
+    const note = await db
+      .prepare('SELECT * FROM guest_notes WHERE id = ?')
+      .bind(result.meta.last_row_id)
+      .first<GuestNote>();
 
     return NextResponse.json({ note });
   } catch (error) {
@@ -88,22 +102,28 @@ export async function PUT(request: NextRequest) {
     const env = (ctx as { env: Env }).env;
     const db = env.DB;
 
-    const data = await request.json() as { id: number; content: string };
+    const data = (await request.json()) as { id: number; content: string };
 
     if (!data.id || !data.content) {
       return NextResponse.json({ error: 'id und content sind erforderlich' }, { status: 400 });
     }
 
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       UPDATE guest_notes
       SET content = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).bind(data.content, data.id).run();
+    `,
+      )
+      .bind(data.content, data.id)
+      .run();
 
     // Fetch updated note
-    const note = await db.prepare(
-      'SELECT * FROM guest_notes WHERE id = ?'
-    ).bind(data.id).first<GuestNote>();
+    const note = await db
+      .prepare('SELECT * FROM guest_notes WHERE id = ?')
+      .bind(data.id)
+      .first<GuestNote>();
 
     return NextResponse.json({ note });
   } catch (error) {

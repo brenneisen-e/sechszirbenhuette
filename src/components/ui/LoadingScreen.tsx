@@ -33,7 +33,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
       try {
         // 1. Fetch video URL from API
         const res = await fetch('/api/media?category=hero&type=video', { cache: 'no-store' });
-        const data = await res.json() as { media?: { url: string }[] };
+        const data = (await res.json()) as { media?: { url: string }[] };
         const videoUrl = data.media?.[0]?.url;
         if (!videoUrl) return;
 
@@ -52,12 +52,14 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
         fetch(videoUrl, { mode: 'cors' }).catch(() => {});
 
         // 4. Also preload thumbnail
-        const thumbRes = await fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' });
-        const thumbData = await thumbRes.json() as { media?: { url: string }[] };
+        const thumbRes = await fetch('/api/media?category=hero-thumbnail&type=image', {
+          cache: 'no-store',
+        });
+        const thumbData = (await thumbRes.json()) as { media?: { url: string }[] };
         const thumbUrl = thumbData.media?.[0]?.url;
         if (thumbUrl) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).__heroThumbnailUrl = thumbUrl;
+          (window as any).__heroThumbnailUrl = thumbUrl;
         }
       } catch {
         // Preload failed, Hero component will fetch as fallback
@@ -222,7 +224,7 @@ export function LoadingScreen({ onLoadComplete, minDisplayTime = 1500 }: Loading
                 animate={{ opacity: 1, rotate: 360 }}
                 transition={{
                   opacity: { duration: 0.4, delay: 0.9 },
-                  rotate: { duration: 20, repeat: Infinity, ease: 'linear' }
+                  rotate: { duration: 20, repeat: Infinity, ease: 'linear' },
                 }}
                 style={{ transformOrigin: '100px 20px' }}
               >

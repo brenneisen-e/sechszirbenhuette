@@ -26,12 +26,18 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      style={{ fontFamily: "'Aptos', 'Inter', system-ui, -apple-system, sans-serif" }}
+    >
       <div className="bg-white rounded-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Gast bearbeiten</h3>
-            <button onClick={onClose} className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              onClick={onClose}
+              className="text-gray-300 hover:text-gray-500 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -39,7 +45,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
           <div className="grid md:grid-cols-2 gap-4">
             {/* Name */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Name</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Name
+              </label>
               <input
                 type="text"
                 value={editingGuest.guest_name}
@@ -50,24 +58,31 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Nationality */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Nationalität</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Nationalität
+              </label>
               <div className="flex flex-wrap gap-1 p-2 border border-gray-300 rounded-lg min-h-[42px]">
-                {(editingGuest.nationality || '').split(',').filter(Boolean).map(code => {
-                  const country = COUNTRIES.find(c => c.code === code.trim());
-                  return country ? (
-                    <span
-                      key={code}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm cursor-pointer hover:bg-red-100"
-                      onClick={() => {
-                        const codes = (editingGuest.nationality || '').split(',').filter(c => c.trim() !== code.trim());
-                        setEditingGuest({ ...editingGuest, nationality: codes.join(',') });
-                      }}
-                      title="Klicken zum Entfernen"
-                    >
-                      <FlagIcon code={code.trim()} size="small" /> {country.name} ×
-                    </span>
-                  ) : null;
-                })}
+                {(editingGuest.nationality || '')
+                  .split(',')
+                  .filter(Boolean)
+                  .map((code) => {
+                    const country = COUNTRIES.find((c) => c.code === code.trim());
+                    return country ? (
+                      <span
+                        key={code}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-sm cursor-pointer hover:bg-red-100"
+                        onClick={() => {
+                          const codes = (editingGuest.nationality || '')
+                            .split(',')
+                            .filter((c) => c.trim() !== code.trim());
+                          setEditingGuest({ ...editingGuest, nationality: codes.join(',') });
+                        }}
+                        title="Klicken zum Entfernen"
+                      >
+                        <FlagIcon code={code.trim()} size="small" /> {country.name} ×
+                      </span>
+                    ) : null;
+                  })}
                 <select
                   value=""
                   onChange={(e) => {
@@ -76,7 +91,7 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
                       if (!current.includes(e.target.value)) {
                         setEditingGuest({
                           ...editingGuest,
-                          nationality: [...current, e.target.value].join(',')
+                          nationality: [...current, e.target.value].join(','),
                         });
                       }
                     }
@@ -84,8 +99,10 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
                   className="flex-1 min-w-[120px] px-1 py-0.5 border-0 text-sm focus:ring-0 bg-transparent"
                 >
                   <option value="">+ Land hinzufügen</option>
-                  {COUNTRIES.map(c => (
-                    <option key={c.code} value={c.code}>{c.name}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -93,7 +110,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">E-Mail</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                E-Mail
+              </label>
               <input
                 type="email"
                 value={editingGuest.email || ''}
@@ -104,7 +123,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Phone */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Telefon</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Telefon
+              </label>
               <input
                 type="text"
                 value={editingGuest.phone || ''}
@@ -115,10 +136,15 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Platform - Multiple Selection */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Plattform(en)</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Plattform(en)
+              </label>
               <div className="flex flex-wrap gap-2">
-                {PLATFORMS.map(p => {
-                  const currentPlatforms = (editingGuest.platform || '').split(',').map(s => s.trim()).filter(Boolean);
+                {PLATFORMS.map((p) => {
+                  const currentPlatforms = (editingGuest.platform || '')
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean);
                   const isSelected = currentPlatforms.includes(p);
                   return (
                     <button
@@ -127,7 +153,7 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
                       onClick={() => {
                         let newPlatforms: string[];
                         if (isSelected) {
-                          newPlatforms = currentPlatforms.filter(cp => cp !== p);
+                          newPlatforms = currentPlatforms.filter((cp) => cp !== p);
                         } else {
                           newPlatforms = [...currentPlatforms, p];
                         }
@@ -148,7 +174,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Address */}
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Adresse</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Adresse
+              </label>
               <input
                 type="text"
                 value={editingGuest.address || ''}
@@ -162,21 +190,27 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
 
             {/* Status */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Status</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Status
+              </label>
               <select
                 value={editingGuest.status}
                 onChange={(e) => setEditingGuest({ ...editingGuest, status: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
               >
-                {STATUS_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {STATUS_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Notes */}
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Notizen</label>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                Notizen
+              </label>
               <textarea
                 value={editingGuest.other_notes || ''}
                 onChange={(e) => setEditingGuest({ ...editingGuest, other_notes: e.target.value })}
@@ -192,7 +226,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
               <input
                 type="checkbox"
                 checked={editingGuest.is_returning_guest === 1}
-                onChange={(e) => setEditingGuest({ ...editingGuest, is_returning_guest: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setEditingGuest({ ...editingGuest, is_returning_guest: e.target.checked ? 1 : 0 })
+                }
                 className="rounded border-gray-300"
               />
               <span className="text-sm text-gray-700">Stammgast</span>
@@ -201,7 +237,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
               <input
                 type="checkbox"
                 checked={editingGuest.is_private === 1}
-                onChange={(e) => setEditingGuest({ ...editingGuest, is_private: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setEditingGuest({ ...editingGuest, is_private: e.target.checked ? 1 : 0 })
+                }
                 className="rounded border-gray-300"
               />
               <span className="text-sm text-gray-700">Privat</span>
@@ -210,7 +248,9 @@ export function GuestEditModal({ guest, onClose, onSave }: GuestEditModalProps) 
               <input
                 type="checkbox"
                 checked={editingGuest.no_nebenkosten === 1}
-                onChange={(e) => setEditingGuest({ ...editingGuest, no_nebenkosten: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setEditingGuest({ ...editingGuest, no_nebenkosten: e.target.checked ? 1 : 0 })
+                }
                 className="rounded border-gray-300"
               />
               <span className="text-sm text-gray-700">Keine NK berechnen</span>

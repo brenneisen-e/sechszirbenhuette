@@ -48,7 +48,7 @@ const ICON_OPTIONS: { value: string; label: string; Icon: LucideIcon }[] = [
 ];
 
 function getIconComponent(iconName: string): LucideIcon {
-  return ICON_OPTIONS.find(o => o.value === iconName)?.Icon || Info;
+  return ICON_OPTIONS.find((o) => o.value === iconName)?.Icon || Info;
 }
 
 const DEFAULT_GROUPS = ['Vor der Reise', 'Während der Reise', 'Nach der Reise'];
@@ -113,10 +113,9 @@ export default function GuestAppEditor() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Compute available groups from existing categories + defaults
-  const availableGroups = Array.from(new Set([
-    ...DEFAULT_GROUPS,
-    ...categories.map(c => c.group_name).filter(Boolean),
-  ]));
+  const availableGroups = Array.from(
+    new Set([...DEFAULT_GROUPS, ...categories.map((c) => c.group_name).filter(Boolean)]),
+  );
 
   // New category form
   const [newCatTitle, setNewCatTitle] = useState('');
@@ -128,7 +127,9 @@ export default function GuestAppEditor() {
   const [newTokenGuestName, setNewTokenGuestName] = useState('');
 
   // Bookings for token creation
-  const [bookings, setBookings] = useState<{ id: number; guest_name: string; arrival_date: string }[]>([]);
+  const [bookings, setBookings] = useState<
+    { id: number; guest_name: string; arrival_date: string }[]
+  >([]);
 
   const handleSeed = async () => {
     setSeeding(true);
@@ -136,7 +137,7 @@ export default function GuestAppEditor() {
     setSuccess('');
     try {
       const res = await fetch('/api/admin/guest-app/seed', { method: 'POST' });
-      const data = await res.json() as { success?: boolean; message?: string; skipped?: boolean };
+      const data = (await res.json()) as { success?: boolean; message?: string; skipped?: boolean };
       if (data.success) {
         setSuccess(data.message || 'Inhalte erfolgreich eingefügt!');
         await loadData();
@@ -158,14 +159,25 @@ export default function GuestAppEditor() {
         fetch('/api/admin/guest-app'),
         fetch('/api/admin/media'),
       ]);
-      const catData = await catRes.json() as { categories?: Category[] };
-      const mediaData = await mediaRes.json() as { media?: (MediaItem & { media_type?: string; category?: string })[] };
+      const catData = (await catRes.json()) as { categories?: Category[] };
+      const mediaData = (await mediaRes.json()) as {
+        media?: (MediaItem & { media_type?: string; category?: string })[];
+      };
 
       setCategories(catData.categories || []);
 
-      const HERO_CATS = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+      const HERO_CATS = new Set([
+        'hero',
+        'hero-thumbnail',
+        'hero-1080p',
+        'hero-720p',
+        'hero-480p',
+        'hero-360p',
+      ]);
       setAvailableMedia(
-        (mediaData.media || []).filter(m => m.media_type !== 'video' && !HERO_CATS.has(m.category || ''))
+        (mediaData.media || []).filter(
+          (m) => m.media_type !== 'video' && !HERO_CATS.has(m.category || ''),
+        ),
       );
     } catch {
       setError('Fehler beim Laden');
@@ -181,7 +193,7 @@ export default function GuestAppEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'list_tokens' }),
       });
-      const data = await res.json() as { tokens?: Token[] };
+      const data = (await res.json()) as { tokens?: Token[] };
       setTokens(data.tokens || []);
     } catch {
       setError('Fehler beim Laden der Tokens');
@@ -191,7 +203,9 @@ export default function GuestAppEditor() {
   const loadBookings = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/bookings');
-      const data = await res.json() as { bookings?: { id: number; guest_name: string; arrival_date: string }[] };
+      const data = (await res.json()) as {
+        bookings?: { id: number; guest_name: string; arrival_date: string }[];
+      };
       const sorted = (data.bookings || []).sort((a, b) => {
         if (!a.arrival_date) return 1;
         if (!b.arrival_date) return -1;
@@ -211,7 +225,10 @@ export default function GuestAppEditor() {
 
   useEffect(() => {
     if (error || success) {
-      const t = setTimeout(() => { setError(''); setSuccess(''); }, 3000);
+      const t = setTimeout(() => {
+        setError('');
+        setSuccess('');
+      }, 3000);
       return () => clearTimeout(t);
     }
     return undefined;
@@ -225,7 +242,11 @@ export default function GuestAppEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = await res.json() as { success?: boolean; error?: string; access_code?: string };
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        access_code?: string;
+      };
       if (!data.success) throw new Error(data.error || 'Fehler');
       return data;
     } finally {
@@ -236,7 +257,12 @@ export default function GuestAppEditor() {
   const handleAddCategory = async () => {
     if (!newCatTitle.trim()) return;
     try {
-      await apiCall({ action: 'create_category', title: newCatTitle.trim(), icon: newCatIcon, group_name: newCatGroup });
+      await apiCall({
+        action: 'create_category',
+        title: newCatTitle.trim(),
+        icon: newCatIcon,
+        group_name: newCatGroup,
+      });
       setNewCatTitle('');
       setNewCatIcon('info');
       setNewCatGroup('');
@@ -359,7 +385,9 @@ export default function GuestAppEditor() {
           <button
             onClick={() => setSubTab('content')}
             className={`px-4 py-2 text-sm rounded-lg font-medium transition ${
-              subTab === 'content' ? 'bg-logo-green text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              subTab === 'content'
+                ? 'bg-logo-green text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             Inhalte
@@ -367,7 +395,9 @@ export default function GuestAppEditor() {
           <button
             onClick={() => setSubTab('tokens')}
             className={`px-4 py-2 text-sm rounded-lg font-medium transition ${
-              subTab === 'tokens' ? 'bg-logo-green text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              subTab === 'tokens'
+                ? 'bg-logo-green text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             Zugangscodes
@@ -377,10 +407,14 @@ export default function GuestAppEditor() {
 
       {/* Messages */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
       )}
       {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">{success}</div>
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+          {success}
+        </div>
       )}
 
       {subTab === 'content' && (
@@ -404,8 +438,10 @@ export default function GuestAppEditor() {
                 onChange={(e) => setNewCatIcon(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
               >
-                {ICON_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {ICON_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -419,7 +455,7 @@ export default function GuestAppEditor() {
                 className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
               />
               <datalist id="group-options-new">
-                {availableGroups.map(g => (
+                {availableGroups.map((g) => (
                   <option key={g} value={g} />
                 ))}
               </datalist>
@@ -438,16 +474,23 @@ export default function GuestAppEditor() {
             <div className="text-center py-12 text-gray-400">
               <Info className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Noch keine Kategorien angelegt</p>
-              <p className="text-sm mb-4">Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die Reise&quot;</p>
+              <p className="text-sm mb-4">
+                Erstellen Sie Kategorien wie &quot;Rund um den Check-In&quot; oder &quot;Rund um die
+                Reise&quot;
+              </p>
               <button
                 onClick={handleSeed}
                 disabled={seeding}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-logo-green text-white rounded-xl font-medium hover:bg-logo-green/90 disabled:opacity-50 transition"
               >
                 {seeding ? (
-                  <><Loader2 size={16} className="animate-spin" /> Wird eingefügt...</>
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Wird eingefügt...
+                  </>
                 ) : (
-                  <><Upload size={16} /> Welcome Guide Inhalte einfügen</>
+                  <>
+                    <Upload size={16} /> Welcome Guide Inhalte einfügen
+                  </>
                 )}
               </button>
             </div>
@@ -463,7 +506,7 @@ export default function GuestAppEditor() {
                 seen.add(g);
                 groups.push({ name: g, cats: [] });
               }
-              groups.find(gr => gr.name === g)!.cats.push(cat);
+              groups.find((gr) => gr.name === g)!.cats.push(cat);
             }
             return groups.map((group) => (
               <div key={group.name || '__none'} className="space-y-4">
@@ -473,198 +516,276 @@ export default function GuestAppEditor() {
                   </h3>
                 )}
                 {group.cats.map((cat) => {
-            const isExpanded = expandedCategory === cat.id;
-            const CatIcon = getIconComponent(cat.icon);
+                  const isExpanded = expandedCategory === cat.id;
+                  const CatIcon = getIconComponent(cat.icon);
 
-            return (
-              <div key={cat.id} className="border border-gray-200 rounded-xl overflow-hidden">
-                {/* Category Header */}
-                <div
-                  className="flex items-center gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition"
-                  onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
-                >
-                  <GripVertical size={16} className="text-gray-300" />
-                  <div className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center">
-                    <CatIcon size={20} className="text-logo-green" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">{cat.title}</h3>
-                    <p className="text-xs text-gray-400">{cat.cards.length} Kachel{cat.cards.length !== 1 ? 'n' : ''}</p>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleUpdateCategory(cat.id, { is_active: cat.is_active ? 0 : 1 }); }}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition"
-                    title={cat.is_active ? 'Deaktivieren' : 'Aktivieren'}
-                  >
-                    {cat.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id); }}
-                    className="p-2 text-gray-400 hover:text-red-600 transition"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-                </div>
-
-                {/* Category Content (expanded) */}
-                {isExpanded && (
-                  <div className="border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
-                    {/* Edit category title/icon/group inline */}
-                    <div className="flex gap-3 items-center mb-4 flex-wrap">
-                      <input
-                        value={cat.title}
-                        onChange={(e) => {
-                          setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, title: e.target.value } : c));
-                        }}
-                        onBlur={(e) => handleUpdateCategory(cat.id, { title: e.target.value })}
-                        className="flex-1 min-w-[150px] px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
-                      />
-                      <select
-                        value={cat.icon}
-                        onChange={(e) => handleUpdateCategory(cat.id, { icon: e.target.value } as Partial<Category>)}
-                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                  return (
+                    <div key={cat.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                      {/* Category Header */}
+                      <div
+                        className="flex items-center gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition"
+                        onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
                       >
-                        {ICON_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                      <input
-                        list={`group-options-${cat.id}`}
-                        value={cat.group_name || ''}
-                        onChange={(e) => {
-                          setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, group_name: e.target.value } : c));
-                        }}
-                        onBlur={(e) => {
-                          handleUpdateCategory(cat.id, { group_name: e.target.value } as Partial<Category>);
-                        }}
-                        placeholder="Keine Gruppe"
-                        className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
-                      />
-                      <datalist id={`group-options-${cat.id}`}>
-                        {availableGroups.map(g => (
-                          <option key={g} value={g} />
-                        ))}
-                      </datalist>
-                    </div>
+                        <GripVertical size={16} className="text-gray-300" />
+                        <div className="w-10 h-10 rounded-lg bg-logo-green/10 flex items-center justify-center">
+                          <CatIcon size={20} className="text-logo-green" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800">{cat.title}</h3>
+                          <p className="text-xs text-gray-400">
+                            {cat.cards.length} Kachel{cat.cards.length !== 1 ? 'n' : ''}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateCategory(cat.id, { is_active: cat.is_active ? 0 : 1 });
+                          }}
+                          className="p-2 text-gray-400 hover:text-gray-600 transition"
+                          title={cat.is_active ? 'Deaktivieren' : 'Aktivieren'}
+                        >
+                          {cat.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCategory(cat.id);
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-600 transition"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        {isExpanded ? (
+                          <ChevronUp size={16} className="text-gray-400" />
+                        ) : (
+                          <ChevronDown size={16} className="text-gray-400" />
+                        )}
+                      </div>
 
-                    {/* Cards */}
-                    {cat.cards.map((card) => {
-                      const isEditing = editingCard === card.id;
-                      return (
-                        <div key={card.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                          {/* Card Header */}
-                          <div
-                            className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition"
-                            onClick={() => setEditingCard(isEditing ? null : card.id)}
-                          >
-                            <GripVertical size={14} className="text-gray-300" />
-                            {card.image_url && (
-                              <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                                <img src={card.image_url} alt="" className="w-full h-full object-cover" />
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-800 text-sm truncate">{card.title}</p>
-                            </div>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteCard(card.id); }}
-                              className="p-1.5 text-gray-400 hover:text-red-600 transition"
+                      {/* Category Content (expanded) */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
+                          {/* Edit category title/icon/group inline */}
+                          <div className="flex gap-3 items-center mb-4 flex-wrap">
+                            <input
+                              value={cat.title}
+                              onChange={(e) => {
+                                setCategories((prev) =>
+                                  prev.map((c) =>
+                                    c.id === cat.id ? { ...c, title: e.target.value } : c,
+                                  ),
+                                );
+                              }}
+                              onBlur={(e) =>
+                                handleUpdateCategory(cat.id, { title: e.target.value })
+                              }
+                              className="flex-1 min-w-[150px] px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                            />
+                            <select
+                              value={cat.icon}
+                              onChange={(e) =>
+                                handleUpdateCategory(cat.id, {
+                                  icon: e.target.value,
+                                } as Partial<Category>)
+                              }
+                              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
                             >
-                              <Trash2 size={14} />
-                            </button>
-                            {isEditing ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+                              {ICON_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              list={`group-options-${cat.id}`}
+                              value={cat.group_name || ''}
+                              onChange={(e) => {
+                                setCategories((prev) =>
+                                  prev.map((c) =>
+                                    c.id === cat.id ? { ...c, group_name: e.target.value } : c,
+                                  ),
+                                );
+                              }}
+                              onBlur={(e) => {
+                                handleUpdateCategory(cat.id, {
+                                  group_name: e.target.value,
+                                } as Partial<Category>);
+                              }}
+                              placeholder="Keine Gruppe"
+                              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                            />
+                            <datalist id={`group-options-${cat.id}`}>
+                              {availableGroups.map((g) => (
+                                <option key={g} value={g} />
+                              ))}
+                            </datalist>
                           </div>
 
-                          {/* Card Editor (expanded) */}
-                          {isEditing && (
-                            <div className="border-t border-gray-100 p-4 space-y-4">
-                              {/* Image */}
-                              <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-2">Bild</label>
-                                {card.image_url ? (
-                                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
-                                    <img src={card.image_url} alt={card.image_alt || ''} className="w-full h-full object-cover" />
+                          {/* Cards */}
+                          {cat.cards.map((card) => {
+                            const isEditing = editingCard === card.id;
+                            return (
+                              <div
+                                key={card.id}
+                                className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+                              >
+                                {/* Card Header */}
+                                <div
+                                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition"
+                                  onClick={() => setEditingCard(isEditing ? null : card.id)}
+                                >
+                                  <GripVertical size={14} className="text-gray-300" />
+                                  {card.image_url && (
+                                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                      <img
+                                        src={card.image_url}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-gray-800 text-sm truncate">
+                                      {card.title}
+                                    </p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCard(card.id);
+                                    }}
+                                    className="p-1.5 text-gray-400 hover:text-red-600 transition"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                  {isEditing ? (
+                                    <ChevronUp size={14} className="text-gray-400" />
+                                  ) : (
+                                    <ChevronDown size={14} className="text-gray-400" />
+                                  )}
+                                </div>
+
+                                {/* Card Editor (expanded) */}
+                                {isEditing && (
+                                  <div className="border-t border-gray-100 p-4 space-y-4">
+                                    {/* Image */}
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-500 mb-2">
+                                        Bild
+                                      </label>
+                                      {card.image_url ? (
+                                        <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
+                                          <img
+                                            src={card.image_url}
+                                            alt={card.image_alt || ''}
+                                            className="w-full h-full object-cover"
+                                          />
+                                          <button
+                                            onClick={() =>
+                                              handleUpdateCard(card.id, {
+                                                image_url: null,
+                                                image_alt: null,
+                                              })
+                                            }
+                                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                                          >
+                                            <X size={14} />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={() => setShowMediaPicker(card.id)}
+                                          className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-logo-green hover:text-logo-green transition"
+                                        >
+                                          <Upload size={24} />
+                                          <span className="text-xs mt-1">Bild auswählen</span>
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    {/* Title */}
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                                        Titel
+                                      </label>
+                                      <input
+                                        value={card.title}
+                                        onChange={(e) => {
+                                          setCategories((prev) =>
+                                            prev.map((c) => ({
+                                              ...c,
+                                              cards: c.cards.map((cd) =>
+                                                cd.id === card.id
+                                                  ? { ...cd, title: e.target.value }
+                                                  : cd,
+                                              ),
+                                            })),
+                                          );
+                                        }}
+                                        onBlur={(e) =>
+                                          handleUpdateCard(card.id, { title: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                                      />
+                                    </div>
+
+                                    {/* Content (WYSIWYG) */}
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                                        Inhalt
+                                      </label>
+                                      <RichTextEditor
+                                        value={card.content}
+                                        onChange={(html) => {
+                                          setCategories((prev) =>
+                                            prev.map((c) => ({
+                                              ...c,
+                                              cards: c.cards.map((cd) =>
+                                                cd.id === card.id ? { ...cd, content: html } : cd,
+                                              ),
+                                            })),
+                                          );
+                                        }}
+                                        onBlur={(html) =>
+                                          handleUpdateCard(card.id, { content: html })
+                                        }
+                                        placeholder="Text eingeben..."
+                                      />
+                                    </div>
+
+                                    {/* Save button */}
                                     <button
-                                      onClick={() => handleUpdateCard(card.id, { image_url: null, image_alt: null })}
-                                      className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                                      onClick={() => {
+                                        handleUpdateCard(card.id, {
+                                          title: card.title,
+                                          content: card.content,
+                                        });
+                                        setSuccess('Kachel gespeichert');
+                                      }}
+                                      disabled={saving}
+                                      className="px-4 py-2 bg-logo-green text-white rounded-lg text-sm font-medium hover:bg-logo-green/90 disabled:opacity-50 flex items-center gap-2"
                                     >
-                                      <X size={14} />
+                                      <Save size={14} /> Speichern
                                     </button>
                                   </div>
-                                ) : (
-                                  <button
-                                    onClick={() => setShowMediaPicker(card.id)}
-                                    className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-logo-green hover:text-logo-green transition"
-                                  >
-                                    <Upload size={24} />
-                                    <span className="text-xs mt-1">Bild auswählen</span>
-                                  </button>
                                 )}
                               </div>
+                            );
+                          })}
 
-                              {/* Title */}
-                              <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Titel</label>
-                                <input
-                                  value={card.title}
-                                  onChange={(e) => {
-                                    setCategories(prev => prev.map(c => ({
-                                      ...c,
-                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, title: e.target.value } : cd),
-                                    })));
-                                  }}
-                                  onBlur={(e) => handleUpdateCard(card.id, { title: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                />
-                              </div>
-
-                              {/* Content (WYSIWYG) */}
-                              <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Inhalt</label>
-                                <RichTextEditor
-                                  value={card.content}
-                                  onChange={(html) => {
-                                    setCategories(prev => prev.map(c => ({
-                                      ...c,
-                                      cards: c.cards.map(cd => cd.id === card.id ? { ...cd, content: html } : cd),
-                                    })));
-                                  }}
-                                  onBlur={(html) => handleUpdateCard(card.id, { content: html })}
-                                  placeholder="Text eingeben..."
-                                />
-                              </div>
-
-                              {/* Save button */}
-                              <button
-                                onClick={() => {
-                                  handleUpdateCard(card.id, { title: card.title, content: card.content });
-                                  setSuccess('Kachel gespeichert');
-                                }}
-                                disabled={saving}
-                                className="px-4 py-2 bg-logo-green text-white rounded-lg text-sm font-medium hover:bg-logo-green/90 disabled:opacity-50 flex items-center gap-2"
-                              >
-                                <Save size={14} /> Speichern
-                              </button>
-                            </div>
-                          )}
+                          {/* Add Card */}
+                          <button
+                            onClick={() => handleAddCard(cat.id)}
+                            disabled={saving}
+                            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-logo-green hover:text-logo-green transition flex items-center justify-center gap-2 text-sm"
+                          >
+                            <Plus size={16} /> Neue Kachel hinzufügen
+                          </button>
                         </div>
-                      );
-                    })}
-
-                    {/* Add Card */}
-                    <button
-                      onClick={() => handleAddCard(cat.id)}
-                      disabled={saving}
-                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-logo-green hover:text-logo-green transition flex items-center justify-center gap-2 text-sm"
-                    >
-                      <Plus size={16} /> Neue Kachel hinzufügen
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ));
           })()}
@@ -674,7 +795,12 @@ export default function GuestAppEditor() {
             <div className="pt-6 border-t border-gray-200 mt-6">
               <button
                 onClick={async () => {
-                  if (!confirm('Alle Kategorien und Kacheln wirklich löschen? Dies kann nicht rückgängig gemacht werden.')) return;
+                  if (
+                    !confirm(
+                      'Alle Kategorien und Kacheln wirklich löschen? Dies kann nicht rückgängig gemacht werden.',
+                    )
+                  )
+                    return;
                   setSaving(true);
                   try {
                     await fetch('/api/admin/guest-app', {
@@ -714,7 +840,7 @@ export default function GuestAppEditor() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                 >
                   <option value="">Buchung auswählen...</option>
-                  {bookings.map(b => (
+                  {bookings.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.guest_name} — {b.arrival_date || 'Kein Datum'}
                     </option>
@@ -722,7 +848,9 @@ export default function GuestAppEditor() {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Gastname (optional)</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Gastname (optional)
+                </label>
                 <input
                   value={newTokenGuestName}
                   onChange={(e) => setNewTokenGuestName(e.target.value)}
@@ -749,24 +877,36 @@ export default function GuestAppEditor() {
           ) : (
             <div className="space-y-2">
               {tokens.map((token) => (
-                <div key={token.id} className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl">
-                  <div className={`w-3 h-3 rounded-full ${token.is_active ? 'bg-green-400' : 'bg-gray-300'}`} />
+                <div
+                  key={token.id}
+                  className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl"
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full ${token.is_active ? 'bg-green-400' : 'bg-gray-300'}`}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-800 text-sm">
                       {token.guest_name || token.booking_guest_name || 'Gast'}
                     </p>
                     <p className="text-xs text-gray-400">
                       {token.arrival_date && `${token.arrival_date} — ${token.departure_date}`}
-                      {token.last_login && ` · Letzter Login: ${new Date(token.last_login).toLocaleDateString('de-DE')}`}
+                      {token.last_login &&
+                        ` · Letzter Login: ${new Date(token.last_login).toLocaleDateString('de-DE')}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5">
-                    <code className="text-sm font-bold tracking-widest text-logo-green">{token.access_code}</code>
+                    <code className="text-sm font-bold tracking-widest text-logo-green">
+                      {token.access_code}
+                    </code>
                     <button
                       onClick={() => copyCode(token.access_code)}
                       className="p-1 text-gray-400 hover:text-logo-green transition"
                     >
-                      {copiedCode === token.access_code ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                      {copiedCode === token.access_code ? (
+                        <Check size={14} className="text-green-500" />
+                      ) : (
+                        <Copy size={14} />
+                      )}
                     </button>
                   </div>
                   <button
@@ -788,22 +928,32 @@ export default function GuestAppEditor() {
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold">Bild auswählen</h3>
-              <button onClick={() => setShowMediaPicker(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setShowMediaPicker(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
                 <X size={20} />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                {availableMedia.map(media => (
+                {availableMedia.map((media) => (
                   <button
                     key={media.id}
                     onClick={() => {
-                      handleUpdateCard(showMediaPicker, { image_url: media.url, image_alt: media.alt_text || media.title });
+                      handleUpdateCard(showMediaPicker, {
+                        image_url: media.url,
+                        image_alt: media.alt_text || media.title,
+                      });
                       setShowMediaPicker(null);
                     }}
                     className="aspect-square rounded-lg overflow-hidden bg-gray-100 hover:ring-2 hover:ring-logo-green transition"
                   >
-                    <img src={media.url} alt={media.alt_text} className="w-full h-full object-cover" />
+                    <img
+                      src={media.url}
+                      alt={media.alt_text}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>

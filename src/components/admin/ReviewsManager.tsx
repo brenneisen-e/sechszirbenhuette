@@ -60,7 +60,7 @@ export default function ReviewsManager() {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/reviews');
-      const data = await res.json() as { reviews?: Review[]; error?: string };
+      const data = (await res.json()) as { reviews?: Review[]; error?: string };
       if (data.reviews) {
         setReviews(data.reviews);
       } else {
@@ -88,7 +88,7 @@ export default function ReviewsManager() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json() as { success?: boolean; error?: string };
+      const data = (await res.json()) as { success?: boolean; error?: string };
       if (data.success) {
         setShowForm(false);
         setEditingId(null);
@@ -124,7 +124,7 @@ export default function ReviewsManager() {
     setDeleting(id);
     try {
       const res = await fetch(`/api/admin/reviews?id=${id}`, { method: 'DELETE' });
-      const data = await res.json() as { success?: boolean };
+      const data = (await res.json()) as { success?: boolean };
       if (data.success) {
         await loadReviews();
       }
@@ -137,12 +137,54 @@ export default function ReviewsManager() {
 
   const importHardcodedReviews = async () => {
     const hardcoded = [
-      { gast_name: 'Familie M.', bewertung: 5, titel: 'Traumhafter Urlaub', text: 'Die Sechszirbenhütte ist ein absoluter Traum! Die Lage ist einzigartig, die Ausstattung top und die Sauna perfekt nach einem Tag auf der Piste. Wir kommen definitiv wieder!', aufenthalt_von: '2024-02-10', quelle: 'Google' },
-      { gast_name: 'Stefan & Anna', bewertung: 5, titel: 'Perfekte Auszeit', text: 'Endlich mal richtig abschalten können. Die Hütte ist liebevoll eingerichtet, sehr sauber und die Umgebung ist einfach wunderschön. Ein Highlight war die private Sauna!', aufenthalt_von: '2024-01-15', quelle: 'Booking.com' },
-      { gast_name: 'Hundefamilie K.', bewertung: 5, titel: 'Perfekt mit Hund', text: 'Endlich eine Unterkunft, in der unser Hund wirklich willkommen ist! Die Wandermöglichkeiten direkt vor der Tür sind fantastisch. Die Hütte ist gemütlich und hat alles was man braucht.', aufenthalt_von: '2023-08-20', quelle: 'FeWo-direkt' },
-      { gast_name: 'Familie Schneider', bewertung: 5, titel: 'Wie im Bilderbuch', text: 'Die Hütte sieht genauso aus wie auf den Fotos - sogar noch schöner! Unsere Kinder haben die Heidi-Alm geliebt und wir die Ruhe am Abend. Absolute Empfehlung!', aufenthalt_von: '2024-07-05', quelle: 'Google' },
-      { gast_name: 'Thomas W.', bewertung: 5, titel: 'Wintertraum', text: 'Perfekte Lage für Skifahrer und Langläufer. Die Pisten sind schnell erreichbar und nach einem aktiven Tag gibt es nichts Besseres als die private Sauna. Top Ausstattung, sehr sauber!', aufenthalt_von: '2024-01-28', quelle: 'Booking.com' },
-      { gast_name: 'Maria & Peter', bewertung: 5, titel: 'Romantischer Rückzugsort', text: 'Der perfekte Ort für eine Auszeit zu zweit. Die Alleinlage ist wunderbar ruhig, die Ausstattung hochwertig. Besonders der Pelletofen sorgt für eine tolle Atmosphäre.', aufenthalt_von: '2024-03-15', quelle: 'FeWo-direkt' },
+      {
+        gast_name: 'Familie M.',
+        bewertung: 5,
+        titel: 'Traumhafter Urlaub',
+        text: 'Die Sechszirbenhütte ist ein absoluter Traum! Die Lage ist einzigartig, die Ausstattung top und die Sauna perfekt nach einem Tag auf der Piste. Wir kommen definitiv wieder!',
+        aufenthalt_von: '2024-02-10',
+        quelle: 'Google',
+      },
+      {
+        gast_name: 'Stefan & Anna',
+        bewertung: 5,
+        titel: 'Perfekte Auszeit',
+        text: 'Endlich mal richtig abschalten können. Die Hütte ist liebevoll eingerichtet, sehr sauber und die Umgebung ist einfach wunderschön. Ein Highlight war die private Sauna!',
+        aufenthalt_von: '2024-01-15',
+        quelle: 'Booking.com',
+      },
+      {
+        gast_name: 'Hundefamilie K.',
+        bewertung: 5,
+        titel: 'Perfekt mit Hund',
+        text: 'Endlich eine Unterkunft, in der unser Hund wirklich willkommen ist! Die Wandermöglichkeiten direkt vor der Tür sind fantastisch. Die Hütte ist gemütlich und hat alles was man braucht.',
+        aufenthalt_von: '2023-08-20',
+        quelle: 'FeWo-direkt',
+      },
+      {
+        gast_name: 'Familie Schneider',
+        bewertung: 5,
+        titel: 'Wie im Bilderbuch',
+        text: 'Die Hütte sieht genauso aus wie auf den Fotos - sogar noch schöner! Unsere Kinder haben die Heidi-Alm geliebt und wir die Ruhe am Abend. Absolute Empfehlung!',
+        aufenthalt_von: '2024-07-05',
+        quelle: 'Google',
+      },
+      {
+        gast_name: 'Thomas W.',
+        bewertung: 5,
+        titel: 'Wintertraum',
+        text: 'Perfekte Lage für Skifahrer und Langläufer. Die Pisten sind schnell erreichbar und nach einem aktiven Tag gibt es nichts Besseres als die private Sauna. Top Ausstattung, sehr sauber!',
+        aufenthalt_von: '2024-01-28',
+        quelle: 'Booking.com',
+      },
+      {
+        gast_name: 'Maria & Peter',
+        bewertung: 5,
+        titel: 'Romantischer Rückzugsort',
+        text: 'Der perfekte Ort für eine Auszeit zu zweit. Die Alleinlage ist wunderbar ruhig, die Ausstattung hochwertig. Besonders der Pelletofen sorgt für eine tolle Atmosphäre.',
+        aufenthalt_von: '2024-03-15',
+        quelle: 'FeWo-direkt',
+      },
     ];
 
     setSaving(true);
@@ -156,7 +198,7 @@ export default function ReviewsManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...review, sichtbar: true }),
         });
-        const data = await res.json() as { success?: boolean };
+        const data = (await res.json()) as { success?: boolean };
         if (data.success) imported++;
       } catch {
         // continue with next
@@ -184,11 +226,15 @@ export default function ReviewsManager() {
     }
   };
 
-  const avgRating = reviews.length > 0
-    ? (reviews.filter(r => r.sichtbar === 1).reduce((sum, r) => sum + r.bewertung, 0) / reviews.filter(r => r.sichtbar === 1).length).toFixed(1)
-    : '–';
+  const avgRating =
+    reviews.length > 0
+      ? (
+          reviews.filter((r) => r.sichtbar === 1).reduce((sum, r) => sum + r.bewertung, 0) /
+          reviews.filter((r) => r.sichtbar === 1).length
+        ).toFixed(1)
+      : '–';
 
-  const visibleCount = reviews.filter(r => r.sichtbar === 1).length;
+  const visibleCount = reviews.filter((r) => r.sichtbar === 1).length;
 
   if (loading) {
     return (
@@ -241,7 +287,10 @@ export default function ReviewsManager() {
                 {editingId ? 'Bewertung bearbeiten' : 'Neue Bewertung'}
               </h3>
               <button
-                onClick={() => { setShowForm(false); setEditingId(null); }}
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingId(null);
+                }}
                 className="p-1 hover:bg-gray-100 rounded"
               >
                 <X className="w-5 h-5" />
@@ -278,7 +327,9 @@ export default function ReviewsManager() {
 
               {/* Text */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bewertungstext</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bewertungstext
+                </label>
                 <RichTextEditor
                   value={form.text}
                   onChange={(html) => setForm({ ...form, text: html })}
@@ -288,7 +339,9 @@ export default function ReviewsManager() {
 
               {/* Rating */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sterne-Rating *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sterne-Rating *
+                </label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -318,7 +371,9 @@ export default function ReviewsManager() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
                 >
                   {QUELLEN.map((q) => (
-                    <option key={q} value={q}>{q}</option>
+                    <option key={q} value={q}>
+                      {q}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -326,7 +381,9 @@ export default function ReviewsManager() {
               {/* Aufenthalt */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Aufenthalt von</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Aufenthalt von
+                  </label>
                   <input
                     type="date"
                     value={form.aufenthalt_von}
@@ -335,7 +392,9 @@ export default function ReviewsManager() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Aufenthalt bis</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Aufenthalt bis
+                  </label>
                   <input
                     type="date"
                     value={form.aufenthalt_bis}
@@ -360,7 +419,10 @@ export default function ReviewsManager() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => { setShowForm(false); setEditingId(null); }}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                  }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium"
                 >
                   Abbrechen
@@ -387,14 +449,19 @@ export default function ReviewsManager() {
       {reviews.length === 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
           <p className="text-sm text-blue-800 mb-3">
-            Es sind noch keine Bewertungen in der Datenbank. Sie können die vorhandenen Bewertungen importieren.
+            Es sind noch keine Bewertungen in der Datenbank. Sie können die vorhandenen Bewertungen
+            importieren.
           </p>
           <button
             onClick={importHardcodedReviews}
             disabled={saving}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
             6 Bewertungen importieren
           </button>
         </div>
@@ -405,7 +472,9 @@ export default function ReviewsManager() {
         <div className="text-center py-16 text-gray-500">
           <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-medium">Keine Bewertungen vorhanden</p>
-          <p className="text-sm mt-1">Erstellen Sie die erste Bewertung oder importieren Sie die vorhandenen.</p>
+          <p className="text-sm mt-1">
+            Erstellen Sie die erste Bewertung oder importieren Sie die vorhandenen.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -455,7 +524,8 @@ export default function ReviewsManager() {
                   {review.aufenthalt_von && (
                     <p className="text-xs text-gray-400 mt-2">
                       Aufenthalt: {new Date(review.aufenthalt_von).toLocaleDateString('de-DE')}
-                      {review.aufenthalt_bis && ` – ${new Date(review.aufenthalt_bis).toLocaleDateString('de-DE')}`}
+                      {review.aufenthalt_bis &&
+                        ` – ${new Date(review.aufenthalt_bis).toLocaleDateString('de-DE')}`}
                     </p>
                   )}
                 </div>
@@ -466,7 +536,11 @@ export default function ReviewsManager() {
                     className="p-1.5 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600"
                     title={review.sichtbar === 1 ? 'Verstecken' : 'Anzeigen'}
                   >
-                    {review.sichtbar === 1 ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {review.sichtbar === 1 ? (
+                      <Eye className="w-4 h-4" />
+                    ) : (
+                      <EyeOff className="w-4 h-4" />
+                    )}
                   </button>
                   <button
                     onClick={() => handleEdit(review)}

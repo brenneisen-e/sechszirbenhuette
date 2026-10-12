@@ -343,7 +343,9 @@ export async function POST() {
     if (!db) return NextResponse.json({ error: 'DB not available' }, { status: 500 });
 
     // Ensure tables exist
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       CREATE TABLE IF NOT EXISTS guest_app_categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -354,9 +356,19 @@ export async function POST() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `).run();
-    try { await db.prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""').run(); } catch { /* exists */ }
-    await db.prepare(`
+    `,
+      )
+      .run();
+    try {
+      await db
+        .prepare('ALTER TABLE guest_app_categories ADD COLUMN group_name TEXT DEFAULT ""')
+        .run();
+    } catch {
+      /* exists */
+    }
+    await db
+      .prepare(
+        `
       CREATE TABLE IF NOT EXISTS guest_app_cards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         category_id INTEGER NOT NULL,
@@ -370,10 +382,14 @@ export async function POST() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (category_id) REFERENCES guest_app_categories(id) ON DELETE CASCADE
       )
-    `).run();
+    `,
+      )
+      .run();
 
     // Check if data already exists
-    const existing = await db.prepare('SELECT COUNT(*) as count FROM guest_app_categories').first<{ count: number }>();
+    const existing = await db
+      .prepare('SELECT COUNT(*) as count FROM guest_app_categories')
+      .first<{ count: number }>();
     if (existing && existing.count > 0) {
       return NextResponse.json({
         message: `Guest app already has ${existing.count} categories. Delete existing data first or use the admin panel to edit.`,
@@ -389,14 +405,18 @@ export async function POST() {
       const cat = SEED_DATA[i];
       if (!cat) continue;
 
-      await db.prepare(
-        'INSERT INTO guest_app_categories (title, icon, group_name, display_order, is_active) VALUES (?, ?, ?, ?, 1)'
-      ).bind(cat.title, cat.icon, cat.group_name || '', i).run();
+      await db
+        .prepare(
+          'INSERT INTO guest_app_categories (title, icon, group_name, display_order, is_active) VALUES (?, ?, ?, ?, 1)',
+        )
+        .bind(cat.title, cat.icon, cat.group_name || '', i)
+        .run();
 
       // Get the inserted category ID
-      const inserted = await db.prepare(
-        'SELECT id FROM guest_app_categories WHERE title = ? ORDER BY id DESC LIMIT 1'
-      ).bind(cat.title).first<{ id: number }>();
+      const inserted = await db
+        .prepare('SELECT id FROM guest_app_categories WHERE title = ? ORDER BY id DESC LIMIT 1')
+        .bind(cat.title)
+        .first<{ id: number }>();
 
       if (!inserted) continue;
       categoriesCreated++;
@@ -404,9 +424,12 @@ export async function POST() {
       for (let j = 0; j < cat.cards.length; j++) {
         const card = cat.cards[j];
         if (!card) continue;
-        await db.prepare(
-          'INSERT INTO guest_app_cards (category_id, title, content, display_order, is_active) VALUES (?, ?, ?, ?, 1)'
-        ).bind(inserted.id, card.title, card.content, j).run();
+        await db
+          .prepare(
+            'INSERT INTO guest_app_cards (category_id, title, content, display_order, is_active) VALUES (?, ?, ?, ?, 1)',
+          )
+          .bind(inserted.id, card.title, card.content, j)
+          .run();
         cardsCreated++;
       }
     }

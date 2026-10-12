@@ -31,7 +31,9 @@ export function GapsSidebar({ gaps }: GapsSidebarProps) {
                   {' - '}
                   {gap.end.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                 </span>
-                <span className="text-xs bg-amber-200 text-amber-800 px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap">{gap.days} Tage</span>
+                <span className="text-xs bg-amber-200 text-amber-800 px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap">
+                  {gap.days} Tage
+                </span>
               </div>
             </div>
           ))}

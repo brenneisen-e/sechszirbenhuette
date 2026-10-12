@@ -42,11 +42,21 @@ export function OrtstaxePopup({
       </div>
       <div className="space-y-2 max-h-60 overflow-y-auto">
         {bookings.map((booking) => (
-          <div key={booking.id} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+          <div
+            key={booking.id}
+            className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm"
+          >
             <div>
               <div className="font-medium text-gray-800">
-                {new Date(booking.arrival).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} -{' '}
-                {new Date(booking.departure).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                {new Date(booking.arrival).toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: '2-digit',
+                })}{' '}
+                -{' '}
+                {new Date(booking.departure).toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: '2-digit',
+                })}
               </div>
               <div className="text-xs text-gray-500">
                 {booking.adults} Erw. × {booking.days} Nächte × {formatCurrency(kurtaxeRate)}

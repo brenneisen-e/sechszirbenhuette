@@ -62,7 +62,14 @@ const META_FLAG_LABELS: Record<string, string> = {
 };
 
 // All hero-related categories are grouped under a single "Hero" section
-const HERO_CATEGORIES = new Set(['hero', 'hero-thumbnail', 'hero-1080p', 'hero-720p', 'hero-480p', 'hero-360p']);
+const HERO_CATEGORIES = new Set([
+  'hero',
+  'hero-thumbnail',
+  'hero-1080p',
+  'hero-720p',
+  'hero-480p',
+  'hero-360p',
+]);
 
 // Full list including hidden hero variants and meta-flags (for edit modal dropdown)
 const ALL_CATEGORIES = [
@@ -107,7 +114,7 @@ function extractStreamUid(url: string): string | null {
   if (!url) return null;
   // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
   const match = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
-  return match ? match[1] ?? null : null;
+  return match ? (match[1] ?? null) : null;
 }
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
@@ -132,7 +139,11 @@ export function ImageManager() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [editingMedia, setEditingMedia] = useState<MediaRecord | null>(null);
-  const [editForm, setEditForm] = useState({ alt_text: '', category: '', categories: [] as string[] });
+  const [editForm, setEditForm] = useState({
+    alt_text: '',
+    category: '',
+    categories: [] as string[],
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [dragItem, setDragItem] = useState<string | null>(null);
@@ -149,7 +160,7 @@ export function ImageManager() {
       let url = '/api/admin/media';
       if (category) url += `?category=${category}`;
       const res = await fetch(url);
-      const data = await res.json() as { media?: MediaRecord[] };
+      const data = (await res.json()) as { media?: MediaRecord[] };
       setMedia(data.media || []);
     } catch {
       setError('Fehler beim Laden der Medien');
@@ -174,7 +185,8 @@ export function ImageManager() {
     if (filterCategory === 'hero' && !HERO_CATEGORIES.has(m.category)) return false;
 
     // Hide hero videos from the general image listing (they are managed in the Hero tab)
-    if (filterCategory !== 'hero' && m.media_type === 'video' && HERO_CATEGORIES.has(m.category)) return false;
+    if (filterCategory !== 'hero' && m.media_type === 'video' && HERO_CATEGORIES.has(m.category))
+      return false;
 
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
@@ -186,30 +198,33 @@ export function ImageManager() {
   });
 
   // File handling
-  const handleFilesSelected = useCallback((files: FileList | File[]) => {
-    const newItems: UploadItem[] = [];
+  const handleFilesSelected = useCallback(
+    (files: FileList | File[]) => {
+      const newItems: UploadItem[] = [];
 
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
-      if (file.size > MAX_FILE_SIZE) {
-        setError(`${file.name} ist zu groß (max. 15MB)`);
-        continue;
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`${file.name} ist zu groß (max. 15MB)`);
+          continue;
+        }
+
+        newItems.push({
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview: URL.createObjectURL(file),
+          status: 'pending',
+          category: filterCategory || 'aussen',
+          categories: filterCategory ? [filterCategory] : ['aussen'],
+          altText: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+        });
       }
 
-      newItems.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        file,
-        preview: URL.createObjectURL(file),
-        status: 'pending',
-        category: filterCategory || 'aussen',
-        categories: filterCategory ? [filterCategory] : ['aussen'],
-        altText: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-      });
-    }
-
-    setUploadItems((prev) => [...prev, ...newItems]);
-    setError('');
-  }, [filterCategory]);
+      setUploadItems((prev) => [...prev, ...newItems]);
+      setError('');
+    },
+    [filterCategory],
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -227,7 +242,7 @@ export function ImageManager() {
       setIsDragging(false);
       if (e.dataTransfer.files) handleFilesSelected(e.dataTransfer.files);
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   const removeUploadItem = (id: string) => {
@@ -245,7 +260,7 @@ export function ImageManager() {
 
     for (const item of pending) {
       setUploadItems((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, status: 'uploading' as const } : f))
+        prev.map((f) => (f.id === item.id ? { ...f, status: 'uploading' as const } : f)),
       );
 
       try {
@@ -261,7 +276,7 @@ export function ImageManager() {
 
         if (!res.ok) throw new Error('Upload fehlgeschlagen');
 
-        const data = await res.json() as { media?: MediaRecord[]; success?: boolean };
+        const data = (await res.json()) as { media?: MediaRecord[]; success?: boolean };
 
         // Set categories (including auto-inherited parent categories) via PUT
         if (data.media && data.media[0]) {
@@ -280,11 +295,11 @@ export function ImageManager() {
         }
 
         setUploadItems((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: 'done' as const } : f))
+          prev.map((f) => (f.id === item.id ? { ...f, status: 'done' as const } : f)),
         );
       } catch {
         setUploadItems((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: 'error' as const } : f))
+          prev.map((f) => (f.id === item.id ? { ...f, status: 'error' as const } : f)),
         );
       }
     }
@@ -336,9 +351,14 @@ export function ImageManager() {
       setMedia((prev) =>
         prev.map((m) =>
           m.id === editingMedia.id
-            ? { ...m, alt_text: editForm.alt_text, category: editForm.category, categories: editForm.categories }
-            : m
-        )
+            ? {
+                ...m,
+                alt_text: editForm.alt_text,
+                category: editForm.category,
+                categories: editForm.categories,
+              }
+            : m,
+        ),
       );
       setEditingMedia(null);
     } catch {
@@ -388,7 +408,10 @@ export function ImageManager() {
 
     const draggedMedia = media.find((m) => m.id === dragItem);
     const targetMedia = media.find((m) => m.id === targetId);
-    if (!draggedMedia || !targetMedia) { setDragItem(null); return; }
+    if (!draggedMedia || !targetMedia) {
+      setDragItem(null);
+      return;
+    }
 
     // If dropping into a different category section, change category
     const categoryChanged = draggedMedia.category !== targetMedia.category;
@@ -406,13 +429,20 @@ export function ImageManager() {
     } else {
       const fromIdx = categoryItems.findIndex((m) => m.id === dragItem);
       const toIdx = categoryItems.findIndex((m) => m.id === targetId);
-      if (fromIdx === -1 || toIdx === -1) { setDragItem(null); return; }
+      if (fromIdx === -1 || toIdx === -1) {
+        setDragItem(null);
+        return;
+      }
       const [moved] = categoryItems.splice(fromIdx, 1);
       if (moved) categoryItems.splice(toIdx, 0, moved);
     }
 
     // Update display_order for items in the target category
-    const updates = categoryItems.map((item, idx) => ({ id: item.id, display_order: idx, category: newCategory }));
+    const updates = categoryItems.map((item, idx) => ({
+      id: item.id,
+      display_order: idx,
+      category: newCategory,
+    }));
 
     // Optimistic update
     setMedia((prev) => {
@@ -468,8 +498,8 @@ export function ImageManager() {
     // Optimistic update
     setMedia((prev) =>
       prev.map((m) =>
-        m.id === dragItem ? { ...m, category: targetCategory, display_order: newOrder } : m
-      )
+        m.id === dragItem ? { ...m, category: targetCategory, display_order: newOrder } : m,
+      ),
     );
 
     setDragItem(null);
@@ -524,7 +554,11 @@ export function ImageManager() {
     for (const cat of presentCategories) {
       if (!categoryOrder.includes(cat) && !HERO_CATEGORIES.has(cat)) {
         const items = filteredMedia.filter((m) => m.category === cat);
-        groups.push({ category: cat, label: ALL_CATEGORIES.find((c) => c.value === cat)?.label || META_FLAG_LABELS[cat] || cat, items });
+        groups.push({
+          category: cat,
+          label: ALL_CATEGORIES.find((c) => c.value === cat)?.label || META_FLAG_LABELS[cat] || cat,
+          items,
+        });
       }
     }
 
@@ -621,9 +655,7 @@ export function ImageManager() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-          isDragging
-            ? 'border-green-500 bg-green-50'
-            : 'border-gray-300 hover:border-gray-400'
+          isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
         }`}
       >
         <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
@@ -672,7 +704,11 @@ export function ImageManager() {
                 disabled={isUploading || pendingCount === 0}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-xs font-medium"
               >
-                {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                {isUploading ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Upload className="w-3 h-3" />
+                )}
                 Alle hochladen
               </button>
             </div>
@@ -698,7 +734,9 @@ export function ImageManager() {
                       value={item.altText}
                       onChange={(e) =>
                         setUploadItems((prev) =>
-                          prev.map((f) => (f.id === item.id ? { ...f, altText: e.target.value } : f))
+                          prev.map((f) =>
+                            f.id === item.id ? { ...f, altText: e.target.value } : f,
+                          ),
                         )
                       }
                       placeholder="Alt-Text"
@@ -730,7 +768,7 @@ export function ImageManager() {
                               categories: cats,
                               category: cats[0] || 'aussen',
                             };
-                          })
+                          }),
                         );
                       }}
                       className={`text-[10px] px-1.5 py-0.5 rounded-full border transition-colors ${
@@ -782,7 +820,12 @@ export function ImageManager() {
 
       {/* Gallery Order Modal */}
       {showGalleryOrder && (
-        <GalleryOrderManager onClose={() => { setShowGalleryOrder(false); loadMedia(); }} />
+        <GalleryOrderManager
+          onClose={() => {
+            setShowGalleryOrder(false);
+            loadMedia();
+          }}
+        />
       )}
 
       {/* Category Filter */}
@@ -798,9 +841,13 @@ export function ImageManager() {
           Alle ({media.length})
         </button>
         {MEDIA_CATEGORIES.map((cat) => {
-          const count = cat.value === 'hero'
-            ? media.filter((m) => HERO_CATEGORIES.has(m.category) || m.categories?.includes('hero')).length
-            : media.filter((m) => m.category === cat.value || m.categories?.includes(cat.value)).length;
+          const count =
+            cat.value === 'hero'
+              ? media.filter(
+                  (m) => HERO_CATEGORIES.has(m.category) || m.categories?.includes('hero'),
+                ).length
+              : media.filter((m) => m.category === cat.value || m.categories?.includes(cat.value))
+                  .length;
           return (
             <button
               key={cat.value}
@@ -867,15 +914,21 @@ export function ImageManager() {
                     key={m.id}
                     draggable
                     onDragStart={(e) => handleDragStartItem(e, m.id)}
-                    onDragOver={(e) => { e.stopPropagation(); handleDragOverItem(e, m.id); }}
-                    onDrop={(e) => { e.stopPropagation(); handleDropItem(e, m.id); }}
+                    onDragOver={(e) => {
+                      e.stopPropagation();
+                      handleDragOverItem(e, m.id);
+                    }}
+                    onDrop={(e) => {
+                      e.stopPropagation();
+                      handleDropItem(e, m.id);
+                    }}
                     onDragEnd={handleDragEndItem}
                     className={`group relative bg-white rounded-lg border overflow-hidden hover:shadow-md transition-all cursor-grab active:cursor-grabbing ${
                       dragOverItem === m.id
                         ? 'border-green-500 ring-2 ring-green-200'
                         : dragItem === m.id
-                        ? 'opacity-50 border-gray-300'
-                        : 'border-gray-200'
+                          ? 'opacity-50 border-gray-300'
+                          : 'border-gray-200'
                     }`}
                   >
                     <div className="relative aspect-square bg-gray-100">
@@ -933,29 +986,43 @@ export function ImageManager() {
                     </div>
 
                     <div className="p-2">
-                      <p className="text-xs text-gray-600 truncate">{m.alt_text || m.title || '–'}</p>
+                      <p className="text-xs text-gray-600 truncate">
+                        {m.alt_text || m.title || '–'}
+                      </p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {/* Show hero sub-category badge when in merged Hero group */}
                         {HERO_CATEGORIES.has(m.category) && m.category !== 'hero' && (
                           <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                            {ALL_CATEGORIES.find((c) => c.value === m.category)?.label || m.category}
+                            {ALL_CATEGORIES.find((c) => c.value === m.category)?.label ||
+                              m.category}
                           </span>
                         )}
                         {/* Show Innen/Außen meta-flag badges (skip aussen for umgebung) */}
                         {m.categories
-                          ?.filter((c) => META_FLAGS.includes(c) && !(c === 'aussen' && m.category === 'umgebung'))
+                          ?.filter(
+                            (c) =>
+                              META_FLAGS.includes(c) &&
+                              !(c === 'aussen' && m.category === 'umgebung'),
+                          )
                           .map((c) => (
                             <span
                               key={c}
                               className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                                c === 'innen' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'
+                                c === 'innen'
+                                  ? 'bg-amber-100 text-amber-700'
+                                  : 'bg-sky-100 text-sky-700'
                               }`}
                             >
                               {META_FLAG_LABELS[c] || c}
                             </span>
                           ))}
                         {m.categories
-                          ?.filter((c) => c !== m.category && !HERO_CATEGORIES.has(c) && !META_FLAGS.includes(c))
+                          ?.filter(
+                            (c) =>
+                              c !== m.category &&
+                              !HERO_CATEGORIES.has(c) &&
+                              !META_FLAGS.includes(c),
+                          )
                           .map((c) => (
                             <span
                               key={c}
@@ -984,7 +1051,11 @@ export function ImageManager() {
               onDrop={(e) => handleDropItem(e, m.id)}
               onDragEnd={handleDragEndItem}
               className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-grab active:cursor-grabbing transition-all ${
-                dragOverItem === m.id ? 'bg-green-50 ring-1 ring-green-300' : dragItem === m.id ? 'opacity-50' : ''
+                dragOverItem === m.id
+                  ? 'bg-green-50 ring-1 ring-green-300'
+                  : dragItem === m.id
+                    ? 'opacity-50'
+                    : ''
               }`}
             >
               <GripVertical className="w-4 h-4 text-gray-300 flex-shrink-0" />
@@ -1054,7 +1125,10 @@ export function ImageManager() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold text-gray-900">Medium bearbeiten</h3>
-              <button onClick={() => setEditingMedia(null)} className="p-1 hover:bg-gray-100 rounded">
+              <button
+                onClick={() => setEditingMedia(null)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1077,15 +1151,15 @@ export function ImageManager() {
                     className="object-contain"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    Video
-                  </div>
+                  <div className="flex items-center justify-center h-full text-gray-400">Video</div>
                 )}
               </div>
 
               {/* Alt Text */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Alt-Text / Beschreibung</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Alt-Text / Beschreibung
+                </label>
                 <input
                   type="text"
                   value={editForm.alt_text}
@@ -1096,7 +1170,9 @@ export function ImageManager() {
 
               {/* Primary Category */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hauptkategorie</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Hauptkategorie
+                </label>
                 <select
                   value={editForm.category}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -1146,7 +1222,11 @@ export function ImageManager() {
                   disabled={isSaving}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium"
                 >
-                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
                   Speichern
                 </button>
               </div>

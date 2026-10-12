@@ -34,12 +34,7 @@ export function BlogPreview({
         {/* Cover */}
         {currentPost.cover_image_url && (
           <div className="relative aspect-video">
-            <Image
-              src={currentPost.cover_image_url}
-              alt=""
-              fill
-              className="object-cover"
-            />
+            <Image src={currentPost.cover_image_url} alt="" fill className="object-cover" />
           </div>
         )}
 
@@ -54,9 +49,7 @@ export function BlogPreview({
 
           {/* Subtitle */}
           {currentPost.subtitle && (
-            <p className="text-lg text-logo-green/80 font-medium mb-3">
-              {currentPost.subtitle}
-            </p>
+            <p className="text-lg text-logo-green/80 font-medium mb-3">{currentPost.subtitle}</p>
           )}
 
           {/* Meta */}
@@ -78,7 +71,8 @@ export function BlogPreview({
               dangerouslySetInnerHTML={{
                 __html: isCarousel
                   ? `<p>${currentPost.content}</p>`
-                  : currentPost.content || '<p class="text-gray-400">Ihr Inhalt erscheint hier...</p>',
+                  : currentPost.content ||
+                    '<p class="text-gray-400">Ihr Inhalt erscheint hier...</p>',
               }}
             />
           )}
@@ -110,13 +104,17 @@ export function BlogPreview({
               <div className="overflow-hidden">
                 <div
                   className="flex gap-3 transition-transform duration-300"
-                  style={{ transform: `translateX(-${carouselOffset * (100 / visibleSlides + 2)}%)` }}
+                  style={{
+                    transform: `translateX(-${carouselOffset * (100 / visibleSlides + 2)}%)`,
+                  }}
                 >
                   {postImages.map((slide, index) => (
                     <div
                       key={index}
                       className="shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
-                      style={{ width: `calc(${100 / visibleSlides}% - ${(visibleSlides - 1) * 12 / visibleSlides}px)` }}
+                      style={{
+                        width: `calc(${100 / visibleSlides}% - ${((visibleSlides - 1) * 12) / visibleSlides}px)`,
+                      }}
                     >
                       {/* Slide image */}
                       {slide.image_url && (
@@ -141,7 +139,10 @@ export function BlogPreview({
                           </h4>
                         )}
                         {slide.caption && (
-                          <div className="text-xs text-gray-600 line-clamp-3 prose prose-xs max-w-none" dangerouslySetInnerHTML={{ __html: slide.caption }} />
+                          <div
+                            className="text-xs text-gray-600 line-clamp-3 prose prose-xs max-w-none"
+                            dangerouslySetInnerHTML={{ __html: slide.caption }}
+                          />
                         )}
                       </div>
                     </div>
@@ -178,46 +179,64 @@ export function BlogPreview({
           )}
 
           {/* Tabs Layout Preview */}
-          {isTabs && (() => {
-            let tabsData: { intro?: string; tabs?: { title: string; slides: { title: string; description: string; tip?: string }[] }[] };
-            try { tabsData = JSON.parse(currentPost.content || '{}'); } catch { tabsData = {}; }
-            const tabs = tabsData.tabs || [];
-            return (
-              <>
-                {tabsData.intro && <p className="text-xs text-gray-600 mb-3">{tabsData.intro}</p>}
-                {tabs.length > 0 && (
-                  <div>
-                    <div className="flex gap-1 mb-3">
-                      {tabs.map((tab, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setActivePreviewTab(idx)}
-                          className={`px-2 py-1 text-[10px] rounded-lg transition ${
-                            activePreviewTab === idx ? 'bg-logo-green text-white' : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {tab.title}
-                        </button>
-                      ))}
-                    </div>
-                    {tabs[activePreviewTab] && (
-                      <div className="space-y-2">
-                        {tabs[activePreviewTab].slides.map((slide, idx) => (
-                          <div key={idx} className="p-2 bg-gray-50 rounded-lg border border-gray-100">
-                            <h5 className="text-xs font-bold text-gray-800">{slide.title}</h5>
-                            <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">{slide.description}</p>
-                            {slide.tip && (
-                              <p className="text-[10px] text-amber-600 mt-1">Tipp: {slide.tip}</p>
-                            )}
-                          </div>
+          {isTabs &&
+            (() => {
+              let tabsData: {
+                intro?: string;
+                tabs?: {
+                  title: string;
+                  slides: { title: string; description: string; tip?: string }[];
+                }[];
+              };
+              try {
+                tabsData = JSON.parse(currentPost.content || '{}');
+              } catch {
+                tabsData = {};
+              }
+              const tabs = tabsData.tabs || [];
+              return (
+                <>
+                  {tabsData.intro && <p className="text-xs text-gray-600 mb-3">{tabsData.intro}</p>}
+                  {tabs.length > 0 && (
+                    <div>
+                      <div className="flex gap-1 mb-3">
+                        {tabs.map((tab, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setActivePreviewTab(idx)}
+                            className={`px-2 py-1 text-[10px] rounded-lg transition ${
+                              activePreviewTab === idx
+                                ? 'bg-logo-green text-white'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}
+                          >
+                            {tab.title}
+                          </button>
                         ))}
                       </div>
-                    )}
-                  </div>
-                )}
-              </>
-            );
-          })()}
+                      {tabs[activePreviewTab] && (
+                        <div className="space-y-2">
+                          {tabs[activePreviewTab].slides.map((slide, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2 bg-gray-50 rounded-lg border border-gray-100"
+                            >
+                              <h5 className="text-xs font-bold text-gray-800">{slide.title}</h5>
+                              <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">
+                                {slide.description}
+                              </p>
+                              {slide.tip && (
+                                <p className="text-[10px] text-amber-600 mt-1">Tipp: {slide.tip}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
         </div>
       </div>
     </div>

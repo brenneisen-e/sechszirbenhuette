@@ -8,7 +8,10 @@ interface UnregisteredBookingsAlertProps {
   onSwitchToGuests: () => void;
 }
 
-export function UnregisteredBookingsAlert({ bookings, onSwitchToGuests }: UnregisteredBookingsAlertProps) {
+export function UnregisteredBookingsAlert({
+  bookings,
+  onSwitchToGuests,
+}: UnregisteredBookingsAlertProps) {
   if (bookings.length === 0) return null;
 
   return (
@@ -17,7 +20,8 @@ export function UnregisteredBookingsAlert({ bookings, onSwitchToGuests }: Unregi
         <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <h4 className="font-medium text-orange-900">
-            {bookings.length} Portal-Buchung{bookings.length > 1 ? 'en' : ''} nicht in Gästedatenbank
+            {bookings.length} Portal-Buchung{bookings.length > 1 ? 'en' : ''} nicht in
+            Gästedatenbank
           </h4>
           <p className="text-sm text-orange-700 mt-1">
             Diese Buchungen wurden über Portale getätigt, sind aber noch nicht im System erfasst:
@@ -36,7 +40,11 @@ export function UnregisteredBookingsAlert({ bookings, onSwitchToGuests }: Unregi
                       year: 'numeric',
                     })}
                     {' - '}
-                    {new Date(fb.end).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {new Date(fb.end).toLocaleDateString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })}
                   </span>
                   <span className="text-orange-600">{fb.summary || 'Buchung'}</span>
                 </div>

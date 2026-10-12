@@ -9,12 +9,12 @@ interface Env {
 
 // Transaction from payment plan
 interface Transaction {
-  date: string;           // YYYY-MM-DD
-  amount: number;         // Positive for payments, positive for refunds too
+  date: string; // YYYY-MM-DD
+  amount: number; // Positive for payments, positive for refunds too
   type: 'payment' | 'refund';
   status: 'paid' | 'refunded' | 'pending';
   description?: string;
-  fee?: number;           // Processing fee (positive for payments, negative for refund fee credits)
+  fee?: number; // Processing fee (positive for payments, negative for refund fee credits)
 }
 
 interface BookingData {
@@ -22,7 +22,7 @@ interface BookingData {
   nationality: string;
   email: string;
   phone: string;
-  address?: string;       // Guest address from communication
+  address?: string; // Guest address from communication
   arrival_date: string;
   departure_date: string;
   adults: number;
@@ -30,31 +30,31 @@ interface BookingData {
   children_ages: string;
   platform: string;
   booking_number: string;
-  rental_price: number;  // Gesamtauszahlung (what owner receives)
-  net_rent?: number;     // Netto Miete for commission calculation (base_rent - discount + management_fee)
+  rental_price: number; // Gesamtauszahlung (what owner receives)
+  net_rent?: number; // Netto Miete for commission calculation (base_rent - discount + management_fee)
   first_contact_date: string;
   notes: string;
   communication?: string; // Messages from PDF documents
   // Neue Billing-Logik
-  guest_total_payment?: number;  // Gesamtzahlung Gast
-  platform_fees?: number;        // Gebühren Plattform (Service + Zahlung kombiniert)
-  service_fee?: number;          // Servicegebühr für Gäste (wird vom Gast gezahlt)
+  guest_total_payment?: number; // Gesamtzahlung Gast
+  platform_fees?: number; // Gebühren Plattform (Service + Zahlung kombiniert)
+  service_fee?: number; // Servicegebühr für Gäste (wird vom Gast gezahlt)
   payment_processing_fees?: number; // Netto Zahlungsbearbeitungsgebühren (nach Erstattungen)
-  payout_amount?: number;        // Gesamtauszahlung
-  payout_date?: string;          // Datum der Auszahlung an Vermieter (YYYY-MM-DD)
+  payout_amount?: number; // Gesamtauszahlung
+  payout_date?: string; // Datum der Auszahlung an Vermieter (YYYY-MM-DD)
   // Einnahmen-Aufteilung
-  nebenkosten_income?: number;   // NK-Einnahmen (Wasser + Strom + Heizung)
-  cleaning_fee_income?: number;  // Reinigungsgebühr inkl. Haustiere
-  kurtaxe_income?: number;       // Kurtaxe (Verwaltungsgebühr bei FeWo)
+  nebenkosten_income?: number; // NK-Einnahmen (Wasser + Strom + Heizung)
+  cleaning_fee_income?: number; // Reinigungsgebühr inkl. Haustiere
+  kurtaxe_income?: number; // Kurtaxe (Verwaltungsgebühr bei FeWo)
   // Transactions from payment plan
   transactions?: Transaction[];
   // FeWo/Vrbo breakdown (informational only, not for cost tracking)
   fewo_breakdown?: {
-    base_rent?: number;           // Raten pro Nacht
-    extra_guest_fee?: number;     // Gebühr für zusätzliche Gäste
-    extra_night_fee?: number;     // Gebühr für zusätzliche Nächte
-    discount?: number;            // Frühbucher-Promotion (negative)
-    management_fee?: number;      // Verwaltungsgebühr = Kurtaxe
+    base_rent?: number; // Raten pro Nacht
+    extra_guest_fee?: number; // Gebühr für zusätzliche Gäste
+    extra_night_fee?: number; // Gebühr für zusätzliche Nächte
+    discount?: number; // Frühbucher-Promotion (negative)
+    management_fee?: number; // Verwaltungsgebühr = Kurtaxe
     water?: number;
     electricity?: number;
     heating?: number;
@@ -67,61 +67,105 @@ interface BookingData {
 
 // Country code mapping for nationality detection
 const COUNTRY_CODES: Record<string, string> = {
-  'deutschland': 'DE', 'germany': 'DE', 'german': 'DE', 'deutsch': 'DE',
-  'österreich': 'AT', 'austria': 'AT', 'austrian': 'AT',
-  'schweiz': 'CH', 'switzerland': 'CH', 'swiss': 'CH',
-  'niederlande': 'NL', 'netherlands': 'NL', 'dutch': 'NL', 'holland': 'NL',
-  'belgien': 'BE', 'belgium': 'BE', 'belgian': 'BE',
-  'frankreich': 'FR', 'france': 'FR', 'french': 'FR',
-  'italien': 'IT', 'italy': 'IT', 'italian': 'IT',
-  'spanien': 'ES', 'spain': 'ES', 'spanish': 'ES',
-  'großbritannien': 'GB', 'uk': 'GB', 'britain': 'GB', 'british': 'GB', 'england': 'GB',
-  'polen': 'PL', 'poland': 'PL', 'polish': 'PL',
-  'tschechien': 'CZ', 'czech': 'CZ', 'czechia': 'CZ',
-  'dänemark': 'DK', 'denmark': 'DK', 'danish': 'DK',
-  'schweden': 'SE', 'sweden': 'SE', 'swedish': 'SE',
-  'norwegen': 'NO', 'norway': 'NO', 'norwegian': 'NO',
-  'usa': 'US', 'united states': 'US', 'american': 'US',
-  'kroatien': 'HR', 'croatia': 'HR', 'croatian': 'HR',
-  'slowenien': 'SI', 'slovenia': 'SI', 'slovenian': 'SI',
-  'ungarn': 'HU', 'hungary': 'HU', 'hungarian': 'HU',
-  'rumänien': 'RO', 'romania': 'RO', 'romanian': 'RO',
-  'slowakei': 'SK', 'slovakia': 'SK', 'slovak': 'SK',
+  deutschland: 'DE',
+  germany: 'DE',
+  german: 'DE',
+  deutsch: 'DE',
+  österreich: 'AT',
+  austria: 'AT',
+  austrian: 'AT',
+  schweiz: 'CH',
+  switzerland: 'CH',
+  swiss: 'CH',
+  niederlande: 'NL',
+  netherlands: 'NL',
+  dutch: 'NL',
+  holland: 'NL',
+  belgien: 'BE',
+  belgium: 'BE',
+  belgian: 'BE',
+  frankreich: 'FR',
+  france: 'FR',
+  french: 'FR',
+  italien: 'IT',
+  italy: 'IT',
+  italian: 'IT',
+  spanien: 'ES',
+  spain: 'ES',
+  spanish: 'ES',
+  großbritannien: 'GB',
+  uk: 'GB',
+  britain: 'GB',
+  british: 'GB',
+  england: 'GB',
+  polen: 'PL',
+  poland: 'PL',
+  polish: 'PL',
+  tschechien: 'CZ',
+  czech: 'CZ',
+  czechia: 'CZ',
+  dänemark: 'DK',
+  denmark: 'DK',
+  danish: 'DK',
+  schweden: 'SE',
+  sweden: 'SE',
+  swedish: 'SE',
+  norwegen: 'NO',
+  norway: 'NO',
+  norwegian: 'NO',
+  usa: 'US',
+  'united states': 'US',
+  american: 'US',
+  kroatien: 'HR',
+  croatia: 'HR',
+  croatian: 'HR',
+  slowenien: 'SI',
+  slovenia: 'SI',
+  slovenian: 'SI',
+  ungarn: 'HU',
+  hungary: 'HU',
+  hungarian: 'HU',
+  rumänien: 'RO',
+  romania: 'RO',
+  romanian: 'RO',
+  slowakei: 'SK',
+  slovakia: 'SK',
+  slovak: 'SK',
 };
 
 // Phone prefix to country code mapping
 const PHONE_PREFIX_TO_COUNTRY: Record<string, string> = {
-  '49': 'DE',   // Germany
-  '43': 'AT',   // Austria
-  '41': 'CH',   // Switzerland
-  '31': 'NL',   // Netherlands
-  '32': 'BE',   // Belgium
-  '33': 'FR',   // France
-  '39': 'IT',   // Italy
-  '34': 'ES',   // Spain
-  '44': 'GB',   // UK
-  '48': 'PL',   // Poland
-  '420': 'CZ',  // Czech Republic
-  '45': 'DK',   // Denmark
-  '46': 'SE',   // Sweden
-  '47': 'NO',   // Norway
-  '1': 'US',    // USA/Canada
-  '385': 'HR',  // Croatia
-  '386': 'SI',  // Slovenia
-  '36': 'HU',   // Hungary
-  '40': 'RO',   // Romania
-  '421': 'SK',  // Slovakia
-  '352': 'LU',  // Luxembourg
-  '353': 'IE',  // Ireland
-  '30': 'GR',   // Greece
-  '351': 'PT',  // Portugal
-  '358': 'FI',  // Finland
-  '359': 'BG',  // Bulgaria
-  '370': 'LT',  // Lithuania
-  '371': 'LV',  // Latvia
-  '372': 'EE',  // Estonia
-  '381': 'RS',  // Serbia
-  '387': 'BA',  // Bosnia
+  '49': 'DE', // Germany
+  '43': 'AT', // Austria
+  '41': 'CH', // Switzerland
+  '31': 'NL', // Netherlands
+  '32': 'BE', // Belgium
+  '33': 'FR', // France
+  '39': 'IT', // Italy
+  '34': 'ES', // Spain
+  '44': 'GB', // UK
+  '48': 'PL', // Poland
+  '420': 'CZ', // Czech Republic
+  '45': 'DK', // Denmark
+  '46': 'SE', // Sweden
+  '47': 'NO', // Norway
+  '1': 'US', // USA/Canada
+  '385': 'HR', // Croatia
+  '386': 'SI', // Slovenia
+  '36': 'HU', // Hungary
+  '40': 'RO', // Romania
+  '421': 'SK', // Slovakia
+  '352': 'LU', // Luxembourg
+  '353': 'IE', // Ireland
+  '30': 'GR', // Greece
+  '351': 'PT', // Portugal
+  '358': 'FI', // Finland
+  '359': 'BG', // Bulgaria
+  '370': 'LT', // Lithuania
+  '371': 'LV', // Latvia
+  '372': 'EE', // Estonia
+  '381': 'RS', // Serbia
+  '387': 'BA', // Bosnia
 };
 
 // Detect nationality from phone number prefix
@@ -163,7 +207,7 @@ function capitalizeName(name: string): string {
   return name
     .toLowerCase()
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 
@@ -172,10 +216,12 @@ function normalizePlatform(platform: string): string {
   if (!platform) return '';
   const lower = platform.toLowerCase();
   if (lower.includes('booking')) return 'Booking.com';
-  if (lower.includes('fewo') || lower.includes('ferienwohnung') || lower.includes('vrbo')) return 'FeWo';
+  if (lower.includes('fewo') || lower.includes('ferienwohnung') || lower.includes('vrbo'))
+    return 'FeWo';
   if (lower.includes('feratel')) return 'Feratel';
   if (lower.includes('airbnb')) return 'Airbnb';
-  if (lower.includes('mail') || lower.includes('direkt') || lower.includes('telefon')) return 'Mail';
+  if (lower.includes('mail') || lower.includes('direkt') || lower.includes('telefon'))
+    return 'Mail';
   return platform;
 }
 
@@ -188,10 +234,13 @@ export async function POST(request: NextRequest) {
     const apiKey = env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({
-        error: 'ANTHROPIC_API_KEY is not configured',
-        success: false
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'ANTHROPIC_API_KEY is not configured',
+          success: false,
+        },
+        { status: 500 },
+      );
     }
 
     const formData = await request.formData();
@@ -209,7 +258,14 @@ export async function POST(request: NextRequest) {
     const mediaType = file.type || 'image/png';
     const isPdf = mediaType === 'application/pdf';
 
-    console.log('Analyzing file with Claude, size:', arrayBuffer.byteLength, 'bytes, type:', mediaType, 'isPdf:', isPdf);
+    console.log(
+      'Analyzing file with Claude, size:',
+      arrayBuffer.byteLength,
+      'bytes, type:',
+      mediaType,
+      'isPdf:',
+      isPdf,
+    );
 
     // Build content array based on file type
     const fileContent = isPdf
@@ -218,16 +274,16 @@ export async function POST(request: NextRequest) {
           source: {
             type: 'base64' as const,
             media_type: 'application/pdf' as const,
-            data: base64Data
-          }
+            data: base64Data,
+          },
         }
       : {
           type: 'image' as const,
           source: {
             type: 'base64' as const,
             media_type: mediaType as 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp',
-            data: base64Data
-          }
+            data: base64Data,
+          },
         };
 
     // Call Claude API
@@ -236,7 +292,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001', // Haiku 4.5 - faster and cheaper
@@ -451,32 +507,35 @@ Antworte NUR mit einem JSON-Objekt in diesem Format:
   }
 }
 
-WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
-              }
-            ]
-          }
-        ]
-      })
+WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`,
+              },
+            ],
+          },
+        ],
+      }),
     });
 
     if (!claudeResponse.ok) {
       const errorText = await claudeResponse.text();
       console.error('Claude API error:', claudeResponse.status, errorText);
-      return NextResponse.json({
-        error: `Claude API error: ${claudeResponse.status}`,
-        success: false,
-        debug: { status: claudeResponse.status, response: errorText.substring(0, 500) }
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: `Claude API error: ${claudeResponse.status}`,
+          success: false,
+          debug: { status: claudeResponse.status, response: errorText.substring(0, 500) },
+        },
+        { status: 500 },
+      );
     }
 
-    const claudeData = await claudeResponse.json() as {
+    const claudeData = (await claudeResponse.json()) as {
       content: Array<{ type: string; text?: string }>;
     };
 
     console.log('Claude response:', JSON.stringify(claudeData).substring(0, 500));
 
     // Extract text from Claude response
-    const textContent = claudeData.content?.find(c => c.type === 'text');
+    const textContent = claudeData.content?.find((c) => c.type === 'text');
     const responseText = textContent?.text || '';
 
     // Parse JSON from response
@@ -492,18 +551,20 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
 
         // Extract FeWo breakdown if present (informational only)
         const fb = parsed.fewo_breakdown;
-        const fewoBreakdown = fb ? {
-          base_rent: fb.base_rent ? parseFloat(fb.base_rent) : undefined,
-          extra_guest_fee: fb.extra_guest_fee ? parseFloat(fb.extra_guest_fee) : undefined,
-          extra_night_fee: fb.extra_night_fee ? parseFloat(fb.extra_night_fee) : undefined,
-          discount: fb.discount ? parseFloat(fb.discount) : undefined,
-          management_fee: fb.management_fee ? parseFloat(fb.management_fee) : undefined,
-          water: fb.water ? parseFloat(fb.water) : undefined,
-          electricity: fb.electricity ? parseFloat(fb.electricity) : undefined,
-          heating: fb.heating ? parseFloat(fb.heating) : undefined,
-          cleaning: fb.cleaning ? parseFloat(fb.cleaning) : undefined,
-          nebenkosten_paid_on_site: fb.nebenkosten_paid_on_site === true,
-        } : undefined;
+        const fewoBreakdown = fb
+          ? {
+              base_rent: fb.base_rent ? parseFloat(fb.base_rent) : undefined,
+              extra_guest_fee: fb.extra_guest_fee ? parseFloat(fb.extra_guest_fee) : undefined,
+              extra_night_fee: fb.extra_night_fee ? parseFloat(fb.extra_night_fee) : undefined,
+              discount: fb.discount ? parseFloat(fb.discount) : undefined,
+              management_fee: fb.management_fee ? parseFloat(fb.management_fee) : undefined,
+              water: fb.water ? parseFloat(fb.water) : undefined,
+              electricity: fb.electricity ? parseFloat(fb.electricity) : undefined,
+              heating: fb.heating ? parseFloat(fb.heating) : undefined,
+              cleaning: fb.cleaning ? parseFloat(fb.cleaning) : undefined,
+              nebenkosten_paid_on_site: fb.nebenkosten_paid_on_site === true,
+            }
+          : undefined;
 
         // Calculate net_rent for commission: base_rent - discount + management_fee
         let netRent: number | undefined;
@@ -520,11 +581,19 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
         const finalNationality = parsedNationality || phoneBasedNationality;
 
         // Parse billing fields
-        const guestTotalPayment = parsed.guest_total_payment ? parseFloat(parsed.guest_total_payment) : undefined;
-        const platformFeesAmount = parsed.platform_fees ? parseFloat(parsed.platform_fees) : undefined;
+        const guestTotalPayment = parsed.guest_total_payment
+          ? parseFloat(parsed.guest_total_payment)
+          : undefined;
+        const platformFeesAmount = parsed.platform_fees
+          ? parseFloat(parsed.platform_fees)
+          : undefined;
         const serviceFee = parsed.service_fee ? parseFloat(parsed.service_fee) : undefined;
-        const paymentProcessingFees = parsed.payment_processing_fees ? parseFloat(parsed.payment_processing_fees) : undefined;
-        const payoutAmount = parsed.payout_amount ? parseFloat(parsed.payout_amount) : (parseFloat(parsed.rental_price) || undefined);
+        const paymentProcessingFees = parsed.payment_processing_fees
+          ? parseFloat(parsed.payment_processing_fees)
+          : undefined;
+        const payoutAmount = parsed.payout_amount
+          ? parseFloat(parsed.payout_amount)
+          : parseFloat(parsed.rental_price) || undefined;
 
         // Parse transactions array
         const transactions: Transaction[] = [];
@@ -555,7 +624,7 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
                 type: isRefund ? 'refund' : 'payment',
                 status: t.status || 'paid',
                 description: t.description || '',
-                fee: fee
+                fee: fee,
               });
             }
           }
@@ -565,7 +634,8 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
         // Die "Servicegebühr für Gäste" ist KEINE Kosten für den Vermieter - das zahlt der Gast an FeWo
         // Der Vermieter sieht nur die Zahlungsbearbeitungsgebühr als Abzug
         // PRIORITÄT: payment_processing_fees aus dem PDF (66.20€) > Transaktions-Summe
-        const finalPlatformFees = paymentProcessingFees ||
+        const finalPlatformFees =
+          paymentProcessingFees ||
           (transactions.length > 0 ? totalFeesFromTransactions : undefined);
 
         // Calculate nebenkosten_income and cleaning_fee_income from fewo_breakdown
@@ -628,7 +698,7 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
 
         return NextResponse.json({
           success: true,
-          data: bookingData
+          data: bookingData,
         });
       }
     } catch (parseError) {
@@ -652,36 +722,38 @@ WICHTIG: Gib NUR das JSON zurück, keinen anderen Text.`
         booking_number: '',
         rental_price: 0,
         first_contact_date: '',
-        notes: 'Screenshot-Analyse fehlgeschlagen. Bitte Daten manuell eingeben.'
+        notes: 'Screenshot-Analyse fehlgeschlagen. Bitte Daten manuell eingeben.',
       },
       debug: {
         message: 'Konnte JSON nicht parsen',
-        responsePreview: responseText.substring(0, 500)
-      }
+        responsePreview: responseText.substring(0, 500),
+      },
     });
-
   } catch (error) {
     console.error('POST /api/admin/analyze-booking error:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json({
-      error: message,
-      success: false,
-      data: {
-        guest_name: '',
-        nationality: '',
-        email: '',
-        phone: '',
-        arrival_date: '',
-        departure_date: '',
-        adults: 2,
-        children: 0,
-        children_ages: '',
-        platform: '',
-        booking_number: '',
-        rental_price: 0,
-        first_contact_date: '',
-        notes: `Fehler: ${message}`
-      }
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: message,
+        success: false,
+        data: {
+          guest_name: '',
+          nationality: '',
+          email: '',
+          phone: '',
+          arrival_date: '',
+          departure_date: '',
+          adults: 2,
+          children: 0,
+          children_ages: '',
+          platform: '',
+          booking_number: '',
+          rental_price: 0,
+          first_contact_date: '',
+          notes: `Fehler: ${message}`,
+        },
+      },
+      { status: 500 },
+    );
   }
 }

@@ -69,7 +69,8 @@ export function GuestTasksTab({
   const naTasks = tasks.filter((t) => t.is_completed === 2);
 
   const renderTask = (task: Task) => {
-    const status = STATUS_CONFIG[task.is_completed as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG[0];
+    const status =
+      STATUS_CONFIG[task.is_completed as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG[0];
     const StatusIcon = status.icon;
     const isEditing = editingTaskId === task.id;
 
@@ -90,7 +91,9 @@ export function GuestTasksTab({
           </button>
 
           <div className="flex-1 min-w-0">
-            <p className={`font-medium ${task.is_completed === 1 ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+            <p
+              className={`font-medium ${task.is_completed === 1 ? 'line-through text-gray-500' : 'text-gray-900'}`}
+            >
               {task.title}
             </p>
 
@@ -171,7 +174,9 @@ export function GuestTasksTab({
           {/* Pending Tasks */}
           {pendingTasks.length > 0 && (
             <div>
-              <h5 className="text-sm font-medium text-gray-700 mb-2">Offen ({pendingTasks.length})</h5>
+              <h5 className="text-sm font-medium text-gray-700 mb-2">
+                Offen ({pendingTasks.length})
+              </h5>
               <div className="space-y-2">{pendingTasks.map(renderTask)}</div>
             </div>
           )}
@@ -179,7 +184,9 @@ export function GuestTasksTab({
           {/* Completed Tasks */}
           {completedTasks.length > 0 && (
             <div>
-              <h5 className="text-sm font-medium text-gray-700 mb-2">Erledigt ({completedTasks.length})</h5>
+              <h5 className="text-sm font-medium text-gray-700 mb-2">
+                Erledigt ({completedTasks.length})
+              </h5>
               <div className="space-y-2">{completedTasks.map(renderTask)}</div>
             </div>
           )}
@@ -212,7 +219,11 @@ export function GuestTasksTab({
                 disabled={!newTaskTitle.trim() || savingTask}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {savingTask ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                {savingTask ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>

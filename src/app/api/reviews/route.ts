@@ -54,11 +54,13 @@ const FALLBACK_REVIEWS: ReviewRecord[] = [
 export async function GET() {
   try {
     const ctx = await getCloudflareContext();
-    const env = ctx.env as unknown as { DB: { prepare: (q: string) => { all: <T>() => Promise<{ results?: T[] }> } } };
+    const env = ctx.env as unknown as {
+      DB: { prepare: (q: string) => { all: <T>() => Promise<{ results?: T[] }> } };
+    };
 
     if (env?.DB) {
       const result = await env.DB.prepare(
-        'SELECT id, gast_name, bewertung, titel, text, aufenthalt_von, quelle FROM reviews WHERE sichtbar = 1 ORDER BY created_at DESC'
+        'SELECT id, gast_name, bewertung, titel, text, aufenthalt_von, quelle FROM reviews WHERE sichtbar = 1 ORDER BY created_at DESC',
       ).all<ReviewRecord>();
 
       const reviews = result.results || [];
