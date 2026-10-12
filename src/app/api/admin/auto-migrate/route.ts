@@ -3,6 +3,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 import { APP_LOGS_TABLE_SQL } from '@/lib/server/appLog';
 import { BEDS24_BOOKING_COLUMNS } from '@/lib/server/beds24Columns';
+import { ensureCoreTables } from '@/lib/server/coreTables';
 
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
@@ -57,6 +58,13 @@ export async function POST() {
         errors.push(`table:${name}: ${msg}`);
       }
     };
+
+    // Kerntabellen zuerst — ohne sie laufen alle Spalten-Ergänzungen ins Leere
+    try {
+      migrated.push(...(await ensureCoreTables(db)));
+    } catch (e) {
+      errors.push(`core-tables: ${e instanceof Error ? e.message : String(e)}`);
+    }
 
     // =============================================
     // BOOKINGS TABLE — columns referenced in API but missing from original schema
