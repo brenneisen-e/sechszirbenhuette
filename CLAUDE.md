@@ -26,6 +26,20 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Cloudflare Images für Uploads (über `/api/admin/media`)
 - Tailwind + framer-motion + lucide-react
 
+## Admin-Auth
+
+- Eigener Login mit Admin-Passwort → Session-Cookie `szh_admin_session` (`src/lib/server/adminAuth.ts`)
+  - Passwort als PBKDF2-Hash in `settings.admin_code_hash` — setzen im Admin Center (Tab System) oder mit `npm run set-admin-password` (wirkt sofort)
+  - Notfall-Passwort als Cloudflare Pages Secret `ADMIN_PASSWORD` — greift erst ab dem nächsten Deployment
+  - Sessions serverseitig in `admin_auth_sessions`, gespeichert nur der SHA-256-Hash des Tokens
+- **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss) gehören NICHT unter `/api/admin`.
+
+## Beds24
+
+- Admin-Tab „Beds24“: `src/components/admin/Beds24Panel.tsx` + `Beds24Cockpit.tsx`, API `src/app/api/admin/beds24/route.ts`, Server-Lib `src/lib/server/beds24*.ts`
+- Beds24-Konto wird mit der Natberger Hütte geteilt → alles auf `settings.beds24_property_id` beschränkt (serverseitig erzwungen)
+- Webhook: `src/app/api/beds24-webhook/route.ts`, Buchungsschluss: `src/app/api/booking-cutoff/route.ts` + `.github/workflows/buchungsschluss.yml`
+
 ## Wichtige Pfade
 
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`
