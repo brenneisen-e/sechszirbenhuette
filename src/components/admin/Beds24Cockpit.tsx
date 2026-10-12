@@ -21,6 +21,7 @@ import Beds24History from '@/components/admin/Beds24History';
 import Beds24IcalSources from '@/components/admin/Beds24IcalSources';
 import Beds24SeasonSync from '@/components/admin/Beds24SeasonSync';
 import BookingCutoffSetting from '@/components/admin/BookingCutoffSetting';
+import BookingHorizonSetting from '@/components/admin/BookingHorizonSetting';
 import { beds24Source } from '@/lib/beds24Channels';
 import { parseArrivalTime } from '@/lib/bookingComComments';
 import {
@@ -2568,6 +2569,7 @@ export default function Beds24Cockpit() {
       <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">
         <p className="font-semibold text-gray-800">Beds24-Einstellungen</p>
         <BookingCutoffSetting />
+        <BookingHorizonSetting />
         <div className="flex flex-wrap items-end gap-2">
           <label className="text-xs text-gray-500">
             Endreinigung am Zimmer (cleaningFee, €)

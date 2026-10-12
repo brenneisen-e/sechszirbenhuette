@@ -2,8 +2,9 @@ name: Buchungsschluss
 
 # Sperrt kurz nach Mitternacht (Wiener Zeit) den neuen Tag bei Beds24, wenn im
 # Admin Center (Beds24 → Einstellungen) „Buchungen bis zum Vortag“ eingestellt
-# ist. Die Logik steht in src/lib/server/bookingCutoff.ts; ist die Einstellung
-# aus, passiert nichts.
+# ist, und sperrt alles nach dem Datum „Buchbar bis“. Die Logik steht in
+# src/lib/server/bookingCutoff.ts und bookingHorizon.ts; sind beide
+# Einstellungen aus, passiert nichts.
 #
 # Mehrere Läufe pro Nacht, weil GitHub geplante Läufe verzögern oder
 # auslassen kann und Mitternacht in Wien je nach Sommer-/Winterzeit auf

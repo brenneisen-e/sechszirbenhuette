@@ -36,6 +36,12 @@ import {
   runBookingCutoff,
   setBookingCutoffMode,
 } from '@/lib/server/bookingCutoff';
+import {
+  getBookingHorizonStatus,
+  releaseHorizonRange,
+  runBookingHorizon,
+  setBookingHorizon,
+} from '@/lib/server/bookingHorizon';
 
 interface Env {
   DB: D1Database;
@@ -184,6 +190,7 @@ export async function POST(request: NextRequest) {
       nights?: number | string;
       numAdults?: number | string;
       mode?: string;
+      horizon?: string;
       guestId?: number | string;
       guest?: ImportGuestInput;
       booking?: ImportBookingInput;
@@ -219,6 +226,25 @@ export async function POST(request: NextRequest) {
         error: outcome.error,
         ...(await getBookingCutoffStatus(env.DB)),
       });
+    }
+
+    // „Buchbar bis“ (lib/server/bookingHorizon.ts)
+    if (body.action === 'getBookingHorizon') {
+      // Rückfall für den GitHub-Workflow, wie beim Buchungsschluss
+      await runBookingHorizon(env.DB).catch(() => undefined);
+      return NextResponse.json({ success: true, ...(await getBookingHorizonStatus(env.DB)) });
+    }
+    if (body.action === 'setBookingHorizon') {
+      const outcome = await setBookingHorizon(env.DB, String(body.horizon ?? ''));
+      return NextResponse.json({
+        success: outcome.result !== 'error',
+        ...outcome,
+        ...(await getBookingHorizonStatus(env.DB)),
+      });
+    }
+    if (body.action === 'releaseHorizon') {
+      const outcome = await releaseHorizonRange(env.DB, String(body.from), String(body.to));
+      return NextResponse.json(outcome, { status: outcome.success ? 200 : 502 });
     }
 
     // Beds24-Buchung in die Gästedatenbank übernehmen (Cockpit)
