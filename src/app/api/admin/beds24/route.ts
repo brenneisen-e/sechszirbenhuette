@@ -25,6 +25,12 @@ import {
   type SyncFinanceInput,
 } from '@/lib/server/beds24Import';
 import {
+  getSnapshot,
+  listSnapshots,
+  restoreEntries,
+  saveSnapshot,
+} from '@/lib/server/beds24Snapshots';
+import {
   type BookingCutoffMode,
   getBookingCutoffStatus,
   runBookingCutoff,
@@ -100,6 +106,7 @@ function buildTargetPath(
 
 // Aktionen, die ein Zimmer lesen oder ändern — nur für Zimmer der gewählten Unterkunft
 const ROOM_ACTIONS = new Set([
+  'restoreSnapshot',
   'setCalendar',
   'setCalendarBatch',
   'verifyCalendar',
@@ -183,11 +190,14 @@ export async function POST(request: NextRequest) {
       finance?: SyncFinanceInput | null;
       ownBookingId?: number | string;
       beds24Id?: string;
+      snapshotId?: number | string;
+      label?: string;
       entries?: Array<{
         from?: string;
         to?: string;
         price1?: number | string | null;
         minStay?: number | string | null;
+        numAvail?: number | string | null;
       }>;
     };
 
@@ -489,6 +499,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error }, { status: 400 });
       }
 
+      // Vorher sichern — ohne Sicherung wird nichts geschrieben
+      const snapshot = await saveSnapshot(
+        env.DB,
+        token,
+        roomId,
+        from,
+        to,
+        String(body.label || 'Cockpit: Werte geändert'),
+      );
+      if (snapshot.error) {
+        return NextResponse.json({ error: snapshot.error }, { status: 502 });
+      }
+
       const res = await fetch(`${BEDS24_API}/inventory/rooms/calendar`, {
         method: 'POST',
         headers: { token, 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -540,6 +563,16 @@ export async function POST(request: NextRequest) {
           }
           entry.minStay = minStay;
         }
+        if (raw.numAvail !== undefined && raw.numAvail !== null && raw.numAvail !== '') {
+          const numAvail = Number(raw.numAvail);
+          if (numAvail !== 0 && numAvail !== 1) {
+            return NextResponse.json(
+              { error: `Ungültige Verfügbarkeit ab ${from}` },
+              { status: 400 },
+            );
+          }
+          entry.numAvail = numAvail;
+        }
         if (Object.keys(entry).length === 2) {
           return NextResponse.json({ error: `Keine Änderung ab ${from}` }, { status: 400 });
         }
@@ -551,6 +584,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error }, { status: 400 });
       }
 
+      // Gesamten betroffenen Zeitraum vorher sichern
+      const spanFrom = calendar.map((e) => String(e.from)).sort()[0] ?? '';
+      const spanTo =
+        calendar
+          .map((e) => String(e.to))
+          .sort()
+          .at(-1) ?? '';
+      const snapshot = await saveSnapshot(
+        env.DB,
+        token,
+        roomId,
+        spanFrom,
+        spanTo,
+        String(body.label || `Sammeländerung (${calendar.length} Zeiträume)`),
+      );
+      if (snapshot.error) {
+        return NextResponse.json({ error: snapshot.error }, { status: 502 });
+      }
+
       const res = await fetch(`${BEDS24_API}/inventory/rooms/calendar`, {
         method: 'POST',
         headers: { token, 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -560,6 +612,81 @@ export async function POST(request: NextRequest) {
       const failure = beds24Failure(res, parsed, 'Beds24 hat die Änderung abgelehnt');
       if (failure) return failure;
       return NextResponse.json({ success: true, count: calendar.length, data: parsed.data });
+    }
+
+    // Sicherungen der gewählten Unterkunft auflisten (neueste zuerst)
+    if (body.action === 'listSnapshots') {
+      const propertyId = await getPropertyId(env.DB);
+      if (!propertyId) {
+        return NextResponse.json({ success: true, snapshots: [] });
+      }
+      const { token, error } = await getBeds24AccessToken(env.DB);
+      if (!token) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+      const rooms = await fetchPropertyRoomIds(token, propertyId);
+      if (!rooms.roomIds) {
+        return NextResponse.json({ error: rooms.error }, { status: 502 });
+      }
+      const rows = await listSnapshots(env.DB, rooms.roomIds);
+      return NextResponse.json({
+        success: true,
+        snapshots: rows.map((r) => ({
+          id: r.id,
+          createdAt: r.created_at,
+          roomId: r.room_id,
+          label: r.label,
+          from: r.date_from,
+          to: r.date_to,
+          entries: restoreEntries(r).length,
+        })),
+      });
+    }
+
+    // Preise und Mindestaufenthalt einer Sicherung zurückschreiben. Die
+    // Verfügbarkeit bleibt bewusst unangetastet: Nächte, die seitdem gebucht
+    // oder gesperrt wurden, dürfen nicht wieder freigegeben werden.
+    if (body.action === 'restoreSnapshot') {
+      const snapshot = await getSnapshot(env.DB, Number(body.snapshotId));
+      if (!snapshot) {
+        return NextResponse.json({ error: 'Sicherung nicht gefunden' }, { status: 404 });
+      }
+      // ROOM_ACTIONS hat body.roomId geprüft — die Sicherung muss dazu passen
+      if (snapshot.room_id !== Number(body.roomId)) {
+        return NextResponse.json(
+          { error: 'Sicherung gehört zu einem anderen Zimmer' },
+          { status: 403 },
+        );
+      }
+      const entries = restoreEntries(snapshot);
+      if (entries.length === 0) {
+        return NextResponse.json({ error: 'Die Sicherung enthält keine Preise' }, { status: 400 });
+      }
+      const { token, error } = await getBeds24AccessToken(env.DB);
+      if (!token) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+      // Auch das Zurückschreiben wird gesichert — so lässt es sich ebenfalls umkehren
+      const backup = await saveSnapshot(
+        env.DB,
+        token,
+        snapshot.room_id,
+        snapshot.date_from,
+        snapshot.date_to,
+        `Vor Wiederherstellung von Sicherung #${snapshot.id}`,
+      );
+      if (backup.error) {
+        return NextResponse.json({ error: backup.error }, { status: 502 });
+      }
+      const res = await fetch(`${BEDS24_API}/inventory/rooms/calendar`, {
+        method: 'POST',
+        headers: { token, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify([{ roomId: snapshot.room_id, calendar: entries }]),
+      });
+      const parsed = await parseJsonSafe(res);
+      const failure = beds24Failure(res, parsed, 'Beds24 hat die Wiederherstellung abgelehnt');
+      if (failure) return failure;
+      return NextResponse.json({ success: true, count: entries.length });
     }
 
     // Rückprüfung nach dem Speichern: Was steht bei Beds24 jetzt wirklich im

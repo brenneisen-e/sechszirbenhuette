@@ -1938,7 +1938,8 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Keine Gäste gefunden</p>
                   <p className="text-sm mt-2">
-                    Öffne Setup oben und klicke auf &quot;Gäste importieren&quot;
+                    Gäste kommen automatisch über Beds24 oder über &quot;Neuer Gast / Buchung&quot;
+                    dazu
                   </p>
                 </div>
               ) : (

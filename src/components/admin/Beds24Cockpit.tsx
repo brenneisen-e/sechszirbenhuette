@@ -16,6 +16,8 @@ import {
   X,
 } from 'lucide-react';
 
+import Beds24BlockSync from '@/components/admin/Beds24BlockSync';
+import Beds24History from '@/components/admin/Beds24History';
 import Beds24SeasonSync from '@/components/admin/Beds24SeasonSync';
 import BookingCutoffSetting from '@/components/admin/BookingCutoffSetting';
 import { beds24Source } from '@/lib/beds24Channels';
@@ -663,8 +665,12 @@ export default function Beds24Cockpit() {
     }
   };
 
+  // Zähler für Bereiche, die nach jedem Laden neu abfragen (Sicherungen)
+  const [loadCount, setLoadCount] = useState(0);
+
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadCount((n) => n + 1);
     setError('');
     try {
       const [calRes, bookRes] = await Promise.all([
@@ -947,6 +953,36 @@ export default function Beds24Cockpit() {
 
   const today = isoToday();
 
+  // Für den Belegungsabgleich: Beds24-Buchungen und alle anderen Quellen
+  const beds24Ranges = useMemo(
+    () =>
+      bookings
+        .filter((b) => b.arrival && b.departure)
+        .map((b) => ({ from: b.arrival, to: b.departure })),
+    [bookings],
+  );
+  const knownRanges = useMemo(
+    () => [
+      ...ownBookings
+        .filter((b) => b.arrival_date && b.departure_date && b.status !== 'cancelled')
+        .map((b) => ({
+          from: (b.arrival_date || '').slice(0, 10),
+          to: (b.departure_date || '').slice(0, 10),
+          label: `${(b.guest_id && guestNames[b.guest_id]) || 'Gast'}${b.platform ? ` · ${b.platform}` : ''}`,
+          source: 'Gästedatenbank',
+        })),
+      ...icalPeriods
+        .filter((p) => p.start && p.end)
+        .map((p) => ({
+          from: p.start.slice(0, 10),
+          to: p.end.slice(0, 10),
+          label: (p.summary || '').trim() || 'Belegung laut Portal-Kalender',
+          source: p.source ? `${p.source} (iCal)` : 'Portal-Kalender',
+        })),
+    ],
+    [ownBookings, icalPeriods, guestNames],
+  );
+
   // Buchungslisten unten: bereits abgereist (für Bewertungsanfragen) vs.
   // laufend/kommend. „Vergangen" = Abreise liegt vor heute.
   const pastBookings = useMemo(
@@ -1069,6 +1105,7 @@ export default function Beds24Cockpit() {
       const res = await apiCall({
         action: 'setCalendar',
         roomId: selectedRoomId,
+        label: `Cockpit: ${formatGermanDate(formFrom)} – ${formatGermanDate(formTo)} geändert`,
         from: formFrom,
         to: formTo,
         price1: formPrice || null,
@@ -1832,6 +1869,15 @@ export default function Beds24Cockpit() {
         </div>
       )}
 
+      {/* Doppelbuchungs-Schutz: belegte Nächte, die bei Beds24 noch frei sind */}
+      <Beds24BlockSync
+        roomId={selectedRoomId}
+        dayMap={dayMap}
+        beds24Ranges={beds24Ranges}
+        knownRanges={knownRanges}
+        onBlocked={load}
+      />
+
       {/* 12-Monats-Raster: Tag + Preis, Farbe = Belegung, Tooltip = Details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 select-none">
         {Array.from({ length: monthsRange }, (_, offset) => {
@@ -2387,6 +2433,9 @@ export default function Beds24Cockpit() {
 
       {/* Saisonpreise aus dem Mietpreise-Tab an Beds24 übertragen */}
       <Beds24SeasonSync roomId={selectedRoomId} dayMap={dayMap} onSynced={load} />
+
+      {/* Sicherungen vor jeder Änderung — Preise zurückholen */}
+      <Beds24History key={loadCount} onRestored={load} />
 
       {/* Beds24-Einstellungen: per API änderbar + Checkliste für UI-only */}
       <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">

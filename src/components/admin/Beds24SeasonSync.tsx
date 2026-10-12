@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, Loader2, Upload } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, Upload, X } from 'lucide-react';
 
 // Saisonpreise aus dem Mietpreise-Tab (rental_prices) an Beds24 übertragen.
 // Beds24 gibt Preis und Mindestaufenthalt an alle verbundenen Portale weiter
@@ -64,12 +64,40 @@ function periodDiff(
   return { differs: false, known };
 }
 
+/** Spanne der aktuellen Beds24-Werte im Zeitraum, z.B. „120–129 €“ — leer, wenn unbekannt. */
+function currentSpan(
+  period: { from: string; to: string },
+  dayMap: Record<string, DayValues>,
+): { price: string; minStay: string } {
+  const prices = new Set<number>();
+  const stays = new Set<number>();
+  let day = period.from;
+  let guard = 0;
+  while (day <= period.to && guard < 800) {
+    const info = dayMap[day];
+    if (info?.price1 !== undefined) prices.add(info.price1);
+    if (info) stays.add(info.minStay ?? 1);
+    day = addDaysIso(day, 1);
+    guard++;
+  }
+  const span = (values: Set<number>, unit: string) => {
+    if (values.size === 0) return '';
+    const sorted = [...values].sort((a, b) => a - b);
+    const low = sorted[0];
+    const high = sorted[sorted.length - 1];
+    return low === high ? `${low}${unit}` : `${low}–${high}${unit}`;
+  };
+  return { price: span(prices, ' €'), minStay: span(stays, ' N') };
+}
+
 export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
   const [prices, setPrices] = useState<RentalPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Record<number, boolean>>({});
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // Bestätigungsdialog: zeigt alt → neu, bevor etwas an die Portale geht
+  const [confirming, setConfirming] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -111,17 +139,17 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
     [prices, today, dayMap],
   );
 
-  // Vorauswahl: alles, was bei Beds24 abweicht
+  // Bewusst keine Vorauswahl: Jede Saison wird aktiv angehakt, bevor sie an
+  // alle Portale geht. Auswahl verwerfen, wenn sich die Saisons ändern.
   useEffect(() => {
-    const next: Record<number, boolean> = {};
-    for (const p of periods) next[p.id] = p.differs;
-    setSelected(next);
-  }, [periods]);
+    setSelected({});
+  }, [prices]);
 
   const chosen = periods.filter((p) => selected[p.id]);
 
   const sync = async () => {
     if (!roomId || chosen.length === 0) return;
+    setConfirming(false);
     setSyncing(true);
     setMessage(null);
     try {
@@ -131,6 +159,7 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
         body: JSON.stringify({
           action: 'setCalendarBatch',
           roomId,
+          label: `Saisonpreise übertragen: ${chosen.map((p) => p.name).join(', ')}`.slice(0, 200),
           entries: chosen.map((p) => ({
             from: p.from,
             to: p.to,
@@ -143,7 +172,7 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
       if (data.success) {
         setMessage({
           ok: true,
-          text: `${data.count ?? chosen.length} Zeitraum/Zeiträume an Beds24 übertragen. Preise gehen sofort an die Portale, den Mindestaufenthalt überträgt Beds24 mit der nächsten Aktualisierung.`,
+          text: `${data.count ?? chosen.length} Zeitraum/Zeiträume an Beds24 übertragen. Preise gehen sofort an die Portale, den Mindestaufenthalt überträgt Beds24 mit der nächsten Aktualisierung. Die vorherigen Werte sind gesichert und lassen sich unter „Sicherungen“ zurückholen.`,
         });
         onSynced();
       } else {
@@ -163,7 +192,7 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
         <p className="text-xs text-gray-500 mt-0.5">
           Quelle ist der Tab &bdquo;Mietpreise&ldquo;. Übertragen werden Preis pro Nacht (price1)
           und Mindestaufenthalt — Beds24 verteilt sie an Booking.com, Feratel, FeWo-direkt und
-          Airbnb. Vorausgewählt sind Saisons, deren Werte bei Beds24 abweichen.
+          Airbnb. Die Spalte „Beds24“ zeigt, welche Saisons dort abweichen.
         </p>
       </div>
 
@@ -229,13 +258,82 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
 
       {periods.length > 0 && (
         <button
-          onClick={sync}
+          onClick={() => setConfirming(true)}
           disabled={syncing || !roomId || chosen.length === 0}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
         >
           {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           {chosen.length} Saison(s) an Beds24 übertragen
         </button>
+      )}
+
+      {confirming && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-5 my-8 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">An alle Portale übertragen?</h3>
+              <button
+                onClick={() => setConfirming(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              Beds24 schickt diese Preise und Mindestaufenthalte sofort an Booking.com, Feratel,
+              FeWo-direkt und Airbnb. Bitte jede Zeile prüfen. Die bisherigen Werte werden vorher
+              gesichert und lassen sich zurückholen.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-400">
+                    <th className="py-1 pr-2 font-medium">Saison</th>
+                    <th className="py-1 pr-2 font-medium">Zeitraum</th>
+                    <th className="py-1 pr-2 font-medium text-right">Preis bisher → neu</th>
+                    <th className="py-1 font-medium text-right">Min. bisher → neu</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {chosen.map((p) => {
+                    const now = currentSpan(p, dayMap);
+                    return (
+                      <tr key={p.id} className="text-gray-700">
+                        <td className="py-1.5 pr-2">{p.name}</td>
+                        <td className="py-1.5 pr-2 whitespace-nowrap">
+                          {formatDate(p.from)} – {formatDate(p.to)}
+                        </td>
+                        <td className="py-1.5 pr-2 text-right whitespace-nowrap">
+                          <span className="text-gray-400">{now.price || 'unbekannt'}</span> →{' '}
+                          <strong>{p.price.toFixed(0)} €</strong>
+                        </td>
+                        <td className="py-1.5 text-right whitespace-nowrap">
+                          <span className="text-gray-400">{now.minStay || 'unbekannt'}</span> →{' '}
+                          <strong>{p.minStay} N</strong>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirming(false)}
+                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={sync}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Upload className="w-4 h-4" />
+                Jetzt an alle Portale übertragen
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {message && (
