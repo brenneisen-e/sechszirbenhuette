@@ -311,6 +311,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, created: true });
   } catch (error) {
     console.error('beds24-webhook error:', error);
+    // Auch Fehler protokollieren — sonst bleibt das Log leer und niemand sieht,
+    // dass Buchungen ankommen, aber nicht übernommen werden.
+    try {
+      const ctx = await getCloudflareContext();
+      await writeAppLog(
+        (ctx as { env: Env }).env.DB ?? null,
+        'error',
+        'beds24-webhook',
+        'error',
+        'Webhook konnte die Buchung nicht verarbeiten',
+        error instanceof Error ? error.message : String(error),
+      );
+    } catch {
+      /* Logging optional */
+    }
     return NextResponse.json({ error: 'webhook failed' }, { status: 500 });
   }
 }
