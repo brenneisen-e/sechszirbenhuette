@@ -112,7 +112,7 @@ export default function Beds24PropertySelect({ propertyId, onChange }: Props) {
           Welche Beds24-Unterkunft ist die Sechszirbenhütte?
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Das Beds24-Konto wird mit der Natberger Hütte geteilt. Erst nach dieser Auswahl zeigt das
+          Im Beds24-Konto können mehrere Unterkünfte liegen. Erst nach dieser Auswahl zeigt das
           Cockpit Preise und Buchungen — und zwar nur die der gewählten Unterkunft. Änderungen an
           Zimmern anderer Unterkünfte lehnt das Admin Center ab.
         </p>

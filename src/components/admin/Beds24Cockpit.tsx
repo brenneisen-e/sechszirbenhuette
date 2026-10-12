@@ -170,7 +170,11 @@ const BEDS24_CHECKLIST: Array<{ key: string; label: string }> = [
   {
     key: 'webhook',
     label:
-      'Webhook-URL bei der Unterkunft Sechszirbenhütte eingetragen (nicht bei der Natberger Hütte)',
+      'Webhook-URL bei der Unterkunft Sechszirbenhütte eingetragen (bei keiner anderen Unterkunft)',
+  },
+  {
+    key: 'imports',
+    label: 'Bei jedem Kanal „Anstehende Buchungen importieren“ ausgeführt',
   },
   {
     key: 'cutoffWorkflow',
@@ -514,6 +518,84 @@ const BOOKING_DETAIL_FIELDS: Array<{ label: string; key: string }> = [
   { label: 'Kommentar', key: 'comments' },
   { label: 'Notizen', key: 'notes' },
 ];
+
+// Daten für die Übernahme einer Beds24-Buchung in die Gästedatenbank
+// (action importBooking). Einzel- und Sammelübernahme nutzen dieselben Werte
+// wie die Preisaufstellung im Buchungs-Modal.
+function buildImportPayload(b: CockpitBooking, rates: KurtaxeRate[]) {
+  const raw = b.raw;
+  const finance = computeBeds24Finance(b, rates);
+  const contact = guestContact(raw);
+  const address = [rawStr(raw, 'address'), rawStr(raw, 'postcode'), rawStr(raw, 'city')]
+    .filter(Boolean)
+    .join(', ');
+  // Booking.com legt die Ankunftszeit als Zeile im Kommentarfeld ab
+  const arrivalHint = parseArrivalTime(rawStr(raw, 'comments') || rawStr(raw, 'arrivalTime'));
+  // Kommission und Zahlungsgebühr getrennt führen: Beds24 liefert im Feld
+  // `commission` die Summe, die Zahlungsgebühr steht im Buchungskommentar.
+  const additionalCosts = {
+    guest_total_payment: finance.guestTotal || undefined,
+    platform_service_fee: finance.commissionOnly || undefined,
+    payment_processing_fee: finance.paymentFee || undefined,
+    payout_amount: finance.payout || undefined,
+    // Booking.com: Kurtaxe zahlt der Gast vor Ort. Andere Kanäle: steht sie
+    // in den Rechnungspositionen, kassiert das Portal.
+    kurtaxe_income: finance.kurtaxe,
+    cleaning_fee_income: finance.cleaningFee || undefined,
+  };
+  return {
+    arrivalHint,
+    guest: {
+      name: b.name,
+      firstName: rawStr(raw, 'firstName') || null,
+      lastName: rawStr(raw, 'lastName') || null,
+      email: contact.email || null,
+      phone: contact.phone || null,
+      address: address || null,
+      nationality: guestCountryCode(raw) || null,
+    },
+    booking: {
+      beds24_booking_id: b.id,
+      booking_number: rawStr(raw, 'apiReference') || b.id,
+      platform: b.platform,
+      arrival_date: b.arrival,
+      departure_date: b.departure,
+      adults: Number(rawStr(raw, 'numAdult')) || 2,
+      children: Number(rawStr(raw, 'numChild')) || 0,
+      children_ages: finance.childrenAges || null,
+      pets: finance.pets || null,
+      // Bei Booking.com ist die Auszahlung der Mietpreis; Kurtaxe und
+      // Kommission sind darin bereits berücksichtigt.
+      rental_price: finance.payout || Number(b.price) || 0,
+      additional_costs: JSON.stringify(additionalCosts),
+      kurtaxe_cash: isBookingCom(b) || !finance.cityTaxInPrice ? 1 : 0,
+      expected_checkin_time: arrivalHint ? arrivalHint.time : null,
+      late_checkin_requested: arrivalHint?.isLate ? 1 : 0,
+      checkin_time_source: arrivalHint ? 'portal' : null,
+    },
+  };
+}
+
+/**
+ * Passende Buchung der Gästedatenbank zu einer Beds24-Buchung: Beds24-ID,
+ * dann Buchungsnummer, dann gleicher Zeitraum.
+ */
+function findOwnBooking(b: CockpitBooking, ownBookings: OwnBooking[]): OwnBooking | undefined {
+  const ref = rawStr(b.raw, 'apiReference');
+  const active = ownBookings.filter((o) => o.status !== 'cancelled');
+  return (
+    active.find((o) => !!o.beds24_booking_id && String(o.beds24_booking_id) === b.id) ||
+    active.find((o) => {
+      const num = (o.booking_number || '').trim();
+      return !!num && (num === ref || num === b.id);
+    }) ||
+    active.find(
+      (o) =>
+        (o.arrival_date || '').slice(0, 10) === b.arrival &&
+        (o.departure_date || '').slice(0, 10) === b.departure,
+    )
+  );
+}
 
 export default function Beds24Cockpit() {
   const [loading, setLoading] = useState(true);
@@ -1369,62 +1451,12 @@ export default function Beds24Cockpit() {
     // Was zusätzlich zur Buchung passiert ist (Kontaktdaten, Code)
     const done: string[] = [];
     try {
-      const raw = activeBooking.raw;
-      const contact = guestContact(raw);
-      const addressParts = [rawStr(raw, 'address'), rawStr(raw, 'postcode'), rawStr(raw, 'city')]
-        .filter(Boolean)
-        .join(', ');
-
-      // Finanzdaten aus den Beds24-Rechnungspositionen übernehmen — dieselben
-      // Werte, die oben in der Preisaufstellung stehen. Kommission und
-      // Zahlungsgebühr getrennt führen: Beds24 liefert im Feld `commission`
-      // die Summe, die Zahlungsgebühr steht im Buchungskommentar.
-      const additionalCosts = {
-        guest_total_payment: guestTotal || undefined,
-        platform_service_fee: activeFinance?.commissionOnly || undefined,
-        payment_processing_fee: activeFinance?.paymentFee || undefined,
-        payout_amount: bookingPayout || undefined,
-        // Booking.com: Kurtaxe zahlt der Gast vor Ort. Andere Kanäle: steht
-        // sie in den Rechnungspositionen, kassiert das Portal.
-        kurtaxe_income: bookingKurtaxe,
-        cleaning_fee_income: cleaningFeeFromInvoice || undefined,
-      };
-
-      // Booking.com legt die Ankunftszeit des Gastes als Zeile im Kommentar-
-      // feld ab ("Approximate time of arrival: ...").
-      const arrivalHint = parseArrivalTime(rawStr(raw, 'comments') || rawStr(raw, 'arrivalTime'));
-
+      const { guest, booking, arrivalHint } = buildImportPayload(activeBooking, kurtaxeRates);
       const res = await apiCall({
         action: 'importBooking',
         guestId: assignGuestId === 'new' ? 'new' : Number(assignGuestId),
-        guest: {
-          name: activeBooking.name,
-          firstName: rawStr(raw, 'firstName') || null,
-          lastName: rawStr(raw, 'lastName') || null,
-          email: contact.email || null,
-          phone: contact.phone || null,
-          address: addressParts || null,
-          nationality: guestCountryCode(raw) || null,
-        },
-        booking: {
-          beds24_booking_id: activeBooking.id,
-          booking_number: rawStr(raw, 'apiReference') || activeBooking.id,
-          platform: activeBooking.platform,
-          arrival_date: activeBooking.arrival,
-          departure_date: activeBooking.departure,
-          adults: Number(rawStr(raw, 'numAdult')) || 2,
-          children: Number(rawStr(raw, 'numChild')) || 0,
-          children_ages: childrenAgesFromBooking || null,
-          pets: petsFromBooking || null,
-          // Bei Booking.com ist die Auszahlung der Mietpreis; Kurtaxe und
-          // Kommission sind darin bereits berücksichtigt.
-          rental_price: bookingPayout || Number(activeBooking.price) || 0,
-          additional_costs: JSON.stringify(additionalCosts),
-          kurtaxe_cash: isBookingCom(activeBooking) || !activeFinance?.cityTaxInPrice ? 1 : 0,
-          expected_checkin_time: arrivalHint ? arrivalHint.time : null,
-          late_checkin_requested: arrivalHint?.isLate ? 1 : 0,
-          checkin_time_source: arrivalHint ? 'portal' : null,
-        },
+        guest,
+        booking,
       });
       if (!res.success) {
         throw new Error(res.error || 'Übernahme fehlgeschlagen');
@@ -1491,6 +1523,84 @@ export default function Beds24Cockpit() {
       setAssignError(e instanceof Error ? e.message : 'Übernahme fehlgeschlagen');
     } finally {
       setAssigning(false);
+    }
+  };
+
+  // Alle Beds24-Buchungen, die noch nicht in der Gästedatenbank stehen, auf
+  // einmal übernehmen. Gäste werden serverseitig wiedererkannt (E-Mail,
+  // Telefon, Name), Dubletten verhindert. iCal-Belegungen ohne Gastdaten
+  // bleiben außen vor.
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [bulkResult, setBulkResult] = useState('');
+
+  const bulkCandidates = useMemo(
+    () =>
+      bookings.filter(
+        (b) =>
+          b.arrival && b.departure && !beds24Source(b.raw).ical && !findOwnBooking(b, ownBookings),
+      ),
+    [bookings, ownBookings],
+  );
+
+  const importAll = async () => {
+    if (bulkCandidates.length === 0) return;
+    if (
+      !confirm(
+        `${bulkCandidates.length} Beds24-Buchung(en) in die Gästedatenbank übernehmen?\n\n` +
+          'Bekannte Gäste werden wiedererkannt, es entstehen keine doppelten Buchungen. ' +
+          'Für kommende Aufenthalte wird gleich ein Gäste-App-Code angelegt.',
+      )
+    ) {
+      return;
+    }
+    setBulkImporting(true);
+    setBulkResult('');
+    let created = 0;
+    let matchedGuests = 0;
+    const failed: string[] = [];
+    try {
+      for (const b of bulkCandidates) {
+        try {
+          const { guest, booking } = buildImportPayload(b, kurtaxeRates);
+          const res = await apiCall({ action: 'importBooking', guestId: 'new', guest, booking });
+          if (!res.success || !res.bookingId) {
+            failed.push(`${b.name} (${res.error || 'Fehler'})`);
+            continue;
+          }
+          created++;
+          if (res.matched && res.matched.length > 0) matchedGuests++;
+          // Gäste-App-Code nur für Aufenthalte, die noch kommen oder laufen
+          if (b.departure >= isoToday()) {
+            const tokenRes = await fetch('/api/admin/guest-app', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'create_token',
+                booking_id: res.bookingId,
+                guest_name: b.name,
+                valid_from: b.arrival,
+                valid_until: b.departure,
+              }),
+            }).catch(() => null);
+            if (tokenRes?.ok) {
+              const tokenData = (await tokenRes.json()) as { access_code?: string };
+              const code = tokenData.access_code;
+              const bookingId = res.bookingId;
+              if (code)
+                setGuestTokens((prev) => [...prev, { booking_id: bookingId, access_code: code }]);
+            }
+          }
+        } catch {
+          failed.push(b.name);
+        }
+      }
+      const parts = [`${created} Buchung(en) übernommen`];
+      if (matchedGuests > 0) parts.push(`${matchedGuests}× bestehender Gast erkannt`);
+      if (failed.length > 0) parts.push(`nicht übernommen: ${failed.join(', ')}`);
+      setBulkResult(parts.join(' · '));
+      load();
+    } finally {
+      setBulkImporting(false);
     }
   };
 
@@ -1796,6 +1906,19 @@ export default function Beds24Cockpit() {
           </button>
           {syncResult && (
             <span className="ml-2 text-xs font-normal text-gray-500">{syncResult}</span>
+          )}
+          <button
+            onClick={importAll}
+            disabled={bulkImporting || bulkCandidates.length === 0}
+            className="ml-3 text-xs font-normal text-blue-600 hover:text-blue-800 underline disabled:opacity-50 disabled:no-underline"
+            title="Übernimmt alle Beds24-Buchungen, die noch nicht in der Gästedatenbank stehen"
+          >
+            {bulkImporting
+              ? 'Übernehme…'
+              : `Alle Beds24-Buchungen übernehmen (${bulkCandidates.length})`}
+          </button>
+          {bulkResult && (
+            <span className="ml-2 text-xs font-normal text-gray-500">{bulkResult}</span>
           )}
           <a
             href="https://beds24.com/"

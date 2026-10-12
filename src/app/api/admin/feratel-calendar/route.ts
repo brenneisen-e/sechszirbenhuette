@@ -151,12 +151,12 @@ export async function GET(request: NextRequest) {
     const errors: string[] = [];
 
     results.forEach((result, index) => {
-      if (result.periods.length > 0) {
-        allPeriods.push(...result.periods);
-        successfulSources.push(sources[index]!.name);
-      }
+      allPeriods.push(...result.periods);
+      // Ein gültiger Kalender ohne Buchungen ist auch ein Erfolg
       if (result.error) {
         errors.push(result.error);
+      } else {
+        successfulSources.push(sources[index]!.name);
       }
     });
 

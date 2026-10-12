@@ -42,6 +42,23 @@ export default function Beds24IcalSources({ onSaved }: { onSaved: () => void }) 
 
   const configured = PORTALS.filter((p) => urls[p]?.trim());
 
+  // Ladestatus je Portal: welche Kalender kamen an, welche mit Fehler?
+  const [status, setStatus] = useState<{ ok: string[]; errors: string[] } | null>(null);
+  const checkStatus = async () => {
+    try {
+      const res = await fetch('/api/admin/feratel-calendar');
+      const data = (await res.json()) as { sources?: string[]; errors?: string[] };
+      setStatus({ ok: data.sources || [], errors: data.errors || [] });
+    } catch {
+      setStatus(null);
+    }
+  };
+  useEffect(() => {
+    if (loaded && configured.length > 0) checkStatus();
+    // Nur beim ersten Laden und nach dem Speichern (siehe save)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
   const save = async () => {
     const list = PORTALS.filter((p) => urls[p]?.trim()).map((p) => ({
       name: p,
@@ -68,6 +85,7 @@ export default function Beds24IcalSources({ onSaved }: { onSaved: () => void }) 
         setMessage({ ok: true, text: 'Gespeichert — Kalender wird neu geladen.' });
         setOpen(false);
         onSaved();
+        checkStatus();
       } else {
         setMessage({ ok: false, text: data.error || 'Speichern fehlgeschlagen' });
       }
@@ -93,13 +111,25 @@ export default function Beds24IcalSources({ onSaved }: { onSaved: () => void }) 
               ? `Hinterlegt: ${configured.join(', ')}`
               : 'Noch keine Kalender hinterlegt — „Belegungen abgleichen“ prüft dann nur Gästedatenbank und eingetragene Liste.'}
           </p>
+          {status && status.ok.length > 0 && (
+            <p className="text-xs text-green-700 mt-0.5 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Geladen: {status.ok.join(', ')}
+            </p>
+          )}
+          {status && status.errors.length > 0 && (
+            <p className="text-xs text-red-700 mt-0.5 flex items-start gap-1">
+              <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              Fehler: {status.errors.join(' · ')} — Adresse prüfen (Export-Link aus dem Extranet,
+              beginnt mit https://)
+            </p>
+          )}
         </div>
         {!open && (
           <button
             onClick={() => setOpen(true)}
-            className="shrink-0 text-xs text-blue-600 hover:text-blue-800 underline"
+            className="shrink-0 px-3 py-1.5 text-xs bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100"
           >
-            bearbeiten
+            Adressen bearbeiten
           </button>
         )}
       </div>
@@ -107,9 +137,9 @@ export default function Beds24IcalSources({ onSaved }: { onSaved: () => void }) 
       {open && (
         <>
           <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-            Nur die Export-Adressen der <strong>Sechszirbenhütte</strong> eintragen, nicht die der
-            Natberger Hütte. Zu finden im Extranet des Portals unter Kalender-Synchronisation (iCal
-            exportieren).
+            Optional — ein zusätzliches Sicherheitsnetz, falls Buchungen nicht per Import in Beds24
+            stehen. Nur die Export-Adressen der <strong>Sechszirbenhütte</strong> eintragen. Zu
+            finden im Extranet des Portals unter Kalender-Synchronisation (iCal exportieren).
           </p>
           <div className="space-y-2">
             {PORTALS.map((portal) => (
