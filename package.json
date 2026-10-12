@@ -15,7 +15,8 @@
     "preview": "opennextjs-cloudflare build && wrangler dev",
     "deploy": "opennextjs-cloudflare build && wrangler pages deploy .open-next/assets --project-name=sechszirbenhuette",
     "db:migrate": "wrangler d1 execute sechszirbenhuette-db --file=./db/schema.sql",
-    "db:seed": "wrangler d1 execute sechszirbenhuette-db --file=./db/seed.sql"
+    "db:seed": "wrangler d1 execute sechszirbenhuette-db --file=./db/seed.sql",
+    "set-admin-password": "node scripts/set-admin-password.mjs"
   },
   "repository": {
     "type": "git",

@@ -15,10 +15,6 @@ interface GuestNote {
   updated_at: string;
 }
 
-function getAdminPassword(env: Env): string {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD || '';
-}
-
 // GET - List notes for a guest
 export async function GET(request: NextRequest) {
   try {

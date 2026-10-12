@@ -15,7 +15,10 @@ import {
   Tag,
   Link2,
   Settings,
+  Loader2,
+  LogOut,
 } from 'lucide-react';
+import AdminLogin from '@/components/admin/AdminLogin';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
 
 // Lazy load heavy components with ssr:false (admin is client-only)
@@ -63,6 +66,10 @@ const Beds24Panel = dynamic(() => import('@/components/admin/Beds24Panel'), {
   loading: AdminLoadingFallback,
 });
 const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
+const AdminAccessPanel = dynamic(() => import('@/components/admin/AdminAccessPanel'), {
   ssr: false,
   loading: AdminLoadingFallback,
 });
@@ -122,7 +129,7 @@ function getInitialTab(): AdminTab {
   return (params.get('tab') as AdminTab) || 'guests';
 }
 
-function AdminPageContent() {
+function AdminPageContent({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTabState] = useState<AdminTab>(getInitialTab);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
@@ -215,7 +222,16 @@ function AdminPageContent() {
           <h1 className="text-sm font-medium text-gray-900">
             {TABS.find((t) => t.id === activeTab)?.label}
           </h1>
-          <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
+          <div className="flex items-center gap-2">
+            <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
+            <button
+              onClick={onLogout}
+              title="Abmelden"
+              className="p-1 text-gray-400 hover:text-gray-600"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -236,6 +252,13 @@ function AdminPageContent() {
             </div>
             <div className="flex items-center gap-3">
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition rounded-lg hover:bg-gray-100"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Abmelden</span>
+              </button>
               <a
                 href="/"
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 hover:text-logo-green transition rounded-lg hover:bg-gray-100"
@@ -308,7 +331,14 @@ function AdminPageContent() {
 
           {activeTab === 'beds24' && <Beds24Panel />}
 
-          {activeTab === 'system' && <LogViewer />}
+          {activeTab === 'system' && (
+            <div className="space-y-12">
+              <LogViewer />
+              <div className="border-t border-gray-200 pt-8">
+                <AdminAccessPanel />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -339,5 +369,43 @@ function AdminPageContent() {
 }
 
 export default function AdminPage() {
-  return <AdminPageContent />;
+  // Eigener Login (Passwort) — ohne gültige Session nur die Anmeldemaske.
+  // Die eigentliche Prüfung macht der Server (src/middleware.ts).
+  const [authState, setAuthState] = useState<'checking' | 'anonymous' | 'authenticated'>(
+    'checking',
+  );
+
+  useEffect(() => {
+    fetch('/api/admin/auth')
+      .then((r) => r.json() as Promise<{ authenticated?: boolean }>)
+      .then((data) => setAuthState(data.authenticated ? 'authenticated' : 'anonymous'))
+      .catch(() => setAuthState('anonymous'));
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
+    } catch {
+      /* Cookie ist serverseitig ohnehin nur mit Session gültig */
+    }
+    setAuthState('anonymous');
+  };
+
+  if (authState === 'checking') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (authState === 'anonymous') {
+    return <AdminLogin onAuthenticated={() => setAuthState('authenticated')} />;
+  }
+
+  return <AdminPageContent onLogout={handleLogout} />;
 }

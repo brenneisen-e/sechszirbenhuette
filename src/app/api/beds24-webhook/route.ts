@@ -24,8 +24,8 @@ interface Env {
 // Plattform kommt aus dem Beds24-Kanal (Booking.com, Feratel, FeWo-direkt über
 // Vrbo …). Auth über den key-Parameter (Zufallswert aus der settings-Tabelle).
 //
-// WICHTIG: Diese Route liegt bewusst NICHT unter /api/admin — Beds24 kann sich
-// nicht bei Cloudflare Zero Trust anmelden.
+// WICHTIG: Diese Route liegt bewusst NICHT unter /api/admin — Beds24 hat keine
+// Admin-Session (src/middleware.ts).
 export async function POST(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();

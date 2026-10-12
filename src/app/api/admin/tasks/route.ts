@@ -7,11 +7,6 @@ interface Env {
   ADMIN_PWD?: string; // Fallback for development
 }
 
-// Helper to get admin password from env
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
 interface TaskRecord {
   id: number;
   guest_id: number;
@@ -99,16 +94,7 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const body = (await request.json()) as {
       guest_id: number;
@@ -156,16 +142,7 @@ export async function PUT(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const body = (await request.json()) as {
       id: number;
@@ -254,16 +231,7 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

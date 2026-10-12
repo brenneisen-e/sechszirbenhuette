@@ -7,10 +7,6 @@ interface Env {
   ADMIN_PWD?: string;
 }
 
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
 // All iCal sources for the calendar
 const ICAL_SOURCES = [
   {

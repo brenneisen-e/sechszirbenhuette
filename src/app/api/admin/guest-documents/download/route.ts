@@ -8,10 +8,6 @@ interface Env {
   ADMIN_PWD?: string;
 }
 
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
 interface DocumentRecord {
   id: number;
   guest_id: number;

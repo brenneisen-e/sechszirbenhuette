@@ -9,7 +9,7 @@ interface Env {
 
 // Täglicher Buchungsschluss (lib/server/bookingCutoff.ts), aufgerufen vom
 // geplanten GitHub-Workflow .github/workflows/buchungsschluss.yml. Liegt
-// bewusst nicht unter /api/admin (Cloudflare Zero Trust).
+// bewusst nicht unter /api/admin (Admin-Login in src/middleware.ts).
 //
 // Bewusst ohne Anmeldung: Der Aufruf kann nur das auslösen, was die
 // Einstellung im Admin Center ohnehin vorgibt — den heutigen Tag sperren, und

@@ -3,7 +3,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 import { ensureAppLogsTable } from '@/lib/server/appLog';
 
-// Auth: /api/admin/* liegt hinter Cloudflare Zero Trust.
+// Auth: Admin-Session, geprüft in src/middleware.ts.
 
 export async function GET(request: NextRequest) {
   try {

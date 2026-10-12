@@ -7,11 +7,6 @@ interface Env {
   ADMIN_PWD?: string; // Fallback for development
 }
 
-// Helper to get admin password from env (checks both secret and fallback)
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
 interface GuestRecord {
   id: number;
   booking_number: string | null;
@@ -137,17 +132,7 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      console.error('ADMIN_PASSWORD not found. Available keys:', Object.keys(env || {}));
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const body = (await request.json()) as {
       guests?: Partial<GuestRecord>[];
@@ -250,23 +235,7 @@ export async function PUT(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      console.error('ADMIN_PASSWORD not found. Available keys:', Object.keys(env || {}));
-      return NextResponse.json(
-        {
-          error: 'ADMIN_PASSWORD is not configured',
-          debug: { availableEnvKeys: Object.keys(env || {}) },
-        },
-        { status: 500 },
-      );
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const body = (await request.json()) as Partial<GuestRecord> & { id: number };
     const { id, ...updates } = body;
@@ -365,16 +334,7 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword) {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD is not configured' }, { status: 500 });
-    }
-
-    if (adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     const { searchParams } = new URL(request.url);
     const guestId = searchParams.get('id');

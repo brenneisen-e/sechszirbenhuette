@@ -36,7 +36,7 @@ interface Env {
 }
 
 // Beds24 API v2 (Channel-Manager für Booking.com, Feratel und FeWo-direkt).
-// Auth: /api/admin/* liegt hinter Cloudflare Zero Trust.
+// Auth: Admin-Session, geprüft in src/middleware.ts.
 // Verbindung: In Beds24 unter Settings → Apps & Integrations → API einen
 // Invite Code erzeugen, hier einlösen. Der zurückgegebene Refresh-Token ist
 // langlebig und wird in der settings-Tabelle gespeichert; daraus werden bei

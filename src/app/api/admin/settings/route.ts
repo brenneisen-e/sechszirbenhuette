@@ -9,11 +9,7 @@ interface Env {
   CLOUDFLARE_API_TOKEN?: string;
 }
 
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
-// Auth handled by Cloudflare Zero Trust
+// Auth: Admin-Session, geprüft in src/middleware.ts
 async function isAuthenticated(_request: NextRequest, _env: Env): Promise<boolean> {
   return true;
 }

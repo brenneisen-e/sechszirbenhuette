@@ -124,8 +124,8 @@ export default function LogViewer() {
 
       {logs.length === 0 && !loading && (
         <div className="text-center py-8 text-gray-400 text-sm">
-          Keine Logs vorhanden. Logs werden bei Gästeapp-Aktionen (Bestellungen, E-Mails)
-          geschrieben.
+          Keine Logs vorhanden. Logs schreiben der Beds24-Webhook, der Buchungsschluss und der
+          E-Mail-Versand.
         </div>
       )}
 

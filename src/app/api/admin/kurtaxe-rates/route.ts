@@ -7,10 +7,6 @@ interface Env {
   ADMIN_PWD?: string;
 }
 
-function getAdminPassword(env: Env): string | undefined {
-  return env.ADMIN_PASSWORD || env.ADMIN_PWD;
-}
-
 interface KurtaxeRate {
   id: number;
   valid_from: string;
@@ -110,12 +106,7 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword || adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
@@ -164,12 +155,7 @@ export async function PUT(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword || adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
@@ -218,12 +204,7 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    const adminPassword = request.headers.get('x-admin-password');
-    const envPassword = getAdminPassword(env);
-
-    if (!envPassword || adminPassword !== envPassword) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Auth: Admin-Session, geprüft in src/middleware.ts
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
