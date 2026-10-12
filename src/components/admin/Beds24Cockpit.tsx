@@ -18,6 +18,7 @@ import {
 
 import Beds24BlockSync from '@/components/admin/Beds24BlockSync';
 import Beds24History from '@/components/admin/Beds24History';
+import Beds24IcalSources from '@/components/admin/Beds24IcalSources';
 import Beds24SeasonSync from '@/components/admin/Beds24SeasonSync';
 import BookingCutoffSetting from '@/components/admin/BookingCutoffSetting';
 import { beds24Source } from '@/lib/beds24Channels';
@@ -1859,7 +1860,7 @@ export default function Beds24Cockpit() {
 
       <p className="text-xs text-gray-400 -mt-2">
         Preise &amp; Mindestaufenthalt aus Beds24 · Auslastung kombiniert aus Gästedatenbank,
-        Portal-iCal-Feeds und Beds24 · Mehrere Tage mit gedrückter Maustaste markieren
+        Portal-iCal-Feeds (siehe unten) und Beds24 · Mehrere Tage mit gedrückter Maustaste markieren
       </p>
 
       {error && (
@@ -1868,6 +1869,9 @@ export default function Beds24Cockpit() {
           {error}
         </div>
       )}
+
+      {/* iCal-Adressen der Portale (Quelle für Overlay und Abgleich) */}
+      <Beds24IcalSources onSaved={load} />
 
       {/* Doppelbuchungs-Schutz: belegte Nächte, die bei Beds24 noch frei sind */}
       <Beds24BlockSync

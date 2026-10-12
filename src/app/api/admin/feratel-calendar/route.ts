@@ -7,21 +7,30 @@ interface Env {
   ADMIN_PWD?: string;
 }
 
-// All iCal sources for the calendar
-const ICAL_SOURCES = [
-  {
-    name: 'Feratel',
-    url: 'https://ical.deskline.net/KTN/services/35981ad0-78ba-48f7-9ebc-3260e1ea446b/4d3167ef-4067-4c33-9483-a005b3dbdd17.ics',
-  },
-  {
-    name: 'FeWo-Direkt',
-    url: 'https://www.fewo-direkt.de/icalendar/69e49db18b094f38956a712f7c455189.ics?nonTentative',
-  },
-  {
-    name: 'Booking.com',
-    url: 'https://ical.booking.com/v1/export?t=f5f44162-4f91-434b-bf41-73381f708169',
-  },
-];
+// iCal-Exporte der Portale. Bewusst NICHT fest im Code: Hier standen früher
+// die Adressen der Natberger Hütte (beim Kopieren des Admin Centers
+// übernommen) — das Cockpit zeigte dadurch deren Buchungen als Belegung der
+// Sechszirbenhütte. Die Adressen werden jetzt im Beds24-Tab gepflegt
+// (settings.ical_sources, JSON [{ name, url }]).
+const ICAL_SETTINGS_KEY = 'ical_sources';
+
+async function loadIcalSources(
+  db: D1Database | undefined,
+): Promise<{ name: string; url: string }[]> {
+  if (!db) return [];
+  try {
+    const row = await db
+      .prepare('SELECT value FROM settings WHERE key = ?')
+      .bind(ICAL_SETTINGS_KEY)
+      .first<{ value: string }>();
+    const list = JSON.parse(row?.value || '[]') as { name?: unknown; url?: unknown }[];
+    return (Array.isArray(list) ? list : [])
+      .filter((e) => typeof e.url === 'string' && /^https:\/\//.test(e.url))
+      .map((e) => ({ name: String(e.name || 'Portal'), url: String(e.url) }));
+  } catch {
+    return [];
+  }
+}
 
 interface BookedPeriod {
   start: string;
@@ -134,7 +143,8 @@ export async function GET(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
-    const results = await Promise.all(ICAL_SOURCES.map((source) => fetchICalFromSource(source)));
+    const sources = await loadIcalSources(env.DB);
+    const results = await Promise.all(sources.map((source) => fetchICalFromSource(source)));
 
     const allPeriods: BookedPeriod[] = [];
     const successfulSources: string[] = [];
@@ -143,7 +153,7 @@ export async function GET(request: NextRequest) {
     results.forEach((result, index) => {
       if (result.periods.length > 0) {
         allPeriods.push(...result.periods);
-        successfulSources.push(ICAL_SOURCES[index]!.name);
+        successfulSources.push(sources[index]!.name);
       }
       if (result.error) {
         errors.push(result.error);

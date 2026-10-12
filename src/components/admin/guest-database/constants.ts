@@ -244,21 +244,9 @@ export function getPlatformBadgeClasses(platform: string | null): string {
   return `${cfg.badgeBg} ${cfg.badgeText}`;
 }
 
-// iCal calendar sources
-export const ICAL_SOURCES = [
-  {
-    name: 'Feratel',
-    url: 'https://ical.deskline.net/KTN/services/35981ad0-78ba-48f7-9ebc-3260e1ea446b/4d3167ef-4067-4c33-9483-a005b3dbdd17.ics',
-  },
-  {
-    name: 'FeWo-Direkt',
-    url: 'https://www.fewo-direkt.de/icalendar/69e49db18b094f38956a712f7c455189.ics?nonTentative',
-  },
-  {
-    name: 'Booking.com',
-    url: 'https://ical.booking.com/v1/export?t=f5f44162-4f91-434b-bf41-73381f708169',
-  },
-];
+// iCal-Quellen: werden im Beds24-Tab gepflegt (settings.ical_sources), siehe
+// src/app/api/admin/feratel-calendar/route.ts. Früher standen hier die
+// Adressen der Natberger Hütte.
 
 // Default new guest data - only personal/guest fields
 // Booking fields (dates, prices, persons) are managed in the bookings table
