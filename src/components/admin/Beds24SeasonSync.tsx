@@ -162,8 +162,8 @@ export default function Beds24SeasonSync({ roomId, dayMap, onSynced }: Props) {
         <p className="font-semibold text-gray-800">Saisonpreise an Beds24 übertragen</p>
         <p className="text-xs text-gray-500 mt-0.5">
           Quelle ist der Tab &bdquo;Mietpreise&ldquo;. Übertragen werden Preis pro Nacht (price1)
-          und Mindestaufenthalt — Beds24 verteilt sie an Booking.com, Feratel und FeWo-direkt.
-          Vorausgewählt sind Saisons, deren Werte bei Beds24 abweichen.
+          und Mindestaufenthalt — Beds24 verteilt sie an Booking.com, Feratel, FeWo-direkt und
+          Airbnb. Vorausgewählt sind Saisons, deren Werte bei Beds24 abweichen.
         </p>
       </div>
 

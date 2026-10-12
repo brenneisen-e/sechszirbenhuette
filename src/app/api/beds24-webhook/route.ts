@@ -4,6 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { beds24Source, platformAliases } from '@/lib/beds24Channels';
 import { parseArrivalTime } from '@/lib/bookingComComments';
 import { writeAppLog } from '@/lib/server/appLog';
+import { getPropertyId } from '@/lib/server/beds24';
 import { ensureBeds24BookingColumns } from '@/lib/server/beds24Columns';
 import { describeMatch, findExistingGuest } from '@/lib/server/guestMatch';
 import {
@@ -73,6 +74,24 @@ export async function POST(request: NextRequest) {
         message,
         JSON.stringify({ beds24Id, ref, arrival, departure, platform }),
       );
+
+    // Gemeinsames Beds24-Konto mit der Natberger Hütte: Buchungen anderer
+    // Unterkünfte nie übernehmen, falls die URL dort versehentlich eingetragen ist
+    const ownPropertyId = await getPropertyId(env.DB);
+    const bookingPropertyId = Number(str('propertyId'));
+    if (ownPropertyId && bookingPropertyId && bookingPropertyId !== ownPropertyId) {
+      await log(
+        `Buchung ${ref} gehört zu Unterkunft ${bookingPropertyId}, nicht zur Sechszirbenhütte (${ownPropertyId}) — ignoriert`,
+        'warn',
+      );
+      return NextResponse.json({ success: true, skipped: true });
+    }
+    if (!ownPropertyId) {
+      await log(
+        'Beds24-Unterkunft im Admin Center nicht festgelegt — Buchung ungeprüft übernommen',
+        'warn',
+      );
+    }
 
     if (!ref || !arrival || !departure) {
       await log('Webhook ohne verwertbare Buchungsdaten übersprungen', 'warn');

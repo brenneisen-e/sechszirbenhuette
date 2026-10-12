@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import Beds24Cockpit from './Beds24Cockpit';
+import Beds24PropertySelect from './Beds24PropertySelect';
 
 // Beds24-Anbindung (Channel-Manager für Booking.com, Feratel und FeWo-direkt):
 // Verbindet sich über einen einmaligen Invite Code mit der Beds24 API v2
@@ -79,6 +80,8 @@ function RawData({ data }: { data: unknown }) {
 
 export default function Beds24Panel() {
   const [connected, setConnected] = useState<boolean | null>(null);
+  // Gewählte Beds24-Unterkunft (gemeinsames Konto mit der Natberger Hütte)
+  const [propertyId, setPropertyId] = useState<number | null>(null);
   const [inviteCode, setInviteCode] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [setupError, setSetupError] = useState('');
@@ -98,6 +101,7 @@ export default function Beds24Panel() {
     });
     return (await res.json()) as {
       connected?: boolean;
+      propertyId?: number | null;
       success?: boolean;
       error?: string;
       data?: unknown;
@@ -141,7 +145,8 @@ export default function Beds24Panel() {
         const data = await apiCall({ action: 'status' });
         if (cancelled) return;
         setConnected(!!data.connected);
-        if (data.connected) loadAll();
+        setPropertyId(data.propertyId ?? null);
+        if (data.connected && data.propertyId) loadAll();
       } catch {
         if (!cancelled) setConnected(false);
       }
@@ -162,7 +167,6 @@ export default function Beds24Panel() {
       if (data.success) {
         setConnected(true);
         setInviteCode('');
-        loadAll();
       } else {
         setSetupError(data.error || 'Setup fehlgeschlagen');
       }
@@ -264,105 +268,116 @@ export default function Beds24Panel() {
         </div>
       </div>
 
-      <Beds24Cockpit />
+      <Beds24PropertySelect
+        propertyId={propertyId}
+        onChange={(id) => {
+          setPropertyId(id);
+          loadAll();
+        }}
+      />
 
-      {SECTIONS.map(({ target, title, icon: Icon }) => {
-        const section = sections[target];
-        const rows = target === 'rooms' ? extractRoomRows(section.data) : extractRows(section.data);
-        return (
-          <div key={target} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm">
-                <Icon className="w-4 h-4 text-gray-400" />
-                {title}
-                {rows.length > 0 && (
-                  <span className="text-xs font-normal text-gray-400">({rows.length})</span>
-                )}
-              </h3>
-              <button
-                onClick={() => loadSection(target)}
-                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Neu laden"
-              >
-                {section.loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" />
-                )}
-              </button>
-            </div>
+      {/* key: beim Wechsel der Unterkunft alles neu laden */}
+      {propertyId && <Beds24Cockpit key={propertyId} />}
 
-            {section.error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm text-red-700 mb-2">
-                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                {section.error}
+      {propertyId &&
+        SECTIONS.map(({ target, title, icon: Icon }) => {
+          const section = sections[target];
+          const rows =
+            target === 'rooms' ? extractRoomRows(section.data) : extractRows(section.data);
+          return (
+            <div key={target} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm">
+                  <Icon className="w-4 h-4 text-gray-400" />
+                  {title}
+                  {rows.length > 0 && (
+                    <span className="text-xs font-normal text-gray-400">({rows.length})</span>
+                  )}
+                </h3>
+                <button
+                  onClick={() => loadSection(target)}
+                  className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Neu laden"
+                >
+                  {section.loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                </button>
               </div>
-            )}
 
-            {target === 'bookings' &&
-              !section.loading &&
-              section.data !== undefined &&
-              rows.length === 0 && (
-                <p className="text-sm text-gray-400">
-                  Keine Buchungen gefunden — ggf. in Beds24 prüfen, ob die Kanäle (Booking.com,
-                  Feratel, Vrbo für FeWo-direkt) verbunden sind und Bestandsbuchungen importiert
-                  wurden.
-                </p>
+              {section.error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-sm text-red-700 mb-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  {section.error}
+                </div>
               )}
 
-            {/* Strukturierte Kurzansicht für Buchungen */}
-            {target === 'bookings' && rows.length > 0 && (
-              <div className="divide-y divide-gray-100">
-                {rows.map((row, i) => (
-                  <div key={i} className="py-2 flex items-center justify-between gap-3 text-sm">
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-800 truncate">
-                        {`${str(row, 'firstName')} ${str(row, 'lastName')}`.trim() ||
-                          str(row, 'guestName') ||
-                          `Buchung #${str(row, 'id')}`}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {str(row, 'arrival')} – {str(row, 'departure')}
-                        {str(row, 'numAdult') && ` · ${str(row, 'numAdult')} Erw.`}
-                        {str(row, 'referer') && ` · ${str(row, 'referer')}`}
-                        {str(row, 'channel') && ` · ${str(row, 'channel')}`}
-                      </p>
+              {target === 'bookings' &&
+                !section.loading &&
+                section.data !== undefined &&
+                rows.length === 0 && (
+                  <p className="text-sm text-gray-400">
+                    Keine Buchungen gefunden — ggf. in Beds24 prüfen, ob die Kanäle (Booking.com,
+                    Feratel, Vrbo für FeWo-direkt, Airbnb) verbunden sind und Bestandsbuchungen
+                    importiert wurden.
+                  </p>
+                )}
+
+              {/* Strukturierte Kurzansicht für Buchungen */}
+              {target === 'bookings' && rows.length > 0 && (
+                <div className="divide-y divide-gray-100">
+                  {rows.map((row, i) => (
+                    <div key={i} className="py-2 flex items-center justify-between gap-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-800 truncate">
+                          {`${str(row, 'firstName')} ${str(row, 'lastName')}`.trim() ||
+                            str(row, 'guestName') ||
+                            `Buchung #${str(row, 'id')}`}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {str(row, 'arrival')} – {str(row, 'departure')}
+                          {str(row, 'numAdult') && ` · ${str(row, 'numAdult')} Erw.`}
+                          {str(row, 'referer') && ` · ${str(row, 'referer')}`}
+                          {str(row, 'channel') && ` · ${str(row, 'channel')}`}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {str(row, 'price') && (
+                          <p className="font-medium text-gray-800">{str(row, 'price')} €</p>
+                        )}
+                        <p className="text-xs text-gray-400">{str(row, 'status')}</p>
+                      </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      {str(row, 'price') && (
-                        <p className="font-medium text-gray-800">{str(row, 'price')} €</p>
-                      )}
-                      <p className="text-xs text-gray-400">{str(row, 'status')}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
 
-            {/* Strukturierte Kurzansicht für Properties/Zimmer */}
-            {(target === 'properties' || target === 'rooms') && rows.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {rows.map((row, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs text-gray-700"
-                  >
-                    {str(row, 'name') || `#${str(row, 'id')}`}
-                    <span className="text-gray-400"> · ID {str(row, 'id')}</span>
-                  </span>
-                ))}
-              </div>
-            )}
+              {/* Strukturierte Kurzansicht für Properties/Zimmer */}
+              {(target === 'properties' || target === 'rooms') && rows.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {rows.map((row, i) => (
+                    <span
+                      key={i}
+                      className="px-2.5 py-1 bg-gray-100 rounded-lg text-xs text-gray-700"
+                    >
+                      {str(row, 'name') || `#${str(row, 'id')}`}
+                      <span className="text-gray-400"> · ID {str(row, 'id')}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
 
-            {section.loading && !section.data && <p className="text-sm text-gray-400">Lade...</p>}
-            {!section.loading && !section.data && !section.error && (
-              <p className="text-sm text-gray-400">Noch nicht geladen</p>
-            )}
+              {section.loading && !section.data && <p className="text-sm text-gray-400">Lade...</p>}
+              {!section.loading && !section.data && !section.error && (
+                <p className="text-sm text-gray-400">Noch nicht geladen</p>
+              )}
 
-            {section.data !== undefined && <RawData data={section.data} />}
-          </div>
-        );
-      })}
+              {section.data !== undefined && <RawData data={section.data} />}
+            </div>
+          );
+        })}
     </div>
   );
 }

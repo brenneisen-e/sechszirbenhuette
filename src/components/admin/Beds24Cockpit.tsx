@@ -159,8 +159,16 @@ const BEDS24_CHECKLIST: Array<{ key: string; label: string }> = [
     label:
       'FeWo-direkt: Channel Manager → Vrbo → Mapping (Zimmer aktivieren) und Account („Connect with Vrbo")',
   },
+  {
+    key: 'airbnb',
+    label: 'Airbnb: Channel Manager → Airbnb → Account verbunden und Inserat dem Zimmer zugeordnet',
+  },
   { key: 'icalOff', label: 'Alte iCal-Synchronisation der Portale untereinander abgeschaltet' },
-  { key: 'webhook', label: 'Webhook-URL in Beds24 eingetragen (Booking Webhooks)' },
+  {
+    key: 'webhook',
+    label:
+      'Webhook-URL bei der Unterkunft Sechszirbenhütte eingetragen (nicht bei der Natberger Hütte)',
+  },
   {
     key: 'cutoffWorkflow',
     label: 'GitHub-Workflow „Buchungsschluss" aktiv (nur bei „bis Vortag")',
@@ -447,6 +455,9 @@ function channelHex(source: string): string {
   }
   if (s.includes('feratel')) {
     return '#fed7aa'; // orange-200
+  }
+  if (s.includes('airbnb')) {
+    return '#fbcfe8'; // pink-200
   }
   return '#d1d5db'; // gray-300 (Privat/unbekannt)
 }
@@ -1769,6 +1780,9 @@ export default function Beds24Cockpit() {
             <span className="w-3 h-3 rounded bg-orange-200" /> Feratel
           </span>
           <span className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded bg-pink-200" /> Airbnb
+          </span>
+          <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-gray-300" /> Privat/gesperrt
           </span>
           <span className="flex items-center gap-1">
@@ -2353,7 +2367,7 @@ export default function Beds24Cockpit() {
           <p className="text-xs text-gray-500 mb-2">
             In Beds24 unter <strong>Settings → Properties → Access → Booking Webhooks</strong>{' '}
             eintragen (Version 2/JSON). Neue oder geänderte Buchungen aller verbundenen Kanäle
-            (Booking.com, Feratel, FeWo-direkt über Vrbo) landen dann automatisch in eurer
+            (Booking.com, Feratel, FeWo-direkt über Vrbo, Airbnb) landen dann automatisch in eurer
             Gästedatenbank — inkl. Plattform, Gast-Anlage, Dubletten-Schutz und Storno-Erkennung.
             Protokoll unter System → Logs (Quelle: beds24-webhook).
           </p>

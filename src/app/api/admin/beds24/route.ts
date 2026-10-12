@@ -5,11 +5,15 @@ import {
   addDaysIso,
   BEDS24_API,
   beds24ResultError,
+  fetchPropertyRoomIds,
   getBeds24AccessToken,
+  getPropertyId,
   getSetting,
   KEY_ACCESS_EXPIRES,
   KEY_ACCESS_TOKEN,
+  KEY_PROPERTY_ID,
   KEY_REFRESH_TOKEN,
+  KEY_ROOM_ID,
   parseJsonSafe,
   setSetting,
 } from '@/lib/server/beds24';
@@ -38,8 +42,15 @@ interface Env {
 // langlebig und wird in der settings-Tabelle gespeichert; daraus werden bei
 // Bedarf 24h-Access-Tokens geholt.
 
-// Abrufbare Bereiche — bewusst eine Whitelist statt freier Pfade
-function buildTargetPath(target: string, bookingId?: number, months?: number): string | null {
+// Abrufbare Bereiche — bewusst eine Whitelist statt freier Pfade. Alles außer
+// Konto und Nachrichten wird auf die gewählte Unterkunft eingeschränkt: Das
+// Beds24-Konto wird mit der Natberger Hütte geteilt.
+function buildTargetPath(
+  target: string,
+  propertyId: number,
+  bookingId?: number,
+  months?: number,
+): string | null {
   // Zeitraum fürs Cockpit: 1–24 Monate (Standard 12)
   const monthsClamped = Math.min(Math.max(Number(months) || 12, 1), 24);
   const rangeEnd = (() => {
@@ -51,7 +62,7 @@ function buildTargetPath(target: string, bookingId?: number, months?: number): s
     case 'account':
       return '/authentication/details';
     case 'properties':
-      return '/properties';
+      return `/properties?id=${propertyId}`;
     case 'bookingMessages': {
       // Nachrichten/Kommunikation zu einer Buchung (z.B. Booking.com-Chat)
       if (!bookingId || !Number.isFinite(bookingId)) return null;
@@ -60,11 +71,11 @@ function buildTargetPath(target: string, bookingId?: number, months?: number): s
     case 'rooms':
       // Eigener /properties/rooms-Pfad liefert je nach Account leere Antworten —
       // Zimmer deshalb über die Properties-Abfrage mitladen
-      return '/properties?includeAllRooms=true';
+      return `/properties?id=${propertyId}&includeAllRooms=true`;
     case 'bookings': {
       // Buchungen ab 30 Tage zurück, damit auch laufende Aufenthalte sichtbar sind
       const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-      return `/bookings?arrivalFrom=${from}&includeInvoiceItems=true&includeInfoItems=true`;
+      return `/bookings?propertyId=${propertyId}&arrivalFrom=${from}&includeInvoiceItems=true&includeInfoItems=true`;
     }
     case 'bookingsYear': {
       // Buchungen des Cockpit-Zeitraums, inkl. Einzelpositionen
@@ -73,19 +84,28 @@ function buildTargetPath(target: string, bookingId?: number, months?: number): s
       // abgereiste Gäste geladen werden — für nachträgliche Bewertungsanfragen
       // und damit vergangene belegte Kalendertage anklickbar bleiben.
       const from = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-      return `/bookings?arrivalFrom=${from}&arrivalTo=${rangeEnd}&includeInvoiceItems=true&includeInfoItems=true`;
+      return `/bookings?propertyId=${propertyId}&arrivalFrom=${from}&arrivalTo=${rangeEnd}&includeInvoiceItems=true&includeInfoItems=true`;
     }
     case 'calendar': {
       // Tageswerte (Preis, Mindestaufenthalt, Verfügbarkeit) des Cockpit-Zeitraums
       const from = new Date().toISOString().slice(0, 10);
-      return `/inventory/rooms/calendar?startDate=${from}&endDate=${rangeEnd}&includeNumAvail=true&includePrices=true&includeMinStay=true&includeMaxStay=true`;
+      return `/inventory/rooms/calendar?propertyId=${propertyId}&startDate=${from}&endDate=${rangeEnd}&includeNumAvail=true&includePrices=true&includeMinStay=true&includeMaxStay=true`;
     }
     case 'offers':
-      return '/properties?includeAllRooms=true&includeOffers=true';
+      return `/properties?id=${propertyId}&includeAllRooms=true&includeOffers=true`;
     default:
       return null;
   }
 }
+
+// Aktionen, die ein Zimmer lesen oder ändern — nur für Zimmer der gewählten Unterkunft
+const ROOM_ACTIONS = new Set([
+  'setCalendar',
+  'setCalendarBatch',
+  'verifyCalendar',
+  'checkStay',
+  'setRoomSettings',
+]);
 
 async function ensureSettingsTable(db: D1Database) {
   await db
@@ -229,7 +249,69 @@ export async function POST(request: NextRequest) {
     // Verbindungsstatus
     if (body.action === 'status') {
       const refreshToken = await getSetting(env.DB, KEY_REFRESH_TOKEN);
-      return NextResponse.json({ connected: !!refreshToken });
+      return NextResponse.json({
+        connected: !!refreshToken,
+        propertyId: await getPropertyId(env.DB),
+      });
+    }
+
+    // Alle Unterkünfte des Beds24-Kontos — zur Auswahl der Sechszirbenhütte
+    if (body.action === 'listProperties') {
+      const { token, error } = await getBeds24AccessToken(env.DB);
+      if (!token) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+      const res = await fetch(`${BEDS24_API}/properties?includeAllRooms=true`, {
+        headers: { token, Accept: 'application/json' },
+      });
+      const parsed = await parseJsonSafe(res);
+      if (!res.ok || !parsed.ok) {
+        return NextResponse.json(
+          { error: `Beds24 antwortete mit HTTP ${res.status}` },
+          { status: 502 },
+        );
+      }
+      const rows = (parsed.data as { data?: unknown })?.data;
+      const properties = (Array.isArray(rows) ? rows : []).map((row) => {
+        const p = row as { id?: unknown; name?: unknown; roomTypes?: unknown };
+        const rooms = Array.isArray(p.roomTypes) ? p.roomTypes : [];
+        return {
+          id: Number(p.id),
+          name: String(p.name ?? ''),
+          rooms: rooms.map((r) => {
+            const room = r as { id?: unknown; name?: unknown };
+            return { id: Number(room.id), name: String(room.name ?? '') };
+          }),
+        };
+      });
+      return NextResponse.json({
+        success: true,
+        properties,
+        propertyId: await getPropertyId(env.DB),
+      });
+    }
+
+    // Unterkunft festlegen, auf die sich dieses Admin Center bezieht
+    if (body.action === 'setProperty') {
+      const propertyId = Number(body.propertyId);
+      if (!Number.isFinite(propertyId) || propertyId <= 0) {
+        return NextResponse.json({ error: 'Ungültige Unterkunft' }, { status: 400 });
+      }
+      const { token, error } = await getBeds24AccessToken(env.DB);
+      if (!token) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+      const rooms = await fetchPropertyRoomIds(token, propertyId);
+      if (!rooms.roomIds) {
+        return NextResponse.json({ error: rooms.error }, { status: 400 });
+      }
+      await setSetting(env.DB, KEY_PROPERTY_ID, String(propertyId));
+      // Ein fest hinterlegtes Zimmer einer anderen Unterkunft verwerfen
+      const fixedRoom = Number(await getSetting(env.DB, KEY_ROOM_ID));
+      if (fixedRoom > 0 && !rooms.roomIds.includes(fixedRoom)) {
+        await deleteSetting(env.DB, KEY_ROOM_ID);
+      }
+      return NextResponse.json({ success: true, propertyId });
     }
 
     // Invite Code einlösen → Refresh-Token speichern
@@ -284,8 +366,16 @@ export async function POST(request: NextRequest) {
 
     // Daten von Beds24 abrufen
     if (body.action === 'fetch') {
+      const propertyId = await getPropertyId(env.DB);
+      if (!propertyId && body.target !== 'account') {
+        return NextResponse.json(
+          { error: 'Bitte zuerst die Beds24-Unterkunft der Sechszirbenhütte wählen' },
+          { status: 400 },
+        );
+      }
       const path = buildTargetPath(
         body.target || '',
+        propertyId ?? 0,
         Number(body.bookingId) || undefined,
         Number(body.months) || undefined,
       );
@@ -318,6 +408,38 @@ export async function POST(request: NextRequest) {
         );
       }
       return NextResponse.json({ success: true, data: parsed.data });
+    }
+
+    // Schreibschutz für das gemeinsame Beds24-Konto: Zimmer-Aktionen nur für
+    // Zimmer der gewählten Unterkunft — nie für die Natberger Hütte.
+    if (ROOM_ACTIONS.has(body.action)) {
+      const propertyId = await getPropertyId(env.DB);
+      if (!propertyId) {
+        return NextResponse.json(
+          { error: 'Bitte zuerst die Beds24-Unterkunft der Sechszirbenhütte wählen' },
+          { status: 400 },
+        );
+      }
+      if (body.action === 'setRoomSettings' && Number(body.propertyId) !== propertyId) {
+        return NextResponse.json(
+          { error: 'Unterkunft passt nicht zur Auswahl im Admin Center' },
+          { status: 403 },
+        );
+      }
+      const { token, error } = await getBeds24AccessToken(env.DB);
+      if (!token) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+      const rooms = await fetchPropertyRoomIds(token, propertyId);
+      if (!rooms.roomIds) {
+        return NextResponse.json({ error: rooms.error }, { status: 502 });
+      }
+      if (!rooms.roomIds.includes(Number(body.roomId))) {
+        return NextResponse.json(
+          { error: `Zimmer ${body.roomId} gehört nicht zur gewählten Unterkunft` },
+          { status: 403 },
+        );
+      }
     }
 
     // Tageswerte bei Beds24 ändern (Preis / Mindestaufenthalt für einen Zeitraum)
@@ -605,9 +727,29 @@ export async function POST(request: NextRequest) {
       if (!Number.isFinite(bookingId) || bookingId <= 0 || !message) {
         return NextResponse.json({ error: 'bookingId und message erforderlich' }, { status: 400 });
       }
+      const propertyId = await getPropertyId(env.DB);
+      if (!propertyId) {
+        return NextResponse.json(
+          { error: 'Bitte zuerst die Beds24-Unterkunft der Sechszirbenhütte wählen' },
+          { status: 400 },
+        );
+      }
       const { token, error } = await getBeds24AccessToken(env.DB);
       if (!token) {
         return NextResponse.json({ error }, { status: 400 });
+      }
+      // Nur an Gäste der eigenen Unterkunft schreiben (gemeinsames Konto)
+      const ownRes = await fetch(
+        `${BEDS24_API}/bookings?id=${bookingId}&propertyId=${propertyId}`,
+        { headers: { token, Accept: 'application/json' } },
+      );
+      const own = await parseJsonSafe(ownRes);
+      const ownRows = own.ok ? (own.data as { data?: unknown })?.data : null;
+      if (!Array.isArray(ownRows) || ownRows.length === 0) {
+        return NextResponse.json(
+          { error: `Buchung ${bookingId} gehört nicht zur gewählten Unterkunft` },
+          { status: 403 },
+        );
       }
       const res = await fetch(`${BEDS24_API}/bookings/messages`, {
         method: 'POST',

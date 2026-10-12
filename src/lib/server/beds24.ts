@@ -8,6 +8,44 @@ export const KEY_REFRESH_TOKEN = 'beds24_refresh_token';
 export const KEY_ACCESS_TOKEN = 'beds24_access_token';
 export const KEY_ACCESS_EXPIRES = 'beds24_access_token_expires';
 
+/**
+ * Beds24-Unterkunft (propertyId) der Sechszirbenhütte. Das Beds24-Konto wird
+ * mit der Natberger Hütte geteilt — ohne diese Einschränkung sähe das Cockpit
+ * Zimmer und Buchungen beider Häuser und könnte Preise ins falsche Zimmer
+ * schreiben. Wird im Beds24-Tab gewählt.
+ */
+export const KEY_PROPERTY_ID = 'beds24_property_id';
+
+export async function getPropertyId(db: D1Database): Promise<number | null> {
+  const value = Number(await getSetting(db, KEY_PROPERTY_ID));
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/** Zimmer-IDs (roomTypes) einer Unterkunft laden — für die Schreibschutz-Prüfung. */
+export async function fetchPropertyRoomIds(
+  token: string,
+  propertyId: number,
+): Promise<{ roomIds?: number[]; error?: string }> {
+  const res = await fetch(`${BEDS24_API}/properties?id=${propertyId}&includeAllRooms=true`, {
+    headers: { token, Accept: 'application/json' },
+  });
+  const parsed = await parseJsonSafe(res);
+  if (!res.ok || !parsed.ok) {
+    return { error: `Beds24 antwortete mit HTTP ${res.status}` };
+  }
+  const rows = (parsed.data as { data?: unknown })?.data;
+  const property = (Array.isArray(rows) ? rows : []).find(
+    (p) => Number((p as { id?: unknown }).id) === propertyId,
+  ) as { roomTypes?: unknown } | undefined;
+  if (!property) return { error: `Beds24 kennt die Unterkunft ${propertyId} nicht` };
+  const roomTypes = Array.isArray(property.roomTypes) ? property.roomTypes : [];
+  return {
+    roomIds: roomTypes
+      .map((r) => Number((r as { id?: unknown }).id))
+      .filter((id) => Number.isFinite(id) && id > 0),
+  };
+}
+
 export async function getSetting(db: D1Database, key: string): Promise<string | null> {
   const row = await db
     .prepare('SELECT value FROM settings WHERE key = ?')
@@ -146,8 +184,8 @@ export interface Beds24Availability {
 }
 
 /**
- * Gesperrte Nächte im Zeitraum laden. Das Zimmer wird wie im Admin-Cockpit
- * gewählt: fest hinterlegtes Zimmer (settings.beds24_room_id), sonst das erste
+ * Gesperrte Nächte im Zeitraum laden — nur Zimmer der festgelegten Unterkunft.
+ * Das Zimmer wird wie im Admin-Cockpit gewählt: fest hinterlegtes Zimmer (settings.beds24_room_id), sonst das erste
  * Zimmer, für das Beds24 Preise führt — das ist das an die Portale übertragene.
  */
 export async function fetchBeds24Availability(
@@ -155,12 +193,17 @@ export async function fetchBeds24Availability(
   from: string,
   to: string,
 ): Promise<{ availability?: Beds24Availability; error?: string }> {
+  // Ohne festgelegte Unterkunft könnte hier ein Zimmer der Natberger Hütte
+  // gesperrt werden (gemeinsames Beds24-Konto)
+  const propertyId = await getPropertyId(db);
+  if (!propertyId) return { error: 'Beds24-Unterkunft im Admin Center nicht festgelegt' };
+
   const { token, error } = await getBeds24AccessToken(db);
   if (!token) return { error: error || 'Kein Beds24-Zugang' };
 
   const res = await fetch(
     `${BEDS24_API}/inventory/rooms/calendar?startDate=${from}&endDate=${to}` +
-      '&includeNumAvail=true&includePrices=true',
+      `&propertyId=${propertyId}&includeNumAvail=true&includePrices=true`,
     { headers: { token, Accept: 'application/json' } },
   );
   const parsed = await parseJsonSafe(res);
