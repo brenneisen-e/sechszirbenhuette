@@ -56,7 +56,7 @@ export default function BlogPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-12 pb-20">
       <div className="container">
         {/* Back Link */}
         <Link
@@ -75,7 +75,7 @@ export default function BlogPage() {
         >
           <h1
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'var(--font-sans)' }}
           >
             {t.navigation.blog || 'Blog'}
           </h1>

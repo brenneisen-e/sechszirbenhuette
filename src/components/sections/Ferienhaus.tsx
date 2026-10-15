@@ -253,7 +253,7 @@ export function Ferienhaus() {
       <div className="container">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-12"
@@ -263,9 +263,9 @@ export function Ferienhaus() {
           </div>
           <h2
             data-text-key="ferienhaus_title"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
+            className="brand-h2 text-logo-green mb-4"
             style={{
-              fontFamily: 'FeelingPassionate, cursive',
+              fontFamily: 'var(--font-sans)',
               ...getTextStyle('ferienhaus_title'),
             }}
           >
@@ -304,7 +304,7 @@ export function Ferienhaus() {
                       onClick={() => scrollToGalleryCategory(card.galleryCategory)}
                       className="bg-white rounded-2xl overflow-hidden text-left group cursor-pointer shadow-sm border border-gray-100 flex flex-col"
                     >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-logo-green/5 to-wood-100/50">
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-leinen">
                         {cardImage?.url ? (
                           <Image
                             src={cardImage.url}
@@ -336,8 +336,8 @@ export function Ferienhaus() {
                           ))}
                         </ul>
                         {card.hint && (
-                          <div className="mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-100">
-                            <p className="text-xs text-amber-800">
+                          <div className="mt-3 p-2.5 bg-leinen rounded-lg border border-zirbe/20">
+                            <p className="text-xs text-rinde">
                               <span className="font-semibold">Hinweis:</span> {card.hint}
                             </p>
                           </div>
@@ -393,7 +393,7 @@ export function Ferienhaus() {
             return (
               <motion.div
                 key={card.key}
-                initial={{ opacity: 0, y: 30 }}
+                initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
@@ -406,7 +406,7 @@ export function Ferienhaus() {
                   flex flex-col"
               >
                 {/* Card Image - Always shown, with placeholder if no image */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-logo-green/5 to-wood-100/50">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-leinen">
                   {cardImage?.url ? (
                     <Image
                       src={cardImage.url}
@@ -452,8 +452,8 @@ export function Ferienhaus() {
 
                   {/* Hint if exists */}
                   {card.hint && (
-                    <div className="mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-100">
-                      <p className="text-xs text-amber-800">
+                    <div className="mt-3 p-2.5 bg-leinen rounded-lg border border-zirbe/20">
+                      <p className="text-xs text-rinde">
                         <span className="font-semibold">Hinweis:</span> {card.hint}
                       </p>
                     </div>
@@ -466,7 +466,7 @@ export function Ferienhaus() {
 
         {/* Floor Plan Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
@@ -483,8 +483,8 @@ export function Ferienhaus() {
                   <Maximize2 size={24} strokeWidth={1.5} />
                 </button>
                 <h3
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-                  style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                  className="brand-h2 text-logo-green mb-4"
+                  style={{ fontFamily: 'var(--font-sans)' }}
                 >
                   {language === 'de' ? 'Grundriss' : 'Floor Plan'}
                 </h3>

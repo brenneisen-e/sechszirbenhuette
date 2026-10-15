@@ -9,13 +9,18 @@ import { Galerie } from '@/components/sections/Galerie';
 import { Instagram } from '@/components/sections/Instagram';
 import { Buchung } from '@/components/sections/Buchung';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { Orientation } from '@/components/brand/Orientation';
+import { FacadeBand } from '@/components/brand/FacadeBand';
+import { HutChapters } from '@/components/brand/HutChapters';
+import { HostGreeting } from '@/components/brand/HostGreeting';
 
 export default function HomePage() {
   return (
-    <>
-      <LoadingScreen minDisplayTime={1000} />
+    <div className="brand-page">
       <Hero />
+      <Orientation />
+      <FacadeBand animated />
+      <HutChapters />
       <IntroText />
       <Ferienhaus />
       <Galerie />
@@ -23,10 +28,11 @@ export default function HomePage() {
       <Bewertungen />
       <Location />
       <Umgebung />
+      <HostGreeting />
       <Buchung />
       <Suspense fallback={null}>
         <AdminPreviewListener />
       </Suspense>
-    </>
+    </div>
   );
 }

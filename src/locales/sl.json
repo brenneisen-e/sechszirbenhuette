@@ -20,7 +20,7 @@
     "welcome": "Dobrodošli",
     "title": "v Sechszirbenhütte",
     "subtitle": "Premium gorska koča na 1.700m v koroških Nockbergah",
-    "description": "Odkrijte Sechszirbenhütte, vašo sanjsko namestitev na 1.700\u00a0m nadmorske višine v srcu gorovja Nockberge na Koroškem v Avstriji. Na slikoviti južni strani Alp v Falkertseeju naša koča ponuja celoletni počitniški raj za družine in ljubitelje narave.",
+    "description": "Odkrijte Sechszirbenhütte, vašo sanjsko namestitev na 1.700 m nadmorske višine v srcu gorovja Nockberge na Koroškem v Avstriji. Na slikoviti južni strani Alp v Falkertseeju naša koča ponuja celoletni počitniški raj za družine in ljubitelje narave.",
     "cta_book": "Rezervirajte Zdaj",
     "cta_explore": "Raziskujte Kočo"
   },
@@ -458,5 +458,63 @@
     "bannerTitle": "Odkrijte več na našem blogu",
     "bannerDescription": "Podrobni potovalni nasveti, pohodniške poti in najlepše destinacije v Nockbergah in na Koroškem.",
     "ctaButton": "Na blog"
+  },
+  "brand": {
+    "place": "Falkert / Koroška",
+    "claim": "Biti zgoraj.",
+    "claimHand": "Biti skupaj.",
+    "heroText": "Več kot 250 let stara gorska koča na samem na 1.700 m – tik ob Narodnem parku Nockberge, 800 m od jezera Falkertsee.",
+    "book": "Rezerviraj",
+    "videoPause": "Ustavi video",
+    "videoPlay": "Predvajaj video",
+    "videoLabel": "Video o koči Sechszirbenhütte na Falkertu",
+    "factsTitle": "Koča na kratko",
+    "facts": [
+      {
+        "value": "1.700 m",
+        "label": "nadmorske višine, na samem"
+      },
+      {
+        "value": "2–5",
+        "label": "oseb"
+      },
+      {
+        "value": "80 m²",
+        "label": "bivalne površine"
+      },
+      {
+        "value": "Savna",
+        "label": "zasebni prizidek s sobo za počitek"
+      },
+      {
+        "value": "Psi",
+        "label": "so dobrodošli"
+      }
+    ],
+    "chaptersLabel": "Koča",
+    "chaptersTitle": "Zunaj gore. Znotraj vaš kraj.",
+    "chapters": [
+      {
+        "title": "Zunaj",
+        "text": "Koča stoji sama med cemprini in macesni, tik ob Narodnem parku Nockberge. Poleti pohodi po Nockbergih, pozimi smučanje na smučišču Heidi Alm.",
+        "alt": "Koča Sechszirbenhütte poleti z balkonom in drvmi med smrekami"
+      },
+      {
+        "title": "Znotraj",
+        "text": "Star les, peč na pelete in v celoti opremljena kuhinja. Dve spalnici z zakonsko posteljo in dnevni prostor z dodatnim ležiščem za dve do pet oseb.",
+        "alt": "Lesena izba s stopniščem, poslikano kmečko omaro in pogledom v kuhinjo"
+      },
+      {
+        "title": "Čas za vas",
+        "text": "Zasebni prizidek s finsko savno, sobo za počitek in deževno prho je samo vaš. Zjutraj vas kava čaka na balkonu, ki obdaja kočo.",
+        "alt": "Skodelica kave v snegu na balkonski ograji"
+      }
+    ],
+    "greetingLabel": "Vaša gostitelja",
+    "greetingHand": "Dobrodošli pri nas.",
+    "greetingText": "Kočo Sechszirbenhütte smo uredili tako, da lahko prispete sem gor in imate čas drug za drugega. Za vprašanja o prihodu ali koči smo vam na voljo.",
+    "reduceMotion": "Zmanjšaj gibanje",
+    "motionReduced": "Gibanje zmanjšano",
+    "motionSystem": "Gibanje zmanjšano (sistemska nastavitev)"
   }
 }

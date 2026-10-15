@@ -13,7 +13,7 @@ export interface SiteSettings {
 }
 
 const defaultSettings: SiteSettings = {
-  primaryColor: '#1e5631',
+  primaryColor: '#263d35',
   accentColor: '#8B7355',
   headingFont: 'FeelingPassionate',
   bodyFont: 'system-ui',

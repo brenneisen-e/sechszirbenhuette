@@ -21,7 +21,7 @@ export function HeidiAlm() {
       <div className="container">
         {/* Heidi Alm Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-20"
@@ -29,10 +29,7 @@ export function HeidiAlm() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-700 mb-6">
             <Mountain size={32} strokeWidth={1.5} />
           </div>
-          <h2
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-6"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
-          >
+          <h2 className="brand-h2 text-logo-green mb-6" style={{ fontFamily: 'var(--font-sans)' }}>
             {t.heidiAlm.title}
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
@@ -42,7 +39,7 @@ export function HeidiAlm() {
 
         {/* Winter Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="bg-white rounded-2xl p-8 md:p-12 shadow-sm"
@@ -52,8 +49,8 @@ export function HeidiAlm() {
               <Snowflake size={32} strokeWidth={1.5} />
             </div>
             <h2
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+              className="brand-h2 text-logo-green mb-4"
+              style={{ fontFamily: 'var(--font-sans)' }}
             >
               {t.winter.title}
             </h2>
@@ -66,7 +63,7 @@ export function HeidiAlm() {
             {winterActivities.map((activity, index) => (
               <motion.div
                 key={activity}
-                initial={{ opacity: 0, x: -20 }}
+                initial={false}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}

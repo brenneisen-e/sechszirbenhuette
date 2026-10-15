@@ -1,406 +1,122 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useLanguage } from '@/contexts/LanguageContext';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { cn } from '@/lib/utils';
+import { BrandLogo } from '@/components/brand/BrandLogo';
+import { BookingCTA } from '@/components/brand/BookingCTA';
 
-// Logo green color (matches the logo)
-const LOGO_GREEN = '#1e5631';
+// Navigation der öffentlichen Seiten: dunkelgrüne Fläche, weißes Original-Logo
+// in Mindestgröße (240 px) mit Schutzraum, Buchen als roter Link. Logo und
+// Navigation werden beim Scrollen weder skaliert noch verformt.
+//
+// Mobil scrollt die Navigation mit (das Vollzeichen braucht 240 px plus
+// Schutzraum); Buchen bleibt dort über die Leiste am unteren Rand erreichbar.
+// Ab 1024 px steht sie oben fest.
+//
+// Ziele sind echte Links (/#abschnitt) — funktionieren auch ohne JavaScript
+// und von Unterseiten aus.
 
-// Navigation links - split for left and right of logo
-const leftNavItems = [
-  { key: 'ferienhaus', href: '#ferienhaus', sectionId: 'ferienhaus', isExternal: false },
-  { key: 'blog', href: '/blog', sectionId: 'blog', isExternal: true },
+const NAV_ITEMS = [
+  { key: 'ferienhaus', href: '/#huette' },
+  { key: 'galerie', href: '/#galerie' },
+  { key: 'umgebung', href: '/#umgebung' },
+  { key: 'blog', href: '/blog' },
 ] as const;
-
-const rightNavItems = [
-  { key: 'galerie', href: '#galerie', sectionId: 'galerie', isExternal: false },
-  { key: 'anfrage', href: '#buchung', sectionId: 'buchung', isExternal: false },
-] as const;
-
-const allNavItems = [...leftNavItems, ...rightNavItems];
-
-// All sections to track for scroll-spy (in order they appear on page)
-const SCROLL_SPY_SECTIONS = ['hero', 'introtext', 'ferienhaus', 'galerie', 'lage', 'buchung'];
 
 export function Header() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isPastHero, setIsPastHero] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Check if we're on admin page or a subpage (not homepage)
-  const isAdminPage = pathname?.startsWith('/admin');
-  const isSubpage = pathname !== '/';
-
-  // Scroll-spy: determine which section is currently in view
-  // IMPORTANT: All hooks must be called before any conditional returns
-  const updateActiveSection = useCallback(() => {
-    if (isAdminPage) return; // Skip on admin pages
-    const scrollPosition = window.scrollY + 150; // Offset for header height
-
-    let currentSection: string | null = null;
-
-    for (const sectionId of SCROLL_SPY_SECTIONS) {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        const { offsetTop, offsetHeight } = element;
-        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-          currentSection = sectionId;
-          break;
-        }
-      }
-    }
-
-    setActiveSection(currentSection);
-  }, [isAdminPage]);
-
+  // Menü bei Seitenwechsel und Escape schließen
+  useEffect(() => setMenuOpen(false), [pathname]);
   useEffect(() => {
-    if (isAdminPage) return; // Skip on admin pages
-
-    const heroSection = document.querySelector('#hero');
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-      // Check if scrolled past hero section
-      if (heroSection) {
-        const heroBottom = heroSection.getBoundingClientRect().bottom;
-        setIsPastHero(heroBottom < 0);
-      }
-      // Update active section for scroll-spy
-      updateActiveSection();
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
     };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
-    window.addEventListener('scroll', handleScroll);
-    // Initial check
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [updateActiveSection, isAdminPage]);
+  if (pathname?.startsWith('/admin')) return null;
 
-  // Don't render on admin pages (after all hooks are called)
-  if (isAdminPage) {
-    return null;
-  }
-
-  // Check if a nav item is active
-  const isNavItemActive = (sectionId: string) => {
-    // Map nav item sections to actual section IDs
-    if (sectionId === 'buchung' && activeSection === 'buchung') return true;
-    if (
-      sectionId === 'ferienhaus' &&
-      (activeSection === 'ferienhaus' || activeSection === 'introtext')
-    )
-      return true;
-    if (sectionId === 'galerie' && activeSection === 'galerie') return true;
-    if (sectionId === 'umgebung' && (activeSection === 'umgebung' || activeSection === 'lage'))
-      return true;
-    return false;
-  };
-
-  const scrollToSection = (href: string) => {
-    // If we're on a subpage and the href is an anchor, navigate to homepage with anchor
-    if (isSubpage && href.startsWith('#')) {
-      window.location.href = '/' + href;
-      setIsMobileMenuOpen(false);
-      return;
-    }
-
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMobileMenuOpen(false);
-  };
+  const isBlog = pathname?.startsWith('/blog');
 
   return (
-    <header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible',
-        isScrolled || isSubpage
-          ? 'bg-white/95 backdrop-blur-sm shadow-md py-2'
-          : 'bg-transparent py-3',
-      )}
-    >
-      <div className="container">
-        {/* Desktop Layout - Logo centered with symmetric nav */}
-        <div className="hidden md:flex items-center justify-center">
-          {/* Left Navigation - justify-end to push items towards center */}
-          <nav className="flex items-center gap-8 justify-end" style={{ minWidth: '280px' }}>
-            {leftNavItems.map((item) => {
-              const isActive = isNavItemActive(item.sectionId);
-              const isBlogPage = pathname === '/blog';
-              const isCurrentBlog = item.key === 'blog' && isBlogPage;
+    <header className="brand-header on-zirbe relative z-50 bg-zirbe text-leinen lg:sticky lg:top-0">
+      <div
+        className="brand-container flex items-center justify-between gap-2 sm:gap-6"
+        style={{ height: 'var(--header-height)' }}
+      >
+        <a href="/" className="shrink-0 rounded-[4px]" aria-label="Sechszirbenhütte – Startseite">
+          <BrandLogo />
+        </a>
 
-              // For external links (like /blog), use Link component
-              if (item.isExternal) {
-                return (
-                  <Link
-                    key={item.key}
+        <nav aria-label="Hauptnavigation" className="hidden lg:block">
+          <ul className="flex items-center gap-8 text-[1.0625rem]">
+            {NAV_ITEMS.map((item) => {
+              const current = item.key === 'blog' && isBlog;
+              return (
+                <li key={item.key}>
+                  <a
                     href={item.href}
-                    className={cn(
-                      'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                      isScrolled || isSubpage
-                        ? 'text-gray-700 hover:text-logo-green'
-                        : 'text-white hover:text-white/80',
-                      isCurrentBlog && 'font-bold',
-                    )}
-                    style={
-                      isCurrentBlog
-                        ? {
-                            color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
-                          }
-                        : undefined
-                    }
+                    aria-current={current ? 'page' : undefined}
+                    className={`py-2 text-leinen underline-offset-[0.35em] hover:underline ${
+                      current ? 'underline decoration-2' : ''
+                    }`}
                   >
                     {t.navigation[item.key]}
-                    {isCurrentBlog && (
-                      <span
-                        className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                        style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
-                      />
-                    )}
-                  </Link>
-                );
-              }
-
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => scrollToSection(item.href)}
-                  className={cn(
-                    'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    isScrolled || isSubpage
-                      ? 'text-gray-700 hover:text-logo-green'
-                      : 'text-white hover:text-white/80',
-                    isActive && 'font-bold',
-                  )}
-                  style={
-                    isActive
-                      ? {
-                          color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
-                        }
-                      : undefined
-                  }
-                >
-                  {t.navigation[item.key]}
-                  {/* Active indicator line */}
-                  {isActive && (
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
-                    />
-                  )}
-                </button>
+                  </a>
+                </li>
               );
             })}
-          </nav>
+          </ul>
+        </nav>
 
-          {/* Centered Logo */}
-          {pathname === '/' ? (
-            <button
-              onClick={() => scrollToSection('#hero')}
-              className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
-            >
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={240}
-                height={100}
-                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-16' : 'h-20')}
-                priority
-              />
-            </button>
-          ) : (
-            <Link
-              href="/"
-              className="transition-transform hover:scale-105 mx-8 flex-shrink-0 relative z-10"
-            >
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={240}
-                height={100}
-                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-16' : 'h-20')}
-                priority
-              />
-            </Link>
-          )}
-
-          {/* Right Navigation - justify-start to push items towards center */}
-          <nav className="flex items-center gap-8 justify-start" style={{ minWidth: '280px' }}>
-            {rightNavItems.map((item) => {
-              const isActive = isNavItemActive(item.sectionId);
-              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
-              const isAnfrage = item.key === 'anfrage';
-
-              // Special styling for Anfragen button - always green bg with white text
-              if (isAnfrage) {
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => scrollToSection(item.href)}
-                    className="font-medium transition-all uppercase tracking-wide text-sm px-4 py-2 rounded-lg bg-logo-green text-white hover:bg-logo-green/90"
-                  >
-                    {t.navigation[item.key]}
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => scrollToSection(item.href)}
-                  className={cn(
-                    'font-medium transition-all uppercase tracking-wide text-sm relative py-1',
-                    isScrolled || isSubpage
-                      ? 'text-gray-700 hover:text-logo-green'
-                      : 'text-white hover:text-white/80',
-                    (isActive || isAnfrageHighlighted) && 'font-bold',
-                  )}
-                  style={
-                    isActive || isAnfrageHighlighted
-                      ? {
-                          color: isScrolled || isSubpage ? LOGO_GREEN : 'white',
-                        }
-                      : undefined
-                  }
-                >
-                  {t.navigation[item.key]}
-                  {/* Active indicator line */}
-                  {(isActive || isAnfrageHighlighted) && (
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300"
-                      style={{ backgroundColor: isScrolled || isSubpage ? LOGO_GREEN : 'white' }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-            <LanguageSwitcher isScrolled={isScrolled || isSubpage} />
-          </nav>
-        </div>
-
-        {/* Mobile Layout */}
-        <div className="md:hidden flex items-center justify-between">
-          {/* Mobile Menu Button */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden lg:block">
+            <LanguageSwitcher isScrolled={false} />
+          </div>
+          <div className="hidden sm:block">
+            <BookingCTA compact />
+          </div>
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={cn(
-              'p-2 rounded-lg transition-colors',
-              isScrolled || isSubpage ? 'text-gray-700' : 'text-white',
-            )}
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            className="lg:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] text-leinen hover:bg-leinen/10"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {menuOpen ? <X size={26} aria-hidden /> : <Menu size={26} aria-hidden />}
+            <span className="sr-only">{menuOpen ? t.common.close : 'Menü'}</span>
           </button>
-
-          {/* Centered Logo (Mobile) */}
-          {pathname === '/' ? (
-            <button
-              onClick={() => scrollToSection('#hero')}
-              className="transition-transform hover:scale-105"
-            >
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={160}
-                height={60}
-                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-12' : 'h-14')}
-                priority
-              />
-            </button>
-          ) : (
-            <Link href="/" className="transition-transform hover:scale-105">
-              <Image
-                src="/images/logo.svg"
-                alt="Sechszirbenhütte"
-                width={160}
-                height={60}
-                className={cn('w-auto transition-all duration-300', isScrolled ? 'h-12' : 'h-14')}
-                priority
-              />
-            </Link>
-          )}
-
-          {/* Language Switcher (Mobile) */}
-          <LanguageSwitcher isScrolled={isScrolled || isSubpage} />
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg">
-          <nav className="container py-4 flex flex-col gap-1">
-            {allNavItems.map((item) => {
-              const isActive = isNavItemActive(item.sectionId);
-              const isAnfrageHighlighted = item.key === 'anfrage' && isPastHero && !isActive;
-              const isAnfrage = item.key === 'anfrage';
-              const isBlogPage = pathname === '/blog';
-              const isCurrentBlog = item.key === 'blog' && isBlogPage;
-
-              // Special styling for Anfragen button - green bg with white text
-              if (isAnfrage) {
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => scrollToSection(item.href)}
-                    className="py-3 px-4 text-white text-left uppercase tracking-wide rounded-lg transition-all font-medium bg-logo-green hover:bg-logo-green/90 mt-2"
-                  >
-                    {t.navigation[item.key]}
-                  </button>
-                );
-              }
-
-              // For external links (like /blog), use Link component
-              if (item.isExternal) {
-                return (
-                  <Link
-                    key={item.key}
+      {menuOpen && (
+        <div id="mobile-menu" className="lg:hidden border-t border-leinen/20 bg-zirbe">
+          <nav aria-label="Hauptnavigation mobil" className="brand-container py-4">
+            <ul className="flex flex-col">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.key}>
+                  <a
                     href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={cn(
-                      'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
-                      isCurrentBlog && 'font-bold bg-logo-green/10',
-                    )}
-                    style={
-                      isCurrentBlog
-                        ? {
-                            color: LOGO_GREEN,
-                          }
-                        : undefined
-                    }
+                    onClick={() => setMenuOpen(false)}
+                    className="block py-3 text-lg text-leinen underline-offset-[0.35em] hover:underline"
                   >
                     {t.navigation[item.key]}
-                  </Link>
-                );
-              }
-
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => scrollToSection(item.href)}
-                  className={cn(
-                    'py-3 px-4 text-gray-700 hover:text-logo-green text-left uppercase tracking-wide rounded-lg transition-all',
-                    (isActive || isAnfrageHighlighted) && 'font-bold bg-logo-green/10',
-                  )}
-                  style={
-                    isActive || isAnfrageHighlighted
-                      ? {
-                          color: LOGO_GREEN,
-                        }
-                      : undefined
-                  }
-                >
-                  {t.navigation[item.key]}
-                </button>
-              );
-            })}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex items-center justify-between gap-4 pb-2">
+              <BookingCTA compact onClick={() => setMenuOpen(false)} />
+              <LanguageSwitcher isScrolled={false} />
+            </div>
           </nav>
         </div>
       )}
@@ -408,47 +124,29 @@ export function Header() {
   );
 }
 
-// Separate Mobile Booking Button Component - rendered outside Header
+// Buchen-Zugang am unteren Rand (nur schmale Ansichten, nachdem der Aufmacher
+// verlassen wurde). Bleibt an seinem Platz — kein Hüpfen, kein Ausweichen.
 export function MobileBookingButton() {
   const pathname = usePathname();
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 100);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Don't render on admin pages
-  if (pathname?.startsWith('/admin')) {
-    return null;
-  }
-
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    // Set hash to trigger widget expansion
-    window.location.hash = href;
-  };
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/gaeste')) return null;
 
   return (
     <div
-      className={`md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-[60] pointer-events-none transition-all duration-300 ${
-        hasScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+      className={`sm:hidden fixed inset-x-0 bottom-0 z-[60] bg-zirbe px-4 pt-3 safe-area-bottom ${
+        visible ? '' : 'invisible'
       }`}
+      style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))' }}
     >
-      <button
-        onClick={() => scrollToSection('#buchung')}
-        className="px-6 py-3 rounded-xl font-semibold text-base text-white shadow-lg transition-all pointer-events-auto"
-        style={{ backgroundColor: LOGO_GREEN }}
-      >
-        Verfügbarkeit prüfen
-      </button>
+      <BookingCTA className="w-full" />
     </div>
   );
 }

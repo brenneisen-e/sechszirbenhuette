@@ -40,6 +40,14 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Beds24-Konto wird mit der Natberger Hütte geteilt → alles auf `settings.beds24_property_id` beschränkt (serverseitig erzwungen)
 - Webhook: `src/app/api/beds24-webhook/route.ts`, Buchungsschluss: `src/app/api/booking-cutoff/route.ts` + `.github/workflows/buchungsschluss.yml`
 
+## Corporate Design (öffentliche Website)
+
+- Grundlage: Corporate Design „Zirbenzweig und Fassadenbraun“ V3 + Claude-Code-Briefing (15.10.2026)
+- Tokens/Bausteine: `src/styles/brand.css`, Tailwind-Farben `zirbe`, `leinen`, `fassadenbraun`, `fensterladenrot`, `on-red`, `rinde`, `moos`, `holz`
+- Komponenten: `src/components/brand/*` (BrandLogo, BookingCTA, FacadeBand = M1, HutChapters = M2, ZirbenMark/HostGreeting = M3, MotionToggle), Bewegungspräferenz `src/contexts/MotionContext.tsx`
+- Regeln: Schrift nie rot; Rot nur als Hintergrund des Buchen-Buttons; Braun nur im Fassadenband; keine Herzen; Northwell nur kurz, Grün/Leinen, nie über Video/Fotos; Hero-Video bleibt
+- Platzhalter bis zum Designpaket: Gill Sans Nova (lokale Gill Sans/Systemschrift), Northwell (Autography), Fugenband-Geometrie, Logo/Zweig aus `public/images/logo.svg` abgeleitet
+
 ## Wichtige Pfade
 
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`

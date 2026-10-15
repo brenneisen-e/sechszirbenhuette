@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Instagram as InstagramIcon, ExternalLink } from 'lucide-react';
 
 const INSTAGRAM_URL = 'https://www.instagram.com/sechszirbenhuette/';
-const LOGO_GREEN = '#1e5631';
+const LOGO_GREEN = '#263d35';
 
 export function Instagram() {
   return (
@@ -14,7 +14,7 @@ export function Instagram() {
           href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.6 }}
@@ -23,7 +23,7 @@ export function Instagram() {
           <div
             className="relative overflow-hidden rounded-2xl p-8 sm:p-10 md:p-12 text-white transition-transform duration-300 group-hover:scale-[1.01]"
             style={{
-              background: `linear-gradient(135deg, ${LOGO_GREEN} 0%, #2d7a4a 50%, #1a4028 100%)`,
+              background: LOGO_GREEN,
             }}
           >
             {/* Decorative circles */}

@@ -123,7 +123,7 @@ export function Bewertungen() {
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-10 shadow-sm">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center max-w-4xl mx-auto mb-12"
@@ -133,9 +133,9 @@ export function Bewertungen() {
             </div>
             <h2
               data-text-key="bewertungen_title"
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
+              className="brand-h2 text-logo-green mb-4"
               style={{
-                fontFamily: 'FeelingPassionate, cursive',
+                fontFamily: 'var(--font-sans)',
                 ...getTextStyle('bewertungen_title'),
               }}
             >
@@ -206,7 +206,7 @@ export function Bewertungen() {
                 {getCurrentReviews().map((review) => (
                   <motion.div
                     key={review.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                     className="bg-gray-50 rounded-xl p-6 lg:p-8 shadow-sm border border-gray-100"

@@ -60,7 +60,7 @@ export function Buchung() {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const link = target.closest('a[href="#buchung"]');
+      const link = target.closest('a[href="#buchung"], a[href="/#buchung"]');
       if (link) {
         setTimeout(expandWidget, 100);
       }
@@ -200,7 +200,7 @@ export function Buchung() {
       <div className="container">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-16"
@@ -210,8 +210,8 @@ export function Buchung() {
           </div>
           <h2
             data-text-key="buchung_title"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('buchung_title') }}
+            className="brand-h2 text-logo-green mb-4"
+            style={{ fontFamily: 'var(--font-sans)', ...getTextStyle('buchung_title') }}
           >
             {getText('buchung_title')}
           </h2>
@@ -226,7 +226,7 @@ export function Buchung() {
 
         {/* Booking Widget - Full Width */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mb-8"
@@ -260,7 +260,7 @@ export function Buchung() {
             <AnimatePresence>
               {isExpanded && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
+                  initial={false}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
@@ -306,7 +306,7 @@ export function Buchung() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Price Info */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
@@ -333,7 +333,7 @@ export function Buchung() {
 
           {/* Extras */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.05 }}
@@ -341,8 +341,8 @@ export function Buchung() {
             className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-24"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <PlusCircle className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
+                <PlusCircle className="w-5 h-5 text-logo-green" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900">{t.buchung.extras.title}</h3>
             </div>
@@ -370,7 +370,7 @@ export function Buchung() {
 
           {/* Included */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}

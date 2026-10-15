@@ -58,8 +58,8 @@ export function Location() {
               <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
             </div>
             <h2
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-6"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+              className="brand-h2 text-logo-green mb-6"
+              style={{ fontFamily: 'var(--font-sans)' }}
             >
               {language === 'de' ? 'Anfahrt' : 'Directions'}
             </h2>
@@ -180,7 +180,7 @@ export function Location() {
                           : 'Follow the Heidi figure (approx. 8 km mountain road)'}
                       </li>
                     </ul>
-                    <p className="mt-3 text-amber-700 text-sm font-medium flex items-center gap-2">
+                    <p className="mt-3 text-rinde text-sm font-medium flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                       <span>
                         {language === 'de'

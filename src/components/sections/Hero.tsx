@@ -1,434 +1,253 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useContentTexts } from '@/contexts/ContentTextsContext';
-import { motion } from 'framer-motion';
-import { ChevronDown, Users, Dog, Star, Mountain, TreePine, Flame, Play } from 'lucide-react';
-import Image from 'next/image';
+import { useMotion } from '@/contexts/MotionContext';
+import { BookingCTA } from '@/components/brand/BookingCTA';
 
-// Logo green color (matches the logo)
-const LOGO_GREEN = '#1e5631';
+// Aufmacher: das bestehende Hüttenvideo (Medienkategorie „hero“, Cloudflare
+// Stream/HLS) bleibt die prägende Medienfläche. Leitidee, Ort und Buchen stehen
+// auf einer ruhigen, deckenden grünen Fläche daneben (mobil darunter) — nie
+// über dem laufenden Film.
+//
+// Wiedergabe: stumm, inline, in Schleife, unabhängig vom Scrollen. Automatischer
+// Start nur ohne reduzierte Bewegung. Außerhalb des Sichtbereichs oder bei
+// verdecktem Tab pausiert der Film; eine bewusste Pause wird nie automatisch
+// aufgehoben. Poster ist ein Standbild aus genau diesem Film.
+
+type HlsLike = { destroy: () => void };
 
 export function Hero() {
   const { t } = useLanguage();
-  const { getText, getTextStyle } = useContentTexts();
-
-  const [isMounted, setIsMounted] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [videoError, setVideoError] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(true);
-  const [showPlayHint, setShowPlayHint] = useState(false);
+  const { reduced } = useMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<{ destroy: () => void } | null>(null);
+  const hlsRef = useRef<HlsLike | null>(null);
+  const userPausedRef = useRef(false);
+  const autoPausedRef = useRef(false);
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
 
-  // Mark as mounted on client to prevent hydration mismatch
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  // Videoquelle und Poster aus der Medienverwaltung
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Use preloaded URLs from LoadingScreen, or fetch as fallback
-  useEffect(() => {
-    if (!isMounted) return;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const win = window as any;
-
-    // Check for preloaded thumbnail from LoadingScreen
-    if (win.__heroThumbnailUrl) {
-      setThumbnailUrl(win.__heroThumbnailUrl as string);
-    } else {
-      fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
-        .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-        .then((data) => {
-          if (data.media?.[0]?.url) setThumbnailUrl(data.media[0].url);
-        })
-        .catch(() => {});
-    }
-
-    // Check for preloaded video URL from LoadingScreen
-    const resolveVideoUrl = (url: string) => {
-      setVideoUrl(url);
-      // Generate a thumbnail from the Stream video at 1s to match the start frame
-      // URL format: https://customer-xxx.cloudflarestream.com/{UID}/manifest/video.m3u8
-      const uidMatch = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//);
-      if (uidMatch && !thumbnailUrl) {
-        const subdomain =
-          url.match(/https:\/\/([^/]+)\//)?.[1] || 'customer-0p71nv70kmvniiuy.cloudflarestream.com';
-        setThumbnailUrl(
-          `https://${subdomain}/${uidMatch[1]}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`,
-        );
-      }
-    };
-
-    if (win.__heroVideoUrl) {
-      resolveVideoUrl(win.__heroVideoUrl as string);
-    } else {
-      fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
-        .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-        .then((data) => {
-          if (data.media?.[0]?.url) {
-            resolveVideoUrl(data.media[0].url);
-          }
-        })
-        .catch(() => {
-          setVideoError(true);
-        });
-    }
-  }, [isMounted]);
-
-  // Ensure video element is muted before anything else
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = true;
-      videoRef.current.volume = 0;
-      videoRef.current.defaultMuted = true;
-    }
-  }, []);
-
-  // Set up HLS.js or native HLS playback
-  useEffect(() => {
-    if (!videoRef.current || !videoUrl) return;
-
-    const video = videoRef.current;
     let cancelled = false;
-
-    // Force muted state before any source attachment
-    video.muted = true;
-    video.volume = 0;
-    video.defaultMuted = true;
-
-    // Clean up previous HLS instance
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-
-    const onPlaySuccess = () => {
-      if (cancelled) return;
-      setVideoLoaded(true);
-      setShowPlayHint(false);
-      setTimeout(() => setShowPlaceholder(false), 300);
-    };
-
-    const ua = navigator.userAgent;
-    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(ua);
-
-    const tryPlay = () => {
-      if (cancelled) return;
-      video.muted = true;
-      video.volume = 0;
-      video.currentTime = 1;
-
-      // On mobile, don't autoplay — always show the play button so the user starts it
-      if (isMobileDevice) {
-        setShowPlayHint(true);
-        return;
-      }
-
-      const p = video.play();
-      if (p) {
-        p.then(onPlaySuccess).catch(() => {
-          // Autoplay blocked — start from beginning on user interaction
-          if (!cancelled) setShowPlayHint(true);
-          video.currentTime = 1;
-        });
-      }
-    };
-
-    const initHls = async () => {
-      const isIOS =
-        /iPad|iPhone|iPod/.test(ua) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isSafari = !isIOS && /^((?!chrome|android).)*safari/i.test(ua);
-      const useNativeHls =
-        (isIOS || isSafari) && !!video.canPlayType('application/vnd.apple.mpegurl');
-
-      if (useNativeHls) {
-        video.src = videoUrl;
-        tryPlay();
-        return;
-      }
-
-      try {
-        const Hls = (await import('hls.js')).default;
-        if (!Hls.isSupported() || cancelled) {
-          if (!cancelled) video.src = videoUrl;
+    fetch('/api/media?category=hero&type=video', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+      .then((data) => {
+        const url = data.media?.[0]?.url;
+        if (cancelled) return;
+        if (!url) {
+          setFailed(true);
           return;
         }
+        setVideoUrl(url);
+        // Standbild aus demselben Stream-Video (Sekunde 1 = Startbild der Schleife)
+        const uid = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//)?.[1];
+        const host = url.match(/^https:\/\/([^/]+)\//)?.[1];
+        if (uid && host) {
+          setPosterUrl(
+            `https://${host}/${uid}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`,
+          );
+        }
+      })
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+  // Kein Stream-Standbild: hinterlegtes Vorschaubild verwenden
+  useEffect(() => {
+    if (posterUrl || !failed) return;
+    fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
+      .then((data) => data.media?.[0]?.url && setPosterUrl(data.media[0].url))
+      .catch(() => {});
+  }, [failed, posterUrl]);
+
+  const tryAutoplay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || reducedRef.current || userPausedRef.current) return;
+    video.muted = true;
+    video.play().catch(() => {
+      // Autoplay blockiert: Poster bleibt, Start über den Schalter
+    });
+  }, []);
+
+  // HLS anbinden (Safari/iOS nativ, sonst hls.js)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoUrl) return;
+    let cancelled = false;
+    video.muted = true;
+    video.defaultMuted = true;
+
+    const onReady = () => {
+      if (cancelled) return;
+      setReady(true);
+      if (video.currentTime < 1) video.currentTime = 1;
+      tryAutoplay();
+    };
+
+    const attach = async () => {
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoUrl;
+        video.addEventListener('loadedmetadata', onReady, { once: true });
+        return;
+      }
+      try {
+        const Hls = (await import('hls.js')).default;
+        if (cancelled) return;
+        if (!Hls.isSupported()) {
+          video.src = videoUrl;
+          video.addEventListener('loadedmetadata', onReady, { once: true });
+          return;
+        }
+        const small = window.matchMedia('(max-width: 767px)').matches;
         const hls = new Hls({
           enableWorker: false,
-          maxBufferLength: isMobile ? 15 : 30,
-          maxMaxBufferLength: isMobile ? 30 : 60,
-          startLevel: isMobile ? 0 : -1,
+          maxBufferLength: small ? 15 : 30,
+          maxMaxBufferLength: small ? 30 : 60,
+          startLevel: small ? 0 : -1,
         });
-
-        hls.on(
-          Hls.Events.ERROR,
-          (_event: string, data: { fatal: boolean; type: string; details: string }) => {
-            if (data.fatal) {
-              if (data.type === 'networkError') {
-                hls.startLoad();
-              } else {
-                hls.destroy();
-                hlsRef.current = null;
-                if (!cancelled) setVideoError(true);
-              }
-            }
-          },
-        );
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          tryPlay();
+        hls.on(Hls.Events.ERROR, (_e: string, data: { fatal: boolean; type: string }) => {
+          if (!data.fatal) return;
+          if (data.type === 'networkError') {
+            hls.startLoad();
+          } else {
+            hls.destroy();
+            hlsRef.current = null;
+            if (!cancelled) setFailed(true);
+          }
         });
-
+        hls.on(Hls.Events.MANIFEST_PARSED, onReady);
         hls.loadSource(videoUrl);
         hls.attachMedia(video);
         hlsRef.current = hls;
       } catch {
-        if (!cancelled) video.src = videoUrl;
+        if (!cancelled) setFailed(true);
       }
     };
-
-    initHls();
+    attach();
 
     return () => {
       cancelled = true;
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
+      video.removeEventListener('loadedmetadata', onReady);
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, [videoUrl, tryAutoplay]);
+
+  // Außerhalb des Sichtbereichs und bei verdecktem Tab pausieren
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !ready) return;
+    const pauseAuto = () => {
+      if (!video.paused) {
+        autoPausedRef.current = true;
+        video.pause();
       }
     };
-  }, [videoUrl]);
+    const resumeAuto = () => {
+      if (!autoPausedRef.current || userPausedRef.current) return;
+      autoPausedRef.current = false;
+      video.play().catch(() => {});
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) resumeAuto();
+        else pauseAuto();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(video);
+    const onVisibility = () => (document.hidden ? pauseAuto() : resumeAuto());
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [ready]);
 
-  // Also try play when video reports it can play (belt and suspenders)
-  const handleVideoCanPlay = () => {
-    if (videoRef.current && !videoLoaded) {
-      const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      // On mobile, don't autoplay — the user starts playback via the play button
-      if (isMobileDevice) return;
-      videoRef.current.muted = true;
-      videoRef.current.volume = 0;
-      videoRef.current
-        .play()
-        .then(() => {
-          setVideoLoaded(true);
-          setTimeout(() => setShowPlaceholder(false), 300);
-        })
-        .catch(() => {});
+  // Wechsel auf reduzierte Bewegung pausiert einen automatisch laufenden Film
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !ready) return;
+    if (reduced && !video.paused && !userPausedRef.current) {
+      video.pause();
+      autoPausedRef.current = false;
+    }
+  }, [reduced, ready]);
+
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      userPausedRef.current = false;
+      autoPausedRef.current = false;
+      video.muted = true;
+      video.play().catch(() => setFailed(true));
+    } else {
+      userPausedRef.current = true;
+      video.pause();
     }
   };
-
-  // Handle video error - show fallback gradient
-  const handleVideoError = () => {
-    setVideoError(true);
-    setShowPlaceholder(true);
-  };
-
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const scrollToGalleryCategory = (category: string) => {
-    const galerie = document.querySelector('#galerie');
-    if (galerie) {
-      galerie.scrollIntoView({ behavior: 'smooth' });
-      // Wait for scroll, then click the category button
-      setTimeout(() => {
-        const categoryButton = document.querySelector(
-          `#galerie button[data-category="${category}"]`,
-        ) as HTMLButtonElement;
-        if (categoryButton) {
-          categoryButton.click();
-        }
-      }, 500);
-    }
-  };
-
-  const features = [
-    {
-      icon: Mountain,
-      label: t.features.altitude.title,
-      onClick: () => scrollToSection('#heidiAlm'),
-    },
-    {
-      icon: TreePine,
-      label: t.features.secluded.title,
-      onClick: () => scrollToGalleryCategory('aussen'),
-    },
-    { icon: Flame, label: t.features.sauna.title, onClick: () => scrollToGalleryCategory('bad') },
-    {
-      icon: Users,
-      label: t.features.guests.title,
-      onClick: () => scrollToGalleryCategory('schlafen'),
-    },
-    { icon: Dog, label: t.features.dogs.title, onClick: () => scrollToSection('#dog-trips') },
-    { icon: Star, label: t.features.rating.title, onClick: () => scrollToSection('#bewertungen') },
-  ];
 
   return (
-    <section id="hero" className="relative h-screen w-full overflow-hidden">
-      {/* Video/Image Background */}
-      <div className="absolute inset-0 bg-gray-900">
-        {/* Placeholder layer - shows thumbnail or gradient while video loads */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-500 ${!showPlaceholder || videoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          style={{ zIndex: !showPlaceholder || videoLoaded ? -1 : 10 }}
-        >
-          {thumbnailUrl && !videoError ? (
-            <Image
-              src={thumbnailUrl}
-              alt="Sechszirbenhütte"
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-green-900 via-gray-800 to-gray-900" />
+    <section id="hero" aria-labelledby="hero-title" className="bg-zirbe">
+      <div className="lg:grid lg:min-h-[max(560px,calc(100svh-var(--header-height)))] lg:grid-cols-12">
+        {/* Film: großzügig, mobil oben */}
+        <div className="relative h-[46svh] min-h-[260px] overflow-hidden bg-zirbe lg:order-2 lg:col-span-7 lg:h-auto">
+          <video
+            ref={videoRef}
+            id="hero-video"
+            muted
+            loop
+            playsInline
+            disablePictureInPicture
+            preload="metadata"
+            poster={posterUrl || undefined}
+            aria-label={t.brand.videoLabel}
+            className="absolute inset-0 h-full w-full object-cover object-[50%_60%]"
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onError={() => setFailed(true)}
+          />
+          {(ready || posterUrl) && !failed && (
+            <button
+              type="button"
+              onClick={toggle}
+              disabled={!ready}
+              aria-pressed={!playing}
+              className="absolute bottom-4 left-4 inline-flex min-h-[44px] items-center gap-2 rounded-[4px] bg-zirbe px-4 text-[0.9375rem] text-leinen hover:bg-[#2f4a41] disabled:opacity-70 md:bottom-6 md:left-6"
+            >
+              {playing ? <Pause size={18} aria-hidden /> : <Play size={18} aria-hidden />}
+              {playing ? t.brand.videoPause : t.brand.videoPlay}
+            </button>
           )}
         </div>
 
-        {/* Video layer - always in DOM with autoPlay muted for browser autoplay policy */}
-        <video
-          ref={videoRef}
-          id="hero-video"
-          muted
-          loop
-          playsInline
-          disablePictureInPicture
-          preload="auto"
-          poster={thumbnailUrl || undefined}
-          className={`h-full w-full object-cover ${videoError ? 'hidden' : ''}`}
-          onCanPlay={handleVideoCanPlay}
-          onError={handleVideoError}
-        />
-        {/* Play hint - shown when autoplay is blocked */}
-        {showPlayHint && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.95, 1.05, 0.95] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
-            onClick={() => {
-              if (videoRef.current) {
-                videoRef.current.muted = true;
-                videoRef.current.currentTime = 1;
-                videoRef.current
-                  .play()
-                  .then(() => {
-                    setVideoLoaded(true);
-                    setShowPlayHint(false);
-                    setTimeout(() => setShowPlaceholder(false), 300);
-                  })
-                  .catch(() => {});
-              }
-            }}
-          >
-            <div
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: LOGO_GREEN }}
-            >
-              <Play className="w-10 h-10 sm:w-12 sm:h-12 text-white fill-white ml-1" />
+        {/* Ruhige, deckende grüne Fläche für Leitidee und Buchen */}
+        <div className="on-zirbe flex flex-col justify-center bg-zirbe text-leinen lg:order-1 lg:col-span-5">
+          <div className="px-6 py-10 sm:px-12 md:py-14 lg:py-16 xl:pl-[max(3rem,calc((100vw-1280px)/2))] xl:pr-16">
+            <p className="brand-label text-holz">{t.brand.place}</p>
+            <h1 id="hero-title" className="mt-6">
+              <span className="brand-h1 block text-leinen">{t.brand.claim}</span>
+              <span className="brand-hand mt-2 block text-leinen">{t.brand.claimHand}</span>
+            </h1>
+            <p className="mt-6 max-w-[30rem] text-leinen">{t.brand.heroText}</p>
+            <div className="mt-8">
+              <BookingCTA />
             </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Content Container - Full height with flex column */}
-      <div className="relative z-10 flex flex-col h-full text-white text-center px-3 sm:px-4 md:px-6 lg:px-8 pt-5">
-        {/* Upper Third - Headline centered */}
-        <div className="flex-1 flex items-center justify-center pt-20 sm:pt-24 md:pt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="w-full"
-          >
-            <motion.p
-              data-text-key="hero_title"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-[clamp(2.5rem,7vw,5rem)] leading-tight text-white drop-shadow-lg px-2"
-              style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('hero_title') }}
-            >
-              {getText('hero_title')}
-            </motion.p>
-            <motion.p
-              data-text-key="hero_description"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="text-[clamp(0.8rem,2vw,1.15rem)] leading-relaxed text-white/85 drop-shadow-sm mt-4 md:mt-5 mx-auto px-2 max-w-2xl"
-              style={getTextStyle('hero_description')}
-            >
-              {getText('hero_description')}
-            </motion.p>
-          </motion.div>
-        </div>
-
-        {/* Middle Third - Flexible space */}
-        <div className="flex-[0.5] sm:flex-1" />
-
-        {/* Lower Third - Feature icons */}
-        <div className="flex-1 flex flex-col items-center justify-center pb-20 sm:pb-16">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: videoLoaded ? 0 : 1.0 }}
-            className="grid grid-cols-2 min-[400px]:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6 px-2"
-          >
-            {features.map((feature, index) => (
-              <motion.button
-                key={index}
-                onClick={feature.onClick}
-                initial={{ opacity: 0, y: 30, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  duration: videoLoaded ? 0.4 : 0.8,
-                  delay: videoLoaded ? index * 0.05 : 1.2 + index * 0.15,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex flex-col items-center group cursor-pointer"
-              >
-                <motion.div
-                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full backdrop-blur-sm flex items-center justify-center mb-1.5 sm:mb-2"
-                  style={{ backgroundColor: LOGO_GREEN }}
-                  whileHover={{ scale: 1.15, rotate: 5 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                >
-                  <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
-                </motion.div>
-                <span className="text-[clamp(0.625rem,1.5vw,0.875rem)] font-semibold text-white drop-shadow-sm leading-tight">
-                  {feature.label}
-                </span>
-              </motion.button>
-            ))}
-          </motion.div>
+          </div>
         </div>
       </div>
-
-      {/* Scroll Indicator */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        onClick={() => scrollToSection('#bewertungen')}
-        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white animate-bounce"
-        aria-label="Scroll down"
-      >
-        <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10" />
-      </motion.button>
     </section>
   );
 }

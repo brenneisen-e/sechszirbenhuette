@@ -23,8 +23,16 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // Logo green - the main brand color
-        'logo-green': '#1e5631',
+        // Markenfarben (Corporate Design V3, src/styles/brand.css)
+        'logo-green': '#263d35',
+        zirbe: '#263d35',
+        leinen: '#f2efe6',
+        fassadenbraun: '#4a3328',
+        fensterladenrot: '#e94d3d',
+        'on-red': '#141a16',
+        rinde: '#202824',
+        moos: '#8d987e',
+        holz: '#d7c3a2',
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -53,7 +61,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)'],
+        hand: ['var(--font-hand)'],
         serif: ['Georgia', 'serif'],
       },
       // Fluid spacing scale

@@ -1,0 +1,418 @@
+/*
+ * Sechszirbenhütte — Corporate Design „Zirbenzweig und Fassadenbraun“, V3.
+ *
+ * Farben, Schriften und Bewegung der öffentlichen Website. Rollen siehe
+ * Briefing: Grün trägt, Leinen beruhigt, Braun nur im Fassadenband, Rot nur
+ * als Hintergrund des Buchen-Buttons oder einer echten Hinweisbühne.
+ * Schrift ist niemals rot.
+ *
+ * PLATZHALTER bis das Designpaket vorliegt:
+ * - Gill Sans Nova Medium: Originaldatei fehlt. Bis dahin nutzt die Seite eine
+ *   lokal installierte Gill Sans (macOS/iOS, Office) und sonst die
+ *   Systemschrift. Originaldatei als public/fonts/brand/GillSansNova-Medium.woff2
+ *   ablegen und die url()-Zeile unten aktivieren.
+ * - Northwell Alt: Originaldatei fehlt, vorläufig „Autography“. Original als
+ *   public/fonts/brand/Northwell-Alt.woff ablegen und url() aktivieren.
+ */
+
+@font-face {
+  font-family: 'Brand Gill';
+  /* src: url('/fonts/brand/GillSansNova-Medium.woff2') format('woff2'); */
+  src:
+    local('Gill Sans Nova Medium'), local('GillSansNova-Medium'), local('Gill Sans Nova'),
+    local('Gill Sans'), local('GillSans'), local('Gill Sans MT');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Brand Northwell';
+  /* src: url('/fonts/brand/Northwell-Alt.woff') format('woff'); */
+  src: url('/fonts/Autography.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-zirbe: #263d35;
+  --color-leinen: #f2efe6;
+  --color-fassadenbraun: #4a3328;
+  --color-fensterladenrot: #e94d3d;
+  --color-on-red: #141a16;
+  --color-rinde: #202824;
+  --color-moos: #8d987e;
+  --color-holz: #d7c3a2;
+  --color-weiss: #ffffff;
+
+  --font-sans:
+    'Brand Gill', 'Gill Sans Nova', 'Gill Sans', 'Gill Sans MT', Calibri, 'Segoe UI', system-ui,
+    -apple-system, sans-serif;
+  --font-hand: 'Brand Northwell', cursive;
+
+  --fs-h1: clamp(2.5rem, 1.6rem + 2.8vw, 4rem);
+  --fs-h2: clamp(2rem, 1.55rem + 1.4vw, 2.75rem);
+  --fs-body: 1.125rem;
+  --fs-note: 0.9375rem;
+  --fs-hand: clamp(3rem, 2.2rem + 2.6vw, 5rem);
+
+  --space-gutter: 1.5rem;
+  /* Vollzeichen 240 × 74 px plus Schutzraum 24 px oben und unten */
+  --header-height: 122px;
+
+  --motion-fast: 180ms;
+  --motion-reveal: 480ms;
+  --motion-facade: 720ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Sehr schmale Geräte (320 px): Logo-Mindestbreite und Menüschalter passen
+   nur mit kleinerem Außenabstand nebeneinander */
+@media (max-width: 359px) {
+  :root {
+    --space-gutter: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --space-gutter: 3rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Grundlage der öffentlichen Seiten
+ * ------------------------------------------------------------------------ */
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+.brand-page {
+  background: var(--color-leinen);
+  color: var(--color-rinde);
+  font-size: var(--fs-body);
+  line-height: 1.556;
+}
+
+.brand-container {
+  width: 100%;
+  max-width: calc(1280px + 2 * var(--space-gutter));
+  margin-inline: auto;
+  padding-inline: max(var(--space-gutter), env(safe-area-inset-left, 0px))
+    max(var(--space-gutter), env(safe-area-inset-right, 0px));
+}
+
+.brand-h1 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-h1);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.brand-h2 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-h2);
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.brand-label {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Northwell: groß, sparsam, nur Grün auf Leinen oder Leinen auf Grün. Die
+   großzügige Zeilenhöhe verhindert, dass Schwünge abgeschnitten werden. */
+.brand-hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: var(--fs-hand);
+  line-height: 1.4;
+  letter-spacing: 0;
+  overflow: visible;
+}
+
+/* Links: dunkelgrün und unterstrichen; auf Grün hell und unterstrichen */
+.brand-link {
+  color: var(--color-zirbe);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+.brand-link:hover {
+  text-decoration-thickness: 2px;
+}
+.on-zirbe .brand-link,
+.brand-link--light {
+  color: var(--color-leinen);
+}
+
+/* Sichtbarer Tastaturfokus in Leinen und Grün */
+.brand-page :focus-visible,
+.brand-header :focus-visible,
+.brand-footer :focus-visible {
+  outline: 3px solid var(--color-zirbe);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--color-leinen);
+}
+.on-zirbe :focus-visible,
+.brand-header :focus-visible,
+.brand-footer :focus-visible {
+  outline-color: var(--color-leinen);
+  box-shadow: 0 0 0 6px var(--color-zirbe);
+}
+
+/* ---------------------------------------------------------------------------
+ * Buchen-Button: Rot als Hintergrund, dunkle Schrift, keine Symbole
+ * ------------------------------------------------------------------------ */
+
+.brand-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  padding: 0 2rem;
+  border-radius: 4px;
+  background: var(--color-fensterladenrot);
+  color: var(--color-on-red);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 1.375rem;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color var(--motion-fast) ease;
+}
+.brand-cta:hover {
+  background: #f06656;
+  color: var(--color-on-red);
+}
+.brand-cta--compact {
+  min-height: 48px;
+  padding: 0 1.25rem;
+  font-size: 1.125rem;
+}
+
+/* Sekundäre Handlung: dunkelgrün auf Leinen oder hell auf Grün */
+.brand-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 4px;
+  border: 2px solid var(--color-zirbe);
+  color: var(--color-zirbe);
+  background: transparent;
+  font-weight: 500;
+  transition: background-color var(--motion-fast) ease;
+}
+.brand-secondary:hover {
+  background: rgba(38, 61, 53, 0.08);
+}
+.on-zirbe .brand-secondary {
+  border-color: var(--color-leinen);
+  color: var(--color-leinen);
+}
+.on-zirbe .brand-secondary:hover {
+  background: rgba(242, 239, 230, 0.12);
+}
+
+/* ---------------------------------------------------------------------------
+ * Bestandsbereiche der Startseite an die Marke angleichen
+ * ------------------------------------------------------------------------ */
+
+.brand-page section .rounded-lg,
+.brand-page section .rounded-xl,
+.brand-page section .rounded-2xl,
+.brand-page section .rounded-3xl {
+  border-radius: 4px;
+}
+.brand-page .bg-stone-50,
+.brand-page .bg-gray-50 {
+  background-color: var(--color-leinen);
+}
+.brand-page section .shadow-sm,
+.brand-page section .shadow-md,
+.brand-page section .shadow-lg,
+.brand-page section .shadow-xl {
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * M1 — Fassadenband. Ausgangszustand im Stylesheet: fertig gezeichnet.
+ * Die Fugen werden entlang ihres Verlaufs von links nach rechts freigelegt
+ * (clip-path). stroke-dasharray mit pathLength scheitert in Chromium an
+ * vector-effect: non-scaling-stroke, das die Linienstärke konstant hält.
+ * Die Animation wird nur vorbereitet (is-armed), solange das Band noch nicht
+ * sichtbar ist, und läuft einmal (is-drawn).
+ * ------------------------------------------------------------------------ */
+
+.facade-gap {
+  background: var(--color-leinen);
+  padding-block: 1.5rem;
+}
+@media (min-width: 768px) {
+  .facade-gap {
+    padding-block: 2rem;
+  }
+}
+
+.facade-band {
+  display: block;
+  width: 100%;
+  height: 72px;
+  background: var(--color-fassadenbraun);
+}
+@media (min-width: 768px) {
+  .facade-band {
+    height: 96px;
+  }
+}
+.facade-band path {
+  fill: none;
+  stroke: var(--color-leinen);
+  stroke-width: 2px;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+}
+.facade-band.is-armed path {
+  clip-path: inset(-12px 100% -12px 0);
+}
+.facade-band.is-armed.is-drawn path {
+  clip-path: inset(-12px 0 -12px 0);
+  transition: clip-path 480ms var(--motion-ease);
+}
+.facade-band.is-armed.is-drawn path:nth-child(2) {
+  transition-delay: 40ms;
+}
+.facade-band.is-armed.is-drawn path:nth-child(3) {
+  transition-delay: 80ms;
+}
+.facade-band.is-armed.is-drawn path:nth-child(4) {
+  transition-delay: 120ms;
+}
+@media (min-width: 768px) {
+  .facade-band.is-armed.is-drawn path {
+    transition-duration: var(--motion-facade);
+  }
+  .facade-band.is-armed.is-drawn path:nth-child(2) {
+    transition-delay: 70ms;
+  }
+  .facade-band.is-armed.is-drawn path:nth-child(3) {
+    transition-delay: 140ms;
+  }
+  .facade-band.is-armed.is-drawn path:nth-child(4) {
+    transition-delay: 210ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * M2 — Hüttenkapitel. Grundaufbau: drei Bild-Text-Blöcke untereinander.
+ * Erweiterung (is-enhanced, nur Desktop ≥1024×700 mit Bewegung): Bild links
+ * sticky, Text rechts, Überblendung 180 ms.
+ * ------------------------------------------------------------------------ */
+
+.chapters-sticky {
+  display: none;
+}
+.chapters.is-enhanced .chapters-sticky {
+  display: block;
+}
+.chapters.is-enhanced .chapter-figure {
+  display: none;
+}
+.chapters-sticky-frame {
+  position: sticky;
+  top: calc(var(--header-height) + 2rem);
+  height: min(60vh, 560px);
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-zirbe);
+}
+.chapters-sticky-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--motion-fast) linear;
+}
+.chapters-sticky-frame img.is-active {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * M3 — Zirbenzweig beim Gastgebergruß. Reservierte Fläche, kein Layoutsprung.
+ * ------------------------------------------------------------------------ */
+
+.zirben-reveal.is-armed {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.zirben-reveal.is-armed.is-shown {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-reveal) var(--motion-ease),
+    transform var(--motion-reveal) var(--motion-ease);
+}
+@media (max-width: 767px) {
+  .zirben-reveal.is-armed {
+    transform: none;
+  }
+  .zirben-reveal.is-armed.is-shown {
+    transition: opacity 220ms linear;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduzierte Bewegung: eigener Zustand, Endzustände sofort.
+ * Gilt für die Systemeinstellung und den Schalter „Bewegung reduzieren“
+ * (html[data-motion="reduce"]).
+ * ------------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .facade-band path,
+  .facade-band.is-armed path {
+    clip-path: none !important;
+    transition: none !important;
+  }
+  .zirben-reveal,
+  .zirben-reveal.is-armed {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .chapters-sticky-frame img {
+    transition: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+html[data-motion='reduce'] .facade-band path,
+html[data-motion='reduce'] .facade-band.is-armed path {
+  clip-path: none !important;
+  transition: none !important;
+}
+html[data-motion='reduce'] .zirben-reveal,
+html[data-motion='reduce'] .zirben-reveal.is-armed {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+html[data-motion='reduce'] .chapters-sticky-frame img {
+  transition: none !important;
+}
+html[data-motion='reduce'] {
+  scroll-behavior: auto;
+}

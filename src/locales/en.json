@@ -20,7 +20,7 @@
     "welcome": "Welcome to the Sechszirbenhütte",
     "title": "to the Sechszirbenhütte",
     "subtitle": "Premium mountain retreat at 1,700m in the Carinthian Nockberge",
-    "description": "Discover the Sechszirbenhütte, your dream accommodation at 1,700\u00a0m altitude in the heart of the Nockberge mountains in Carinthia, Austria. Located on the picturesque southern side of the Alps in Falkertsee, our cabin offers a year-round holiday paradise for families and nature lovers.",
+    "description": "Discover the Sechszirbenhütte, your dream accommodation at 1,700 m altitude in the heart of the Nockberge mountains in Carinthia, Austria. Located on the picturesque southern side of the Alps in Falkertsee, our cabin offers a year-round holiday paradise for families and nature lovers.",
     "cta_book": "Book Now",
     "cta_explore": "Explore the Cabin"
   },
@@ -464,5 +464,63 @@
     "bannerTitle": "Discover more in our blog",
     "bannerDescription": "Detailed travel tips, hiking routes and the most beautiful destinations in the Nockberge and Carinthia.",
     "ctaButton": "Visit Blog"
+  },
+  "brand": {
+    "place": "Falkert / Carinthia",
+    "claim": "Up here.",
+    "claimHand": "Together.",
+    "heroText": "A mountain hut more than 250 years old, standing alone at 1,700 m – right by the Nockberge National Park, 800 m from Lake Falkert.",
+    "book": "Book",
+    "videoPause": "Pause video",
+    "videoPlay": "Play video",
+    "videoLabel": "Film about the Sechszirbenhütte at Falkert",
+    "factsTitle": "The hut at a glance",
+    "facts": [
+      {
+        "value": "1,700 m",
+        "label": "altitude, secluded"
+      },
+      {
+        "value": "2–5",
+        "label": "guests"
+      },
+      {
+        "value": "80 m²",
+        "label": "living space"
+      },
+      {
+        "value": "Sauna",
+        "label": "private annex with relaxation room"
+      },
+      {
+        "value": "Dogs",
+        "label": "are welcome"
+      }
+    ],
+    "chaptersLabel": "The hut",
+    "chaptersTitle": "Mountains outside. Your own place inside.",
+    "chapters": [
+      {
+        "title": "Outside",
+        "text": "The hut stands on its own among Swiss stone pines and larches, right by the Nockberge National Park. Hike the Nockberge in summer, ski at the Heidi Alm resort in winter.",
+        "alt": "The Sechszirbenhütte in summer with balcony and woodpile among spruce trees"
+      },
+      {
+        "title": "Inside",
+        "text": "Old wood, a wood-pellet stove and a fully equipped kitchen. Two bedrooms with double beds and a living area with an extra sleeping place for two to five people.",
+        "alt": "Wooden parlour with staircase, painted farmhouse cupboard and a view into the kitchen"
+      },
+      {
+        "title": "Time for you",
+        "text": "The private sauna annex with Finnish sauna, relaxation room and rain shower is yours alone. In the morning, coffee waits on the wraparound balcony.",
+        "alt": "Coffee cup in the snow on the balcony railing"
+      }
+    ],
+    "greetingLabel": "Your hosts",
+    "greetingHand": "Welcome to our hut.",
+    "greetingText": "We have set up the Sechszirbenhütte so you can arrive up here and have time for each other. If you have questions about getting here or about the hut, we are happy to help.",
+    "reduceMotion": "Reduce motion",
+    "motionReduced": "Motion reduced",
+    "motionSystem": "Motion reduced (system setting)"
   }
 }

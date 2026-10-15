@@ -245,7 +245,7 @@ function DogTripsCarouselDynamic({
         <div className="flex flex-col items-center text-center mb-8">
           <h3
             className="text-2xl sm:text-3xl md:text-4xl text-logo-green"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'var(--font-sans)' }}
           >
             {tab.sectionTitle}
           </h3>
@@ -370,7 +370,7 @@ function KidsTripsSectionDynamic({ tab }: { tab: TabData }) {
         <div className="flex flex-col items-center text-center mb-8">
           <h3
             className="text-2xl sm:text-3xl md:text-4xl text-logo-green"
-            style={{ fontFamily: 'FeelingPassionate, cursive' }}
+            style={{ fontFamily: 'var(--font-sans)' }}
           >
             {tab.sectionTitle}
           </h3>
@@ -749,7 +749,7 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <>
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-12 pb-20">
           <div className="container flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-logo-green" />
             <span className="ml-3 text-gray-600">Wird geladen...</span>
@@ -762,7 +762,7 @@ export default function BlogPostPage() {
   if (error || !post) {
     return (
       <>
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-12 pb-20">
           <div className="container text-center py-20">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Beitrag nicht gefunden</h1>
             <p className="text-gray-600 mb-8">
@@ -788,7 +788,7 @@ export default function BlogPostPage() {
   if (isArticleLayout) {
     return (
       <>
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-12 pb-20">
           <div className="container">
             {/* Back Link */}
             <Link
@@ -820,7 +820,7 @@ export default function BlogPostPage() {
                 {/* Title */}
                 <h1
                   className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
-                  style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                  style={{ fontFamily: 'var(--font-sans)' }}
                 >
                   {post.title}
                 </h1>
@@ -909,7 +909,7 @@ export default function BlogPostPage() {
   // Standard blog post layout
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-28 pb-20">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 pt-12 pb-20">
         <article className="container max-w-4xl">
           {/* Back Link */}
           <Link
@@ -946,7 +946,7 @@ export default function BlogPostPage() {
           >
             <h1
               className="text-3xl sm:text-4xl md:text-5xl text-logo-green mb-4"
-              style={{ fontFamily: 'FeelingPassionate, cursive' }}
+              style={{ fontFamily: 'var(--font-sans)' }}
             >
               {post.title}
             </h1>
@@ -1098,14 +1098,14 @@ export default function BlogPostPage() {
           font-weight: bold;
           margin-bottom: 0.75rem;
           margin-top: 2rem;
-          color: #1e5631;
+          color: #263d35;
         }
         .prose h3 {
           font-size: 1.25rem;
           font-weight: 600;
           margin-bottom: 0.5rem;
           margin-top: 1.5rem;
-          color: #1e5631;
+          color: #263d35;
         }
         .prose p {
           margin-bottom: 1rem;
@@ -1125,7 +1125,7 @@ export default function BlogPostPage() {
           margin-bottom: 0.25rem;
         }
         .prose blockquote {
-          border-left: 4px solid #1e5631;
+          border-left: 4px solid #263d35;
           padding-left: 1rem;
           font-style: italic;
           color: #6b7280;
@@ -1136,7 +1136,7 @@ export default function BlogPostPage() {
           margin: 2rem 0;
         }
         .prose a {
-          color: #1e5631;
+          color: #263d35;
           text-decoration: underline;
         }
         .prose a:hover {

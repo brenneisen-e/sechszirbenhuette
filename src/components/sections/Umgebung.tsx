@@ -15,7 +15,7 @@ export function Umgebung() {
       <div className="container">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-4xl mx-auto mb-12"
@@ -25,8 +25,8 @@ export function Umgebung() {
           </div>
           <h2
             data-text-key="umgebung_title"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-logo-green mb-4"
-            style={{ fontFamily: 'FeelingPassionate, cursive', ...getTextStyle('umgebung_title') }}
+            className="brand-h2 text-logo-green mb-4"
+            style={{ fontFamily: 'var(--font-sans)', ...getTextStyle('umgebung_title') }}
           >
             {getText('umgebung_title')}
           </h2>
@@ -42,13 +42,13 @@ export function Umgebung() {
 
         {/* Blog Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
         >
           <Link href="/blog" className="block group">
-            <div className="bg-gradient-to-br from-logo-green to-logo-green/80 rounded-3xl p-8 md:p-12 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+            <div className="bg-logo-green rounded-3xl p-8 md:p-12  transition-all duration-300 overflow-hidden relative">
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-4 right-4">

@@ -78,7 +78,7 @@ export function BlogPostsGrid({ posts, fallbackImages = [] }: BlogPostsGridProps
             <div className="p-5 flex flex-col flex-1">
               <h3
                 className="text-xl text-logo-green mb-2 group-hover:text-logo-green/80 transition-colors"
-                style={{ fontFamily: 'FeelingPassionate, cursive' }}
+                style={{ fontFamily: 'var(--font-sans)' }}
               >
                 {post.title}
               </h3>

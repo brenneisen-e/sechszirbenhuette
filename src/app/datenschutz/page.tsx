@@ -8,7 +8,7 @@ export default function DatenschutzPage() {
   const isDE = language === 'de';
 
   return (
-    <div className="pt-24 pb-16">
+    <div className="pt-12 pb-16">
       <div className="container max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
           {isDE ? 'Datenschutzerklärung' : 'Privacy Policy'}

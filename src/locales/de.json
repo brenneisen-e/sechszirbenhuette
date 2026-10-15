@@ -20,7 +20,7 @@
     "welcome": "Herzlich Willkommen in der Sechszirbenhütte",
     "title": "in der Sechszirbenhütte",
     "subtitle": "Ihr Hüttenurlaub am Falkert",
-    "description": "Entdecken Sie die Sechszirbenhütte, Ihre traumhafte Unterkunft auf 1.700\u00a0m Höhe im Herzen der Nockberge in Kärnten, Österreich. Gelegen an der malerischen Alpensüdseite in Falkertsee, bietet unsere Hütte ein ganzjähriges Urlaubsparadies für Familien und Naturliebhaber.",
+    "description": "Entdecken Sie die Sechszirbenhütte, Ihre traumhafte Unterkunft auf 1.700 m Höhe im Herzen der Nockberge in Kärnten, Österreich. Gelegen an der malerischen Alpensüdseite in Falkertsee, bietet unsere Hütte ein ganzjähriges Urlaubsparadies für Familien und Naturliebhaber.",
     "cta_book": "Jetzt anfragen & buchen",
     "cta_explore": "Ferienhaus entdecken"
   },
@@ -463,5 +463,63 @@
     "bannerTitle": "Entdecken Sie mehr in unserem Blog",
     "bannerDescription": "Ausführliche Reisetipps, Wanderrouten und die schönsten Ausflugsziele in den Nockbergen und Kärnten.",
     "ctaButton": "Zum Blog"
+  },
+  "brand": {
+    "place": "Falkert / Kärnten",
+    "claim": "Oben sein.",
+    "claimHand": "Bei euch sein.",
+    "heroText": "Eine über 250 Jahre alte Berghütte in Alleinlage auf 1.700 m – direkt am Nationalpark Nockberge, 800 m vom Falkertsee.",
+    "book": "Buchen",
+    "videoPause": "Video pausieren",
+    "videoPlay": "Video abspielen",
+    "videoLabel": "Film über die Sechszirbenhütte am Falkert",
+    "factsTitle": "Die Hütte in Kürze",
+    "facts": [
+      {
+        "value": "1.700 m",
+        "label": "Höhe, in Alleinlage"
+      },
+      {
+        "value": "2–5",
+        "label": "Personen"
+      },
+      {
+        "value": "80 m²",
+        "label": "Wohnfläche"
+      },
+      {
+        "value": "Sauna",
+        "label": "Privater Anbau mit Ruheraum"
+      },
+      {
+        "value": "Hunde",
+        "label": "sind willkommen"
+      }
+    ],
+    "chaptersLabel": "Die Hütte",
+    "chaptersTitle": "Draußen die Berge. Drinnen bei euch.",
+    "chapters": [
+      {
+        "title": "Draußen",
+        "text": "Die Hütte steht allein zwischen Zirben und Lärchen, direkt am Nationalpark Nockberge. Im Sommer wandert ihr in den Nockbergen, im Winter fahrt ihr im Skigebiet der Heidi Alm.",
+        "alt": "Die Sechszirbenhütte im Sommer mit Balkon und Holzstapel zwischen Fichten"
+      },
+      {
+        "title": "Drinnen",
+        "text": "Altes Holz, ein Holz-Pelletofen und eine voll ausgestattete Küche. Zwei Schlafzimmer mit Doppelbett und ein Wohnbereich mit Schlafmöglichkeit bieten Platz für zwei bis fünf Personen.",
+        "alt": "Holzstube mit Treppe, bemaltem Bauernschrank und Blick in die Küche"
+      },
+      {
+        "title": "Zeit für euch",
+        "text": "Der private Sauna-Anbau mit finnischer Sauna, Ruheraum und Regendusche gehört nur euch. Morgens wartet der Kaffee auf dem umlaufenden Balkon.",
+        "alt": "Kaffeetasse im Schnee auf dem Balkongeländer"
+      }
+    ],
+    "greetingLabel": "Eure Gastgeber",
+    "greetingHand": "Willkommen bei uns.",
+    "greetingText": "Wir haben die Sechszirbenhütte so hergerichtet, dass ihr oben ankommt und Zeit füreinander habt. Bei Fragen zur Anreise oder zur Hütte sind wir für euch da.",
+    "reduceMotion": "Bewegung reduzieren",
+    "motionReduced": "Bewegung reduziert",
+    "motionSystem": "Bewegung reduziert (Systemeinstellung)"
   }
 }

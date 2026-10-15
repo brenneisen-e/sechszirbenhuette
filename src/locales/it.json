@@ -20,7 +20,7 @@
     "welcome": "Benvenuti",
     "title": "alla Sechszirbenhütte",
     "subtitle": "Rifugio premium a 1.700m nelle Nockberge della Carinzia",
-    "description": "Scoprite la Sechszirbenhütte, il vostro alloggio da sogno a 1.700\u00a0m di altitudine nel cuore delle montagne Nockberge in Carinzia, Austria. Situata sul pittoresco versante meridionale delle Alpi a Falkertsee, la nostra baita offre un paradiso vacanziero per famiglie e amanti della natura tutto l'anno.",
+    "description": "Scoprite la Sechszirbenhütte, il vostro alloggio da sogno a 1.700 m di altitudine nel cuore delle montagne Nockberge in Carinzia, Austria. Situata sul pittoresco versante meridionale delle Alpi a Falkertsee, la nostra baita offre un paradiso vacanziero per famiglie e amanti della natura tutto l'anno.",
     "cta_book": "Prenota Ora",
     "cta_explore": "Scopri il Rifugio"
   },
@@ -458,5 +458,63 @@
     "bannerTitle": "Scopri di più nel nostro blog",
     "bannerDescription": "Consigli di viaggio dettagliati, percorsi escursionistici e le destinazioni più belle nelle Nockberge e in Carinzia.",
     "ctaButton": "Vai al Blog"
+  },
+  "brand": {
+    "place": "Falkert / Carinzia",
+    "claim": "Stare in alto.",
+    "claimHand": "Stare insieme.",
+    "heroText": "Una baita di montagna di oltre 250 anni, isolata a 1.700 m – accanto al Parco Nazionale Nockberge, a 800 m dal lago Falkertsee.",
+    "book": "Prenota",
+    "videoPause": "Metti in pausa il video",
+    "videoPlay": "Riproduci il video",
+    "videoLabel": "Video sulla Sechszirbenhütte al Falkert",
+    "factsTitle": "La baita in breve",
+    "facts": [
+      {
+        "value": "1.700 m",
+        "label": "di altitudine, in posizione isolata"
+      },
+      {
+        "value": "2–5",
+        "label": "persone"
+      },
+      {
+        "value": "80 m²",
+        "label": "superficie abitabile"
+      },
+      {
+        "value": "Sauna",
+        "label": "annesso privato con sala relax"
+      },
+      {
+        "value": "Cani",
+        "label": "benvenuti"
+      }
+    ],
+    "chaptersLabel": "La baita",
+    "chaptersTitle": "Fuori le montagne. Dentro il vostro posto.",
+    "chapters": [
+      {
+        "title": "Fuori",
+        "text": "La baita sorge isolata tra pini cembri e larici, accanto al Parco Nazionale Nockberge. D'estate si cammina nei Nockberge, d'inverno si scia nel comprensorio Heidi Alm.",
+        "alt": "La Sechszirbenhütte d'estate con balcone e legna accatastata tra gli abeti"
+      },
+      {
+        "title": "Dentro",
+        "text": "Legno antico, una stufa a pellet e una cucina completamente attrezzata. Due camere con letto matrimoniale e una zona giorno con posto letto per due-cinque persone.",
+        "alt": "Stube in legno con scala, armadio contadino dipinto e vista sulla cucina"
+      },
+      {
+        "title": "Tempo per voi",
+        "text": "L'annesso privato con sauna finlandese, sala relax e doccia a pioggia è solo vostro. Al mattino il caffè vi aspetta sul balcone che gira intorno alla baita.",
+        "alt": "Tazza di caffè nella neve sulla ringhiera del balcone"
+      }
+    ],
+    "greetingLabel": "I vostri padroni di casa",
+    "greetingHand": "Benvenuti da noi.",
+    "greetingText": "Abbiamo preparato la Sechszirbenhütte perché possiate arrivare quassù e avere tempo l'uno per l'altro. Per domande sull'arrivo o sulla baita siamo a vostra disposizione.",
+    "reduceMotion": "Riduci le animazioni",
+    "motionReduced": "Animazioni ridotte",
+    "motionSystem": "Animazioni ridotte (impostazione di sistema)"
   }
 }
