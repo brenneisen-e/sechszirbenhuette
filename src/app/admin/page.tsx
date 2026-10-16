@@ -15,11 +15,13 @@ import {
   Tag,
   Link2,
   Settings,
+  SlidersHorizontal,
   Loader2,
   LogOut,
 } from 'lucide-react';
 import AdminLogin from '@/components/admin/AdminLogin';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
+import PartnerSwitch from '@/components/admin/PartnerSwitch';
 
 // Lazy load heavy components with ssr:false (admin is client-only)
 const AdminLoadingFallback = () => <div className="animate-pulse h-96 bg-gray-100 rounded-lg" />;
@@ -65,6 +67,10 @@ const Beds24Panel = dynamic(() => import('@/components/admin/Beds24Panel'), {
   ssr: false,
   loading: AdminLoadingFallback,
 });
+const PriceOverview = dynamic(() => import('@/components/admin/PriceOverview'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
 const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
   ssr: false,
   loading: AdminLoadingFallback,
@@ -102,6 +108,7 @@ type AdminTab =
   | 'reviews'
   | 'guestapp'
   | 'beds24'
+  | 'prices'
   | 'system';
 
 const TABS: {
@@ -120,13 +127,20 @@ const TABS: {
   { id: 'reviews', label: 'Bewertungen', shortLabel: 'Reviews', icon: Star },
   { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
   { id: 'beds24', label: 'Beds24', shortLabel: 'B24', icon: Link2 },
+  { id: 'prices', label: 'Preisübersicht', shortLabel: 'Preisüb.', icon: SlidersHorizontal },
   { id: 'system', label: 'System', shortLabel: 'System', icon: Settings },
 ];
 
+function tabFromSearch(search: string): AdminTab {
+  const tab = new URLSearchParams(search).get('tab');
+  // Unbekannte Tabs (z.B. beim Wechsel aus dem Admin Center der Natberger
+  // Hütte) landen auf den Gästen statt auf einer leeren Seite
+  return TABS.find((t) => t.id === tab)?.id ?? 'guests';
+}
+
 function getInitialTab(): AdminTab {
   if (typeof window === 'undefined') return 'guests';
-  const params = new URLSearchParams(window.location.search);
-  return (params.get('tab') as AdminTab) || 'guests';
+  return tabFromSearch(window.location.search);
 }
 
 function AdminPageContent({ onLogout }: { onLogout: () => void }) {
@@ -152,10 +166,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
 
   // Sync browser back/forward with tab state
   useEffect(() => {
-    const onPopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      setActiveTabState((params.get('tab') as AdminTab) || 'guests');
-    };
+    const onPopState = () => setActiveTabState(tabFromSearch(window.location.search));
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
@@ -223,6 +234,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
             {TABS.find((t) => t.id === activeTab)?.label}
           </h1>
           <div className="flex items-center gap-2">
+            <PartnerSwitch tab={activeTab} compact />
             <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
             <button
               onClick={onLogout}
@@ -251,6 +263,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
               </span>
             </div>
             <div className="flex items-center gap-3">
+              <PartnerSwitch tab={activeTab} />
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
               <button
                 onClick={onLogout}
@@ -330,6 +343,8 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'guestapp' && <GuestAppEditor />}
 
           {activeTab === 'beds24' && <Beds24Panel />}
+
+          {activeTab === 'prices' && <PriceOverview />}
 
           {activeTab === 'system' && (
             <div className="space-y-12">

@@ -32,13 +32,24 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
   - Passwort als PBKDF2-Hash in `settings.admin_code_hash` — setzen im Admin Center (Tab System) oder mit `npm run set-admin-password` (wirkt sofort)
   - Notfall-Passwort als Cloudflare Pages Secret `ADMIN_PASSWORD` — greift erst ab dem nächsten Deployment
   - Sessions serverseitig in `admin_auth_sessions`, gespeichert nur der SHA-256-Hash des Tokens
-- **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss) gehören NICHT unter `/api/admin`.
+- **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`) gehören NICHT unter `/api/admin`.
 
 ## Beds24
 
 - Admin-Tab „Beds24“: `src/components/admin/Beds24Panel.tsx` + `Beds24Cockpit.tsx`, API `src/app/api/admin/beds24/route.ts`, Server-Lib `src/lib/server/beds24*.ts`
 - Beds24-Konto wird mit der Natberger Hütte geteilt → alles auf `settings.beds24_property_id` beschränkt (serverseitig erzwungen)
 - Webhook: `src/app/api/beds24-webhook/route.ts`, Buchungsschluss: `src/app/api/booking-cutoff/route.ts` + `.github/workflows/buchungsschluss.yml`
+
+## Verbindung zur Natberger Hütte und Preisübersicht
+
+- Beide Admin Center sind gekoppelt („Partner“): `src/lib/server/partner.ts`, Gegenstück `lib/server/partner.ts` im Repo `natbergerhuette` — **gleiches Protokoll, Änderungen immer in beiden Repos**
+  - Kopplung per Code im Tab „Preisübersicht“; Adresse und gemeinsamer Schlüssel in `settings` (`partner_url`, `partner_secret`, `partner_name`, `partner_hut`)
+  - `/api/partner`: Aufrufe von Server zu Server, HMAC-signiert (Zeitstempel, Einmalwert in `partner_nonces`, Body) — keine Admin-Session
+  - Umschalter im Kopf (`src/components/admin/PartnerSwitch.tsx`): einmaliges Ticket, direkte Anmeldung nur mit `settings.partner_sso_allowed = 1`
+- Tab „Preisübersicht“: `src/components/admin/PriceOverview.tsx` + `price-overview/*`, API `src/app/api/admin/price-overview/route.ts`
+- Rechenlogik `src/lib/pricing/dynamicPricing.ts` liegt **identisch** im Repo `natbergerhuette`; Nachfrage je Nacht aus `src/lib/demand/*` (Kopie aus `natbergerhuette/lib/demand`, angepasst an `noUncheckedIndexedAccess`)
+- Server `src/lib/server/priceOverview.ts`: nur Zimmer der gewählten Unterkunft (`settings.beds24_property_id`), schreibt nur `price1`/`minStay`, vorher Sicherung (`beds24Snapshots.ts`); Regeln in `settings.price_rules`
+- Schreibt die Preisübersicht Preise, weichen sie danach ggf. von den Saisonpreisen im Tab „Mietpreise“ ab (Beds24SeasonSync zeigt das an)
 
 ## Corporate Design (öffentliche Website)
 
