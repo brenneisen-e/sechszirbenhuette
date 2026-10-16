@@ -21,6 +21,7 @@ import {
   type HutData,
   type HutKey,
   LEVEL_NAMES,
+  monthName,
   nightsOf,
   type NightSuggestion,
   type PeriodRow,
@@ -33,13 +34,13 @@ import {
 } from '@/lib/pricing/dynamicPricing';
 
 import {
-  euroRange,
+  euroList,
   type HutResponse,
   type HutTarget,
   partnerApi,
   type PartnerStatus,
   priceApi,
-  stayRange,
+  stayList,
   viennaToday,
 } from './price-overview/api';
 import EditPeriodDialog, {
@@ -70,15 +71,37 @@ interface RoomOption {
   id: number;
   name: string;
   propertyName: string;
+  hasPrices: boolean;
 }
 
 type Target = { night: string; price1?: number; minStay?: number };
 
 const MODES: { id: RowMode; label: string }[] = [
-  { id: 'sections', label: 'Abschnitte' },
-  { id: 'months', label: 'Monate' },
+  { id: 'seasons', label: 'Preiszeiträume' },
   { id: 'weeks', label: 'Wochen' },
+  { id: 'months', label: 'Monate' },
 ];
+
+/**
+ * Gliederung links: Wie viele Zeilen umfasst der Saison- bzw. Monatsblock,
+ * der in dieser Zeile beginnt (0 = Zeile gehört zum Block darüber)? Ein
+ * Monatsblock endet auch an einer Saisongrenze, damit er im Saisonblock liegt.
+ */
+function groupSpans(rows: PeriodRow[]): { season: number; month: number }[] {
+  const spans = rows.map(() => ({ season: 0, month: 0 }));
+  let seasonStart = 0;
+  let monthStart = 0;
+  rows.forEach((row, i) => {
+    const prev = rows[i - 1];
+    if (!prev || prev.season !== row.season) seasonStart = i;
+    if (!prev || prev.season !== row.season || prev.month !== row.month) monthStart = i;
+    const season = spans[seasonStart];
+    const month = spans[monthStart];
+    if (season) season.season += 1;
+    if (month) month.month += 1;
+  });
+  return spans;
+}
 
 function levelDot(level: number) {
   return (
@@ -89,37 +112,41 @@ function levelDot(level: number) {
   );
 }
 
+/** Aktueller Wert einzeilig: „155 € min. 3“, belegte Zeiträume grau */
 function CurrentCell({ summary }: { summary: CellSummary }) {
   if (summary.nights === 0) return <span className="text-gray-300">—</span>;
   if (summary.blocked === summary.nights) {
-    return <span className="text-xs text-gray-500">belegt</span>;
+    // Wie in der Saisonliste: Preis bleibt sichtbar, der Zeitraum ist aber vergeben
+    return (
+      <span className="text-gray-400 whitespace-nowrap">
+        {summary.blockedPrices.length > 0 && `${euroList(summary.blockedPrices)} · `}belegt
+      </span>
+    );
   }
   return (
-    <div>
-      <p className="font-medium text-gray-900 tabular-nums">
-        {euroRange(summary.priceMin, summary.priceMax)}
-      </p>
-      <p className="text-xs text-gray-500">
-        {stayRange(summary.stayMin, summary.stayMax)}
-        {summary.blocked > 0 && ` · ${summary.blocked}/${summary.nights} belegt`}
-      </p>
-    </div>
+    <span className="whitespace-nowrap">
+      <span className="font-medium text-gray-900 tabular-nums">{euroList(summary.prices)}</span>
+      <span className="ml-1.5 text-xs text-gray-500">{stayList(summary.stays)}</span>
+      {summary.blocked > 0 && (
+        <span className="ml-1.5 text-xs text-gray-400">
+          {summary.blocked}/{summary.nights} belegt
+        </span>
+      )}
+    </span>
   );
 }
 
 function SuggestionCell({ summary }: { summary: CellSummary }) {
-  if (summary.suggestMin === null) return <span className="text-gray-300">—</span>;
-  const diff = summary.diffNights > 0;
+  if (summary.suggestPrices.length === 0) return <span className="text-gray-300">—</span>;
+  if (summary.diffNights === 0) return <span className="text-xs text-gray-400">passt</span>;
   return (
-    <div className={diff ? 'text-purple-700' : 'text-gray-400'}>
-      <p className="font-medium tabular-nums">
-        {euroRange(summary.suggestMin, summary.suggestMax)}
-      </p>
-      <p className="text-xs">
-        {stayRange(summary.suggestStayMin, summary.suggestStayMax)}
-        {diff ? ` · ${summary.diffNights} N. anders` : ' · passt'}
-      </p>
-    </div>
+    <span className="whitespace-nowrap text-purple-700">
+      <span className="font-medium tabular-nums">
+        {summary.fixedLabel && `${summary.fixedLabel} `}
+        {euroList(summary.suggestPrices)}
+      </span>
+      <span className="ml-1.5 text-xs">{stayList(summary.suggestStays)}</span>
+    </span>
   );
 }
 
@@ -127,7 +154,7 @@ export default function PriceOverview() {
   const [status, setStatus] = useState<PartnerStatus | null>(null);
   const [showConnection, setShowConnection] = useState(false);
   const [months, setMonths] = useState(12);
-  const [mode, setMode] = useState<RowMode>('sections');
+  const [mode, setMode] = useState<RowMode>('seasons');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [responses, setResponses] = useState<Record<HutTarget, HutResponse | null>>({
@@ -228,8 +255,18 @@ export default function PriceOverview() {
 
   const demand = useMemo(() => (range ? demandByNight(range.from, range.to) : {}), [range]);
   const rows = useMemo(
-    () => (range ? buildRows(range.from, range.to, mode, demand) : []),
-    [range, mode, demand],
+    () =>
+      range
+        ? buildRows(
+            range.from,
+            range.to,
+            mode,
+            demand,
+            // Für die Saisons: Reihenfolge wie die Spalten, damit der Schlüssel stabil ist
+            TARGETS.map((t) => responses[t]?.data?.days ?? {}),
+          )
+        : [],
+    [range, mode, demand, responses],
   );
 
   const suggestions = useMemo(() => {
@@ -430,10 +467,12 @@ export default function PriceOverview() {
     const res = (await priceApi({ action: 'rooms' })) as { success?: boolean; data?: RoomOption[] };
     if (!res.success || !res.data) return;
     setRooms(res.data);
-    // Gemeinsames Beds24-Konto: Zimmer der eigenen Unterkunft vorschlagen
+    // Gemeinsames Beds24-Konto: Zimmer der eigenen Unterkunft vorschlagen —
+    // nach Namen, sonst das erste Zimmer, für das Beds24 Preise führt
     const key = (status?.own.name ?? '').split(' ')[0]?.toLowerCase() ?? '';
-    const own = key ? res.data.filter((r) => r.propertyName.toLowerCase().includes(key)) : [];
-    if (own.length === 1 && own[0]) setRoomChoice(String(own[0].id));
+    const byName = key ? res.data.filter((r) => r.propertyName.toLowerCase().includes(key)) : [];
+    const guess = byName.length === 1 ? byName[0] : res.data.find((r) => r.hasPrices);
+    if (guess) setRoomChoice(String(guess.id));
   };
 
   const saveRoom = async () => {
@@ -503,6 +542,7 @@ export default function PriceOverview() {
                     {rooms.map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.propertyName} · {r.name || 'Zimmer'} (ID {r.id})
+                        {!r.hasPrices && ' — ohne Preise'}
                       </option>
                     ))}
                   </select>
@@ -573,19 +613,27 @@ export default function PriceOverview() {
     );
   };
 
-  const rowHeader = (row: PeriodRow) => (
-    <div>
-      <p className="font-medium text-gray-900">{row.label}</p>
-      <p
-        className="text-xs text-gray-500 flex items-center gap-1.5"
-        title={row.reasons.join(' · ')}
-      >
-        {levelDot(row.level)}
-        {formatRange(row.from, row.to)} · {nightsOf(row.from, row.to).length} N.
-        {row.level > 0 && ` · ${LEVEL_NAMES[row.level]}`}
-      </p>
-    </div>
+  // Zeitraum einzeilig; Ferien und Feiertage nur bei hoher Nachfrage als
+  // kurzer Hinweis, alles Weitere im Tooltip
+  const periodCell = (row: PeriodRow) => (
+    <span
+      className="flex items-center gap-1.5 whitespace-nowrap"
+      title={[
+        `${formatRange(row.from, row.to)} · ${nightsOf(row.from, row.to).length} Nächte`,
+        `Nachfrage ${LEVEL_NAMES[row.level]}`,
+        ...row.reasons,
+      ].join('\n')}
+    >
+      {levelDot(row.level)}
+      <span className="text-gray-900 tabular-nums">{row.label}</span>
+      {row.level >= 2 && row.reasons[0] && (
+        <span className="text-xs text-gray-400 truncate max-w-[13rem]">{row.reasons[0]}</span>
+      )}
+    </span>
   );
+
+  const spans = groupSpans(rows);
+  const showMonth = mode !== 'months';
 
   const summaryFor = (slot: Slot, row: PeriodRow) =>
     summarize(row.from, row.to, slot.response.data?.days ?? {}, suggestions[slot.target] ?? null);
@@ -698,13 +746,21 @@ export default function PriceOverview() {
 
       {range && rows.length > 0 && (
         <>
-          {/* Desktop: Tabelle */}
+          {/* Desktop: Tabelle, links nach Saison und Monat gegliedert */}
           <div className="hidden md:block border border-gray-200 rounded-lg overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm border-collapse">
               <thead className="bg-gray-50 text-xs text-gray-500">
                 <tr>
-                  <th className="text-left font-medium px-3 py-2" rowSpan={2}>
-                    Zeitraum
+                  <th className="text-left font-medium px-3 py-2 w-px" rowSpan={2}>
+                    Saison
+                  </th>
+                  {showMonth && (
+                    <th className="text-left font-medium px-3 py-2 w-px" rowSpan={2}>
+                      Monat
+                    </th>
+                  )}
+                  <th className="text-left font-medium px-3 py-2 w-px" rowSpan={2}>
+                    {mode === 'months' ? 'Monat' : 'Zeitraum (Sa–Sa)'}
                   </th>
                   {slots.map((slot) => (
                     <th
@@ -720,7 +776,7 @@ export default function PriceOverview() {
                   {slots.map((slot) => (
                     <Fragment key={slot.target}>
                       <th className="text-left font-normal px-3 pb-2 border-l border-gray-200">
-                        Beds24 aktuell
+                        Beds24
                       </th>
                       {suggestions[slot.target] && (
                         <th className="text-left font-normal px-3 pb-2">Vorschlag</th>
@@ -729,67 +785,114 @@ export default function PriceOverview() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
-                {rows.map((row) => (
-                  <tr key={row.key} className="align-top">
-                    <td className="px-3 py-2.5 min-w-[14rem]">{rowHeader(row)}</td>
-                    {slots.map((slot) => {
-                      const summary = summaryFor(slot, row);
-                      const clickable = !!slot.response.data;
-                      return (
-                        <Fragment key={slot.target}>
-                          <td
-                            onClick={() => openEdit(slot, row)}
-                            className={`px-3 py-2.5 border-l border-gray-100 ${
-                              clickable ? 'cursor-pointer hover:bg-gray-50' : ''
-                            }`}
-                          >
-                            <CurrentCell summary={summary} />
-                          </td>
-                          {suggestions[slot.target] && (
+              <tbody>
+                {rows.map((row, i) => {
+                  const span = spans[i] ?? { season: 0, month: 0 };
+                  // Trennlinien: kräftig zwischen Saisons, deutlich zwischen Monaten
+                  let rule = 'border-t border-gray-100';
+                  if (span.season > 0) rule = 'border-t-2 border-gray-300';
+                  else if (span.month > 0) rule = 'border-t border-gray-300';
+                  return (
+                    <tr key={row.key} className={rule}>
+                      {span.season > 0 && (
+                        <td
+                          rowSpan={span.season}
+                          className="align-top px-3 py-1.5 bg-gray-50 font-semibold text-gray-800 whitespace-nowrap border-r border-gray-200"
+                        >
+                          {row.season}
+                        </td>
+                      )}
+                      {showMonth && span.month > 0 && (
+                        <td
+                          rowSpan={span.month}
+                          className="align-top px-3 py-1.5 whitespace-nowrap border-r border-gray-200"
+                        >
+                          <span className="font-medium text-gray-800">{monthName(row.month)}</span>
+                          <span className="ml-1 text-xs text-gray-400">
+                            {row.month.slice(0, 4)}
+                          </span>
+                        </td>
+                      )}
+                      <td className="px-3 py-1.5">{periodCell(row)}</td>
+                      {slots.map((slot) => {
+                        const summary = summaryFor(slot, row);
+                        const clickable = !!slot.response.data;
+                        return (
+                          <Fragment key={slot.target}>
                             <td
                               onClick={() => openEdit(slot, row)}
-                              className="px-3 py-2.5 cursor-pointer hover:bg-purple-50/50"
+                              className={`px-3 py-1.5 border-l border-gray-100 ${
+                                clickable ? 'cursor-pointer hover:bg-gray-50' : ''
+                              }`}
                             >
-                              <SuggestionCell summary={summary} />
+                              <CurrentCell summary={summary} />
                             </td>
-                          )}
-                        </Fragment>
-                      );
-                    })}
-                  </tr>
-                ))}
+                            {suggestions[slot.target] && (
+                              <td
+                                onClick={() => openEdit(slot, row)}
+                                className="px-3 py-1.5 cursor-pointer hover:bg-purple-50/50"
+                              >
+                                <SuggestionCell summary={summary} />
+                              </td>
+                            )}
+                          </Fragment>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* Mobil: Karten */}
-          <div className="md:hidden space-y-2">
-            {rows.map((row) => (
-              <div key={row.key} className="border border-gray-200 rounded-lg p-3">
-                {rowHeader(row)}
-                <div className={`grid gap-2 mt-2 ${slots.length > 1 ? 'grid-cols-2' : ''}`}>
-                  {slots.map((slot) => {
-                    const summary = summaryFor(slot, row);
-                    return (
-                      <button
-                        key={slot.target}
-                        onClick={() => openEdit(slot, row)}
-                        className="text-left bg-gray-50 rounded-lg p-2 active:bg-gray-100"
-                      >
-                        <p className="text-[11px] text-gray-500 mb-1">{slot.name}</p>
-                        <CurrentCell summary={summary} />
-                        {suggestions[slot.target] && (
-                          <div className="mt-1 pt-1 border-t border-gray-200">
-                            <SuggestionCell summary={summary} />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+          {/* Mobil: je Saison und Monat ein Block, darin eine kompakte Liste */}
+          <div className="md:hidden">
+            {rows.map((row, i) => {
+              const span = spans[i] ?? { season: 0, month: 0 };
+              if (span.month === 0) return null;
+              const block = rows.slice(i, i + span.month);
+              return (
+                <div key={row.key} className="mb-3">
+                  {span.season > 0 && (
+                    <p className="text-sm font-semibold text-gray-900 mt-5 mb-1.5">{row.season}</p>
+                  )}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="flex items-baseline justify-between gap-2 bg-gray-50 px-3 py-1.5 text-xs">
+                      <span className="font-medium text-gray-800">
+                        {monthName(row.month)} {row.month.slice(0, 4)}
+                      </span>
+                      <span className="text-gray-400 truncate">
+                        {slots.map((slot) => slot.name.split(' ')[0]).join(' · ')}
+                      </span>
+                    </div>
+                    {block.map((r) => (
+                      <div key={r.key} className="px-3 py-2 border-t border-gray-100">
+                        <div className="text-xs">{periodCell(r)}</div>
+                        <div className={`grid gap-2 mt-1 ${slots.length > 1 ? 'grid-cols-2' : ''}`}>
+                          {slots.map((slot) => {
+                            const summary = summaryFor(slot, r);
+                            return (
+                              <button
+                                key={slot.target}
+                                onClick={() => openEdit(slot, r)}
+                                className="min-w-0 text-left text-sm rounded px-1 -mx-1 active:bg-gray-100"
+                              >
+                                <CurrentCell summary={summary} />
+                                {suggestions[slot.target] && summary.diffNights > 0 && (
+                                  <span className="block text-xs">
+                                    <SuggestionCell summary={summary} />
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">

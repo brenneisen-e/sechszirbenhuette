@@ -41,6 +41,8 @@ export interface RoomOption {
   id: number;
   name: string;
   propertyName: string;
+  /** Beds24 führt für das Zimmer Preise */
+  hasPrices: boolean;
 }
 
 export interface Outcome<T> {
@@ -62,6 +64,28 @@ function addMonthsIso(iso: string, months: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Zimmer, für die Beds24 in den nächsten 90 Tagen Preise führt */
+async function roomsWithPrices(token: string, filter: string): Promise<Set<number>> {
+  const from = viennaToday();
+  const res = await fetch(
+    `${BEDS24_API}/inventory/rooms/calendar?startDate=${from}&endDate=${addDaysIso(from, 90)}` +
+      `&includePrices=true${filter}`,
+    { headers: { token, Accept: 'application/json' } },
+  );
+  const parsed = await parseJsonSafe(res);
+  const priced = new Set<number>();
+  if (!res.ok || !parsed.ok) return priced;
+  const rows = (parsed.data as { data?: unknown })?.data;
+  for (const row of Array.isArray(rows) ? rows : []) {
+    const r = row as { roomId?: unknown; calendar?: unknown };
+    const list = Array.isArray(r.calendar) ? r.calendar : [];
+    if (list.some((e) => typeof (e as { price1?: unknown }).price1 === 'number')) {
+      priced.add(Number(r.roomId));
+    }
+  }
+  return priced;
+}
+
 /** Zimmer der gewählten Unterkunft — zur Auswahl in der Preisübersicht */
 export async function listRoomOptions(db: D1Database): Promise<Outcome<RoomOption[]>> {
   const propertyId = await getPropertyId(db);
@@ -81,6 +105,7 @@ export async function listRoomOptions(db: D1Database): Promise<Outcome<RoomOptio
     return { error: `Beds24 antwortete mit HTTP ${res.status}`, status: 502 };
   }
   const rows = (parsed.data as { data?: unknown })?.data;
+  const priced = await roomsWithPrices(token, `&propertyId=${propertyId}`);
   const rooms: RoomOption[] = [];
   for (const row of Array.isArray(rows) ? rows : []) {
     const p = row as { id?: unknown; name?: unknown; roomTypes?: unknown };
@@ -89,7 +114,12 @@ export async function listRoomOptions(db: D1Database): Promise<Outcome<RoomOptio
       const room = r as { id?: unknown; name?: unknown };
       const id = Number(room.id);
       if (Number.isFinite(id) && id > 0) {
-        rooms.push({ id, name: String(room.name ?? ''), propertyName: String(p.name ?? '') });
+        rooms.push({
+          id,
+          name: String(room.name ?? ''),
+          propertyName: String(p.name ?? ''),
+          hasPrices: priced.has(id),
+        });
       }
     }
   }
@@ -97,8 +127,9 @@ export async function listRoomOptions(db: D1Database): Promise<Outcome<RoomOptio
 }
 
 /**
- * Zimmer wie im Cockpit: fest hinterlegtes Zimmer der Unterkunft, sonst das
- * einzige. Hat die Unterkunft mehrere Zimmer, muss eines gewählt werden.
+ * Zimmer wie beim Buchungsschluss: fest hinterlegtes Zimmer der Unterkunft,
+ * sonst das erste mit Preisen, sonst das erste — immer nur innerhalb der
+ * gewählten Unterkunft.
  */
 async function resolveRoom(db: D1Database): Promise<Outcome<RoomOption>> {
   const options = await listRoomOptions(db);
@@ -106,7 +137,8 @@ async function resolveRoom(db: D1Database): Promise<Outcome<RoomOption>> {
   const fixed = Number(await getSetting(db, KEY_ROOM_ID));
   const room =
     options.data.find((r) => r.id === fixed) ||
-    (options.data.length === 1 ? options.data[0] : undefined);
+    options.data.find((r) => r.hasPrices) ||
+    options.data[0];
   if (!room) {
     return {
       error: 'Für die Sechszirbenhütte ist noch kein Beds24-Zimmer festgelegt',

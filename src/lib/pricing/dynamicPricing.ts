@@ -9,7 +9,8 @@
 // deshalb gilt dieselbe Nachfrage — die Preise je Stufe legt jede Hütte
 // selbst fest.
 
-import { type DemandLevel, demandStretches, type NightDemand } from '@/lib/demand/scoring';
+import { SEASONS } from '@/lib/demand/periods';
+import { type DemandLevel, type NightDemand } from '@/lib/demand/scoring';
 
 export type HutKey = 'natberger' | 'szh';
 
@@ -341,16 +342,35 @@ export function deriveRules(
 // Zeilen der Übersicht
 // ============================================================================
 
-export type RowMode = 'sections' | 'months' | 'weeks';
+export type RowMode = 'seasons' | 'weeks' | 'months';
 
 export interface PeriodRow {
   key: string;
   from: string;
   to: string;
   label: string;
+  /** Monat (YYYY-MM) und grobe Saison für die Gliederung links */
+  month: string;
+  season: string;
   /** höchste Nachfragestufe, die mindestens drei Nächte trägt */
   level: DemandLevel;
   reasons: string[];
+}
+
+/**
+ * Grobe Saison am Falkert für die Gliederung der Übersicht, abgeleitet aus
+ * den Saisonzeiten in lib/demand (beide Hütten liegen in derselben Region).
+ */
+export function seasonOf(night: string): string {
+  const label = SEASONS.find((s) => night >= s.from && night <= s.to)?.label ?? '';
+  if (/ski/i.test(label)) return 'Winter';
+  if (/sommer/i.test(label)) return 'Sommer';
+  if (/wanderherbst/i.test(label)) return 'Herbst';
+  return 'Nebensaison';
+}
+
+export function monthName(month: string): string {
+  return MONTHS[Number(month.slice(5, 7)) - 1] ?? month;
 }
 
 function rowDemand(
@@ -396,67 +416,111 @@ function monthChunks(from: string, to: string): [string, string][] {
   return chunks;
 }
 
+/** Mittlere Nacht eines Zeitraums — bestimmt Monat und Saison einer Woche (Mehrheit der Nächte) */
+function middleNight(from: string, to: string): string {
+  return addDaysIso(from, Math.floor(daysBetween(from, to) / 2));
+}
+
+/** Kurzer Zeitraum ohne Jahr, z. B. „7.11.–27.11.“ — das Jahr steht in der Monatsspalte */
+export function formatShortRange(from: string, to: string): string {
+  return from === to ? formatDay(from) : `${formatDay(from)}–${formatDay(to)}`;
+}
+
 function makeRow(
   from: string,
   to: string,
   label: string,
   demand: Record<string, NightDemand>,
 ): PeriodRow {
-  return { key: `${from}_${to}`, from, to, label, ...rowDemand(from, to, demand) };
+  const middle = middleNight(from, to);
+  return {
+    key: `${from}_${to}`,
+    from,
+    to,
+    label,
+    month: middle.slice(0, 7),
+    season: seasonOf(middle),
+    ...rowDemand(from, to, demand),
+  };
+}
+
+/** Werte einer Hütte in einem Zeitraum als Vergleichsschlüssel (Preise und Mindestaufenthalte) */
+function valueKey(days: Record<string, HutDay>, nights: string[]): string {
+  const prices = new Set<number>();
+  const stays = new Set<number>();
+  for (const night of nights) {
+    const day = days[night];
+    if (!day) continue;
+    if (day.p !== undefined) prices.add(Math.round(day.p * 100) / 100);
+    stays.add(day.m ?? 1);
+  }
+  const sorted = (set: Set<number>) => [...set].sort((a, b) => a - b).join('/');
+  return `${sorted(prices)}|${sorted(stays)}`;
+}
+
+/** Hüttenwochen: Samstag bis Freitag (Nächte), die erste ab `from` */
+function saturdayWeeks(from: string, to: string): [string, string][] {
+  const weeks: [string, string][] = [];
+  let start = from;
+  while (start <= to) {
+    const friday = addDaysIso(start, (5 - weekdayOf(start) + 7) % 7);
+    const end = friday < to ? friday : to;
+    weeks.push([start, end]);
+    start = addDaysIso(end, 1);
+  }
+  return weeks;
 }
 
 /**
- * Zeilen bilden:
+ * Zeilen bilden, gegliedert nach Saison und Monat (eine Woche gehört zu dem
+ * Monat und der Saison, in denen die Mehrheit ihrer Nächte liegt):
+ * - seasons: Wochen Samstag bis Samstag, zusammengefasst, solange Monat und
+ *   Saison gleich bleiben und bei keiner Hütte Preis oder Mindestaufenthalt
+ *   wechseln — wie eine Saisonliste
+ * - weeks: jede Hüttenwoche Samstag bis Freitag (Nächte) einzeln
  * - months: Kalendermonate
- * - weeks: Hüttenwochen Samstag bis Freitag (Nächte)
- * - sections: Zeiten hoher Nachfrage (Ferien, Feiertage, Spitzen) als eigene
- *   Zeile, die ruhigeren Wochen dazwischen nach Monaten
  */
 export function buildRows(
   from: string,
   to: string,
   mode: RowMode,
   demand: Record<string, NightDemand>,
+  huts: Record<string, HutDay>[] = [],
 ): PeriodRow[] {
   if (mode === 'months') {
     return monthChunks(from, to).map(([a, b]) => makeRow(a, b, monthLabel(a), demand));
   }
 
+  const weeks = saturdayWeeks(from, to);
   if (mode === 'weeks') {
-    const rows: PeriodRow[] = [];
-    let start = from;
-    while (start <= to) {
-      // Bis Freitag (Samstag ist Wechseltag)
-      const toFriday = (5 - weekdayOf(start) + 7) % 7;
-      const end = addDaysIso(start, toFriday) < to ? addDaysIso(start, toFriday) : to;
-      rows.push(makeRow(start, end, formatRange(start, end), demand));
-      start = addDaysIso(end, 1);
-    }
-    return rows;
+    return weeks.map(([a, b]) => makeRow(a, b, formatShortRange(a, b), demand));
   }
 
-  const inRange: Record<string, NightDemand> = {};
-  for (const night of nightsOf(from, to)) if (demand[night]) inRange[night] = demand[night];
-  const stretches = demandStretches(inRange, 2);
   const rows: PeriodRow[] = [];
-  const pushQuiet = (a: string, b: string) => {
-    for (const [ca, cb] of monthChunks(a, b)) rows.push(makeRow(ca, cb, monthLabel(ca), demand));
-  };
-  let cursor = from;
-  for (const s of stretches) {
-    if (s.from > cursor) pushQuiet(cursor, addDaysIso(s.from, -1));
-    const label = s.reasons[0] || `Nachfrage ${LEVEL_NAMES[s.level]}`;
-    // Sehr lange Zeiträume (Sommer) nach Monaten teilen, sonst sagt die Zeile wenig
-    if (daysBetween(s.from, s.to) > 45) {
-      for (const [ca, cb] of monthChunks(s.from, s.to)) {
-        rows.push(makeRow(ca, cb, `${label} · ${MONTHS[Number(ca.slice(5, 7)) - 1]}`, demand));
-      }
-    } else {
-      rows.push(makeRow(s.from, s.to, label, demand));
+  let current: { from: string; to: string; key: string } | null = null;
+  const close = () => {
+    if (current) {
+      rows.push(
+        makeRow(current.from, current.to, formatShortRange(current.from, current.to), demand),
+      );
     }
-    cursor = addDaysIso(s.to, 1);
+  };
+  for (const [a, b] of weeks) {
+    const middle = middleNight(a, b);
+    const nights = nightsOf(a, b);
+    const key = [
+      middle.slice(0, 7),
+      seasonOf(middle),
+      ...huts.map((days) => valueKey(days, nights)),
+    ].join('#');
+    if (current && current.key === key) {
+      current.to = b;
+      continue;
+    }
+    close();
+    current = { from: a, to: b, key };
   }
-  if (cursor <= to) pushQuiet(cursor, to);
+  close();
   return rows;
 }
 
@@ -467,14 +531,15 @@ export function buildRows(
 export interface CellSummary {
   nights: number;
   blocked: number;
-  priceMin: number | null;
-  priceMax: number | null;
-  stayMin: number | null;
-  stayMax: number | null;
-  suggestMin: number | null;
-  suggestMax: number | null;
-  suggestStayMin: number | null;
-  suggestStayMax: number | null;
+  /** Verschiedene Werte der freien Nächte, aufsteigend */
+  prices: number[];
+  stays: number[];
+  /** Preise der belegten oder gesperrten Nächte */
+  blockedPrices: number[];
+  suggestPrices: number[];
+  suggestStays: number[];
+  /** Gilt für alle freien Nächte derselbe feste Zeitraum der Regeln, dessen Bezeichnung */
+  fixedLabel: string | null;
   /** Freie Nächte, deren Vorschlag vom aktuellen Wert abweicht */
   diffNights: number;
 }
@@ -491,10 +556,12 @@ export function summarize(
   days: Record<string, HutDay>,
   suggestions: Record<string, NightSuggestion> | null,
 ): CellSummary {
-  const price: number[] = [];
-  const stay: number[] = [];
-  const suggest: number[] = [];
-  const suggestStay: number[] = [];
+  const prices = new Set<number>();
+  const stays = new Set<number>();
+  const blockedPrices = new Set<number>();
+  const suggestPrices = new Set<number>();
+  const suggestStays = new Set<number>();
+  const bases = new Set<string>();
   let nights = 0;
   let blocked = 0;
   let diffNights = 0;
@@ -504,30 +571,31 @@ export function summarize(
     nights += 1;
     if (day.a === 0) {
       blocked += 1;
+      if (day.p !== undefined && day.p > 0) blockedPrices.add(day.p);
       continue;
     }
-    if (day.p !== undefined && day.p > 0) price.push(day.p);
-    stay.push(day.m ?? 1);
+    if (day.p !== undefined && day.p > 0) prices.add(day.p);
+    stays.add(day.m ?? 1);
     const s = suggestions?.[night];
     if (s) {
-      suggest.push(s.price);
-      suggestStay.push(s.minStay);
+      suggestPrices.add(s.price);
+      suggestStays.add(s.minStay);
+      bases.add(s.basis);
       if (differs(day, s)) diffNights += 1;
     }
   }
-  const min = (list: number[]) => (list.length ? Math.min(...list) : null);
-  const max = (list: number[]) => (list.length ? Math.max(...list) : null);
+  const sorted = (set: Set<number>) => [...set].sort((a, b) => a - b);
+  const [onlyBasis] = [...bases];
   return {
     nights,
     blocked,
-    priceMin: min(price),
-    priceMax: max(price),
-    stayMin: min(stay),
-    stayMax: max(stay),
-    suggestMin: min(suggest),
-    suggestMax: max(suggest),
-    suggestStayMin: min(suggestStay),
-    suggestStayMax: max(suggestStay),
+    prices: sorted(prices),
+    stays: sorted(stays),
+    blockedPrices: sorted(blockedPrices),
+    suggestPrices: sorted(suggestPrices),
+    suggestStays: sorted(suggestStays),
+    fixedLabel:
+      bases.size === 1 && onlyBasis?.startsWith('fest: ') ? onlyBasis.slice('fest: '.length) : null,
     diffNights,
   };
 }

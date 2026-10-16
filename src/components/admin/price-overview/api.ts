@@ -61,13 +61,23 @@ export function euro(value: number): string {
   return `${value.toLocaleString('de-DE', { maximumFractionDigits: 2 })} €`;
 }
 
-export function euroRange(min: number | null, max: number | null): string {
-  if (min === null || max === null) return '—';
-  if (Math.abs(max - min) < 0.5) return euro(min);
-  return `${min.toLocaleString('de-DE', { maximumFractionDigits: 2 })}–${euro(max)}`;
+function plain(value: number): string {
+  return value.toLocaleString('de-DE', { maximumFractionDigits: 2 });
 }
 
-export function stayRange(min: number | null, max: number | null): string {
-  if (min === null || max === null) return '';
-  return min === max ? `min. ${min}` : `min. ${min}–${max}`;
+/** Verschiedene Werte wie in einer Saisonliste: „155 €“, „392/406 €“, ab vier Werten „155–406 €“ */
+export function euroList(values: number[]): string {
+  const first = values[0];
+  const last = values[values.length - 1];
+  if (first === undefined || last === undefined) return '—';
+  if (values.length <= 3) return `${values.map(plain).join('/')} €`;
+  return `${plain(first)}–${euro(last)}`;
+}
+
+export function stayList(values: number[]): string {
+  const first = values[0];
+  const last = values[values.length - 1];
+  if (first === undefined || last === undefined) return '';
+  if (values.length <= 3) return `min. ${values.join('/')}`;
+  return `min. ${first}–${last}`;
 }
