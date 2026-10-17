@@ -48,6 +48,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
   - Umschalter im Kopf (`src/components/admin/PartnerSwitch.tsx`): einmaliges Ticket, direkte Anmeldung nur mit `settings.partner_sso_allowed = 1`
 - Tab „Preisübersicht“: `src/components/admin/PriceOverview.tsx` + `price-overview/*`, API `src/app/api/admin/price-overview/route.ts`
 - Rechenlogik `src/lib/pricing/dynamicPricing.ts` liegt **identisch** im Repo `natbergerhuette`; Nachfrage je Nacht aus `src/lib/demand/*` (Kopie aus `natbergerhuette/lib/demand`, angepasst an `noUncheckedIndexedAccess`)
+- Saisonpreise eines Jahres mit einem Klick: `src/lib/pricing/seasonPlan.ts` (identisch in beiden Repos, derzeit nur Natberger Hütte 2027), Vorschau und Übernahme in `price-overview/SeasonPlanPanel.tsx`
 - Server `src/lib/server/priceOverview.ts`: nur Zimmer der gewählten Unterkunft (`settings.beds24_property_id`), schreibt nur `price1`/`minStay`, vorher Sicherung (`beds24Snapshots.ts`); Regeln in `settings.price_rules`
 - Schreibt die Preisübersicht Preise, weichen sie danach ggf. von den Saisonpreisen im Tab „Mietpreise“ ab (Beds24SeasonSync zeigt das an)
 

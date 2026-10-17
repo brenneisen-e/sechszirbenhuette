@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  CalendarRange,
   Link2,
   Loader2,
   RefreshCw,
@@ -32,6 +33,7 @@ import {
   summarize,
   toEntries,
 } from '@/lib/pricing/dynamicPricing';
+import { seasonPlanFor } from '@/lib/pricing/seasonPlan';
 
 import {
   euroList,
@@ -49,6 +51,7 @@ import EditPeriodDialog, {
 } from './price-overview/EditPeriodDialog';
 import PartnerConnection from './price-overview/PartnerConnection';
 import RulesEditor from './price-overview/RulesEditor';
+import SeasonPlanPanel, { type PlanRowValue } from './price-overview/SeasonPlanPanel';
 
 // Preisübersicht beider Hütten: Preise und Mindestaufenthalte der
 // Natberger Hütte und der Sechszirbenhütte live aus Beds24, nebeneinander
@@ -170,6 +173,10 @@ export default function PriceOverview() {
   const savedRef = useRef<Partial<Record<HutTarget, PriceRules>>>({});
   const [drafts, setDrafts] = useState<Partial<Record<HutTarget, PriceRules>>>({});
   const [rulesOpen, setRulesOpen] = useState<HutTarget | null>(null);
+  // Saisonpreise eines Jahres (lib/pricing/seasonPlan.ts)
+  const [planOpen, setPlanOpen] = useState<HutTarget | null>(null);
+  const [planError, setPlanError] = useState('');
+  const [planMessage, setPlanMessage] = useState('');
   const [rulesSaving, setRulesSaving] = useState(false);
   const [rulesError, setRulesError] = useState('');
 
@@ -447,6 +454,50 @@ export default function PriceOverview() {
     await load();
   };
 
+  const openPlan = (t: HutTarget) => {
+    setPlanError('');
+    setPlanMessage('');
+    setPlanOpen(t);
+    // Für den Vergleich mit den aktuellen Preisen das ganze Jahr laden
+    if (months < 18) setMonths(18);
+  };
+
+  /** Saisonpreise schreiben — je Zeitraum ein Preis, auf Wunsch als feste Zeiträume in die Regeln */
+  const applyPlan = async (t: HutTarget, year: number, rows: PlanRowValue[], remember: boolean) => {
+    setPlanError('');
+    setPlanMessage('');
+    const targets: Target[] = rows.flatMap((r) =>
+      nightsOf(r.from, r.to).map((night) => {
+        const target: Target = { night, price1: r.price };
+        if (r.minStay !== undefined) target.minStay = r.minStay;
+        return target;
+      }),
+    );
+    let rulesToSave = isDirty(t) ? drafts[t] : undefined;
+    const draft = drafts[t];
+    const first = rows[0];
+    const last = rows[rows.length - 1];
+    if (remember && draft && first && last) {
+      rulesToSave = {
+        ...draft,
+        fixed: [
+          // Feste Zeiträume im Planjahr ersetzen, die übrigen bleiben
+          ...draft.fixed.filter((f) => f.to < first.from || f.from > last.to),
+          ...rows.map((r) => ({
+            from: r.from,
+            to: r.to,
+            price: r.price,
+            minStay: r.minStay ?? null,
+            label: `${r.label} ${year}`,
+          })),
+        ].sort((a, b) => a.from.localeCompare(b.from)),
+      };
+    }
+    const result = await apply(t, targets, `Saisonpreise ${year}`, rulesToSave);
+    if (result.ok) setPlanMessage(`Saisonpreise ${year} übernommen (${rows.length} Zeiträume)`);
+    else setPlanError(result.error || 'Übernahme fehlgeschlagen');
+  };
+
   const openRules = (t: HutTarget) => {
     setRulesError('');
     const data = responses[t]?.data;
@@ -584,6 +635,19 @@ export default function PriceOverview() {
                 {pending === 0
                   ? 'Alles entspricht den Regeln'
                   : `Alle Vorschläge übernehmen (${pending} N.)`}
+              </button>
+            )}
+            {seasonPlanFor(data.hut) && (
+              <button
+                onClick={() => (planOpen === t ? setPlanOpen(null) : openPlan(t))}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${
+                  planOpen === t
+                    ? 'border-gray-900 text-gray-900'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <CalendarRange className="w-3.5 h-3.5" />
+                Saisonpreise {seasonPlanFor(data.hut)?.year}
               </button>
             )}
             {data.lastChange && (
@@ -724,6 +788,26 @@ export default function PriceOverview() {
           {slots.map(renderSlotCard)}
         </div>
       )}
+
+      {planOpen &&
+        (() => {
+          const data = responses[planOpen]?.data;
+          const plan = seasonPlanFor(data?.hut);
+          if (!data || !plan) return null;
+          return (
+            <SeasonPlanPanel
+              key={`${planOpen}-${plan.year}`}
+              plan={plan}
+              hut={data}
+              hasRules={!!drafts[planOpen]}
+              busy={busy === planOpen}
+              error={planError}
+              message={planMessage}
+              onApply={(rows, remember) => applyPlan(planOpen, plan.year, rows, remember)}
+              onClose={() => setPlanOpen(null)}
+            />
+          );
+        })()}
 
       {rulesOpen && drafts[rulesOpen] && (
         <RulesEditor
