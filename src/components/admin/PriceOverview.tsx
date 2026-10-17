@@ -612,6 +612,19 @@ export default function PriceOverview() {
 
         {data && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            {seasonPlanFor(data.hut) && (
+              <button
+                onClick={() => (planOpen === t ? setPlanOpen(null) : openPlan(t))}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg ${
+                  planOpen === t
+                    ? 'border border-gray-900 text-gray-900'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                }`}
+              >
+                <CalendarRange className="w-3.5 h-3.5" />
+                Saisonpreise {seasonPlanFor(data.hut)?.year}
+              </button>
+            )}
             <button
               onClick={() => (rulesOpen === t ? setRulesOpen(null) : openRules(t))}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${
@@ -625,29 +638,18 @@ export default function PriceOverview() {
               {!savedRules[t] && <span className="text-gray-400">(neu)</span>}
               {isDirty(t) && <span className="text-amber-700">*</span>}
             </button>
-            {suggestions[t] && (
+            {/* Erst mit gespeicherten Preisregeln — ein frisch abgeleiteter Entwurf
+                soll nicht mit einem Klick die Preise überschreiben */}
+            {suggestions[t] && savedRules[t] && (
               <button
                 onClick={() => setConfirmAll(t)}
                 disabled={busy !== null || pending === 0}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-purple-700 text-white hover:bg-purple-800 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-purple-300 text-purple-700 hover:bg-purple-50 disabled:opacity-50"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {pending === 0
                   ? 'Alles entspricht den Regeln'
                   : `Alle Vorschläge übernehmen (${pending} N.)`}
-              </button>
-            )}
-            {seasonPlanFor(data.hut) && (
-              <button
-                onClick={() => (planOpen === t ? setPlanOpen(null) : openPlan(t))}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${
-                  planOpen === t
-                    ? 'border-gray-900 text-gray-900'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <CalendarRange className="w-3.5 h-3.5" />
-                Saisonpreise {seasonPlanFor(data.hut)?.year}
               </button>
             )}
             {data.lastChange && (
