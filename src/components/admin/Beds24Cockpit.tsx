@@ -2740,7 +2740,9 @@ export default function Beds24Cockpit() {
                   className="mt-1 w-full px-2 py-2 text-sm border border-gray-300 rounded-lg"
                 />
               </label>
-              <label className="text-xs text-gray-500 col-span-2">
+              {/* Nur ab sm über zwei Spalten — ohne Präfix erzwänge col-span-2 auf dem
+                  Handy eine zweite, schmale Spalte und quetschte Von/Bis zusammen */}
+              <label className="text-xs text-gray-500 sm:col-span-2">
                 Verfügbarkeit
                 <select
                   value={formAvail}
