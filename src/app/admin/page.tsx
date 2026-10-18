@@ -16,6 +16,7 @@ import {
   Link2,
   Settings,
   SlidersHorizontal,
+  Instagram,
   Loader2,
   LogOut,
 } from 'lucide-react';
@@ -71,6 +72,10 @@ const PriceOverview = dynamic(() => import('@/components/admin/PriceOverview'), 
   ssr: false,
   loading: AdminLoadingFallback,
 });
+const InstagramPanel = dynamic(() => import('@/components/admin/InstagramPanel'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
 const LogViewer = dynamic(() => import('@/components/admin/LogViewer'), {
   ssr: false,
   loading: AdminLoadingFallback,
@@ -109,6 +114,7 @@ type AdminTab =
   | 'guestapp'
   | 'beds24'
   | 'prices'
+  | 'instagram'
   | 'system';
 
 const TABS: {
@@ -128,6 +134,7 @@ const TABS: {
   { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
   { id: 'beds24', label: 'Beds24', shortLabel: 'B24', icon: Link2 },
   { id: 'prices', label: 'Preisübersicht', shortLabel: 'Preisüb.', icon: SlidersHorizontal },
+  { id: 'instagram', label: 'Instagram', shortLabel: 'Insta', icon: Instagram },
   { id: 'system', label: 'System', shortLabel: 'System', icon: Settings },
 ];
 
@@ -345,6 +352,8 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'beds24' && <Beds24Panel />}
 
           {activeTab === 'prices' && <PriceOverview />}
+
+          {activeTab === 'instagram' && <InstagramPanel />}
 
           {activeTab === 'system' && (
             <div className="space-y-12">

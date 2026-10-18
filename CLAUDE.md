@@ -32,7 +32,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
   - Passwort als PBKDF2-Hash in `settings.admin_code_hash` — setzen im Admin Center (Tab System) oder mit `npm run set-admin-password` (wirkt sofort)
   - Notfall-Passwort als Cloudflare Pages Secret `ADMIN_PASSWORD` — greift erst ab dem nächsten Deployment
   - Sessions serverseitig in `admin_auth_sessions`, gespeichert nur der SHA-256-Hash des Tokens
-- **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`) gehören NICHT unter `/api/admin`.
+- **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`, Instagram-Rücksprung `/api/instagram/callback`) gehören NICHT unter `/api/admin`.
 
 ## Beds24
 
@@ -52,6 +52,13 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Saisonpreise eines Jahres mit einem Klick: `src/lib/pricing/seasonPlan.ts` (identisch in beiden Repos, derzeit nur Natberger Hütte 2027), Vorschau und Übernahme in `price-overview/SeasonPlanPanel.tsx`
 - Server `src/lib/server/priceOverview.ts`: nur Zimmer der gewählten Unterkunft (`settings.beds24_property_id`), schreibt nur `price1`/`minStay`, vorher Sicherung (`beds24Snapshots.ts`); Regeln in `settings.price_rules`
 - Schreibt die Preisübersicht Preise, weichen sie danach ggf. von den Saisonpreisen im Tab „Mietpreise“ ab (Beds24SeasonSync zeigt das an)
+
+## Instagram
+
+- Kanal @sechszirbenhuette auf der Startseite (`src/components/sections/Instagram.tsx`), Daten von `/api/instagram` (öffentlich, zwischengespeichert in `settings.instagram_feed_cache`, stündlich neu, nach Fehlschlag frühestens nach 15 Min.)
+- Server `src/lib/server/instagram.ts`: „Instagram API mit Instagram-Login“ (Meta-App mit Instagram-App-ID/-Geheimnis, Scope `instagram_business_basic`), Schlüssel 60 Tage, wird nach 7 Tagen verlängert; Geheimnis und Schlüssel verlassen den Server nie
+- Admin-Tab „Instagram“ (`src/components/admin/InstagramPanel.tsx`, API `src/app/api/admin/instagram/route.ts`): Anleitung, App-Daten, „Mit Instagram verbinden“ oder Schlüssel einfügen, Feed an/aus
+- Rücksprung `src/app/api/instagram/callback/route.ts` liegt bewusst außerhalb von `/api/admin`, geschützt durch den Einmalwert `state` (15 Min., einmal nutzbar)
 
 ## Corporate Design (öffentliche Website)
 

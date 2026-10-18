@@ -564,5 +564,14 @@
     "reduceMotion": "Zmanjšaj gibanje",
     "motionReduced": "Gibanje zmanjšano",
     "motionSystem": "Gibanje zmanjšano (sistemska nastavitev)"
+  },
+  "instagram": {
+    "label": "Instagram",
+    "title": "Novice iz koče",
+    "text": "Aktualne fotografije in videi iz koče Sechszirbenhütte in Nockbergov.",
+    "follow": "Spremljajte nas na Instagramu",
+    "video": "Video",
+    "album": "Več fotografij",
+    "post": "Objava na Instagramu"
   }
 }

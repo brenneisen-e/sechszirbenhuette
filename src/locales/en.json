@@ -559,5 +559,14 @@
     "reduceMotion": "Reduce motion",
     "motionReduced": "Motion reduced",
     "motionSystem": "Motion reduced (system setting)"
+  },
+  "instagram": {
+    "label": "Instagram",
+    "title": "News from the hut",
+    "text": "Current photos and reels from the Sechszirbenhütte and the Nockberge.",
+    "follow": "Follow us on Instagram",
+    "video": "Video",
+    "album": "Several photos",
+    "post": "Post on Instagram"
   }
 }

@@ -561,5 +561,14 @@
     "reduceMotion": "Bewegung reduzieren",
     "motionReduced": "Bewegung reduziert",
     "motionSystem": "Bewegung reduziert (Systemeinstellung)"
+  },
+  "instagram": {
+    "label": "Instagram",
+    "title": "Neues von der Hütte",
+    "text": "Aktuelle Bilder und Reels aus der Sechszirbenhütte und den Nockbergen.",
+    "follow": "Folgen Sie uns auf Instagram",
+    "video": "Video",
+    "album": "Mehrere Bilder",
+    "post": "Beitrag auf Instagram"
   }
 }

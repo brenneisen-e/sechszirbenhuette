@@ -564,5 +564,14 @@
     "reduceMotion": "Riduci le animazioni",
     "motionReduced": "Animazioni ridotte",
     "motionSystem": "Animazioni ridotte (impostazione di sistema)"
+  },
+  "instagram": {
+    "label": "Instagram",
+    "title": "Novità dalla baita",
+    "text": "Foto e reel recenti dalla Sechszirbenhütte e dai Nockberge.",
+    "follow": "Seguiteci su Instagram",
+    "video": "Video",
+    "album": "Più foto",
+    "post": "Post su Instagram"
   }
 }

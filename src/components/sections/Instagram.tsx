@@ -1,60 +1,156 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Instagram as InstagramIcon, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ExternalLink, Instagram as InstagramIcon, Layers, Play } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+// Instagram-Kanal @sechszirbenhuette: die neuesten Beiträge als Raster
+// (Handy 4, Tablet 6, Desktop 8), jeweils mit Link auf den Beitrag. Die
+// Daten kommen zwischengespeichert von /api/instagram (src/lib/server/
+// instagram.ts); verbunden wird der Kanal im Admin Center, Tab Instagram.
+// Ohne Verbindung bleibt nur der Link zum Kanal.
 
 const INSTAGRAM_URL = 'https://www.instagram.com/sechszirbenhuette/';
-const LOGO_GREEN = '#263d35';
+
+interface Post {
+  id: string;
+  type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  image: string;
+  permalink: string;
+  caption: string;
+}
+
+interface Feed {
+  connected: boolean;
+  profile: { username: string } | null;
+  posts: Post[];
+}
+
+// Wie viele Beiträge je Breite zu sehen sind
+function visibility(index: number): string {
+  if (index >= 6) return 'hidden lg:block';
+  if (index >= 4) return 'hidden sm:block';
+  return '';
+}
+
+function shortCaption(caption: string, fallback: string): string {
+  const text = caption.replace(/\s+/g, ' ').trim();
+  if (!text) return fallback;
+  return text.length > 120 ? `${text.slice(0, 117)}…` : text;
+}
 
 export function Instagram() {
-  return (
-    <section className="pt-10 pb-6 bg-white">
-      <div className="container mx-auto px-4">
-        <motion.a
-          href={INSTAGRAM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          initial={false}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.6 }}
-          className="block max-w-4xl mx-auto group"
-        >
-          <div
-            className="relative overflow-hidden rounded-2xl p-8 sm:p-10 md:p-12 text-white transition-transform duration-300 group-hover:scale-[1.01]"
-            style={{
-              background: LOGO_GREEN,
-            }}
+  const { t } = useLanguage();
+  const [feed, setFeed] = useState<Feed | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/instagram')
+      .then((res) => (res.ok ? (res.json() as Promise<Feed>) : null))
+      .then((data) => {
+        if (!cancelled && data) setFeed(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handle = `@${feed?.profile?.username ?? 'sechszirbenhuette'}`;
+  const profileUrl = feed?.profile?.username
+    ? `https://www.instagram.com/${feed.profile.username}/`
+    : INSTAGRAM_URL;
+  const posts = (feed?.posts ?? []).slice(0, 8);
+
+  if (posts.length === 0) {
+    return (
+      <section aria-label={t.instagram.label} className="bg-leinen py-8 md:py-10">
+        <div className="brand-container">
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="on-zirbe group flex flex-col items-start gap-4 rounded-[4px] bg-zirbe p-6 text-leinen sm:flex-row sm:items-center sm:justify-between md:p-8"
           >
-            {/* Decorative circles */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5" />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
-
-            <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-              {/* Instagram icon */}
-              <div className="shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/25 transition-colors">
-                  <InstagramIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-                </div>
-              </div>
-
-              {/* Text */}
-              <div className="text-center sm:text-left flex-1">
-                <h3 className="text-2xl sm:text-3xl font-bold mb-2">
-                  Folgen Sie uns auf Instagram
-                </h3>
-                <p className="text-white/80 text-sm sm:text-base mb-3">
-                  Entdecken Sie aktuelle Bilder und Reels aus der Sechszirbenhütte und den
-                  Nockbergen
-                </p>
-                <span className="inline-flex items-center gap-2 text-white/90 font-medium text-sm group-hover:text-white transition-colors">
-                  @sechszirbenhuette
-                  <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <span className="flex items-center gap-4">
+              <InstagramIcon size={36} strokeWidth={1.5} aria-hidden />
+              <span>
+                <span className="block text-[1.375rem] leading-tight">{t.instagram.follow}</span>
+                <span className="mt-1 block text-[0.9375rem] text-leinen/85">
+                  {t.instagram.text}
                 </span>
-              </div>
-            </div>
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-leinen underline underline-offset-4 group-hover:decoration-2">
+              {handle}
+              <ExternalLink size={16} aria-hidden />
+            </span>
+          </a>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      id="instagram"
+      aria-labelledby="instagram-title"
+      className="bg-leinen py-12 md:py-14 lg:py-16"
+    >
+      <div className="brand-container">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="brand-label text-zirbe">{t.instagram.label}</p>
+            <h2 id="instagram-title" className="brand-h2 mt-2 text-zirbe">
+              {t.instagram.title}
+            </h2>
+            <p className="mt-2 max-w-xl text-rinde">{t.instagram.text}</p>
           </div>
-        </motion.a>
+          <a
+            href={profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="brand-secondary"
+          >
+            <InstagramIcon size={18} aria-hidden />
+            {handle}
+          </a>
+        </div>
+
+        <ul className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:mt-8 md:gap-3 lg:grid-cols-4">
+          {posts.map((post, index) => {
+            const alt = shortCaption(post.caption, t.instagram.post);
+            return (
+              <li key={post.id} className={visibility(index)}>
+                <a
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block aspect-square overflow-hidden rounded-[4px] bg-zirbe/10"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Bilder liegen bei Instagram, Adressen wechseln */}
+                  <img
+                    src={post.image}
+                    alt={alt}
+                    loading="lazy"
+                    decoding="async"
+                    referrerPolicy="no-referrer"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                  />
+                  {post.type !== 'IMAGE' && (
+                    <span className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-[4px] bg-zirbe/80 text-leinen">
+                      {post.type === 'VIDEO' ? (
+                        <Play size={16} aria-label={t.instagram.video} />
+                      ) : (
+                        <Layers size={16} aria-label={t.instagram.album} />
+                      )}
+                    </span>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
