@@ -21,7 +21,7 @@
     "title": "v Sechszirbenhütte",
     "subtitle": "Premium gorska koča na 1.700m v koroških Nockbergah",
     "description": "Odkrijte Sechszirbenhütte, vašo sanjsko namestitev na 1.700 m nadmorske višine v srcu gorovja Nockberge na Koroškem v Avstriji. Na slikoviti južni strani Alp v Falkertseeju naša koča ponuja celoletni počitniški raj za družine in ljubitelje narave.",
-    "cta_book": "Rezervirajte Zdaj",
+    "cta_book": "Rezervirajte neposredno",
     "cta_explore": "Raziskujte Kočo"
   },
   "features": {
@@ -80,15 +80,15 @@
     "intro": "Privoščite si nepozabne počitnice v naši več kot 250 let stari gorski koči na samotni lokaciji – neposredno ob Narodnem parku Nockberge.",
     "details": {
       "grundstueck": "1.200 m² alpskega zemljišča",
-      "wohnflaeche": "80 m²",
+      "wohnflaeche": "85 m²",
       "hoehe": "1.700m nadmorske višine",
-      "personen": "2–5 oseb"
+      "personen": "do 5 oseb"
     },
     "rooms": {
       "title": "Spalnice",
       "bedroom1": "Spalnica 1: Zakonska postelja",
-      "bedroom2": "Spalnica 2: Zakonska postelja",
-      "living": "Dnevni prostor z možnostjo spanja"
+      "bedroom2": "Spalnica 2: Zakonska in enojna postelja",
+      "living": "Izba s pečjo na pelete"
     },
     "kitchen": {
       "title": "Kuhinja",
@@ -102,8 +102,8 @@
       ]
     },
     "bathroom": {
-      "title": "Kopalnica",
-      "items": ["Tuš z WC", "Talno ogrevanje"]
+      "title": "Kopalnici",
+      "items": ["2 kopalnici", "Ločeno stranišče", "Talno ogrevanje"]
     },
     "sauna": {
       "title": "Savna",
@@ -254,32 +254,82 @@
     }
   },
   "buchung": {
-    "title": "Pošljite Nezavezujoče Povpraševanje",
-    "subtitle": "Rezervirajte Svoje Sanjske Počitnice v Sechszirbenhütte",
-    "prices": {
-      "title": "Pregled Cen",
-      "base": "Cena najema na noč (do 4 osebe)",
-      "lowSeason": "Nizka Sezona",
-      "highSeason": "Visoka Sezona",
-      "minStay": "Minimalno bivanje: 3 noči (Visoka sezona: 7 noči)"
+    "title": "Rezervirajte neposredno",
+    "subtitle": "Preverite razpoložljivost in takoj rezervirajte – neposredno pri nas po najboljši ceni.",
+    "direct": {
+      "title": "Neposredna rezervacija = najboljša cena",
+      "text": "Pri nas rezervirate približno 15 % ceneje kot prek Booking.com ali Airbnb."
     },
-    "extras": {
-      "title": "Dodatne Storitve",
-      "person5": "5. Oseba",
-      "dog": "Pes",
-      "laundry": "Paket Perila"
+    "search": {
+      "title": "Izberite termin",
+      "arrival": "Prihod",
+      "departure": "Odhod",
+      "adults": "Odrasli",
+      "children": "Otroci",
+      "guests": "Osebe",
+      "submit": "Preveri ceno in razpoložljivost",
+      "short": "Preveri",
+      "nights": "noči",
+      "night": "noč",
+      "invalid": "Odhod mora biti po prihodu.",
+      "maxGuests": "Koča sprejme do 5 oseb."
+    },
+    "widget": {
+      "title": "Koledar rezervacij",
+      "frameTitle": "Koledar rezervacij koče Sechszirbenhütte",
+      "loading": "Nalaganje koledarja …",
+      "openWindow": "Odpri rezervacijo v novem oknu",
+      "secure": "Varna rezervacija prek Beds24"
+    },
+    "prices": {
+      "title": "Cene",
+      "text": "Cene na noč glede na sezono, stroški vključeni. Točno ceno za vaš termin pokaže koledar rezervacij.",
+      "minStayTitle": "Minimalno bivanje",
+      "minStay": [
+        "praviloma 7 noči",
+        "4 noči od 1. do 19. marca, junija in septembra",
+        "3 noči v nizki sezoni in v tednu pred božičem",
+        "kratkoročno včasih tudi manj"
+      ]
     },
     "included": {
-      "title": "Vključeno",
+      "title": "Vključeno v ceno",
       "items": [
-        "Elektrika (20 kWh/noč)",
-        "Ogrevanje",
+        "Elektrika",
+        "Ogrevanje (peleti)",
         "Voda",
         "Odvoz odpadkov",
-        "Končno čiščenje (brez psa)",
         "WiFi",
-        "Turistična taksa (odrasli)",
         "Uporaba savne"
+      ]
+    },
+    "extras": {
+      "title": "Dodatno",
+      "items": [
+        {
+          "label": "Končno čiščenje",
+          "value": "150 €",
+          "note": "s psom 190 €"
+        },
+        {
+          "label": "Turistična taksa",
+          "value": "4,50 €",
+          "note": "na odraslo osebo in noč, otroci do 16 let brezplačno, vključen brezplačen prevoz za goste"
+        },
+        {
+          "label": "Paket perila (neobvezno)",
+          "value": "25 €",
+          "note": "na osebo"
+        }
+      ]
+    },
+    "info": {
+      "title": "Dobro je vedeti",
+      "items": [
+        "Prihod od 15. ure, odhod do 10. ure",
+        "30 % predplačilo z bančnim nakazilom",
+        "Last minute: prihod v 14 dneh 10 % popusta, v 7 dneh 15 %",
+        "Psi so dobrodošli"
       ]
     },
     "form": {
@@ -362,8 +412,8 @@
     "checkAvailability": "Preveri razpoložljivost",
     "loadingBooking": "Nalaganje rezervacijskega sistema...",
     "floorPlan": "Tloris",
-    "floorPlanDesc": "Naša koča ponuja približno 85 m² bivalne površine za do 5 oseb.",
-    "livingSpace": "približno 85 m² bivalne površine",
+    "floorPlanDesc": "85 m² bivalne površine: izba s pečjo na pelete, v celoti opremljena kuhinja, dve spalnici za do 5 oseb, dve kopalnici in ločeno stranišče – ob tem lastna savna s sobo za počitek in velik balkon okoli koče.",
+    "livingSpace": "85 m² bivalne površine",
     "floors": "2 nadstropji",
     "previousReview": "Prejšnja ocena",
     "nextReview": "Naslednja ocena",
@@ -390,62 +440,60 @@
   },
   "amenities": {
     "living": {
-      "title": "Dnevni Prostor",
-      "items": ["Švedska peč", "Jedilni kotiček", "Satelitska TV & DVD", "Stereo naprava"]
+      "title": "Izba",
+      "items": ["Peč na pelete", "Sedežna garnitura in jedilna miza", "Satelitska TV", "WiFi"]
     },
     "kitchen": {
       "title": "Kuhinja",
       "items": [
-        "Popolnoma opremljena",
+        "V celoti opremljena",
         "Pomivalni stroj",
-        "Keramična plošča & pečica",
-        "Mikrovalovna z žarom"
+        "Štedilnik in pečica",
+        "Aparat za kavo in grelnik vode"
       ]
     },
     "rooms": {
-      "title": "Spalnice",
+      "title": "Spalnici",
       "items": [
-        "1 galerijska soba (2 enojni postelji)",
-        "1 dvoposteljna soba",
-        "1 soba z 2 pogradi",
-        "Prostor za 5 oseb"
+        "Spalnica 1: zakonska postelja",
+        "Spalnica 2: zakonska in enojna postelja",
+        "Za do 5 oseb"
       ],
-      "hint": "Prinesite lastno posteljnino ali rezervirajte paket udobja"
+      "hint": "Prinesite posteljnino in brisače ali rezervirajte paket perila (25 € na osebo)"
     },
     "sauna": {
-      "title": "Savna & Wellness",
+      "title": "Savna in počitek",
       "items": [
-        "Savna s sanarijem",
-        "Prostor za sprostitev z ležalniki",
-        "Dodatna prha s Kneipp cevjo",
-        "Talno ogrevanje"
+        "Lastna finska savna",
+        "Soba za počitek z ležalniki",
+        "Deževna prha",
+        "Terasa ob savni"
       ]
     },
     "bathroom": {
-      "title": "Kopalnica",
-      "items": ["Tuš & WC", "Dvojno umivalnik", "Talno ogrevanje", "Moderna oprema"],
-      "hint": "Prinesite lastne brisače ali rezervirajte paket udobja"
+      "title": "Kopalnici",
+      "items": ["2 kopalnici", "Ločeno stranišče", "Talno ogrevanje"]
     },
     "outdoor": {
-      "title": "Zunanjost",
+      "title": "Zunaj",
       "items": [
-        "15m² balkon z zunanjim stopniščem",
-        "650m² zemljišče",
-        "2 parkirni mesti",
-        "Žar & vrtno pohištvo"
+        "Velik balkon okoli koče",
+        "Lasten planinski vrt (1.200 m²)",
+        "Vrtno pohištvo in žar",
+        "Parkirišče ob koči"
       ]
     },
     "equipment": {
       "title": "Oprema",
-      "items": ["WiFi / ADSL", "Satelitska TV", "Žar", "Hišni ljubljenčki dobrodošli"]
+      "items": ["WiFi", "Satelitska TV", "Pralni in sušilni stroj", "Psi so dobrodošli"]
     },
     "location": {
-      "title": "Lokacija",
+      "title": "Lega",
       "items": [
-        "Smučišče Falkert na mestu",
-        "Turracher Höhe (20 min.)",
-        "Bad Kleinkirchheim (25 min.)",
-        "Številne pohodniške poti"
+        "Na samem na 1.700 m",
+        "Jezero Falkertsee 800 m",
+        "Heidi Alm 800 m z avtom",
+        "Bad Kleinkirchheim in Turracher Höhe pribl. 20 min"
       ]
     }
   },
@@ -475,16 +523,16 @@
         "label": "nadmorske višine, na samem"
       },
       {
-        "value": "2–5",
-        "label": "oseb"
+        "value": "do 5",
+        "label": "oseb, 2 spalnici"
       },
       {
-        "value": "80 m²",
-        "label": "bivalne površine"
+        "value": "85 m²",
+        "label": "bivalne površine, ob tem 1.200 m² planinskega vrta"
       },
       {
         "value": "Savna",
-        "label": "zasebni prizidek s sobo za počitek"
+        "label": "lastna savna s sobo za počitek"
       },
       {
         "value": "Psi",
@@ -496,17 +544,17 @@
     "chapters": [
       {
         "title": "Zunaj",
-        "text": "Koča stoji sama med cemprini in macesni, tik ob Narodnem parku Nockberge. Poleti pohodi po Nockbergih, pozimi smučanje na smučišču Heidi Alm.",
+        "text": "Koča stoji sama med cemprini in macesni, tik ob Narodnem parku Nockberge, 800 m od jezera Falkertsee. Poleti pohodi po Nockbergih, pozimi smučanje na smučišču Heidi Alm.",
         "alt": "Koča Sechszirbenhütte poleti z balkonom in drvmi med smrekami"
       },
       {
         "title": "Znotraj",
-        "text": "Star les, peč na pelete in v celoti opremljena kuhinja. Dve spalnici z zakonsko posteljo in dnevni prostor z dodatnim ležiščem za dve do pet oseb.",
+        "text": "Star les, izba s pečjo na pelete in v celoti opremljena kuhinja. Dve spalnici – ena z zakonsko posteljo, druga z zakonsko in enojno posteljo – za do pet oseb, poleg tega dve kopalnici in ločeno stranišče.",
         "alt": "Lesena izba s stopniščem, poslikano kmečko omaro in pogledom v kuhinjo"
       },
       {
         "title": "Čas za vas",
-        "text": "Zasebni prizidek s finsko savno, sobo za počitek in deževno prho je samo vaš. Zjutraj vas kava čaka na balkonu, ki obdaja kočo.",
+        "text": "Lastna savna s sobo za počitek in teraso je samo vaša. Zjutraj vas kava čaka na velikem balkonu, ki obdaja kočo.",
         "alt": "Skodelica kave v snegu na balkonski ograji"
       }
     ],

@@ -1,398 +1,173 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { Check, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BookingSearch } from '@/components/brand/BookingSearch';
 import {
-  CalendarCheck,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  Euro,
-  PlusCircle,
-  Gift,
-} from 'lucide-react';
-import { DESKLINE_CONFIG } from '@/lib/constants';
+  beds24BookingUrl,
+  BOOKING_SEARCH_EVENT,
+  type BookingQuery,
+  DEFAULT_QUERY,
+  readBookingQuery,
+} from '@/lib/booking';
 
-// Extend Window interface for Deskline widget
-declare global {
-  interface Window {
-    dw?: ((...args: unknown[]) => void) & { q?: unknown[][] };
-  }
-}
+// Buchung direkt über Beds24 (Unterkunft 359833, nur Zimmer 741929) als
+// eingebettete Buchungsseite. Beds24 sendet keine Höhe an die Seite (kein
+// iframeResizer), deshalb hat der Rahmen eine feste Höhe je Breite, und der
+// Link „in eigenem Fenster“ bleibt als Ausweg sichtbar — vor allem auf dem
+// Handy. Preise und Zusatzkosten daneben sind Hinweise; verbindlich rechnet
+// Beds24.
 
 export function Buchung() {
   const { t, language } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scriptLoadedRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [shouldLoadWidget, setShouldLoadWidget] = useState(false);
+  const b = t.buchung;
+  const [query, setQuery] = useState<BookingQuery>(DEFAULT_QUERY);
+  const [loaded, setLoaded] = useState(false);
 
-  const includedItems = t.buchung.included.items;
-
-  // Expand the widget and load it
-  const expandWidget = useCallback(() => {
-    setIsExpanded(true);
-    setShouldLoadWidget(true);
+  useEffect(() => {
+    setQuery(readBookingQuery(new URLSearchParams(window.location.search)));
+    const onSearch = (e: Event) => setQuery((e as CustomEvent<BookingQuery>).detail);
+    window.addEventListener(BOOKING_SEARCH_EVENT, onSearch);
+    return () => window.removeEventListener(BOOKING_SEARCH_EVENT, onSearch);
   }, []);
 
-  // Listen for hash changes and initial hash
-  useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#buchung') {
-        expandWidget();
-      }
-    };
+  const url = beds24BookingUrl(query, language);
+  useEffect(() => setLoaded(false), [url]);
 
-    if (window.location.hash === '#buchung') {
-      setTimeout(expandWidget, 100);
-    }
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [expandWidget]);
-
-  // Listen for clicks on #buchung links to expand
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest('a[href="#buchung"], a[href="/#buchung"]');
-      if (link) {
-        setTimeout(expandWidget, 100);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [expandWidget]);
-
-  // Load the Deskline widget only when shouldLoadWidget is true
-  useEffect(() => {
-    if (!shouldLoadWidget) return;
-    if (scriptLoadedRef.current) return;
-    scriptLoadedRef.current = true;
-
-    // Spoof mobile viewport for the widget BEFORE it loads
-    const originalInnerWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth');
-    const originalMatchMedia = window.matchMedia;
-
-    // Override innerWidth to return mobile size (375px)
-    Object.defineProperty(window, 'innerWidth', {
-      configurable: true,
-      get: () => 375,
-    });
-
-    // Override matchMedia to return mobile-style results
-    window.matchMedia = (query: string) => {
-      const result = originalMatchMedia.call(window, query);
-      if (query.includes('min-width')) {
-        const match = query.match(/min-width:\s*(\d+)/);
-        if (match?.[1] && parseInt(match[1]) > 500) {
-          return {
-            ...result,
-            matches: false,
-            media: query,
-            onchange: null,
-            addListener: () => {},
-            removeListener: () => {},
-            addEventListener: () => {},
-            removeEventListener: () => {},
-            dispatchEvent: () => true,
-          } as MediaQueryList;
-        }
-      }
-      if (query.includes('max-width')) {
-        const match = query.match(/max-width:\s*(\d+)/);
-        if (match?.[1] && parseInt(match[1]) >= 500) {
-          return {
-            ...result,
-            matches: true,
-            media: query,
-            onchange: null,
-            addListener: () => {},
-            removeListener: () => {},
-            addEventListener: () => {},
-            removeEventListener: () => {},
-            dispatchEvent: () => true,
-          } as MediaQueryList;
-        }
-      }
-      return result;
-    };
-
-    // Initialize dw function
-    window.dw =
-      window.dw ||
-      function (...args: unknown[]) {
-        (window.dw!.q = window.dw!.q || []).push(args);
-      };
-
-    // Configure widget settings
-    window.dw('settings', DESKLINE_CONFIG.widgetId, {
-      context: {
-        serviceIds: [],
-        productIds: [],
-        packageIds: [],
-      },
-      lang: language === 'en' ? 'en' : 'de',
-    });
-
-    // Load Deskline script
-    const script = document.createElement('script');
-    script.src = DESKLINE_CONFIG.scriptUrl;
-    script.async = true;
-    document.body.appendChild(script);
-
-    // Watch for widget being added to body and move it to our container
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        for (const node of mutation.addedNodes) {
-          if (node instanceof HTMLElement) {
-            const isWidget =
-              node.id?.includes('deskline') ||
-              node.id?.includes('dw-') ||
-              node.className?.includes('deskline') ||
-              node.className?.includes('dw-') ||
-              node.querySelector('[class*="deskline"]') ||
-              node.querySelector('[class*="dw-"]');
-
-            if (isWidget && containerRef.current && node.parentElement === document.body) {
-              containerRef.current.appendChild(node);
-              setIsLoading(false);
-            }
-          }
-        }
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: false });
-
-    // Fallback: After 3 seconds, check if widget appeared somewhere
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-      const desklineElements = document.querySelectorAll(
-        '[id*="dw-"], [class*="dw-"], [id*="deskline"], [class*="deskline"]',
-      );
-      desklineElements.forEach((el) => {
-        if (el.parentElement === document.body && containerRef.current) {
-          containerRef.current.appendChild(el);
-        }
-      });
-    }, 3000);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(timeout);
-      if (originalInnerWidth) {
-        Object.defineProperty(window, 'innerWidth', originalInnerWidth);
-      }
-      window.matchMedia = originalMatchMedia;
-      scriptLoadedRef.current = false;
-    };
-  }, [shouldLoadWidget, language]);
+  const card = 'rounded-[4px] border border-zirbe/15 bg-white p-5';
+  const cardTitle = 'text-[1.125rem] text-zirbe';
 
   return (
-    <section id="buchung" className="py-20 bg-stone-50">
-      <div className="container">
-        {/* Header */}
-        <motion.div
-          initial={false}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center max-w-4xl mx-auto mb-16"
-        >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-logo-green/10 text-logo-green mb-6">
-            <CalendarCheck size={32} strokeWidth={1.5} />
-          </div>
+    <section id="buchung" aria-labelledby="buchung-title" className="bg-leinen py-14 lg:py-20">
+      <div className="brand-container">
+        <div className="max-w-3xl">
           <h2
+            id="buchung-title"
             data-text-key="buchung_title"
-            className="brand-h2 text-logo-green mb-4"
-            style={{ fontFamily: 'var(--font-sans)', ...getTextStyle('buchung_title') }}
+            className="brand-h2 text-zirbe"
+            style={getTextStyle('buchung_title')}
           >
             {getText('buchung_title')}
           </h2>
           <p
             data-text-key="buchung_subtitle"
-            className="text-sm sm:text-base md:text-lg text-gray-600"
+            className="mt-3 text-rinde"
             style={getTextStyle('buchung_subtitle')}
           >
             {getText('buchung_subtitle')}
           </p>
-        </motion.div>
+        </div>
 
-        {/* Booking Widget - Full Width */}
-        <motion.div
-          initial={false}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-8"
-        >
-          <div className="bg-gray-50 rounded-xl overflow-hidden">
-            {/* Collapsed State - Show Button */}
-            {!isExpanded && (
-              <div className="p-6 md:p-8 text-center">
-                <div className="max-w-md mx-auto">
-                  <CalendarCheck className="w-12 h-12 text-logo-green mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-logo-green mb-2">
-                    {t.buchung.form.title}
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    {language === 'de'
-                      ? 'Prüfen Sie die Verfügbarkeit und senden Sie uns direkt eine Anfrage.'
-                      : 'Check availability and send us a request directly.'}
-                  </p>
-                  <button
-                    onClick={expandWidget}
-                    className="bg-logo-green text-white px-8 py-4 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-lg flex items-center justify-center gap-2 mx-auto group"
-                  >
-                    <span>{language === 'de' ? 'Verfügbarkeit prüfen' : 'Check availability'}</span>
-                    <ChevronDown className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            )}
+        {/* Handy/Tablet: Suche, Kalender, Hinweise untereinander; Desktop: links
+            Suche und Hinweise, rechts der Kalender über beide Zeilen */}
+        <div className="mt-8 grid gap-6 lg:mt-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-10">
+          <div className="grid content-start gap-4 sm:grid-cols-2 lg:col-span-4 lg:grid-cols-1">
+            <div className="on-zirbe rounded-[4px] bg-zirbe p-5 text-leinen sm:col-span-2 lg:col-span-1">
+              <p className="text-[1.25rem] leading-snug">{b.direct.title}</p>
+              <p className="mt-1 text-[0.9375rem] text-leinen/85">{b.direct.text}</p>
+            </div>
 
-            {/* Expanded State - Show Widget */}
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={false}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* Collapse Header */}
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className="w-full px-4 md:px-6 py-4 bg-gray-200 hover:bg-gray-300 transition flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <CalendarCheck className="w-5 h-5 text-logo-green" />
-                      <span className="font-semibold text-gray-900">{t.buchung.form.title}</span>
-                    </div>
-                    <ChevronUp className="w-5 h-5 text-gray-600" />
-                  </button>
-
-                  {/* Widget Container */}
-                  <div
-                    ref={containerRef}
-                    id="deskline-container"
-                    className="p-4 md:p-6 min-h-[500px] [&>*]:w-full"
-                  >
-                    {isLoading && (
-                      <div className="flex items-center justify-center h-64 text-gray-500">
-                        <div className="text-center">
-                          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-wood-600" />
-                          <p>
-                            {language === 'de'
-                              ? 'Buchungssystem wird geladen...'
-                              : 'Loading booking system...'}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className={`${card} sm:col-span-2 lg:col-span-1`}>
+              <h3 className={cardTitle}>{b.search.title}</h3>
+              <BookingSearch variant="section" className="mt-3" />
+            </div>
           </div>
-        </motion.div>
 
-        {/* Info Cards - 3 columns on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {/* Price Info */}
-          <motion.div
-            initial={false}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          <div
+            id="buchung-kalender"
+            className="scroll-mt-4 lg:col-span-8 lg:col-start-5 lg:row-span-2 lg:row-start-1"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
-                <Euro className="w-5 h-5 text-logo-green" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">{t.buchung.prices.title}</h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">{t.buchung.prices.base}</p>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">{t.buchung.prices.lowSeason}</span>
-                <span className="font-semibold text-gray-900">auf Anfrage</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">{t.buchung.prices.highSeason}</span>
-                <span className="font-semibold text-gray-900">auf Anfrage</span>
-              </div>
-            </div>
-            <p className="mt-4 text-xs text-gray-400">{t.buchung.prices.minStay}</p>
-          </motion.div>
-
-          {/* Extras */}
-          <motion.div
-            initial={false}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.05 }}
-            id="extras"
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow scroll-mt-24"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
-                <PlusCircle className="w-5 h-5 text-logo-green" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">{t.buchung.extras.title}</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">{t.buchung.extras.person5}</span>
-                <span className="font-medium text-gray-900">
-                  50 € <span className="text-gray-400 text-sm">/ Aufenthalt</span>
+            <div className="overflow-hidden rounded-[4px] border border-zirbe/15 bg-white">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-zirbe/10 px-4 py-3 text-[0.9375rem]">
+                <span className="inline-flex items-center gap-2 text-rinde">
+                  <ShieldCheck size={18} className="text-zirbe" aria-hidden />
+                  {b.widget.secure}
                 </span>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="brand-link inline-flex items-center gap-1.5"
+                >
+                  {b.widget.openWindow}
+                  <ExternalLink size={16} aria-hidden />
+                </a>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">{t.buchung.extras.dog}</span>
-                <span className="font-medium text-gray-900">
-                  40 € <span className="text-gray-400 text-sm">/ Tier</span>
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">{t.buchung.extras.laundry}</span>
-                <span className="font-medium text-gray-900">
-                  25 € <span className="text-gray-400 text-sm">/ Person</span>
-                </span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Included */}
-          <motion.div
-            initial={false}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-logo-green/20 hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-logo-green/10 flex items-center justify-center">
-                <Gift className="w-5 h-5 text-logo-green" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">{t.buchung.included.title}</h3>
-            </div>
-            <ul className="space-y-2.5">
-              {includedItems.map((item: string, index: number) => (
-                <li key={index} className="flex items-center gap-3 text-sm text-gray-700">
-                  <div className="w-5 h-5 rounded-full bg-logo-green/10 flex items-center justify-center flex-shrink-0">
-                    <Check size={12} className="text-logo-green" />
+              <div className="relative h-[1500px] sm:h-[1700px] lg:h-[1780px]">
+                {!loaded && (
+                  <div className="absolute inset-x-0 top-0 flex justify-center pt-24 text-rinde">
+                    <span className="inline-flex items-center gap-3">
+                      <Loader2 size={22} className="animate-spin text-zirbe" aria-hidden />
+                      {b.widget.loading}
+                    </span>
                   </div>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+                )}
+                <iframe
+                  src={url}
+                  title={b.widget.frameTitle}
+                  loading="lazy"
+                  onLoad={() => setLoaded(true)}
+                  className="absolute inset-0 h-full w-full border-0"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid content-start gap-4 sm:grid-cols-2 lg:col-span-4 lg:grid-cols-1">
+            <div className={card}>
+              <h3 className={cardTitle}>{b.prices.title}</h3>
+              <p className="mt-2 text-[0.9375rem] text-rinde">{b.prices.text}</p>
+              <h4 className="mt-4 text-[0.9375rem] text-zirbe">{b.prices.minStayTitle}</h4>
+              <ul className="mt-1 space-y-1 text-[0.9375rem] text-rinde">
+                {b.prices.minStay.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={card}>
+              <h3 className={cardTitle}>{b.extras.title}</h3>
+              <ul className="mt-2 divide-y divide-zirbe/10">
+                {b.extras.items.map((item) => (
+                  <li key={item.label} className="py-2">
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="text-rinde">{item.label}</span>
+                      <span className="whitespace-nowrap text-zirbe tabular-nums">
+                        {item.value}
+                      </span>
+                    </span>
+                    <span className="block text-[0.875rem] text-rinde/75">{item.note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={card}>
+              <h3 className={cardTitle}>{b.included.title}</h3>
+              <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[0.9375rem] text-rinde lg:grid-cols-1 xl:grid-cols-2">
+                {b.included.items.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check size={16} className="mt-1 shrink-0 text-zirbe" aria-hidden />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className={card}>
+              <h3 className={cardTitle}>{b.info.title}</h3>
+              <ul className="mt-2 space-y-1.5 text-[0.9375rem] text-rinde">
+                {b.info.items.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check size={16} className="mt-1 shrink-0 text-zirbe" aria-hidden />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>

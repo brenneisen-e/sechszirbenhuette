@@ -39,6 +39,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Admin-Tab „Beds24“: `src/components/admin/Beds24Panel.tsx` + `Beds24Cockpit.tsx`, API `src/app/api/admin/beds24/route.ts`, Server-Lib `src/lib/server/beds24*.ts`
 - Beds24-Konto wird mit der Natberger Hütte geteilt → alles auf `settings.beds24_property_id` beschränkt (serverseitig erzwungen)
 - Webhook: `src/app/api/beds24-webhook/route.ts`, Buchungsschluss: `src/app/api/booking-cutoff/route.ts` + `.github/workflows/buchungsschluss.yml`
+- Buchung auf der Website: eingebettete Beds24-Buchungsseite (Unterkunft 359833, nur Zimmer 741929 per `roomid`), `src/lib/booking.ts` + `src/components/sections/Buchung.tsx`; Suche (Anreise/Abreise/Personen) `src/components/brand/BookingSearch.tsx` im Hero und im Buchungsbereich, Zeitraum in der Adresse (`?anreise=…&abreise=…&erwachsene=…&kinder=…#buchung`). Preise, Endreinigung, Ortstaxe, Extras rechnet nur Beds24 — keine Preise im Code. Feratel/Deskline ist entfernt
 
 ## Verbindung zur Natberger Hütte und Preisübersicht
 
@@ -57,6 +58,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Grundlage: Corporate Design „Zirbenzweig und Fassadenbraun“ V3 + Claude-Code-Briefing (15.10.2026)
 - Tokens/Bausteine: `src/styles/brand.css`, Tailwind-Farben `zirbe`, `leinen`, `fassadenbraun`, `fensterladenrot`, `on-red`, `rinde`, `moos`, `holz`
 - Komponenten: `src/components/brand/*` (BrandLogo, BookingCTA, FacadeBand = M1, HutChapters = M2, ZirbenMark/HostGreeting = M3, MotionToggle), Bewegungspräferenz `src/contexts/MotionContext.tsx`
+- Ansprache auf der Website durchgehend „Sie“ (Briefing 18.10.2026), auch in Alt-Texten, Buttons, Fehlermeldungen; Fakten (85 m², 2 Schlafzimmer, 2 Bäder + WC …) in den Sprachdateien `src/locales/*.json` (`brand`, `amenities`, `buchung`)
 - Regeln: Schrift nie rot; Rot nur als Hintergrund des Buchen-Buttons; Braun nur im Fassadenband; keine Herzen; Northwell nur kurz, Grün/Leinen, nie über Video/Fotos; Hero-Video bleibt
 - Platzhalter bis zum Designpaket: Gill Sans Nova (lokale Gill Sans/Systemschrift), Northwell (Autography), Fugenband-Geometrie, Logo/Zweig aus `public/images/logo.svg` abgeleitet
 

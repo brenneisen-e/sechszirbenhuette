@@ -4,12 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMotion } from '@/contexts/MotionContext';
-import { BookingCTA } from '@/components/brand/BookingCTA';
+import { BookingSearch } from '@/components/brand/BookingSearch';
 
 // Aufmacher: das bestehende Hüttenvideo (Medienkategorie „hero“, Cloudflare
 // Stream/HLS) bleibt die prägende Medienfläche. Leitidee, Ort und Buchen stehen
 // auf einer ruhigen, deckenden grünen Fläche daneben (mobil darunter) — nie
-// über dem laufenden Film.
+// über dem laufenden Film. Buchen ist dort eine kompakte Suche (Anreise,
+// Abreise, Personen), die den Beds24-Kalender im Abschnitt #buchung lädt.
 //
 // Wiedergabe: stumm, inline, in Schleife, unabhängig vom Scrollen. Automatischer
 // Start nur ohne reduzierte Bewegung. Außerhalb des Sichtbereichs oder bei
@@ -242,9 +243,10 @@ export function Hero() {
               <span className="brand-hand mt-2 block text-leinen">{t.brand.claimHand}</span>
             </h1>
             <p className="mt-6 max-w-[30rem] text-leinen">{t.brand.heroText}</p>
-            <div className="mt-8">
-              <BookingCTA />
-            </div>
+            <BookingSearch
+              variant="hero"
+              className="mt-8 max-w-[30rem] md:max-w-none lg:max-w-[30rem]"
+            />
           </div>
         </div>
       </div>

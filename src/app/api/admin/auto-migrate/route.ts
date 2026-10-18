@@ -379,6 +379,22 @@ export async function POST() {
       'guest_sessions',
     );
 
+    // Website durchgehend mit „Sie“ (Briefing 18.10.2026): Blogtexte aus der
+    // Zeit der Du/Ihr-Ansprache angleichen. Ändert nur, solange die alte
+    // Formulierung noch vorkommt.
+    try {
+      const result = (await db
+        .prepare(
+          `UPDATE blog_posts SET content = REPLACE(content, 'Wasserspielplatz auf euch', 'Wasserspielplatz auf Sie')
+           WHERE content LIKE '%Wasserspielplatz auf euch%'`,
+        )
+        .run()) as { meta?: { changes?: number } };
+      if ((result.meta?.changes ?? 0) > 0) migrated.push('blog_posts:sie_ansprache');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      errors.push(`blog_posts:sie_ansprache: ${msg}`);
+    }
+
     return NextResponse.json({
       success: true,
       migrated,

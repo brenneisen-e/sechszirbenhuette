@@ -3,9 +3,8 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
 // Primärer CTA „Buchen“: roter Hintergrund, dunkle Schrift, keine Symbole.
-// Ziel ist das bestehende Buchungs-Widget (Feratel/Deskline) im Abschnitt
-// #buchung der Startseite — ein echter Link, funktioniert auch ohne JavaScript.
-// Buchung.tsx öffnet das Widget beim Sprung auf #buchung.
+// Ziel ist die Beds24-Buchung im Abschnitt #buchung der Startseite — ein
+// echter Link, funktioniert auch ohne JavaScript.
 
 interface Props {
   compact?: boolean;

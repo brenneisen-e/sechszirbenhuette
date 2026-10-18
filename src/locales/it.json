@@ -21,7 +21,7 @@
     "title": "alla Sechszirbenhütte",
     "subtitle": "Rifugio premium a 1.700m nelle Nockberge della Carinzia",
     "description": "Scoprite la Sechszirbenhütte, il vostro alloggio da sogno a 1.700 m di altitudine nel cuore delle montagne Nockberge in Carinzia, Austria. Situata sul pittoresco versante meridionale delle Alpi a Falkertsee, la nostra baita offre un paradiso vacanziero per famiglie e amanti della natura tutto l'anno.",
-    "cta_book": "Prenota Ora",
+    "cta_book": "Prenotate direttamente",
     "cta_explore": "Scopri il Rifugio"
   },
   "features": {
@@ -80,15 +80,15 @@
     "intro": "Concediti una vacanza indimenticabile nel nostro rifugio di montagna di oltre 250 anni in posizione isolata – direttamente al Parco Nazionale Nockberge.",
     "details": {
       "grundstueck": "1.200 m² di terreno alpino",
-      "wohnflaeche": "80 m²",
+      "wohnflaeche": "85 m²",
       "hoehe": "1.700m sul livello del mare",
-      "personen": "2–5 persone"
+      "personen": "fino a 5 persone"
     },
     "rooms": {
       "title": "Camere da Letto",
       "bedroom1": "Camera 1: Letto matrimoniale",
-      "bedroom2": "Camera 2: Letto matrimoniale",
-      "living": "Zona giorno con possibilità di dormire"
+      "bedroom2": "Camera 2: Letto matrimoniale e letto singolo",
+      "living": "Stube con stufa a pellet"
     },
     "kitchen": {
       "title": "Cucina",
@@ -102,8 +102,8 @@
       ]
     },
     "bathroom": {
-      "title": "Bagno",
-      "items": ["Doccia con WC", "Riscaldamento a pavimento"]
+      "title": "Bagni",
+      "items": ["2 bagni", "WC separato", "Riscaldamento a pavimento"]
     },
     "sauna": {
       "title": "Sauna",
@@ -254,32 +254,82 @@
     }
   },
   "buchung": {
-    "title": "Invia una Richiesta Non Vincolante",
-    "subtitle": "Prenota la Tua Vacanza da Sogno alla Sechszirbenhütte",
-    "prices": {
-      "title": "Panoramica Prezzi",
-      "base": "Prezzo affitto per notte (fino a 4 persone)",
-      "lowSeason": "Bassa Stagione",
-      "highSeason": "Alta Stagione",
-      "minStay": "Soggiorno minimo: 3 notti (Alta stagione: 7 notti)"
+    "title": "Prenotate direttamente",
+    "subtitle": "Verificate la disponibilità e prenotate subito – direttamente da noi al miglior prezzo.",
+    "direct": {
+      "title": "Prenotazione diretta = miglior prezzo",
+      "text": "Prenotando da noi risparmiate circa il 15 % rispetto a Booking.com o Airbnb."
     },
-    "extras": {
-      "title": "Servizi Aggiuntivi",
-      "person5": "5ª Persona",
-      "dog": "Cane",
-      "laundry": "Pacchetto Biancheria"
+    "search": {
+      "title": "Scegliete le date",
+      "arrival": "Arrivo",
+      "departure": "Partenza",
+      "adults": "Adulti",
+      "children": "Bambini",
+      "guests": "Persone",
+      "submit": "Verifica prezzo e disponibilità",
+      "short": "Verifica",
+      "nights": "notti",
+      "night": "notte",
+      "invalid": "La partenza deve essere dopo l'arrivo.",
+      "maxGuests": "La baita ospita fino a 5 persone."
+    },
+    "widget": {
+      "title": "Calendario prenotazioni",
+      "frameTitle": "Calendario prenotazioni della Sechszirbenhütte",
+      "loading": "Caricamento del calendario …",
+      "openWindow": "Apri la prenotazione in una nuova finestra",
+      "secure": "Prenotazione sicura tramite Beds24"
+    },
+    "prices": {
+      "title": "Prezzi",
+      "text": "Prezzi per notte secondo la stagione, spese accessorie incluse. Il calendario mostra il prezzo esatto per le vostre date.",
+      "minStayTitle": "Soggiorno minimo",
+      "minStay": [
+        "di regola 7 notti",
+        "4 notti dal 1° al 19 marzo, a giugno e a settembre",
+        "3 notti in bassa stagione e nella settimana prima di Natale",
+        "a breve termine talvolta anche meno"
+      ]
     },
     "included": {
-      "title": "Incluso",
+      "title": "Incluso nel prezzo",
       "items": [
-        "Elettricità (20 kWh/notte)",
-        "Riscaldamento",
+        "Elettricità",
+        "Riscaldamento (pellet)",
         "Acqua",
         "Smaltimento rifiuti",
-        "Pulizia finale (senza cane)",
         "WiFi",
-        "Tassa di soggiorno (adulti)",
-        "Uso sauna"
+        "Uso della sauna"
+      ]
+    },
+    "extras": {
+      "title": "In aggiunta",
+      "items": [
+        {
+          "label": "Pulizia finale",
+          "value": "150 €",
+          "note": "con cane 190 €"
+        },
+        {
+          "label": "Tassa di soggiorno",
+          "value": "4,50 €",
+          "note": "per adulto e notte, bambini fino a 16 anni gratis, trasporto gratuito per gli ospiti incluso"
+        },
+        {
+          "label": "Pacchetto biancheria (facoltativo)",
+          "value": "25 €",
+          "note": "a persona"
+        }
+      ]
+    },
+    "info": {
+      "title": "Buono a sapersi",
+      "items": [
+        "Check-in dalle 15, check-out entro le 10",
+        "Acconto del 30 % tramite bonifico",
+        "Last minute: arrivo entro 14 giorni 10 % di sconto, entro 7 giorni 15 %",
+        "I cani sono benvenuti"
       ]
     },
     "form": {
@@ -308,8 +358,8 @@
       "agb": "Accetto le Condizioni Generali",
       "datenschutz": "Accetto la Privacy Policy",
       "submit": "Invia Richiesta",
-      "success": "Grazie! La tua richiesta è stata inviata con successo.",
-      "error": "Si è verificato un errore. Riprova più tardi."
+      "success": "Grazie! La vostra richiesta è stata inviata con successo.",
+      "error": "Si è verificato un errore. Vi preghiamo di riprovare più tardi."
     }
   },
   "bewertungen": {
@@ -362,8 +412,8 @@
     "checkAvailability": "Verifica disponibilità",
     "loadingBooking": "Caricamento sistema prenotazione...",
     "floorPlan": "Planimetria",
-    "floorPlanDesc": "Il nostro rifugio offre circa 85 m² di superficie abitabile per un massimo di 5 persone.",
-    "livingSpace": "circa 85 m² di superficie",
+    "floorPlanDesc": "85 m² di superficie abitabile: stube con stufa a pellet, cucina completamente attrezzata, due camere per un massimo di 5 persone, due bagni e un WC separato – più la sauna privata con sala relax e il grande balcone.",
+    "livingSpace": "85 m² di superficie abitabile",
     "floors": "2 piani",
     "previousReview": "Recensione precedente",
     "nextReview": "Prossima recensione",
@@ -390,62 +440,60 @@
   },
   "amenities": {
     "living": {
-      "title": "Zona Giorno",
-      "items": ["Stufa svedese", "Zona pranzo", "TV satellitare & DVD", "Impianto stereo"]
+      "title": "Stube",
+      "items": ["Stufa a pellet", "Divani e tavolo da pranzo", "TV satellitare", "WiFi"]
     },
     "kitchen": {
       "title": "Cucina",
       "items": [
         "Completamente attrezzata",
         "Lavastoviglie",
-        "Piano cottura & forno",
-        "Microonde con grill"
+        "Fornelli e forno",
+        "Macchina del caffè e bollitore"
       ]
     },
     "rooms": {
-      "title": "Camere da Letto",
+      "title": "Camere da letto",
       "items": [
-        "1 camera soppalco (2 letti singoli)",
-        "1 camera matrimoniale",
-        "1 camera con 2 letti a castello",
-        "Posto per 5 persone"
+        "Camera 1: letto matrimoniale",
+        "Camera 2: letto matrimoniale e singolo",
+        "Fino a 5 persone"
       ],
-      "hint": "Portare biancheria propria o prenotare pacchetto comfort"
+      "hint": "Portate lenzuola e asciugamani o prenotate il pacchetto biancheria (25 € a persona)"
     },
     "sauna": {
-      "title": "Sauna & Wellness",
+      "title": "Sauna e relax",
       "items": [
-        "Sauna con sanarium",
+        "Sauna finlandese privata",
         "Sala relax con lettini",
-        "Doccia extra con tubo Kneipp",
-        "Riscaldamento a pavimento"
+        "Doccia a pioggia",
+        "Terrazza della sauna"
       ]
     },
     "bathroom": {
-      "title": "Bagno",
-      "items": ["Doccia & WC", "Doppio lavandino", "Riscaldamento a pavimento", "Servizi moderni"],
-      "hint": "Portare asciugamani propri o prenotare pacchetto comfort"
+      "title": "Bagni",
+      "items": ["2 bagni", "WC separato", "Riscaldamento a pavimento"]
     },
     "outdoor": {
-      "title": "Area Esterna",
+      "title": "All'aperto",
       "items": [
-        "Balcone di 15m² con scala esterna",
-        "Terreno di 650m²",
-        "2 posti auto",
-        "BBQ & mobili da giardino"
+        "Grande balcone che circonda la baita",
+        "Giardino alpino privato (1.200 m²)",
+        "Mobili da giardino e grill",
+        "Parcheggio alla baita"
       ]
     },
     "equipment": {
       "title": "Dotazioni",
-      "items": ["WiFi / ADSL", "TV satellitare", "BBQ", "Animali benvenuti"]
+      "items": ["WiFi", "TV satellitare", "Lavatrice e asciugatrice", "Cani benvenuti"]
     },
     "location": {
       "title": "Posizione",
       "items": [
-        "Comprensorio Falkert in loco",
-        "Turracher Höhe (20 min.)",
-        "Bad Kleinkirchheim (25 min.)",
-        "Molti sentieri escursionistici"
+        "Isolata a 1.700 m",
+        "Lago Falkertsee 800 m",
+        "Heidi Alm 800 m in auto",
+        "Bad Kleinkirchheim e Turracher Höhe circa 20 min"
       ]
     }
   },
@@ -475,16 +523,16 @@
         "label": "di altitudine, in posizione isolata"
       },
       {
-        "value": "2–5",
-        "label": "persone"
+        "value": "fino a 5",
+        "label": "persone, 2 camere"
       },
       {
-        "value": "80 m²",
-        "label": "superficie abitabile"
+        "value": "85 m²",
+        "label": "superficie abitabile, più 1.200 m² di giardino alpino"
       },
       {
         "value": "Sauna",
-        "label": "annesso privato con sala relax"
+        "label": "sauna privata con sala relax"
       },
       {
         "value": "Cani",
@@ -496,17 +544,17 @@
     "chapters": [
       {
         "title": "Fuori",
-        "text": "La baita sorge isolata tra pini cembri e larici, accanto al Parco Nazionale Nockberge. D'estate si cammina nei Nockberge, d'inverno si scia nel comprensorio Heidi Alm.",
+        "text": "La baita sorge isolata tra pini cembri e larici, accanto al Parco Nazionale Nockberge, a 800 m dal lago Falkertsee. D'estate si cammina nei Nockberge, d'inverno si scia nel comprensorio Heidi Alm.",
         "alt": "La Sechszirbenhütte d'estate con balcone e legna accatastata tra gli abeti"
       },
       {
         "title": "Dentro",
-        "text": "Legno antico, una stufa a pellet e una cucina completamente attrezzata. Due camere con letto matrimoniale e una zona giorno con posto letto per due-cinque persone.",
+        "text": "Legno antico, una stube con stufa a pellet e una cucina completamente attrezzata. Due camere – una con letto matrimoniale, una con letto matrimoniale e letto singolo – per un massimo di cinque persone, più due bagni e un WC separato.",
         "alt": "Stube in legno con scala, armadio contadino dipinto e vista sulla cucina"
       },
       {
         "title": "Tempo per voi",
-        "text": "L'annesso privato con sauna finlandese, sala relax e doccia a pioggia è solo vostro. Al mattino il caffè vi aspetta sul balcone che gira intorno alla baita.",
+        "text": "La sauna privata con sala relax e terrazza è solo vostra. Al mattino il caffè vi aspetta sul grande balcone che gira intorno alla baita.",
         "alt": "Tazza di caffè nella neve sulla ringhiera del balcone"
       }
     ],

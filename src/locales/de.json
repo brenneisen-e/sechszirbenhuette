@@ -21,7 +21,7 @@
     "title": "in der Sechszirbenhütte",
     "subtitle": "Ihr Hüttenurlaub am Falkert",
     "description": "Entdecken Sie die Sechszirbenhütte, Ihre traumhafte Unterkunft auf 1.700 m Höhe im Herzen der Nockberge in Kärnten, Österreich. Gelegen an der malerischen Alpensüdseite in Falkertsee, bietet unsere Hütte ein ganzjähriges Urlaubsparadies für Familien und Naturliebhaber.",
-    "cta_book": "Jetzt anfragen & buchen",
+    "cta_book": "Jetzt direkt buchen",
     "cta_explore": "Ferienhaus entdecken"
   },
   "features": {
@@ -80,15 +80,15 @@
     "intro": "Gönnen Sie sich einen unvergesslichen Hüttenurlaub in unserer über 250 Jahre alten Berghütte in Alleinlage – direkt am Nationalpark Nockberge und nur 800 m vom malerischen Falkertsee entfernt.",
     "details": {
       "grundstueck": "1.200 m² Almgrundstück",
-      "wohnflaeche": "80 m²",
+      "wohnflaeche": "85 m²",
       "hoehe": "1.700 m ü.d.M.",
-      "personen": "2–5 Personen"
+      "personen": "bis 5 Personen"
     },
     "rooms": {
       "title": "Schlafzimmer",
       "bedroom1": "Schlafzimmer 1: Doppelbett",
-      "bedroom2": "Schlafzimmer 2: Doppelbett",
-      "living": "Wohnbereich mit Schlafmöglichkeit"
+      "bedroom2": "Schlafzimmer 2: Doppel- und Einzelbett",
+      "living": "Stube mit Pelletofen"
     },
     "kitchen": {
       "title": "Küche",
@@ -102,31 +102,30 @@
       ]
     },
     "bathroom": {
-      "title": "Bad",
-      "items": ["Duschbad mit WC", "Fußbodenheizung"]
+      "title": "Bäder",
+      "items": ["2 Bäder", "Separates WC", "Fußbodenheizung"]
     },
     "sauna": {
       "title": "Sauna",
       "items": [
-        "Privater Sauna-Anbau",
+        "Eigene Sauna im Anbau",
         "Finnische Sauna",
         "Ruheraum mit Liegen",
-        "Bodentiefe Regendusche",
-        "Eigene Terrasse",
-        "Fußbodenheizung"
+        "Regendusche",
+        "Sauna-Terrasse"
       ]
     },
     "living": {
       "title": "Wohnbereich",
-      "items": ["Gemütliche Sitzgruppe", "Esstisch", "Moderner Holz-Pelletofen", "SAT-TV", "WLAN"]
+      "items": ["Stube mit Holz-Pelletofen", "Gemütliche Sitzgruppe", "Esstisch", "SAT-TV", "WLAN"]
     },
     "outdoor": {
       "title": "Außenbereich",
       "items": [
-        "Umlaufender Balkon",
-        "Gartenmöbel",
-        "Eigener Parkplatz",
-        "Ski- und Schlittenkeller"
+        "Großer umlaufender Balkon",
+        "Eigener Almgarten (1.200 m²)",
+        "Gartenmöbel und Grill",
+        "Parkplatz an der Hütte"
       ]
     }
   },
@@ -217,7 +216,7 @@
         },
         {
           "title": "Panoramaweg St. Oswald (mit Brunnachbahn)",
-          "description": "Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil, um z.B. auch kleinere Kandidaten mit einer Kraxel zu transportieren. Der Ausblick ist traumhaft und es gibt zahlreiche Abzweigungen für ausgedehntere Wanderungen, wenn z.B. ein Elternteil alleine weiterziehen möchte. Auf halber Strecke liegt die Bockhütte, eine perfekte Rast und wie im Bilderbuch. Wieder an der Biosphärenparkbahn Brunnachbahn angekommen wartet ein Aktiv Park und Wasserspielplatz auf euch, hier können sich müde Beine abkühlen, die Kinder Floß fahren und die Erwachsenen auf den Sonnenbänken eine Pause einlegen.",
+          "description": "Unsere Standard-Wanderung, wenn wir am Falkert sind. Mit der Brunnachbahn in Bad Kleinkirchheim geht es zum Panoramaweg St. Oswald. Die Wanderung ist kindgerecht und nicht zu steil, um z.B. auch kleinere Kandidaten mit einer Kraxel zu transportieren. Der Ausblick ist traumhaft und es gibt zahlreiche Abzweigungen für ausgedehntere Wanderungen, wenn z.B. ein Elternteil alleine weiterziehen möchte. Auf halber Strecke liegt die Bockhütte, eine perfekte Rast und wie im Bilderbuch. Wieder an der Biosphärenparkbahn Brunnachbahn angekommen wartet ein Aktiv Park und Wasserspielplatz auf Sie, hier können sich müde Beine abkühlen, die Kinder Floß fahren und die Erwachsenen auf den Sonnenbänken eine Pause einlegen.",
           "distance": "16 Autominuten",
           "age": "Alle Altersgruppen"
         },
@@ -248,32 +247,75 @@
     }
   },
   "buchung": {
-    "title": "Jetzt unverbindlich anfragen",
-    "subtitle": "Buchen Sie Ihren Traumurlaub in der Sechszirbenhütte",
-    "prices": {
-      "title": "Preisübersicht",
-      "base": "Mietpreis pro Nacht (bis 4 Personen)",
-      "lowSeason": "Nebensaison",
-      "highSeason": "Hauptsaison",
-      "minStay": "Mindestaufenthalt: 3 Nächte (Hauptsaison: 7 Nächte)"
+    "title": "Direkt buchen",
+    "subtitle": "Verfügbarkeit prüfen und sofort buchen – direkt bei uns zum besten Preis.",
+    "direct": {
+      "title": "Direkt buchen = bester Preis",
+      "text": "Bei uns buchen Sie rund 15 % günstiger als über Booking.com oder Airbnb."
     },
-    "extras": {
-      "title": "Zusatzleistungen",
-      "person5": "5. Person",
-      "dog": "Hund",
-      "laundry": "Wäschepaket"
+    "search": {
+      "title": "Zeitraum wählen",
+      "arrival": "Anreise",
+      "departure": "Abreise",
+      "adults": "Erwachsene",
+      "children": "Kinder",
+      "guests": "Personen",
+      "submit": "Preis und Verfügbarkeit prüfen",
+      "short": "Prüfen",
+      "nights": "Nächte",
+      "night": "Nacht",
+      "invalid": "Die Abreise muss nach der Anreise liegen.",
+      "maxGuests": "Die Hütte bietet Platz für bis zu 5 Personen."
+    },
+    "widget": {
+      "title": "Buchungskalender",
+      "frameTitle": "Buchungskalender der Sechszirbenhütte",
+      "loading": "Buchungskalender wird geladen …",
+      "openWindow": "Buchung in eigenem Fenster öffnen",
+      "secure": "Sichere Buchung über Beds24"
+    },
+    "prices": {
+      "title": "Preise",
+      "text": "Tagespreise je nach Saison, Nebenkosten inklusive. Den genauen Preis für Ihren Zeitraum zeigt der Buchungskalender.",
+      "minStayTitle": "Mindestaufenthalt",
+      "minStay": [
+        "7 Nächte in der Regel",
+        "4 Nächte vom 1. bis 19. März, im Juni und im September",
+        "3 Nächte in der Nebensaison und in der Woche vor Weihnachten",
+        "kurzfristig teils auch kürzer"
+      ]
     },
     "included": {
-      "title": "Inklusive",
+      "title": "Im Preis enthalten",
+      "items": ["Strom", "Heizung (Pellets)", "Wasser", "Müllentsorgung", "WLAN", "Sauna-Nutzung"]
+    },
+    "extras": {
+      "title": "Zusätzlich",
       "items": [
-        "Strom (20 kWh/Nacht)",
-        "Heizung",
-        "Wasser",
-        "Müllentsorgung",
-        "Endreinigung (ohne Hund)",
-        "WLAN",
-        "Ortstaxe (Erwachsene)",
-        "Sauna-Nutzung"
+        {
+          "label": "Endreinigung",
+          "value": "150 €",
+          "note": "mit Hund 190 €"
+        },
+        {
+          "label": "Ortstaxe",
+          "value": "4,50 €",
+          "note": "pro Erwachsenem und Nacht, Kinder bis 16 frei, inklusive Gästefreifahrt"
+        },
+        {
+          "label": "Wäschepaket (optional)",
+          "value": "25 €",
+          "note": "pro Person"
+        }
+      ]
+    },
+    "info": {
+      "title": "Gut zu wissen",
+      "items": [
+        "Check-in ab 15 Uhr, Check-out bis 10 Uhr",
+        "Anzahlung 30 % per Überweisung",
+        "Last Minute: Anreise innerhalb von 14 Tagen 10 % günstiger, innerhalb von 7 Tagen 15 %",
+        "Hunde sind willkommen"
       ]
     },
     "form": {
@@ -372,8 +414,8 @@
     "checkAvailability": "Verfügbarkeit prüfen",
     "loadingBooking": "Buchungssystem wird geladen...",
     "floorPlan": "Grundriss",
-    "floorPlanDesc": "Unsere Hütte bietet auf ca. 85 m² Wohnfläche Platz für bis zu 5 Personen.",
-    "livingSpace": "ca. 85 m² Wohnfläche",
+    "floorPlanDesc": "Auf 85 m² Wohnfläche: Stube mit Pelletofen, voll ausgestattete Küche, zwei Schlafzimmer für bis zu 5 Personen, zwei Bäder und ein separates WC – dazu die eigene Sauna mit Ruheraum und der große umlaufende Balkon.",
+    "livingSpace": "85 m² Wohnfläche",
     "floors": "2 Etagen",
     "previousReview": "Vorherige Bewertung",
     "nextReview": "Nächste Bewertung",
@@ -400,57 +442,55 @@
   },
   "amenities": {
     "living": {
-      "title": "Wohnbereich",
-      "items": ["Schwedenofen", "Essecke", "Satellit-TV & DVD", "Stereoanlage"]
+      "title": "Stube",
+      "items": ["Holz-Pelletofen", "Sitzgruppe und Esstisch", "SAT-TV", "WLAN"]
     },
     "kitchen": {
       "title": "Küche",
-      "items": ["Voll ausgestattet", "Spülmaschine", "Ceranherd & Backofen", "Mikrowelle mit Grill"]
+      "items": [
+        "Voll ausgestattet",
+        "Geschirrspüler",
+        "Herd und Backofen",
+        "Kaffeemaschine und Wasserkocher"
+      ]
     },
     "rooms": {
       "title": "Schlafzimmer",
       "items": [
-        "1 Galeriezimmer (2 Einzelbetten)",
-        "1 Doppelbettzimmer",
-        "1 Zimmer mit 2 Stockbetten",
-        "Platz für 5 Personen"
+        "Schlafzimmer 1: Doppelbett",
+        "Schlafzimmer 2: Doppel- und Einzelbett",
+        "Platz für bis zu 5 Personen"
       ],
-      "hint": "Bettwäsche selbst mitbringen oder Komfort-Paket buchen"
+      "hint": "Bettwäsche und Handtücher mitbringen oder das Wäschepaket buchen (25 € pro Person)"
     },
     "sauna": {
-      "title": "Sauna & Wellness",
-      "items": [
-        "Sauna mit Sanarium",
-        "Ruheraum mit Liegen",
-        "Extra Dusche mit Kneipp-Schlauch",
-        "Fußbodenheizung"
-      ]
+      "title": "Sauna & Ruheraum",
+      "items": ["Eigene finnische Sauna", "Ruheraum mit Liegen", "Regendusche", "Sauna-Terrasse"]
     },
     "bathroom": {
-      "title": "Badezimmer",
-      "items": ["Dusche & WC", "Doppelwaschbecken", "Fußbodenheizung", "Modern ausgestattet"],
-      "hint": "Handtücher selbst mitbringen oder Komfort-Paket buchen"
+      "title": "Bäder",
+      "items": ["2 Bäder", "Separates WC", "Fußbodenheizung"]
     },
     "outdoor": {
-      "title": "Außenbereich",
+      "title": "Draußen",
       "items": [
-        "15m² Balkon mit Außentreppe",
-        "650m² Grundstück",
-        "2 Parkplätze",
-        "Grill & Gartenmöbel"
+        "Großer umlaufender Balkon",
+        "Eigener Almgarten (1.200 m²)",
+        "Gartenmöbel und Grill",
+        "Parkplatz an der Hütte"
       ]
     },
     "equipment": {
       "title": "Ausstattung",
-      "items": ["WLAN / ADSL", "Satelliten-TV", "Grill", "Haustiere willkommen"]
+      "items": ["WLAN", "SAT-TV", "Waschmaschine und Trockner", "Hunde willkommen"]
     },
     "location": {
       "title": "Lage",
       "items": [
-        "Skigebiet Falkert vor Ort",
-        "Turracher Höhe (20 Min.)",
-        "Bad Kleinkirchheim (25 Min.)",
-        "Viele Wanderwege"
+        "Alleinlage auf 1.700 m",
+        "Falkertsee 800 m",
+        "Heidi Alm 800 m mit dem Auto",
+        "Bad Kleinkirchheim und Turracher Höhe ca. 20 Min."
       ]
     }
   },
@@ -467,7 +507,7 @@
   "brand": {
     "place": "Falkert / Kärnten",
     "claim": "Oben sein.",
-    "claimHand": "Bei euch sein.",
+    "claimHand": "Bei sich sein.",
     "heroText": "Eine über 250 Jahre alte Berghütte in Alleinlage auf 1.700 m – direkt am Nationalpark Nockberge, 800 m vom Falkertsee.",
     "book": "Buchen",
     "videoPause": "Video pausieren",
@@ -480,16 +520,16 @@
         "label": "Höhe, in Alleinlage"
       },
       {
-        "value": "2–5",
-        "label": "Personen"
+        "value": "bis 5",
+        "label": "Personen, 2 Schlafzimmer"
       },
       {
-        "value": "80 m²",
-        "label": "Wohnfläche"
+        "value": "85 m²",
+        "label": "Wohnfläche, dazu 1.200 m² Almgarten"
       },
       {
         "value": "Sauna",
-        "label": "Privater Anbau mit Ruheraum"
+        "label": "Eigene Sauna mit Ruheraum"
       },
       {
         "value": "Hunde",
@@ -497,27 +537,27 @@
       }
     ],
     "chaptersLabel": "Die Hütte",
-    "chaptersTitle": "Draußen die Berge. Drinnen bei euch.",
+    "chaptersTitle": "Draußen die Berge. Drinnen ganz bei sich.",
     "chapters": [
       {
         "title": "Draußen",
-        "text": "Die Hütte steht allein zwischen Zirben und Lärchen, direkt am Nationalpark Nockberge. Im Sommer wandert ihr in den Nockbergen, im Winter fahrt ihr im Skigebiet der Heidi Alm.",
+        "text": "Die Hütte steht allein zwischen Zirben und Lärchen, direkt am Nationalpark Nockberge, 800 m vom Falkertsee. Im Sommer wandern Sie in den Nockbergen, im Winter fahren Sie im Skigebiet der Heidi Alm.",
         "alt": "Die Sechszirbenhütte im Sommer mit Balkon und Holzstapel zwischen Fichten"
       },
       {
         "title": "Drinnen",
-        "text": "Altes Holz, ein Holz-Pelletofen und eine voll ausgestattete Küche. Zwei Schlafzimmer mit Doppelbett und ein Wohnbereich mit Schlafmöglichkeit bieten Platz für zwei bis fünf Personen.",
+        "text": "Altes Holz, eine Stube mit Pelletofen und eine voll ausgestattete Küche. Zwei Schlafzimmer – eines mit Doppelbett, eines mit Doppel- und Einzelbett – bieten Platz für bis zu fünf Personen, dazu zwei Bäder und ein separates WC.",
         "alt": "Holzstube mit Treppe, bemaltem Bauernschrank und Blick in die Küche"
       },
       {
-        "title": "Zeit für euch",
-        "text": "Der private Sauna-Anbau mit finnischer Sauna, Ruheraum und Regendusche gehört nur euch. Morgens wartet der Kaffee auf dem umlaufenden Balkon.",
+        "title": "Zeit für sich",
+        "text": "Die eigene Sauna mit Ruheraum und Sauna-Terrasse gehört ganz Ihnen. Morgens wartet der Kaffee auf dem großen umlaufenden Balkon.",
         "alt": "Kaffeetasse im Schnee auf dem Balkongeländer"
       }
     ],
-    "greetingLabel": "Eure Gastgeber",
+    "greetingLabel": "Ihre Gastgeber",
     "greetingHand": "Willkommen bei uns.",
-    "greetingText": "Wir haben die Sechszirbenhütte so hergerichtet, dass ihr oben ankommt und Zeit füreinander habt. Bei Fragen zur Anreise oder zur Hütte sind wir für euch da.",
+    "greetingText": "Wir haben die Sechszirbenhütte so hergerichtet, dass Sie oben ankommen und Zeit füreinander haben. Bei Fragen zur Anreise oder zur Hütte sind wir gern für Sie da.",
     "reduceMotion": "Bewegung reduzieren",
     "motionReduced": "Bewegung reduziert",
     "motionSystem": "Bewegung reduziert (Systemeinstellung)"

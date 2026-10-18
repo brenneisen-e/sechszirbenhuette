@@ -416,3 +416,11 @@ html[data-motion='reduce'] .chapters-sticky-frame img {
 html[data-motion='reduce'] {
   scroll-behavior: auto;
 }
+
+/* Sprungziele (#buchung, #galerie …) nicht unter dem ab 1024 px haftenden
+   Kopf verstecken */
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: var(--header-height);
+  }
+}

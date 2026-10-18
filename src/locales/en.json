@@ -21,7 +21,7 @@
     "title": "to the Sechszirbenhütte",
     "subtitle": "Premium mountain retreat at 1,700m in the Carinthian Nockberge",
     "description": "Discover the Sechszirbenhütte, your dream accommodation at 1,700 m altitude in the heart of the Nockberge mountains in Carinthia, Austria. Located on the picturesque southern side of the Alps in Falkertsee, our cabin offers a year-round holiday paradise for families and nature lovers.",
-    "cta_book": "Book Now",
+    "cta_book": "Book direct now",
     "cta_explore": "Explore the Cabin"
   },
   "features": {
@@ -80,15 +80,15 @@
     "intro": "Treat yourself to an unforgettable cabin vacation in our over 250-year-old mountain cabin in secluded location – right at the Nockberge National Park and just 800m from the picturesque Falkertsee.",
     "details": {
       "grundstueck": "1,200 m² alpine property",
-      "wohnflaeche": "80 m²",
+      "wohnflaeche": "85 m²",
       "hoehe": "1,700m above sea level",
-      "personen": "2–5 persons"
+      "personen": "up to 5 persons"
     },
     "rooms": {
       "title": "Bedrooms",
       "bedroom1": "Bedroom 1: Double bed",
-      "bedroom2": "Bedroom 2: Double bed",
-      "living": "Living area with sleeping option"
+      "bedroom2": "Bedroom 2: Double bed and single bed",
+      "living": "Parlour with pellet stove"
     },
     "kitchen": {
       "title": "Kitchen",
@@ -102,8 +102,8 @@
       ]
     },
     "bathroom": {
-      "title": "Bathroom",
-      "items": ["Shower bath with WC", "Underfloor heating"]
+      "title": "Bathrooms",
+      "items": ["2 bathrooms", "Separate WC", "Underfloor heating"]
     },
     "sauna": {
       "title": "Sauna",
@@ -249,32 +249,75 @@
     }
   },
   "buchung": {
-    "title": "Send a Non-Binding Inquiry",
-    "subtitle": "Book Your Dream Vacation at the Sechszirbenhütte",
-    "prices": {
-      "title": "Price Overview",
-      "base": "Rental price per night (up to 4 persons)",
-      "lowSeason": "Low Season",
-      "highSeason": "High Season",
-      "minStay": "Minimum stay: 3 nights (High season: 7 nights)"
+    "title": "Book Direct",
+    "subtitle": "Check availability and book instantly – directly with us at the best price.",
+    "direct": {
+      "title": "Book direct = best price",
+      "text": "Booking with us costs around 15 % less than on Booking.com or Airbnb."
     },
-    "extras": {
-      "title": "Additional Services",
-      "person5": "5th Person",
-      "dog": "Dog",
-      "laundry": "Laundry Package"
+    "search": {
+      "title": "Choose your dates",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "adults": "Adults",
+      "children": "Children",
+      "guests": "Guests",
+      "submit": "Check price and availability",
+      "short": "Check",
+      "nights": "nights",
+      "night": "night",
+      "invalid": "Departure must be after arrival.",
+      "maxGuests": "The hut sleeps up to 5 people."
+    },
+    "widget": {
+      "title": "Booking calendar",
+      "frameTitle": "Booking calendar of the Sechszirbenhütte",
+      "loading": "Loading booking calendar …",
+      "openWindow": "Open booking in a new window",
+      "secure": "Secure booking via Beds24"
+    },
+    "prices": {
+      "title": "Prices",
+      "text": "Nightly rates by season, utilities included. The booking calendar shows the exact price for your dates.",
+      "minStayTitle": "Minimum stay",
+      "minStay": [
+        "7 nights as a rule",
+        "4 nights from 1 to 19 March, in June and in September",
+        "3 nights in the low season and in the week before Christmas",
+        "sometimes shorter at short notice"
+      ]
     },
     "included": {
-      "title": "Included",
+      "title": "Included in the price",
+      "items": ["Electricity", "Heating (pellets)", "Water", "Waste disposal", "WiFi", "Sauna use"]
+    },
+    "extras": {
+      "title": "Additional costs",
       "items": [
-        "Electricity (20 kWh/night)",
-        "Heating",
-        "Water",
-        "Waste disposal",
-        "Final cleaning (without dog)",
-        "WiFi",
-        "Tourist tax (adults)",
-        "Sauna use"
+        {
+          "label": "Final cleaning",
+          "value": "€150",
+          "note": "with dog €190"
+        },
+        {
+          "label": "Tourist tax",
+          "value": "€4.50",
+          "note": "per adult and night, children up to 16 free, includes free guest transport"
+        },
+        {
+          "label": "Linen package (optional)",
+          "value": "€25",
+          "note": "per person"
+        }
+      ]
+    },
+    "info": {
+      "title": "Good to know",
+      "items": [
+        "Check-in from 3 pm, check-out by 10 am",
+        "30 % deposit by bank transfer",
+        "Last minute: arrival within 14 days 10 % off, within 7 days 15 % off",
+        "Dogs are welcome"
       ]
     },
     "form": {
@@ -373,8 +416,8 @@
     "checkAvailability": "Check availability",
     "loadingBooking": "Loading booking system...",
     "floorPlan": "Floor Plan",
-    "floorPlanDesc": "Our cabin offers approx. 85 m² of living space for up to 5 people.",
-    "livingSpace": "approx. 85 m² living space",
+    "floorPlanDesc": "85 m² of living space: parlour with pellet stove, fully equipped kitchen, two bedrooms for up to 5 guests, two bathrooms and a separate WC – plus the private sauna with relaxation room and the large wraparound balcony.",
+    "livingSpace": "85 m² living space",
     "floors": "2 floors",
     "previousReview": "Previous review",
     "nextReview": "Next review",
@@ -401,57 +444,51 @@
   },
   "amenities": {
     "living": {
-      "title": "Living Area",
-      "items": ["Wood stove", "Dining area", "Satellite TV & DVD", "Stereo system"]
+      "title": "Parlour",
+      "items": ["Wood-pellet stove", "Seating area and dining table", "Satellite TV", "WiFi"]
     },
     "kitchen": {
       "title": "Kitchen",
-      "items": ["Fully equipped", "Dishwasher", "Ceramic hob & oven", "Microwave with grill"]
+      "items": ["Fully equipped", "Dishwasher", "Stove and oven", "Coffee maker and kettle"]
     },
     "rooms": {
       "title": "Bedrooms",
-      "items": [
-        "1 gallery room (2 single beds)",
-        "1 double bedroom",
-        "1 room with 2 bunk beds",
-        "Space for 5 people"
-      ],
-      "hint": "Bring your own bedding or book comfort package"
+      "items": ["Bedroom 1: double bed", "Bedroom 2: double and single bed", "Sleeps up to 5"],
+      "hint": "Bring bed linen and towels or book the linen package (€25 per person)"
     },
     "sauna": {
-      "title": "Sauna & Wellness",
+      "title": "Sauna & Relaxation",
       "items": [
-        "Sauna with sanarium",
+        "Private Finnish sauna",
         "Relaxation room with loungers",
-        "Extra shower with Kneipp hose",
-        "Underfloor heating"
+        "Rain shower",
+        "Sauna terrace"
       ]
     },
     "bathroom": {
-      "title": "Bathroom",
-      "items": ["Shower & WC", "Double sink", "Underfloor heating", "Modern amenities"],
-      "hint": "Bring your own towels or book comfort package"
+      "title": "Bathrooms",
+      "items": ["2 bathrooms", "Separate WC", "Underfloor heating"]
     },
     "outdoor": {
-      "title": "Outdoor Area",
+      "title": "Outdoors",
       "items": [
-        "15m² balcony with external stairs",
-        "650m² property",
-        "2 parking spaces",
-        "BBQ & garden furniture"
+        "Large wraparound balcony",
+        "Private alpine garden (1,200 m²)",
+        "Garden furniture and grill",
+        "Parking at the hut"
       ]
     },
     "equipment": {
       "title": "Amenities",
-      "items": ["WiFi / ADSL", "Satellite TV", "BBQ", "Pets welcome"]
+      "items": ["WiFi", "Satellite TV", "Washing machine and dryer", "Dogs welcome"]
     },
     "location": {
       "title": "Location",
       "items": [
-        "Falkert ski area on site",
-        "Turracher Höhe (20 min.)",
-        "Bad Kleinkirchheim (25 min.)",
-        "Many hiking trails"
+        "Secluded at 1,700 m",
+        "Lake Falkert 800 m",
+        "Heidi Alm 800 m by car",
+        "Bad Kleinkirchheim and Turracher Höhe approx. 20 min"
       ]
     }
   },
@@ -481,16 +518,16 @@
         "label": "altitude, secluded"
       },
       {
-        "value": "2–5",
-        "label": "guests"
+        "value": "up to 5",
+        "label": "guests, 2 bedrooms"
       },
       {
-        "value": "80 m²",
-        "label": "living space"
+        "value": "85 m²",
+        "label": "living space, plus a 1,200 m² alpine garden"
       },
       {
         "value": "Sauna",
-        "label": "private annex with relaxation room"
+        "label": "private sauna with relaxation room"
       },
       {
         "value": "Dogs",
@@ -502,17 +539,17 @@
     "chapters": [
       {
         "title": "Outside",
-        "text": "The hut stands on its own among Swiss stone pines and larches, right by the Nockberge National Park. Hike the Nockberge in summer, ski at the Heidi Alm resort in winter.",
+        "text": "The hut stands on its own among Swiss stone pines and larches, right by the Nockberge National Park, 800 m from Lake Falkert. Hike the Nockberge in summer, ski at the Heidi Alm resort in winter.",
         "alt": "The Sechszirbenhütte in summer with balcony and woodpile among spruce trees"
       },
       {
         "title": "Inside",
-        "text": "Old wood, a wood-pellet stove and a fully equipped kitchen. Two bedrooms with double beds and a living area with an extra sleeping place for two to five people.",
+        "text": "Old wood, a parlour with a pellet stove and a fully equipped kitchen. Two bedrooms – one with a double bed, one with a double and a single bed – sleep up to five, plus two bathrooms and a separate WC.",
         "alt": "Wooden parlour with staircase, painted farmhouse cupboard and a view into the kitchen"
       },
       {
         "title": "Time for you",
-        "text": "The private sauna annex with Finnish sauna, relaxation room and rain shower is yours alone. In the morning, coffee waits on the wraparound balcony.",
+        "text": "The private sauna with relaxation room and sauna terrace is yours alone. In the morning, coffee waits on the large wraparound balcony.",
         "alt": "Coffee cup in the snow on the balcony railing"
       }
     ],

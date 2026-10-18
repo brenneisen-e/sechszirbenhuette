@@ -32,90 +32,26 @@ interface AmenityCard {
   key: string;
   icon: React.ComponentType<{ size?: number }>;
   galleryCategory: string | null;
+}
+
+// Karten mit Zuordnung zur Galerie; Titel und Punkte stehen in den
+// Sprachdateien unter `amenities`
+const amenityCards: AmenityCard[] = [
+  { key: 'living', icon: Sofa, galleryCategory: 'wohnen' },
+  { key: 'kitchen', icon: UtensilsCrossed, galleryCategory: 'kueche' },
+  { key: 'rooms', icon: Bed, galleryCategory: 'schlafen' },
+  { key: 'sauna', icon: Flame, galleryCategory: 'bad' },
+  { key: 'bathroom', icon: Bath, galleryCategory: 'bad' },
+  { key: 'outdoor', icon: TreePine, galleryCategory: 'aussen' },
+  { key: 'equipment', icon: Wifi, galleryCategory: null },
+  { key: 'location', icon: MapPin, galleryCategory: 'umgebung' },
+];
+
+interface AmenityText {
+  title: string;
   items: string[];
   hint?: string;
 }
-
-// Card configuration with gallery category mapping
-const amenityCards: AmenityCard[] = [
-  {
-    key: 'living',
-    icon: Sofa,
-    galleryCategory: 'wohnen',
-    items: ['Schwedenofen', 'Essecke für 8-10 Personen', 'Satellit-TV & DVD', 'Stereoanlage'],
-  },
-  {
-    key: 'kitchen',
-    icon: UtensilsCrossed,
-    galleryCategory: 'kueche',
-    items: ['Voll ausgestattet', 'Spülmaschine', 'Ceranherd & Backofen', 'Mikrowelle mit Grill'],
-  },
-  {
-    key: 'rooms',
-    icon: Bed,
-    galleryCategory: 'schlafen',
-    items: ['2 Doppelbetten', '1 Einzelbett', '1 Zimmer mit 2 Stockbetten', 'Platz für 5 Personen'],
-    hint: 'Bettwäsche selbst mitbringen oder Komfort-Paket buchen',
-  },
-  {
-    key: 'sauna',
-    icon: Flame,
-    galleryCategory: 'bad',
-    items: [
-      'Sauna mit Sanarium',
-      'Ruheraum mit Liegen',
-      'Extra Dusche mit Kneipp-Schlauch',
-      'Fußbodenheizung',
-    ],
-  },
-  {
-    key: 'bathroom',
-    icon: Bath,
-    galleryCategory: 'bad',
-    items: ['Dusche & WC', 'Doppelwaschbecken', 'Fußbodenheizung', 'Modern ausgestattet'],
-    hint: 'Handtücher selbst mitbringen oder Komfort-Paket buchen',
-  },
-  {
-    key: 'outdoor',
-    icon: TreePine,
-    galleryCategory: 'aussen',
-    items: [
-      '15m² Balkon mit Außentreppe',
-      '650m² Grundstück',
-      '2 Parkplätze',
-      'Grill & Gartenmöbel',
-    ],
-  },
-  {
-    key: 'equipment',
-    icon: Wifi,
-    galleryCategory: null,
-    items: ['WLAN / ADSL', 'Satelliten-TV', 'Grill', 'Haustiere willkommen'],
-  },
-  {
-    key: 'location',
-    icon: MapPin,
-    galleryCategory: 'umgebung',
-    items: [
-      'Skigebiet Falkert vor Ort',
-      'Turracher Höhe (20 Min.)',
-      'Bad Kleinkirchheim (25 Min.)',
-      'Viele Wanderwege',
-    ],
-  },
-];
-
-// German titles for the cards
-const cardTitles: Record<string, { de: string; en: string }> = {
-  living: { de: 'Wohnbereich', en: 'Living Area' },
-  kitchen: { de: 'Küche', en: 'Kitchen' },
-  rooms: { de: 'Schlafzimmer', en: 'Bedrooms' },
-  sauna: { de: 'Sauna & Wellness', en: 'Sauna & Wellness' },
-  bathroom: { de: 'Badezimmer', en: 'Bathroom' },
-  outdoor: { de: 'Außenbereich', en: 'Outdoor' },
-  equipment: { de: 'Ausstattung', en: 'Amenities' },
-  location: { de: 'Lage', en: 'Location' },
-};
 
 interface CardImage {
   url: string;
@@ -124,8 +60,10 @@ interface CardImage {
 }
 
 export function Ferienhaus() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const { getText, getTextStyle } = useContentTexts();
+  const amenityText = (key: string): AmenityText | undefined =>
+    (t.amenities as Record<string, AmenityText>)[key];
   const [isMounted, setIsMounted] = useState(false);
   const [images, setImages] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
@@ -295,7 +233,7 @@ export function Ferienhaus() {
             >
               {amenityCards.map((card) => {
                 const Icon = card.icon;
-                const title = cardTitles[card.key]?.[language as 'de' | 'en'] ?? card.key;
+                const title = amenityText(card.key)?.title ?? card.key;
                 const cardImage = cardImages[card.key];
 
                 return (
@@ -328,17 +266,18 @@ export function Ferienhaus() {
                           <h3 className="text-base font-bold text-gray-900">{title}</h3>
                         </div>
                         <ul className="space-y-1.5 flex-1">
-                          {card.items.map((item, i) => (
+                          {(amenityText(card.key)?.items ?? []).map((item, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                               <span className="w-1.5 h-1.5 rounded-full bg-logo-green mt-1.5 flex-shrink-0" />
                               <span>{item}</span>
                             </li>
                           ))}
                         </ul>
-                        {card.hint && (
+                        {amenityText(card.key)?.hint && (
                           <div className="mt-3 p-2.5 bg-leinen rounded-lg border border-zirbe/20">
                             <p className="text-xs text-rinde">
-                              <span className="font-semibold">Hinweis:</span> {card.hint}
+                              <span className="font-semibold">{t.ui.note}:</span>{' '}
+                              {amenityText(card.key)?.hint}
                             </p>
                           </div>
                         )}
@@ -387,7 +326,7 @@ export function Ferienhaus() {
         <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-6">
           {amenityCards.map((card, index) => {
             const Icon = card.icon;
-            const title = cardTitles[card.key]?.[language as 'de' | 'en'] ?? card.key;
+            const title = amenityText(card.key)?.title ?? card.key;
             const cardImage = cardImages[card.key];
 
             return (
@@ -442,7 +381,7 @@ export function Ferienhaus() {
 
                   {/* Items */}
                   <ul className="space-y-1.5 flex-1">
-                    {card.items.map((item, i) => (
+                    {(amenityText(card.key)?.items ?? []).map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-logo-green mt-1.5 flex-shrink-0" />
                         <span>{item}</span>
@@ -451,10 +390,11 @@ export function Ferienhaus() {
                   </ul>
 
                   {/* Hint if exists */}
-                  {card.hint && (
+                  {amenityText(card.key)?.hint && (
                     <div className="mt-3 p-2.5 bg-leinen rounded-lg border border-zirbe/20">
                       <p className="text-xs text-rinde">
-                        <span className="font-semibold">Hinweis:</span> {card.hint}
+                        <span className="font-semibold">{t.ui.note}:</span>{' '}
+                        {amenityText(card.key)?.hint}
                       </p>
                     </div>
                   )}
@@ -486,21 +426,19 @@ export function Ferienhaus() {
                   className="brand-h2 text-logo-green mb-4"
                   style={{ fontFamily: 'var(--font-sans)' }}
                 >
-                  {language === 'de' ? 'Grundriss' : 'Floor Plan'}
+                  {t.ui.floorPlan}
                 </h3>
                 <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4">
-                  {language === 'de'
-                    ? 'Unsere Hütte bietet auf ca. 85 m² Wohnfläche Platz für bis zu 5 Personen. Im Erdgeschoss befinden sich die Küche, der gemütliche Wohnbereich mit Schwedenofen, sowie der Wellnessbereich mit Sauna und Ruheraum. Im Obergeschoss liegen die Schlafzimmer mit 2 Doppelbetten und 1 Einzelbett.'
-                    : 'Our cabin offers approx. 85 m² of living space for up to 5 people. The ground floor features the kitchen, cozy living area with wood stove, and wellness area with sauna and relaxation room. The upper floor has the bedrooms with 2 double beds and 1 single bed.'}
+                  {t.ui.floorPlanDesc}
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
                   <span className="inline-flex items-center gap-1.5 text-gray-600">
                     <span className="w-2 h-2 rounded-full bg-logo-green"></span>
-                    {language === 'de' ? 'ca. 85 m² Wohnfläche' : 'approx. 85 m² living space'}
+                    {t.ui.livingSpace}
                   </span>
                   <span className="inline-flex items-center gap-1.5 text-gray-600">
                     <span className="w-2 h-2 rounded-full bg-logo-green"></span>
-                    {language === 'de' ? '2 Etagen' : '2 floors'}
+                    {t.ui.floors}
                   </span>
                 </div>
               </div>
@@ -513,11 +451,7 @@ export function Ferienhaus() {
                 >
                   <Image
                     src="/images/grundriss.jpg"
-                    alt={
-                      language === 'de'
-                        ? 'Grundriss der Sechszirbenhütte'
-                        : 'Floor plan of Sechszirbenhütte'
-                    }
+                    alt={`${t.ui.floorPlan} – Sechszirbenhütte`}
                     fill
                     className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, 40vw"
@@ -602,11 +536,7 @@ export function Ferienhaus() {
           >
             <Image
               src="/images/grundriss.jpg"
-              alt={
-                language === 'de'
-                  ? 'Grundriss der Sechszirbenhütte'
-                  : 'Floor plan of Sechszirbenhütte'
-              }
+              alt={`${t.ui.floorPlan} – Sechszirbenhütte`}
               width={1600}
               height={1200}
               className="w-full h-auto max-h-[85vh] object-contain p-4"
