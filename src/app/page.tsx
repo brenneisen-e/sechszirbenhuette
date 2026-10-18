@@ -29,6 +29,7 @@ export default function HomePage() {
       <Location />
       <Umgebung />
       <HostGreeting />
+      <FacadeBand animated />
       <Buchung />
       <Suspense fallback={null}>
         <AdminPreviewListener />

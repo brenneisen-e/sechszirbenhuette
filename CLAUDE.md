@@ -75,6 +75,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Ausstattung: Desktop 12 Spalten (Kopf + Grundriss haftend links, Karten rechts), Tablet 2 Spalten, Handy Wischreihe (`brand-snap-row`)
 - Galerie: Bento (je 8 Bilder ein Leitbild 2×2 und ein breites 2×1, Reihenfolge aus dem Tab Bilder), „Weitere Bilder“, Lightbox mit Tastatur/Wischen
 - Hüttenkapitel: ab 1024×700 haftendes Bild bis an den linken Bildschirmrand (`--content-inset`), Handy randlos
+- Fachwerk-Übergänge (`src/components/brand/FacadeBand.tsx animated`): Fugen ziehen sich auf (Deckfläche, transform), ab 768 px Parallaxe in drei Ebenen über `--p` aus `src/hooks/useScrollProgress.ts`; Hüttenkapitel mit Fensterläden über dem haftenden Bild. Nur transform/opacity animieren; reduzierte Bewegung = fertiges, stilles Band; Handy eine Ebene, kein Sticky
 - Bilder: `src/lib/imageVariants.ts` (`responsiveSource`) — Cloudflare-Varianten thumb 640 / medium 1280 / large 1920 / hero 2560, eingerichtet beim Laden des Admin Centers (`src/lib/server/imageVariants.ts` über auto-migrate), Schalter `site_settings.imageVariants`, im Frontend `useImageVariants()`
 
 ## Wichtige Pfade

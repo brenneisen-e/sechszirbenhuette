@@ -18,6 +18,8 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { SectionHeader } from '@/components/brand/SectionHeader';
+import { useImageVariants } from '@/contexts/SiteSettingsContext';
+import { responsiveSource } from '@/lib/imageVariants';
 
 // Ausstattung als kompaktes Fakten-Raster.
 // Handy: Wischreihe mit Bildkarten. Tablet: zwei Spalten mit Bild links.
@@ -87,6 +89,7 @@ function scrollToGalleryCategory(category: string) {
 export function Ferienhaus() {
   const { t } = useLanguage();
   const { getText } = useContentTexts();
+  const variants = useImageVariants();
   const [cardImages, setCardImages] = useState<Record<string, CardImage>>({});
   const [showFloorPlan, setShowFloorPlan] = useState(false);
 
@@ -153,12 +156,14 @@ export function Ferienhaus() {
           }`}
         >
           {image?.url ? (
-            <Image
-              src={image.url}
-              alt={image.alt_text || title}
-              fill
+            // eslint-disable-next-line @next/next/no-img-element -- Cloudflare-Varianten per srcset
+            <img
+              {...responsiveSource(image.url, variants, 'medium', 'thumb')}
               sizes={layout === 'stacked' ? '80vw' : '(min-width: 1024px) 16vw, 18vw'}
-              className="object-cover"
+              alt={image.alt_text || title}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
             <span className="absolute inset-0 flex items-center justify-center text-zirbe/40">

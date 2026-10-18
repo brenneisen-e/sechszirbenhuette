@@ -24,6 +24,9 @@ export const SITE_CONFIG = {
   owners: 'Malte + Mareike Brenneisen',
 };
 
+// Cloudflare Stream des Kontos (Hüttenfilm im Aufmacher) — für preconnect
+export const STREAM_ORIGIN = 'https://customer-0p71nv70kmvniiuy.cloudflarestream.com';
+
 export const FEATURES = [
   {
     key: 'altitude',

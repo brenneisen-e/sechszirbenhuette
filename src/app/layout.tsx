@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
+import { STREAM_ORIGIN } from '@/lib/constants';
 import { ContentTextsProvider } from '@/contexts/ContentTextsContext';
 import { Header, MobileBookingButton } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -69,6 +70,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="de" suppressHydrationWarning>
       <head>
+        {/* Früh verbinden: Hüttenfilm und Standbild (Cloudflare Stream), Bilder
+            (Cloudflare Images), Buchungskalender (Beds24) */}
+        <link rel="preconnect" href={STREAM_ORIGIN} crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://imagedelivery.net" />
+        <link rel="dns-prefetch" href="https://beds24.com" />
         {/* Bewegungswahl vor dem ersten Zeichnen setzen (Schalter „Bewegung reduzieren“) */}
         <script
           dangerouslySetInnerHTML={{

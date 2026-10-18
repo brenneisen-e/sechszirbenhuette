@@ -247,12 +247,14 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
- * M1 — Fassadenband. Ausgangszustand im Stylesheet: fertig gezeichnet.
- * Die Fugen werden entlang ihres Verlaufs von links nach rechts freigelegt
- * (clip-path). stroke-dasharray mit pathLength scheitert in Chromium an
- * vector-effect: non-scaling-stroke, das die Linienstärke konstant hält.
- * Die Animation wird nur vorbereitet (is-armed), solange das Band noch nicht
- * sichtbar ist, und läuft einmal (is-drawn).
+ * M1 — Fassadenband als Fachwerk-Übergang (Briefing 18.10.2026).
+ * Ausgangszustand im Stylesheet: fertiges Band, alles still.
+ * - Aufziehen: Deckfläche in Fassadenbraun gleitet nach rechts weg und gibt
+ *   die Fugen von links frei (is-armed → is-drawn, nur transform).
+ * - Parallaxe (is-parallax, ab 768 px mit Bewegung): drei Ebenen, verschoben
+ *   nach dem Scrollstand --p (0–1) aus useScrollProgress, nur transform.
+ *   Die Ebenen sind breiter als das Band, damit keine Enden sichtbar werden.
+ * - Handy: eine Ebene (ohne Fachwerk), reduzierte Bewegung: fertig und still.
  * ------------------------------------------------------------------------ */
 
 .facade-gap {
@@ -266,9 +268,11 @@ body {
 }
 
 .facade-band {
+  position: relative;
   display: block;
   width: 100%;
   height: 72px;
+  overflow: hidden;
   background: var(--color-fassadenbraun);
 }
 @media (min-width: 768px) {
@@ -276,41 +280,67 @@ body {
     height: 96px;
   }
 }
-.facade-band path {
+@media (min-width: 1024px) {
+  .facade-gap.is-parallax .facade-band {
+    height: 120px;
+  }
+}
+
+.facade-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.facade-layer path {
   fill: none;
   stroke: var(--color-leinen);
   stroke-width: 2px;
   stroke-linecap: butt;
   stroke-linejoin: miter;
 }
-.facade-band.is-armed path {
-  clip-path: inset(-12px 100% -12px 0);
+.facade-beams {
+  display: none;
 }
-.facade-band.is-armed.is-drawn path {
-  clip-path: inset(-12px 0 -12px 0);
-  transition: clip-path 480ms var(--motion-ease);
+.facade-beams path {
+  stroke-opacity: 0.28;
 }
-.facade-band.is-armed.is-drawn path:nth-child(2) {
-  transition-delay: 40ms;
+
+.facade-gap.is-parallax .facade-layer {
+  left: -6%;
+  width: 112%;
+  will-change: transform;
 }
-.facade-band.is-armed.is-drawn path:nth-child(3) {
-  transition-delay: 80ms;
+.facade-gap.is-parallax .facade-beams {
+  display: block;
+  transform: translate3d(calc((var(--p, 0.5) - 0.5) * -8%), 0, 0);
 }
-.facade-band.is-armed.is-drawn path:nth-child(4) {
-  transition-delay: 120ms;
+.facade-gap.is-parallax .facade-joints--a {
+  transform: translate3d(calc((var(--p, 0.5) - 0.5) * 4%), 0, 0);
+}
+.facade-gap.is-parallax .facade-joints--b {
+  transform: translate3d(calc((var(--p, 0.5) - 0.5) * -2%), 0, 0);
+}
+
+.facade-cover {
+  position: absolute;
+  inset: 0;
+  background: var(--color-fassadenbraun);
+  transform: translate3d(101%, 0, 0);
+  pointer-events: none;
+}
+.facade-band.is-armed .facade-cover {
+  transform: translate3d(0, 0, 0);
+}
+.facade-band.is-armed.is-drawn .facade-cover {
+  transform: translate3d(101%, 0, 0);
+  transition: transform 560ms var(--motion-ease);
 }
 @media (min-width: 768px) {
-  .facade-band.is-armed.is-drawn path {
-    transition-duration: var(--motion-facade);
-  }
-  .facade-band.is-armed.is-drawn path:nth-child(2) {
-    transition-delay: 70ms;
-  }
-  .facade-band.is-armed.is-drawn path:nth-child(3) {
-    transition-delay: 140ms;
-  }
-  .facade-band.is-armed.is-drawn path:nth-child(4) {
-    transition-delay: 210ms;
+  .facade-band.is-armed.is-drawn .facade-cover {
+    transition-duration: 900ms;
   }
 }
 
@@ -359,6 +389,35 @@ body {
   opacity: 1;
 }
 
+/* Fensterläden: zwei Flügel in Fassadenbraun mit hellen Fugen liegen über dem
+   haftenden Bild und öffnen sich, während der Abschnitt hereinscrollt
+   (--p bis 0,28 → ganz offen). Nur transform; ohne Scrollstand offen. */
+.chapters-shutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 50%;
+  background-color: var(--color-fassadenbraun);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 26px,
+    rgba(242, 239, 230, 0.85) 26px 28px
+  );
+  will-change: transform;
+  pointer-events: none;
+}
+.chapters-shutter--left {
+  left: 0;
+  border-right: 2px solid var(--color-leinen);
+  transform: translate3d(calc(-101% * min(1, var(--p, 1) / 0.28)), 0, 0);
+}
+.chapters-shutter--right {
+  right: 0;
+  border-left: 2px solid var(--color-leinen);
+  transform: translate3d(calc(101% * min(1, var(--p, 1) / 0.28)), 0, 0);
+}
+
 /* ---------------------------------------------------------------------------
  * M3 — Zirbenzweig beim Gastgebergruß. Reservierte Fläche, kein Layoutsprung.
  * ------------------------------------------------------------------------ */
@@ -390,10 +449,12 @@ body {
  * ------------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-  .facade-band path,
-  .facade-band.is-armed path {
-    clip-path: none !important;
-    transition: none !important;
+  .facade-cover,
+  .chapters-shutter {
+    display: none !important;
+  }
+  .facade-layer {
+    transform: none !important;
   }
   .zirben-reveal,
   .zirben-reveal.is-armed {
@@ -408,10 +469,12 @@ body {
     scroll-behavior: auto;
   }
 }
-html[data-motion='reduce'] .facade-band path,
-html[data-motion='reduce'] .facade-band.is-armed path {
-  clip-path: none !important;
-  transition: none !important;
+html[data-motion='reduce'] .facade-cover,
+html[data-motion='reduce'] .chapters-shutter {
+  display: none !important;
+}
+html[data-motion='reduce'] .facade-layer {
+  transform: none !important;
 }
 html[data-motion='reduce'] .zirben-reveal,
 html[data-motion='reduce'] .zirben-reveal.is-armed {

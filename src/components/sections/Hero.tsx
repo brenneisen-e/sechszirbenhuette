@@ -240,7 +240,9 @@ export function Hero() {
             <p className="brand-label text-holz">{t.brand.place}</p>
             <h1 id="hero-title" className="mt-6">
               <span className="brand-h1 block text-leinen">{t.brand.claim}</span>
-              <span className="brand-hand mt-2 block text-leinen">{t.brand.claimHand}</span>
+              <span className="brand-hand mt-2 block whitespace-nowrap text-leinen [font-size:min(var(--fs-hand),4.25rem)]">
+                {t.brand.claimHand}
+              </span>
             </h1>
             <p className="mt-6 max-w-[30rem] text-leinen">{t.brand.heroText}</p>
             <BookingSearch

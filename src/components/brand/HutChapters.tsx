@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMotion } from '@/contexts/MotionContext';
+import { useScrollProgress } from '@/hooks/useScrollProgress';
 
 // Hüttenporträt in drei Kapiteln.
 //
@@ -13,7 +14,8 @@ import { useMotion } from '@/contexts/MotionContext';
 // Bildschirmrand, Text rechts. Aktiv
 // ist das Kapitel, dessen Überschrift die Leselinie bei 45 % Viewporthöhe
 // erreicht hat — vorwärts wie rückwärts. Wechsel durch Überblendung (180 ms),
-// keine Zooms, kein blockiertes Scrollen.
+// keine Zooms, kein blockiertes Scrollen. Beim Hereinscrollen öffnen sich zwei
+// Fensterläden über dem Bild (brand.css, nur transform).
 
 const IMAGES = [
   { base: '/images/brand/kapitel-draussen' },
@@ -35,6 +37,8 @@ export function HutChapters() {
   const headingRefs = useRef<(HTMLHeadingElement | null)[]>([]);
   const [enhanced, setEnhanced] = useState(false);
   const [active, setActive] = useState(0);
+  // Fensterläden über dem haftenden Bild öffnen sich mit dem Scrollstand
+  useScrollProgress(sectionRef, enhanced);
 
   // Erweiterung nur bei passender Fläche und erlaubter Bewegung
   useEffect(() => {
@@ -113,6 +117,8 @@ export function HutChapters() {
           {enhanced && (
             <div className="chapters-sticky col-span-7 row-span-3">
               <div className="chapters-sticky-frame">
+                <span className="chapters-shutter chapters-shutter--left" aria-hidden="true" />
+                <span className="chapters-shutter chapters-shutter--right" aria-hidden="true" />
                 {chapters.map((chapter, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

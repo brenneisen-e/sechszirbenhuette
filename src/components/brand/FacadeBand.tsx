@@ -2,34 +2,70 @@
 
 import { useEffect, useRef } from 'react';
 import { motionReducedNow, useMotion } from '@/contexts/MotionContext';
+import { useMediaQuery, useScrollProgress } from '@/hooks/useScrollProgress';
 
 // Fassadenband: dunkelbraun mit vier hellen Fugen und ihren Versätzen.
 // PLATZHALTER-Geometrie nach Markenhandbuch S. 9 — ersetzen durch die Pfade aus
 // 03_Designsystem/Fugenband-Leinen-auf-Fassadenbraun.svg, sobald vorhanden.
 //
-// Nur horizontale und vertikale Segmente: Die freie Breitenanpassung
-// (preserveAspectRatio="none") erhält rechte Winkel; die Linienstärke bleibt
-// dank non-scaling-stroke konstant.
+// Nur horizontale und vertikale Segmente bei den Fugen: Die freie
+// Breitenanpassung (preserveAspectRatio="none") erhält rechte Winkel; die
+// Linienstärke bleibt dank non-scaling-stroke konstant.
 //
-// M1 (animated): Die Fugen zeichnen sich einmal von links nach rechts (clip-path,
-// siehe brand.css), wenn das
-// Band etwa bei 80 vh eintritt. Der Ausgangszustand im Stylesheet ist das
-// fertige Muster; der Anfangszustand wird nur vorbereitet, solange das Band
-// noch unterhalb der Auslöselinie liegt.
+// animated (Fachwerk-Übergang, Briefing 18.10.2026):
+// - Die Fugen ziehen sich einmal von links nach rechts auf, wenn das Band
+//   etwa bei 80 vh eintritt: Eine Deckfläche in Fassadenbraun gleitet nach
+//   rechts weg (nur transform).
+// - Ab 768 px mit Bewegung zusätzlich Parallaxe in drei Ebenen: Kärntner
+//   Fachwerk (Ständer und Streben, zart) hinten, die beiden Fugenpaare davor,
+//   gegeneinander verschoben je nach Scrollstand (--p, nur transform).
+// - Handy: eine Ebene, keine Parallaxe. Reduzierte Bewegung: fertiges Band.
+// Ohne animated (Fußzeile): nur das Band.
 
-const PATHS = [
-  'M0 20 H340 V14 H680 V20 H1000',
-  'M0 43.5 H1000',
-  'M0 63 H570 V68 H1000',
-  'M0 86.5 H1000',
+const JOINTS_A = ['M0 20 H340 V14 H680 V20 H1000', 'M0 63 H570 V68 H1000'];
+const JOINTS_B = ['M0 43.5 H1000', 'M0 86.5 H1000'];
+
+// Ständer alle 160 Einheiten, dazwischen Streben und ein Andreaskreuz
+const BEAMS = [
+  'M100 0 V100',
+  'M260 0 V100',
+  'M420 0 V100',
+  'M580 0 V100',
+  'M740 0 V100',
+  'M900 0 V100',
+  'M100 100 L260 0',
+  'M260 0 L420 100 M260 100 L420 0',
+  'M420 0 L580 100',
+  'M740 100 L900 0',
 ];
 
-export function FacadeBand({ animated = false }: { animated?: boolean }) {
-  const ref = useRef<SVGSVGElement>(null);
-  const { reduced } = useMotion();
+function Layer({ paths, className }: { paths: string[]; className: string }) {
+  return (
+    <svg
+      className={`facade-layer ${className}`}
+      viewBox="0 0 1000 100"
+      preserveAspectRatio="none"
+      focusable="false"
+      aria-hidden="true"
+    >
+      {paths.map((d) => (
+        <path key={d} d={d} vectorEffect="non-scaling-stroke" />
+      ))}
+    </svg>
+  );
+}
 
+export function FacadeBand({ animated = false }: { animated?: boolean }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
+  const { reduced } = useMotion();
+  const wide = useMediaQuery('(min-width: 768px)');
+  const parallax = animated && wide && !reduced;
+  useScrollProgress(wrapRef, parallax);
+
+  // Fugen einmal aufziehen
   useEffect(() => {
-    const el = ref.current;
+    const el = bandRef.current;
     if (!animated || !el || reduced || motionReducedNow()) return;
     if (el.classList.contains('is-drawn')) return;
 
@@ -66,23 +102,17 @@ export function FacadeBand({ animated = false }: { animated?: boolean }) {
 
   // Wechsel auf reduzierte Bewegung: Endzustand
   useEffect(() => {
-    if (reduced) ref.current?.classList.remove('is-armed');
+    if (reduced) bandRef.current?.classList.remove('is-armed');
   }, [reduced]);
 
   return (
-    <div className="facade-gap" aria-hidden="true">
-      <svg
-        ref={ref}
-        className="facade-band"
-        viewBox="0 0 1000 100"
-        preserveAspectRatio="none"
-        focusable="false"
-        aria-hidden="true"
-      >
-        {PATHS.map((d) => (
-          <path key={d} d={d} vectorEffect="non-scaling-stroke" />
-        ))}
-      </svg>
+    <div ref={wrapRef} className={`facade-gap ${parallax ? 'is-parallax' : ''}`} aria-hidden="true">
+      <div ref={bandRef} className="facade-band">
+        {animated && <Layer paths={BEAMS} className="facade-beams" />}
+        <Layer paths={JOINTS_A} className="facade-joints facade-joints--a" />
+        <Layer paths={JOINTS_B} className="facade-joints facade-joints--b" />
+        {animated && <span className="facade-cover" />}
+      </div>
     </div>
   );
 }
