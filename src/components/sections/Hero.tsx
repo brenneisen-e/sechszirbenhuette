@@ -21,6 +21,11 @@ import { BookingSearch } from '@/components/brand/BookingSearch';
 
 type HlsLike = { destroy: () => void };
 
+const STILL_SRC = '/api/hero-poster?w=1920';
+const STILL_SRCSET =
+  '/api/hero-poster?w=640 640w, /api/hero-poster?w=960 960w, /api/hero-poster?w=1280 1280w, /api/hero-poster?w=1920 1920w';
+const STILL_SIZES = '(min-width: 1024px) 58vw, 100vw';
+
 export function Hero() {
   const { t } = useLanguage();
   const { reduced } = useMotion();
@@ -189,6 +194,16 @@ export function Hero() {
 
   return (
     <section id="hero" aria-labelledby="hero-title" className="bg-zirbe">
+      {/* Standbild schon im <head> ankündigen (React hebt den Link dorthin),
+          damit es vor CSS und Skripten lädt */}
+      <link
+        rel="preload"
+        as="image"
+        href={STILL_SRC}
+        imageSrcSet={STILL_SRCSET}
+        imageSizes={STILL_SIZES}
+        fetchPriority="high"
+      />
       <div className="lg:grid lg:min-h-[max(560px,calc(100svh-var(--header-height)))] lg:grid-cols-12">
         {/* Film: großzügig, mobil oben */}
         <div className="relative h-[46svh] min-h-[260px] overflow-hidden bg-zirbe lg:order-2 lg:col-span-7 lg:h-auto">
@@ -212,9 +227,9 @@ export function Hero() {
           {!stillFailed && (
             // eslint-disable-next-line @next/next/no-img-element -- Standbild direkt im HTML (LCP)
             <img
-              src="/api/hero-poster?w=1920"
-              srcSet="/api/hero-poster?w=640 640w, /api/hero-poster?w=960 960w, /api/hero-poster?w=1280 1280w, /api/hero-poster?w=1920 1920w"
-              sizes="(min-width: 1024px) 58vw, 100vw"
+              src={STILL_SRC}
+              srcSet={STILL_SRCSET}
+              sizes={STILL_SIZES}
               alt=""
               aria-hidden="true"
               fetchPriority="high"
