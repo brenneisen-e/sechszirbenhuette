@@ -5,6 +5,7 @@ import { Check, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
 import { BookingSearch } from '@/components/brand/BookingSearch';
+import { SectionHeader } from '@/components/brand/SectionHeader';
 import {
   beds24BookingUrl,
   BOOKING_SEARCH_EVENT,
@@ -22,7 +23,7 @@ import {
 
 export function Buchung() {
   const { t, language } = useLanguage();
-  const { getText, getTextStyle } = useContentTexts();
+  const { getText } = useContentTexts();
   const b = t.buchung;
   const [query, setQuery] = useState<BookingQuery>(DEFAULT_QUERY);
   const [loaded, setLoaded] = useState(false);
@@ -41,25 +42,16 @@ export function Buchung() {
   const cardTitle = 'text-[1.125rem] text-zirbe';
 
   return (
-    <section id="buchung" aria-labelledby="buchung-title" className="bg-leinen py-14 lg:py-20">
+    <section id="buchung" aria-labelledby="buchung-title" className="brand-section bg-leinen">
       <div className="brand-container">
-        <div className="max-w-3xl">
-          <h2
-            id="buchung-title"
-            data-text-key="buchung_title"
-            className="brand-h2 text-zirbe"
-            style={getTextStyle('buchung_title')}
-          >
-            {getText('buchung_title')}
-          </h2>
-          <p
-            data-text-key="buchung_subtitle"
-            className="mt-3 text-rinde"
-            style={getTextStyle('buchung_subtitle')}
-          >
-            {getText('buchung_subtitle')}
-          </p>
-        </div>
+        <SectionHeader
+          id="buchung-title"
+          label={t.navigation.buchung}
+          title={getText('buchung_title')}
+          titleKey="buchung_title"
+          intro={getText('buchung_subtitle')}
+          introKey="buchung_subtitle"
+        />
 
         {/* Handy/Tablet: Suche, Kalender, Hinweise untereinander; Desktop: links
             Suche und Hinweise, rechts der Kalender über beide Zeilen */}

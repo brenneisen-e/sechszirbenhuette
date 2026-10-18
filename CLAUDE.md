@@ -69,6 +69,14 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Regeln: Schrift nie rot; Rot nur als Hintergrund des Buchen-Buttons; Braun nur im Fassadenband; keine Herzen; Northwell nur kurz, Grün/Leinen, nie über Video/Fotos; Hero-Video bleibt
 - Platzhalter bis zum Designpaket: Gill Sans Nova (lokale Gill Sans/Systemschrift), Northwell (Autography), Fugenband-Geometrie, Logo/Zweig aus `public/images/logo.svg` abgeleitet
 
+## Layout der Startseite (Briefing 18.10.2026)
+
+- Abschnitte: Klasse `brand-section` (Abstände Handy/Tablet/Desktop) und Kopf `src/components/brand/SectionHeader.tsx` (Marke, Überschrift, Einleitung, optional Handlung) — Schriftgrößen aus `brand.css` (clamp), nicht aus den Admin-Texten
+- Ausstattung: Desktop 12 Spalten (Kopf + Grundriss haftend links, Karten rechts), Tablet 2 Spalten, Handy Wischreihe (`brand-snap-row`)
+- Galerie: Bento (je 8 Bilder ein Leitbild 2×2 und ein breites 2×1, Reihenfolge aus dem Tab Bilder), „Weitere Bilder“, Lightbox mit Tastatur/Wischen
+- Hüttenkapitel: ab 1024×700 haftendes Bild bis an den linken Bildschirmrand (`--content-inset`), Handy randlos
+- Bilder: `src/lib/imageVariants.ts` (`responsiveSource`) — Cloudflare-Varianten thumb 640 / medium 1280 / large 1920 / hero 2560, eingerichtet beim Laden des Admin Centers (`src/lib/server/imageVariants.ts` über auto-migrate), Schalter `site_settings.imageVariants`, im Frontend `useImageVariants()`
+
 ## Wichtige Pfade
 
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`

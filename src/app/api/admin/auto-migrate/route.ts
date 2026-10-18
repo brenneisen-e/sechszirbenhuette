@@ -4,6 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { APP_LOGS_TABLE_SQL } from '@/lib/server/appLog';
 import { BEDS24_BOOKING_COLUMNS } from '@/lib/server/beds24Columns';
 import { ensureCoreTables } from '@/lib/server/coreTables';
+import { ensureImageVariants } from '@/lib/server/imageVariants';
 
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
@@ -393,6 +394,18 @@ export async function POST() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : '';
       errors.push(`blog_posts:sie_ansprache: ${msg}`);
+    }
+
+    // Bildgrößen in Cloudflare Images (thumb/medium/large/hero) einmalig anlegen
+    try {
+      const variants = await ensureImageVariants(
+        ctx.env as unknown as Parameters<typeof ensureImageVariants>[0],
+      );
+      if (variants.created.length > 0)
+        migrated.push(`image_variants:${variants.created.join(',')}`);
+      if (variants.error) errors.push(`image_variants: ${variants.error}`);
+    } catch (e) {
+      errors.push(`image_variants: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     return NextResponse.json({

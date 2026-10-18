@@ -329,12 +329,21 @@ body {
 .chapters.is-enhanced .chapter-figure {
   display: none;
 }
+/* Abstand vom Bildschirmrand bis zum Inhalt (brand-container) */
+:root {
+  --content-inset: max(var(--space-gutter), calc((100vw - 1280px) / 2));
+}
+/* Bild bis an den linken Bildschirmrand; der Abschnitt schneidet mit
+   overflow-x: clip ab (kein Scrollcontainer, sticky bleibt intakt) */
+.chapters.is-enhanced .chapters-sticky {
+  margin-left: calc(-1 * var(--content-inset));
+}
 .chapters-sticky-frame {
   position: sticky;
   top: calc(var(--header-height) + 2rem);
-  height: min(60vh, 560px);
+  height: min(calc(100svh - var(--header-height) - 4rem), 760px);
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 0 4px 4px 0;
   background: var(--color-zirbe);
 }
 .chapters-sticky-frame img {
@@ -423,4 +432,48 @@ html[data-motion='reduce'] {
   html {
     scroll-padding-top: var(--header-height);
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Abschnitte der Startseite: gleiche Abstände und Köpfe (Briefing 18.10.2026)
+ * Handy 56 px, Tablet (768–1023) etwa die Hälfte des früheren Abstands,
+ * Desktop fließend bis 88 px.
+ * ------------------------------------------------------------------------ */
+
+.brand-section {
+  padding-block: 3.5rem;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .brand-section {
+    padding-block: 2.75rem;
+  }
+}
+@media (min-width: 1024px) {
+  .brand-section {
+    padding-block: clamp(4rem, 1.5rem + 3vw, 5.5rem);
+  }
+}
+
+.brand-intro {
+  font-size: clamp(1rem, 0.9rem + 0.35vw, 1.1875rem);
+  line-height: 1.6;
+}
+
+/* Waagerechte Wischreihe (Handy), ohne JavaScript, mit Einrasten */
+/* display setzt das Markup (grid … sm:hidden), damit Tailwind-Breakpoints greifen */
+.brand-snap-row {
+  grid-auto-flow: column;
+  grid-auto-columns: min(78vw, 22rem);
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-gutter);
+  padding-inline: var(--space-gutter);
+  margin-inline: calc(-1 * var(--space-gutter));
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+}
+.brand-snap-row > * {
+  scroll-snap-align: start;
 }

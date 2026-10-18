@@ -7,9 +7,10 @@ import { useMotion } from '@/contexts/MotionContext';
 // Hüttenporträt in drei Kapiteln.
 //
 // Grundaufbau (mobil, reduzierte Bewegung, ohne JavaScript, 200 % Zoom): drei
-// normale Bild-Text-Blöcke untereinander.
+// normale Bild-Text-Blöcke untereinander, auf dem Handy randlos.
 //
-// M2 (ab 1024 × 700 px mit Bewegung): Bild links sticky, Text rechts. Aktiv
+// M2 (ab 1024 × 700 px mit Bewegung): Bild links sticky und bis an den linken
+// Bildschirmrand, Text rechts. Aktiv
 // ist das Kapitel, dessen Überschrift die Leselinie bei 45 % Viewporthöhe
 // erreicht hat — vorwärts wie rückwärts. Wechsel durch Überblendung (180 ms),
 // keine Zooms, kein blockiertes Scrollen.
@@ -96,21 +97,21 @@ export function HutChapters() {
       id="huette"
       ref={sectionRef}
       aria-labelledby="huette-title"
-      className="bg-leinen py-16 md:py-24 scroll-mt-[var(--header-height)]"
+      className="brand-section overflow-x-clip bg-leinen"
     >
       <div className="brand-container">
         <p className="brand-label text-zirbe">{t.brand.chaptersLabel}</p>
-        <h2 id="huette-title" className="brand-h2 mt-4 max-w-3xl text-zirbe">
+        <h2 id="huette-title" className="brand-h2 mt-3 max-w-3xl text-zirbe">
           {t.brand.chaptersTitle}
         </h2>
 
         <div
-          className={`chapters mt-12 md:mt-16 ${
-            enhanced ? 'is-enhanced grid grid-cols-12 gap-x-12' : ''
+          className={`chapters mt-8 md:mt-12 ${
+            enhanced ? 'is-enhanced grid grid-cols-12 gap-x-10' : ''
           }`}
         >
           {enhanced && (
-            <div className="chapters-sticky col-span-6 row-span-3">
+            <div className="chapters-sticky col-span-7 row-span-3">
               <div className="chapters-sticky-frame">
                 {chapters.map((chapter, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -118,7 +119,7 @@ export function HutChapters() {
                     key={chapter.title}
                     src={`${IMAGES[i]?.base}-1400.jpg`}
                     srcSet={srcSet(IMAGES[i]?.base ?? '')}
-                    sizes="50vw"
+                    sizes="62vw"
                     alt={i === active ? chapter.alt : ''}
                     aria-hidden={i === active ? undefined : true}
                     width={1400}
@@ -135,12 +136,12 @@ export function HutChapters() {
               key={chapter.title}
               className={
                 enhanced
-                  ? 'col-span-5 col-start-8 flex min-h-[62vh] flex-col justify-center py-[10vh] first:pt-0'
-                  : 'grid gap-6 py-8 first:pt-0 md:grid-cols-12 md:items-center md:gap-12 md:py-12'
+                  ? 'col-span-4 col-start-9 flex min-h-[52vh] flex-col justify-center py-[5vh] first:pt-0 last:pb-[12vh]'
+                  : 'grid gap-5 py-6 first:pt-0 md:grid-cols-12 md:items-center md:gap-10 md:py-8'
               }
             >
               <figure
-                className={`chapter-figure md:col-span-7 ${i % 2 === 1 ? 'md:order-2 md:col-start-6' : ''}`}
+                className={`chapter-figure -mx-[var(--space-gutter)] md:col-span-7 md:mx-0 ${i % 2 === 1 ? 'md:order-2 md:col-start-6' : ''}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -152,7 +153,7 @@ export function HutChapters() {
                   height={1050}
                   loading="lazy"
                   decoding="async"
-                  className="block aspect-[4/3] w-full rounded-[4px] object-cover"
+                  className="block aspect-[4/3] w-full object-cover md:rounded-[4px]"
                 />
               </figure>
               <div className={enhanced ? '' : `md:col-span-5 ${i % 2 === 1 ? 'md:order-1' : ''}`}>

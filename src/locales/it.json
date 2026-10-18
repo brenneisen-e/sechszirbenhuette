@@ -436,7 +436,18 @@
       "bad": "Bagno & Sauna",
       "umgebung": "Dintorni",
       "extras": "Extra"
-    }
+    },
+    "innen": "Interni",
+    "aussen": "Esterni",
+    "more": "Altre foto",
+    "less": "Meno foto",
+    "open": "Ingrandisci foto",
+    "close": "Chiudi",
+    "prev": "Foto precedente",
+    "next": "Foto successiva",
+    "empty": "Nessuna foto in questa categoria",
+    "loading": "Caricamento foto …",
+    "label": "Galleria"
   },
   "amenities": {
     "living": {
@@ -573,5 +584,24 @@
     "video": "Video",
     "album": "Più foto",
     "post": "Post su Instagram"
+  },
+  "lage": {
+    "label": "Come arrivare",
+    "title": "Come raggiungerci",
+    "intro": "Isolata a 1.700 m presso il lago Falkertsee – in auto fino alla baita. Bad Kleinkirchheim e Turracher Höhe distano circa 20 minuti.",
+    "maps": "Apri in Google Maps",
+    "address": "Indirizzo",
+    "route": "Come arrivare",
+    "steps": [
+      "Autostrada A10 dei Tauri, uscita Spittal/Millstätter See",
+      "Via Bad Kleinkirchheim in direzione Falkertsee",
+      "Seguire la figura di Heidi (circa 8 km di strada di montagna)"
+    ],
+    "snow": "Da novembre ad aprile: catene da neve consigliate",
+    "contact": "Contatti",
+    "checkin": "Check-in dalle 15, check-out entro le 10",
+    "tapMap": "Toccare per muovere la mappa",
+    "lockMap": "Blocca mappa",
+    "mapTitle": "Mappa per la Sechszirbenhütte"
   }
 }

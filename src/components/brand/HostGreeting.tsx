@@ -11,7 +11,7 @@ import { ZirbenMark } from './ZirbenMark';
 export function HostGreeting() {
   const { t } = useLanguage();
   return (
-    <section aria-labelledby="gruss-title" className="bg-leinen py-16 md:py-24">
+    <section aria-labelledby="gruss-title" className="brand-section bg-leinen">
       <div className="brand-container grid items-center gap-8 md:grid-cols-12 md:gap-12">
         <div className="md:col-span-3 md:flex md:justify-end">
           <ZirbenMark width={104} />

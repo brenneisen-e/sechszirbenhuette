@@ -436,7 +436,18 @@
       "bad": "Kopalnica & Savna",
       "umgebung": "Okolica",
       "extras": "Dodatki"
-    }
+    },
+    "innen": "Notranjost",
+    "aussen": "Zunanjost",
+    "more": "Več fotografij",
+    "less": "Manj fotografij",
+    "open": "Povečaj fotografijo",
+    "close": "Zapri",
+    "prev": "Prejšnja fotografija",
+    "next": "Naslednja fotografija",
+    "empty": "V tej kategoriji ni fotografij",
+    "loading": "Nalaganje fotografij …",
+    "label": "Galerija"
   },
   "amenities": {
     "living": {
@@ -573,5 +584,24 @@
     "video": "Video",
     "album": "Več fotografij",
     "post": "Objava na Instagramu"
+  },
+  "lage": {
+    "label": "Dostop",
+    "title": "Kako do nas",
+    "intro": "Na samem na 1.700 m ob jezeru Falkertsee – z avtom do koče. Do Bad Kleinkirchheima in Turracher Höhe je približno 20 minut.",
+    "maps": "Odpri v Google Zemljevidih",
+    "address": "Naslov",
+    "route": "Dostop",
+    "steps": [
+      "Avtocesta A10 (Tauern), izvoz Spittal/Millstätter See",
+      "Prek Bad Kleinkirchheima proti Falkertseeju",
+      "Sledite figuri Heidi (pribl. 8 km gorske ceste)"
+    ],
+    "snow": "Od novembra do aprila: priporočamo snežne verige",
+    "contact": "Kontakt",
+    "checkin": "Prihod od 15. ure, odhod do 10. ure",
+    "tapMap": "Tapnite za premikanje zemljevida",
+    "lockMap": "Zakleni zemljevid",
+    "mapTitle": "Zemljevid do koče Sechszirbenhütte"
   }
 }

@@ -1,230 +1,139 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MapPin, Navigation, Mail, Phone, Hand, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, Clock, Hand, Lock, Mail, MapPin, Navigation, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { SectionHeader } from '@/components/brand/SectionHeader';
 import { SITE_CONFIG } from '@/lib/constants';
 
-interface MediaItem {
-  id: number;
-  url: string;
-  alt_text: string;
-}
+// Anfahrt: Karte (OpenStreetMap) und daneben Adresse, Weg und Kontakt.
+// Desktop 12 Spalten (Karte 7, Angaben 5), Tablet zwei Spalten, Handy
+// untereinander. Auf Touch-Geräten ist die Karte gesperrt, bis man sie antippt,
+// damit sie beim Scrollen nicht mitwandert.
+
+const MAPS_URL = 'https://maps.app.goo.gl/CaaeUUnQQjHCyhz68';
 
 export function Location() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
+  const l = t.lage;
   const [mapInteractive, setMapInteractive] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const [markerImage, setMarkerImage] = useState<string | null>(null);
+  const { lat, lng } = SITE_CONFIG.coordinates;
+  const bbox = `${lng - 0.05}%2C${lat - 0.035}%2C${lng + 0.05}%2C${lat + 0.035}`;
 
-  // Mark as mounted to prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Fetch exterior image for map marker (only after mount)
-  useEffect(() => {
-    if (!isMounted) return;
-
-    async function fetchMarkerImage() {
-      try {
-        const response = await fetch('/api/media?category=aussen&type=image');
-        const data = (await response.json()) as { media?: MediaItem[] };
-        if (data.media && data.media.length > 0 && data.media[0]) {
-          setMarkerImage(data.media[0].url);
-        } else {
-          // Use fallback if no images in database
-          setMarkerImage('/images/aussen/Aussen-Sommer.jpg');
-        }
-      } catch {
-        // Use fallback image on error
-        setMarkerImage('/images/aussen/Aussen-Sommer.jpg');
-      }
-    }
-    fetchMarkerImage();
-  }, [isMounted]);
-
-  // Sechszirbenhütte coordinates
-  const lat = SITE_CONFIG.coordinates.lat;
-  const lng = SITE_CONFIG.coordinates.lng;
+  const block = 'rounded-[4px] border border-zirbe/15 bg-white p-5';
+  const blockTitle = 'flex items-center gap-2 text-[1.0625rem] text-zirbe';
 
   return (
-    <section id="lage" className="py-20 bg-stone-50">
-      <div className="container mx-auto px-4">
-        {/* White background container for better readability */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 md:p-10 shadow-sm">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-6">
-              <MapPin className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
-            </div>
-            <h2
-              className="brand-h2 text-logo-green mb-6"
-              style={{ fontFamily: 'var(--font-sans)' }}
-            >
-              {language === 'de' ? 'Anfahrt' : 'Directions'}
-            </h2>
+    <section id="lage" aria-labelledby="lage-title" className="brand-section bg-leinen">
+      <div className="brand-container">
+        <SectionHeader
+          id="lage-title"
+          label={l.label}
+          title={l.title}
+          intro={l.intro}
+          action={
             <a
-              href="https://maps.app.goo.gl/CaaeUUnQQjHCyhz68"
+              href={MAPS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-logo-green text-white px-6 py-3 rounded-xl font-semibold hover:bg-logo-green/90 transition shadow-sm"
+              className="brand-secondary"
             >
-              <Navigation className="w-5 h-5" strokeWidth={1.5} />
-              {language === 'de' ? 'In Google Maps öffnen' : 'Open in Google Maps'}
+              <Navigation size={18} aria-hidden />
+              {l.maps}
             </a>
+          }
+        />
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+          <div className="relative h-[340px] overflow-hidden rounded-[4px] border border-zirbe/15 md:h-auto md:min-h-[420px] lg:col-span-7">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`}
+              className={`absolute inset-0 h-full w-full ${
+                mapInteractive
+                  ? 'pointer-events-auto'
+                  : 'pointer-events-none lg:pointer-events-auto'
+              }`}
+              style={{ border: 0 }}
+              loading="lazy"
+              title={l.mapTitle}
+            />
+            {mapInteractive ? (
+              <button
+                type="button"
+                onClick={() => setMapInteractive(false)}
+                className="absolute right-2 top-2 inline-flex min-h-[40px] items-center gap-1.5 rounded-[4px] bg-zirbe px-3 text-[0.875rem] text-leinen lg:hidden"
+              >
+                <Lock size={14} aria-hidden />
+                {l.lockMap}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setMapInteractive(true)}
+                className="absolute inset-0 flex items-end justify-center pb-4 lg:hidden"
+              >
+                <span className="inline-flex items-center gap-2 rounded-[4px] bg-zirbe px-3 py-2 text-[0.875rem] text-leinen">
+                  <Hand size={16} aria-hidden />
+                  {l.tapMap}
+                </span>
+              </button>
+            )}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
-            {/* Map */}
-            <div className="rounded-xl overflow-hidden shadow-lg border border-gray-100 h-[400px] lg:h-auto lg:min-h-[500px] relative">
-              <iframe
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05}%2C${lat - 0.05}%2C${lng + 0.05}%2C${lat + 0.05}&layer=mapnik&marker=${lat}%2C${lng}`}
-                className={`w-full h-full ${mapInteractive ? 'pointer-events-auto' : 'pointer-events-none lg:pointer-events-auto'}`}
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                title="Karte zur Sechszirbenhütte"
-              />
-              {/* Tap to interact overlay - mobile only */}
-              {!mapInteractive && (
-                <button
-                  onClick={() => setMapInteractive(true)}
-                  className="lg:hidden absolute inset-0 bg-black/20 flex flex-col items-center justify-center gap-2 text-white z-20 transition-opacity"
-                >
-                  <Hand className="w-8 h-8" />
-                  <span className="text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                    {language === 'de' ? 'Tippen zum Navigieren' : 'Tap to navigate'}
-                  </span>
-                </button>
-              )}
-              {/* Close interaction button - mobile only */}
-              {mapInteractive && (
-                <button
-                  onClick={() => setMapInteractive(false)}
-                  className="lg:hidden absolute top-2 right-2 bg-white/90 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium shadow-md z-20"
-                >
-                  {language === 'de' ? 'Karte sperren' : 'Lock map'}
-                </button>
-              )}
-              {/* Custom Marker with Image */}
-              {markerImage && (
-                <div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none z-10"
-                  style={{ marginTop: '-20px' }}
-                >
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-2xl">
-                      <img
-                        src={markerImage}
-                        alt="Sechszirbenhütte"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    {/* Triangle pointer */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
-                  </div>
-                </div>
-              )}
+          <div className="grid content-start gap-4 lg:col-span-5">
+            <div className={block}>
+              <p className={blockTitle}>
+                <MapPin size={18} aria-hidden />
+                {l.address}
+              </p>
+              <p className="mt-2 text-rinde">
+                {SITE_CONFIG.address.street}
+                <br />
+                {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}
+                <br />
+                {SITE_CONFIG.address.country}
+              </p>
             </div>
 
-            {/* Info Cards */}
-            <div className="flex flex-col gap-4 lg:gap-0 lg:justify-between">
-              {/* Address */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-logo-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-logo-green" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">
-                      {language === 'de' ? 'Adresse' : 'Address'}
-                    </h3>
-                    <p className="text-gray-600">
-                      {SITE_CONFIG.address.street}
-                      <br />
-                      {SITE_CONFIG.address.zip} {SITE_CONFIG.address.city}
-                      <br />
-                      {SITE_CONFIG.address.country}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className={block}>
+              <p className={blockTitle}>
+                <Navigation size={18} aria-hidden />
+                {l.route}
+              </p>
+              <ol className="mt-2 list-decimal space-y-1 pl-5 text-[0.9375rem] text-rinde">
+                {l.steps.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+              <p className="mt-3 flex items-center gap-2 text-[0.9375rem] text-rinde">
+                <AlertTriangle size={16} aria-hidden className="shrink-0 text-zirbe" />
+                {l.snow}
+              </p>
+              <p className="mt-1 flex items-center gap-2 text-[0.9375rem] text-rinde">
+                <Clock size={16} aria-hidden className="shrink-0 text-zirbe" />
+                {l.checkin}
+              </p>
+            </div>
 
-              {/* Directions */}
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-logo-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Navigation className="w-6 h-6 text-logo-green" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">
-                      {language === 'de' ? 'Anfahrt' : 'Directions'}
-                    </h3>
-                    <ul className="space-y-2 text-gray-600 text-sm">
-                      <li>
-                        •{' '}
-                        {language === 'de'
-                          ? 'A10 Tauernautobahn, Abfahrt Spittal/Millstätter See'
-                          : 'A10 Tauern motorway, exit Spittal/Millstätter See'}
-                      </li>
-                      <li>
-                        •{' '}
-                        {language === 'de'
-                          ? 'Über Bad Kleinkirchheim Richtung Falkertsee'
-                          : 'Via Bad Kleinkirchheim towards Falkertsee'}
-                      </li>
-                      <li>
-                        •{' '}
-                        {language === 'de'
-                          ? 'Der Heidi-Figur folgen (ca. 8 km Bergstraße)'
-                          : 'Follow the Heidi figure (approx. 8 km mountain road)'}
-                      </li>
-                    </ul>
-                    <p className="mt-3 text-rinde text-sm font-medium flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                      <span>
-                        {language === 'de'
-                          ? 'Nov–April: Schneeketten empfohlen'
-                          : 'Nov–April: Snow chains recommended'}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact */}
-              <div className="bg-logo-green text-white rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-white" strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">
-                      {language === 'de' ? 'Kontakt' : 'Contact'}
-                    </h3>
-                    <div className="space-y-2">
-                      <p className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" strokeWidth={1.5} />
-                        <a
-                          href={`mailto:${SITE_CONFIG.email}`}
-                          className="hover:text-white/80 transition"
-                        >
-                          {SITE_CONFIG.email}
-                        </a>
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" strokeWidth={1.5} />
-                        <a
-                          href={`tel:${SITE_CONFIG.phone.replace(/\s/g, '')}`}
-                          className="hover:text-white/80 transition"
-                        >
-                          {SITE_CONFIG.phone}
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="on-zirbe rounded-[4px] bg-zirbe p-5 text-leinen">
+              <p className="flex items-center gap-2 text-[1.0625rem]">
+                <Mail size={18} aria-hidden />
+                {l.contact}
+              </p>
+              <p className="mt-2">
+                <a href={`mailto:${SITE_CONFIG.email}`} className="brand-link">
+                  {SITE_CONFIG.email}
+                </a>
+              </p>
+              <p className="mt-1 flex items-center gap-2">
+                <Phone size={16} aria-hidden />
+                <a
+                  href={`tel:${SITE_CONFIG.phone.replace(/\(0\)|\s/g, '')}`}
+                  className="brand-link"
+                >
+                  {SITE_CONFIG.phone}
+                </a>
+              </p>
             </div>
           </div>
         </div>

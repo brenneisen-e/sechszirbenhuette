@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Loader2, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContentTexts } from '@/contexts/ContentTextsContext';
-import Image from 'next/image';
-import { AdaptiveImage } from '@/components/ui/AdaptiveImage';
-import { X, Images, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useImageVariants } from '@/contexts/SiteSettingsContext';
+import { SectionHeader } from '@/components/brand/SectionHeader';
+import { responsiveSource } from '@/lib/imageVariants';
+
+// Galerie als Bento-Raster: je acht Bilder ein großes Leitbild und ein
+// breites Bild, „Weitere Bilder“ lädt die nächste Folge. Klick öffnet die
+// Lightbox in voller Auflösung (Cloudflare-Varianten bis 2560 px, sobald
+// eingerichtet). Filter Innen/Außen/Extras mit Unterkategorien; die
+// Ausstattungskarten springen über data-category/data-subcategory hierher.
 
 interface GalleryImage {
   src: string;
@@ -253,597 +260,377 @@ function parseAltText(altText: string): { title: string; description: string } {
   return { title: altText, description: '' };
 }
 
+// Datenbank-Kategorien, die in die Galerie gehören
+const GALLERY_CATEGORIES = new Set(Object.keys(categoryMap));
+const INNEN = ['wohnen', 'schlafen', 'kueche', 'bad'];
+const AUSSEN = ['aussen', 'umgebung'];
+
+/** Bilder je Schritt („Weitere Bilder“) — eine Bento-Folge */
+const PAGE = 8;
+
+// Bento: In jeder Achterfolge ein großes Leitbild (2 × 2) und ein breites
+// Bild (2 × 1), der Rest einfach; grid-flow-dense füllt die Lücken.
+function tileKind(index: number): 'lead' | 'wide' | 'small' {
+  const k = index % PAGE;
+  if (k === 0) return 'lead';
+  if (k === 5) return 'wide';
+  return 'small';
+}
+
+const TILE_CLASS = {
+  lead: 'col-span-2 row-span-2',
+  wide: 'col-span-2',
+  small: '',
+};
+
+const TILE_SIZES = {
+  lead: '(min-width: 1024px) 640px, (min-width: 768px) 66vw, 100vw',
+  wide: '(min-width: 1024px) 640px, (min-width: 768px) 66vw, 100vw',
+  small: '(min-width: 1024px) 320px, (min-width: 768px) 33vw, 50vw',
+};
+
+function isInnen(img: GalleryImage) {
+  return INNEN.includes(img.category) || !!img.tags?.includes('innen');
+}
+
+function isAussen(img: GalleryImage) {
+  return AUSSEN.includes(img.category) || !!img.tags?.includes('aussen');
+}
+
 export function Galerie() {
-  const { t, language } = useLanguage();
-  const { getText, getTextStyle } = useContentTexts();
-  const [isMounted, setIsMounted] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
-  // Start with empty images to prevent hydration mismatch
+  const { t } = useLanguage();
+  const { getText } = useContentTexts();
+  const variants = useImageVariants();
+  const g = t.galerie;
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [mobileIndex, setMobileIndex] = useState(0);
-  // Start with undefined to ensure consistent SSR rendering
-  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+  const [visible, setVisible] = useState(PAGE);
+  const [lightbox, setLightbox] = useState<number | null>(null);
   const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
-  const imagesPerPage = 4;
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // Mark as mounted to prevent hydration mismatch
   useEffect(() => {
-    setIsMounted(true);
+    let cancelled = false;
+    fetch('/api/media')
+      .then((res) => res.json() as Promise<{ media?: MediaItem[] }>)
+      .then((data) => {
+        if (cancelled) return;
+        const dbImages = (data.media ?? [])
+          .filter((img) => GALLERY_CATEGORIES.has(img.category))
+          .map((img) => {
+            const { title, description } = parseAltText(img.alt_text || img.title || '');
+            return {
+              src: img.url,
+              title,
+              description,
+              category: categoryMap[img.category] || img.category,
+              tags: img.categories || [],
+            };
+          });
+        setImages(dbImages.length > 0 ? dbImages : fallbackImages);
+      })
+      .catch(() => {
+        if (!cancelled) setImages(fallbackImages);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Detect mobile viewport (only after mount)
   useEffect(() => {
-    if (!isMounted) return;
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, [isMounted]);
-
-  // Touch handlers for mobile swipe
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]?.clientX ?? 0;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0]?.clientX ?? 0;
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (filteredLength: number) => {
-      const diff = touchStartX.current - touchEndX.current;
-      const threshold = 50;
-
-      if (Math.abs(diff) > threshold) {
-        if (diff > 0 && mobileIndex < filteredLength - 1) {
-          // Swipe left - next image
-          setMobileIndex((prev) => prev + 1);
-        } else if (diff < 0 && mobileIndex > 0) {
-          // Swipe right - previous image
-          setMobileIndex((prev) => prev - 1);
-        }
-      }
-    },
-    [mobileIndex],
-  );
-
-  // Reset pagination when category changes
-  useEffect(() => {
-    setCurrentPage(0);
-    setIsExpanded(false);
-    setMobileIndex(0);
+    setVisible(PAGE);
   }, [selectedCategory, selectedSubCategory]);
 
-  // Fetch images from API on mount (only after client mount to prevent hydration mismatch)
-  useEffect(() => {
-    if (!isMounted) return;
-
-    async function fetchImages() {
-      try {
-        const response = await fetch('/api/media');
-        const data = (await response.json()) as { media?: MediaItem[] };
-
-        if (data.media && data.media.length > 0) {
-          const galleryCategories = [
-            'exterior',
-            'aussen',
-            'living',
-            'wohnen',
-            'innen',
-            'bedrooms',
-            'schlafen',
-            'kitchen',
-            'kueche',
-            'bathroom',
-            'bad',
-            'sauna',
-            'wellness',
-            'surroundings',
-            'umgebung',
-            'extras',
-            // Kinderausflüge
-            'heidi-alm',
-            'turracher-hoehe',
-            'ossiacher-see',
-            'panoramaweg',
-            'tierpark',
-            'gerlitzen',
-            'nockalm',
-            // Hundewanderungen
-            'hund-falkert',
-            'hund-rodresnock',
-            'hund-drei-seen',
-            'hund-hochrindl',
-            'hund-millstaetter',
-          ];
-          const allMedia = data.media;
-          const dbImages: GalleryImage[] = allMedia
-            .filter((img: MediaItem) => galleryCategories.includes(img.category))
-            .map((img: MediaItem) => {
-              const { title, description } = parseAltText(img.alt_text || img.title || '');
-              return {
-                src: img.url,
-                title,
-                description,
-                category: categoryMap[img.category] || img.category,
-                tags: img.categories || [],
-              };
-            });
-
-          if (dbImages.length > 0) {
-            setImages(dbImages);
-          } else {
-            // Use fallback images if no images from database
-            setImages(fallbackImages);
-          }
-        } else {
-          // Use fallback images if no media returned
-          setImages(fallbackImages);
-        }
-      } catch (error) {
-        console.error('Failed to fetch images from API:', error);
-        // Use fallback images on error
-        setImages(fallbackImages);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchImages();
-  }, [isMounted]);
-
-  const categoryLabels: Record<string, { de: string; en: string }> = {
-    all: { de: 'Alle', en: 'All' },
-    aussen: { de: 'Außenbereich', en: 'Exterior' },
-    wohnen: { de: 'Wohnbereich', en: 'Living' },
-    schlafen: { de: 'Schlafzimmer', en: 'Bedrooms' },
-    kueche: { de: 'Küche', en: 'Kitchen' },
-    bad: { de: 'Bad & Sauna', en: 'Bath & Sauna' },
-    umgebung: { de: 'Umgebung', en: 'Surroundings' },
-    extras: { de: 'Extras', en: 'Extras' },
-    // Kinderausflüge
-    'heidi-alm': { de: 'Heidi-Alm', en: 'Heidi-Alm' },
-    'turracher-hoehe': { de: 'Turracher Höhe', en: 'Turracher Höhe' },
-    'ossiacher-see': { de: 'Ossiacher See', en: 'Lake Ossiach' },
-    panoramaweg: { de: 'Panoramaweg', en: 'Panorama Trail' },
-    tierpark: { de: 'Tierpark', en: 'Animal Park' },
-    gerlitzen: { de: 'Gerlitzen-Alpe', en: 'Gerlitzen-Alpe' },
-    nockalm: { de: 'Nockalm', en: 'Nockalm' },
-    // Hundewanderungen
-    'hund-falkert': { de: 'Falkert & See', en: 'Falkert & Lake' },
-    'hund-rodresnock': { de: 'Rodresnock', en: 'Rodresnock' },
-    'hund-drei-seen': { de: 'Drei Seen', en: 'Three Lakes' },
-    'hund-hochrindl': { de: 'Hochrindl', en: 'Hochrindl' },
-    'hund-millstaetter': { de: 'Millstätter See', en: 'Millstätter See' },
-  };
-
-  // Top-level categories: Alle, Innen, Außen, Extras
-  const topCategories = [
-    {
-      id: 'all',
-      label: categoryLabels.all?.[language as 'de' | 'en'] || 'Alle',
-      count: images.length,
-    },
-    {
-      id: 'innen',
-      label: language === 'de' ? 'Innen' : 'Interior',
-      count: images.filter(
-        (img) =>
-          ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) ||
-          img.tags?.includes('innen'),
-      ).length,
-    },
-    {
-      id: 'aussen',
-      label: language === 'de' ? 'Außen' : 'Exterior',
-      count: images.filter(
-        (img) => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen'),
-      ).length,
-    },
-    {
-      id: 'extras',
-      label: categoryLabels.extras?.[language as 'de' | 'en'] || 'Extras',
-      count: images.filter((img) => img.category === 'extras').length,
-    },
-  ];
-
-  // Sub-categories for Innen and Außen
-  const innenSubCategories = ['wohnen', 'schlafen', 'kueche', 'bad'].filter((id) =>
-    images.some((img) => img.category === id),
-  );
-  const aussenSubCategories = ['aussen', 'umgebung'].filter((id) =>
-    images.some((img) => img.category === id),
-  );
-
-  const showSubFilters = selectedCategory === 'innen' || selectedCategory === 'aussen';
-  const subCategories =
-    selectedCategory === 'innen'
-      ? innenSubCategories
-      : selectedCategory === 'aussen'
-        ? aussenSubCategories
-        : [];
-
-  // Filter images
   const filteredImages = (() => {
     if (selectedCategory === 'all') return images;
-    if (selectedCategory === 'extras') return images.filter((img) => img.category === 'extras');
-
     if (selectedCategory === 'innen') {
-      const innenImages = images.filter(
-        (img) =>
-          ['wohnen', 'schlafen', 'kueche', 'bad'].includes(img.category) ||
-          img.tags?.includes('innen'),
-      );
-      if (selectedSubCategory) {
-        return innenImages.filter((img) => img.category === selectedSubCategory);
-      }
-      return innenImages;
+      const list = images.filter(isInnen);
+      return selectedSubCategory ? list.filter((i) => i.category === selectedSubCategory) : list;
     }
-
     if (selectedCategory === 'aussen') {
-      const aussenImages = images.filter(
-        (img) => ['aussen', 'umgebung'].includes(img.category) || img.tags?.includes('aussen'),
-      );
-      if (selectedSubCategory) {
-        return aussenImages.filter((img) => img.category === selectedSubCategory);
-      }
-      return aussenImages;
+      const list = images.filter(isAussen);
+      return selectedSubCategory ? list.filter((i) => i.category === selectedSubCategory) : list;
     }
-
     return images.filter((img) => img.category === selectedCategory);
   })();
 
-  // Calculate paginated images
-  const totalPages = Math.ceil(filteredImages.length / imagesPerPage);
-  const displayedImages = isExpanded
-    ? filteredImages
-    : filteredImages.slice(currentPage * imagesPerPage, (currentPage + 1) * imagesPerPage);
+  const topCategories = [
+    { id: 'all', label: g.categories.all, count: images.length },
+    { id: 'innen', label: g.innen, count: images.filter(isInnen).length },
+    { id: 'aussen', label: g.aussen, count: images.filter(isAussen).length },
+    {
+      id: 'extras',
+      label: g.categories.extras,
+      count: images.filter((img) => img.category === 'extras').length,
+    },
+  ].filter((c) => c.id === 'all' || c.count > 0);
 
-  const canGoPrev = currentPage > 0;
-  const canGoNext = currentPage < totalPages - 1;
+  const subCategories = (
+    selectedCategory === 'innen' ? INNEN : selectedCategory === 'aussen' ? AUSSEN : []
+  ).filter((id) => images.some((img) => img.category === id));
+
+  const categoryLabel = (id: string) =>
+    (g.categories as Record<string, string>)[id] ?? id.replace(/-/g, ' ');
+
+  const shown = filteredImages.slice(0, visible);
+  const current = lightbox !== null ? filteredImages[lightbox] : undefined;
+
+  const step = useCallback(
+    (delta: number) =>
+      setLightbox((i) =>
+        i === null || filteredImages.length === 0
+          ? i
+          : (i + delta + filteredImages.length) % filteredImages.length,
+      ),
+    [filteredImages.length],
+  );
+
+  // Lightbox: Tastatur, Seite nicht mitscrollen
+  useEffect(() => {
+    if (lightbox === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(null);
+      if (e.key === 'ArrowRight') step(1);
+      if (e.key === 'ArrowLeft') step(-1);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [lightbox, step]);
+
+  const filterButton = (active: boolean) =>
+    `inline-flex min-h-[44px] items-center gap-1.5 rounded-[4px] px-4 text-[0.9375rem] transition-colors ${
+      active
+        ? 'bg-zirbe text-leinen'
+        : 'border border-zirbe/30 text-zirbe hover:border-zirbe hover:bg-zirbe/5'
+    }`;
+
+  const lightboxSource = current ? responsiveSource(current.src, variants, 'hero', 'large') : null;
 
   return (
-    <section id="galerie" className="py-20 bg-stone-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-logo-green/10 rounded-full mb-4">
-            <Images className="w-8 h-8 text-logo-green" strokeWidth={1.5} />
-          </div>
-          <h2
-            className="brand-h2 text-logo-green mb-4"
-            style={{ fontFamily: 'var(--font-sans)', ...getTextStyle('galerie_title') }}
-          >
-            {getText('galerie_title') || (language === 'de' ? 'Galerie' : 'Gallery')}
-          </h2>
-          <p
-            className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto"
-            style={getTextStyle('galerie_subtitle')}
-          >
-            {getText('galerie_subtitle') ||
-              (language === 'de'
-                ? 'Entdecken Sie die Sechszirbenhütte in Bildern'
-                : 'Discover the Sechszirbenhütte in pictures')}
-          </p>
-        </div>
+    <section
+      id="galerie"
+      ref={sectionRef}
+      aria-labelledby="galerie-title"
+      className="brand-section bg-leinen"
+    >
+      <div className="brand-container">
+        <SectionHeader
+          id="galerie-title"
+          label={g.label}
+          title={getText('galerie_title') || g.label}
+          titleKey="galerie_title"
+          intro={getText('galerie_subtitle')}
+          introKey="galerie_subtitle"
+        />
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
+        <div className="mt-6 flex flex-wrap gap-2">
           {topCategories.map((category) => (
             <button
               key={category.id}
+              type="button"
               data-category={category.id}
+              aria-pressed={selectedCategory === category.id}
               onClick={() => {
                 setSelectedCategory(category.id);
                 setSelectedSubCategory(null);
               }}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedCategory === category.id
-                  ? 'bg-logo-green text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={filterButton(selectedCategory === category.id)}
             >
-              {category.label}{' '}
-              {category.count > 0 && <span className="text-sm opacity-75">({category.count})</span>}
+              {category.label}
+              {category.count > 0 && <span className="opacity-70">{category.count}</span>}
             </button>
           ))}
         </div>
 
-        {/* Sub-category Filter (for Innen / Außen) */}
-        {showSubFilters && subCategories.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+        {subCategories.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
             <button
+              type="button"
+              aria-pressed={!selectedSubCategory}
               onClick={() => setSelectedSubCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                !selectedSubCategory
-                  ? 'bg-logo-green/20 text-logo-green border border-logo-green/30'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
+              className={filterButton(!selectedSubCategory)}
             >
-              {language === 'de' ? 'Alle' : 'All'}
+              {g.categories.all}
             </button>
-            {subCategories.map((subCat) => {
-              const count = images.filter((img) => img.category === subCat).length;
-              return (
-                <button
-                  key={subCat}
-                  data-subcategory={subCat}
-                  onClick={() => setSelectedSubCategory(subCat)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    selectedSubCategory === subCat
-                      ? 'bg-logo-green/20 text-logo-green border border-logo-green/30'
-                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
-                  }`}
-                >
-                  {categoryLabels[subCat]?.[language as 'de' | 'en'] || subCat}
-                  {count > 0 && <span className="text-xs opacity-75 ml-1">({count})</span>}
-                </button>
-              );
-            })}
-          </div>
-        )}
-        {!showSubFilters && <div className="mb-4" />}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-wood-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500">
-              {language === 'de' ? 'Bilder werden geladen...' : 'Loading images...'}
-            </p>
+            {subCategories.map((sub) => (
+              <button
+                key={sub}
+                type="button"
+                data-subcategory={sub}
+                aria-pressed={selectedSubCategory === sub}
+                onClick={() => setSelectedSubCategory(sub)}
+                className={filterButton(selectedSubCategory === sub)}
+              >
+                {categoryLabel(sub)}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Image Grid */}
-        {!isLoading && (
+        {isLoading ? (
+          <p className="mt-8 flex items-center gap-3 text-rinde">
+            <Loader2 size={20} className="animate-spin text-zirbe" aria-hidden />
+            {g.loading}
+          </p>
+        ) : filteredImages.length === 0 ? (
+          <p className="mt-8 text-rinde">{g.empty}</p>
+        ) : (
           <>
-            {/* Mobile Carousel - only render after hydration is complete */}
-            {isMobile === true && filteredImages.length > 0 && (
-              <div className="md:hidden">
-                <div
-                  className="relative overflow-hidden rounded-xl"
-                  onTouchStart={handleTouchStart}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={() => handleTouchEnd(filteredImages.length)}
-                >
-                  {/* Current Image */}
-                  <div
-                    onClick={() => {
-                      const img = filteredImages[mobileIndex];
-                      if (img) setSelectedImage(images.indexOf(img));
-                    }}
-                    className="relative aspect-[4/3] bg-gray-100 cursor-pointer"
-                  >
-                    <AdaptiveImage
-                      src={filteredImages[mobileIndex]?.src ?? ''}
-                      alt={filteredImages[mobileIndex]?.title || 'Galeriebild'}
-                      fill
-                      className="object-cover"
-                      sizes="100vw"
-                      priority
-                    />
-                  </div>
-
-                  {/* Navigation Arrows */}
-                  {mobileIndex > 0 && (
+            <ul className="mt-6 grid grid-flow-dense auto-rows-[9.5rem] grid-cols-2 gap-2 sm:auto-rows-[12rem] md:mt-8 md:grid-cols-3 md:gap-3 lg:auto-rows-[clamp(11rem,14vw,16.5rem)] lg:grid-cols-4">
+              {shown.map((image, index) => {
+                const kind = tileKind(index);
+                const source = responsiveSource(
+                  image.src,
+                  variants,
+                  kind === 'small' ? 'medium' : 'large',
+                  kind === 'small' ? 'thumb' : 'medium',
+                );
+                return (
+                  <li key={`${image.src}-${index}`} className={TILE_CLASS[kind]}>
                     <button
-                      onClick={() => setMobileIndex((prev) => prev - 1)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
+                      type="button"
+                      onClick={() => setLightbox(index)}
+                      aria-label={`${g.open}: ${image.title || g.label}`}
+                      className="group relative block h-full w-full overflow-hidden rounded-[4px] bg-zirbe/10"
                     >
-                      <ChevronLeft size={20} />
-                    </button>
-                  )}
-                  {mobileIndex < filteredImages.length - 1 && (
-                    <button
-                      onClick={() => setMobileIndex((prev) => prev + 1)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center text-gray-700"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  )}
-                </div>
-
-                {/* Dot indicators */}
-                <div className="flex justify-center gap-1.5 mt-4">
-                  {filteredImages.slice(0, Math.min(filteredImages.length, 10)).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setMobileIndex(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        mobileIndex === index ? 'bg-logo-green w-6' : 'bg-logo-green/30 w-2'
-                      }`}
-                    />
-                  ))}
-                  {filteredImages.length > 10 && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      +{filteredImages.length - 10}
-                    </span>
-                  )}
-                </div>
-
-                {/* Image counter */}
-                <p className="text-center text-sm text-gray-500 mt-2">
-                  {mobileIndex + 1} / {filteredImages.length}
-                </p>
-              </div>
-            )}
-
-            {/* Desktop Grid - show always on server, then conditionally after hydration */}
-            <div
-              className={`${isMobile === true ? 'hidden' : ''} md:block relative`}
-              suppressHydrationWarning
-            >
-              {/* Previous Button (only when not expanded) */}
-              {!isExpanded && filteredImages.length > imagesPerPage && (
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-                  disabled={!canGoPrev}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition -translate-x-1/2 ${!canGoPrev ? 'opacity-30 cursor-not-allowed' : ''}`}
-                >
-                  <ChevronLeft size={24} />
-                </button>
-              )}
-
-              {/* Next Button (only when not expanded) */}
-              {!isExpanded && filteredImages.length > imagesPerPage && (
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
-                  disabled={!canGoNext}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition translate-x-1/2 ${!canGoNext ? 'opacity-30 cursor-not-allowed' : ''}`}
-                >
-                  <ChevronRight size={24} />
-                </button>
-              )}
-
-              {/* Image Grid */}
-              <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 ${!isExpanded ? 'mx-8' : ''}`}>
-                {displayedImages.map((image, index) => (
-                  <div
-                    key={`${currentPage}-${index}`}
-                    onClick={() => setSelectedImage(images.indexOf(image))}
-                    className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group"
-                  >
-                    <AdaptiveImage
-                      src={image.src}
-                      alt={image.title || 'Galeriebild'}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-110"
-                      sizes="(max-width: 1200px) 50vw, 25vw"
-                    />
-                    {(image.title || image.description) && (
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {image.title && (
-                          <p className="text-white text-sm font-semibold">{image.title}</p>
-                        )}
-                        {image.description && (
-                          <p className="text-white/80 text-xs">{image.description}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pagination indicator and Expand Button (Desktop only) */}
-            {isMobile !== true && filteredImages.length > imagesPerPage && (
-              <div className="hidden md:flex items-center justify-between mt-6">
-                {/* Page indicator (left side - only when not expanded) */}
-                {!isExpanded ? (
-                  <div className="flex gap-2">
-                    {Array.from({ length: totalPages }).map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentPage(index)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all ${
-                          currentPage === index
-                            ? 'bg-logo-green w-6'
-                            : 'bg-logo-green/30 hover:bg-logo-green/50'
-                        }`}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- Cloudflare-Varianten per srcset */}
+                      <img
+                        src={source.src}
+                        srcSet={source.srcSet}
+                        sizes={source.srcSet ? TILE_SIZES[kind] : undefined}
+                        alt={image.title || g.label}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                       />
-                    ))}
-                  </div>
-                ) : (
-                  <div />
-                )}
+                      {image.title && (
+                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-rinde/75 to-transparent p-3 pt-10 text-left text-[0.9375rem] text-leinen opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                          {image.title}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
 
-                {/* Expand/Collapse Button (right side) */}
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="px-4 py-2 rounded-lg font-medium text-sm bg-logo-green text-white hover:bg-logo-green/90 transition-all"
-                >
-                  {isExpanded
-                    ? language === 'de'
-                      ? 'Galerie einklappen'
-                      : 'Collapse Gallery'
-                    : language === 'de'
-                      ? 'Galerie ausklappen'
-                      : 'Expand Gallery'}
-                </button>
+            {filteredImages.length > PAGE && (
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                {visible < filteredImages.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setVisible((v) => v + PAGE)}
+                    className="brand-secondary"
+                  >
+                    <ChevronDown size={18} aria-hidden />
+                    {g.more}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVisible(PAGE);
+                      sectionRef.current?.scrollIntoView({ block: 'start' });
+                    }}
+                    className="brand-secondary"
+                  >
+                    <ChevronUp size={18} aria-hidden />
+                    {g.less}
+                  </button>
+                )}
+                <span className="text-[0.9375rem] text-rinde">
+                  {Math.min(visible, filteredImages.length)} / {filteredImages.length}
+                </span>
               </div>
             )}
           </>
         )}
-
-        {/* Empty State */}
-        {!isLoading && filteredImages.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">
-              {language === 'de'
-                ? 'Keine Bilder in dieser Kategorie'
-                : 'No images in this category'}
-            </p>
-          </div>
-        )}
-
-        {/* Lightbox */}
-        {selectedImage !== null && (
-          <div
-            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            {/* Previous Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedImage((selectedImage - 1 + images.length) % images.length);
-              }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 rounded-full bg-white/20 hover:bg-white/40 transition z-20"
-              aria-label="Vorheriges Bild"
-            >
-              <ChevronLeft className="w-8 h-8" />
-            </button>
-
-            {/* Next Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedImage((selectedImage + 1) % images.length);
-              }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 rounded-full bg-white/20 hover:bg-white/40 transition z-20"
-              aria-label="Nächstes Bild"
-            >
-              <ChevronRight className="w-8 h-8" />
-            </button>
-
-            <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition p-2 rounded-full hover:bg-white/10"
-                aria-label="Schließen"
-              >
-                <X className="w-8 h-8" strokeWidth={2} />
-              </button>
-              <div className="relative aspect-[4/3] bg-black rounded-xl overflow-hidden">
-                <Image
-                  src={images[selectedImage]?.src ?? ''}
-                  alt={images[selectedImage]?.title ?? ''}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
-                  priority
-                />
-              </div>
-              <div className="mt-4 text-white text-center">
-                {images[selectedImage]?.title && (
-                  <p className="text-lg font-semibold">{images[selectedImage]?.title}</p>
-                )}
-                {images[selectedImage]?.description && (
-                  <p className="text-sm text-gray-300">{images[selectedImage]?.description}</p>
-                )}
-                <p className="text-sm text-gray-400 mt-1">
-                  {selectedImage + 1} / {images.length}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {current && lightbox !== null && lightboxSource && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.title || g.label}
+          className="fixed inset-0 z-[70] flex flex-col bg-rinde/95 text-leinen"
+          onClick={() => setLightbox(null)}
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0]?.clientX ?? 0;
+          }}
+          onTouchEnd={(e) => {
+            const diff = touchStartX.current - (e.changedTouches[0]?.clientX ?? 0);
+            if (Math.abs(diff) > 50) step(diff > 0 ? 1 : -1);
+          }}
+        >
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            <span className="text-[0.9375rem] tabular-nums">
+              {lightbox + 1} / {filteredImages.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setLightbox(null)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-[4px] hover:bg-leinen/10"
+              aria-label={g.close}
+            >
+              <X size={26} aria-hidden />
+            </button>
+          </div>
+          <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-16">
+            {/* eslint-disable-next-line @next/next/no-img-element -- volle Auflösung per srcset */}
+            <img
+              key={current.src}
+              src={lightboxSource.src}
+              srcSet={lightboxSource.srcSet}
+              sizes={lightboxSource.srcSet ? '100vw' : undefined}
+              alt={current.title || g.label}
+              decoding="async"
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-full max-w-full object-contain"
+            />
+            {filteredImages.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    step(-1);
+                  }}
+                  className="absolute left-2 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-[4px] bg-rinde/60 hover:bg-rinde sm:inline-flex"
+                  aria-label={g.prev}
+                >
+                  <ChevronLeft size={28} aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    step(1);
+                  }}
+                  className="absolute right-2 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-[4px] bg-rinde/60 hover:bg-rinde sm:inline-flex"
+                  aria-label={g.next}
+                >
+                  <ChevronRight size={28} aria-hidden />
+                </button>
+              </>
+            )}
+          </div>
+          <div className="min-h-[4.5rem] px-4 py-3 text-center">
+            {current.title && <p className="text-[1.0625rem]">{current.title}</p>}
+            {current.description && (
+              <p className="text-[0.9375rem] text-leinen/75">{current.description}</p>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

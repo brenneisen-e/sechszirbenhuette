@@ -10,6 +10,8 @@ export interface SiteSettings {
   headingSize: string; // e.g., "48", "56", "64", "72"
   bodySize: string; // e.g., "14", "16", "18", "20"
   sectionSpacing: 'compact' | 'normal' | 'spacious';
+  /** '1', sobald die Bildgrößen in Cloudflare Images eingerichtet sind */
+  imageVariants?: string;
 }
 
 const defaultSettings: SiteSettings = {
@@ -116,6 +118,12 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       {children}
     </SiteSettingsContext.Provider>
   );
+}
+
+/** Stehen die Cloudflare-Bildgrößen (srcset) bereit? */
+export function useImageVariants(): boolean {
+  const context = useContext(SiteSettingsContext);
+  return context?.settings.imageVariants === '1';
 }
 
 export function useSiteSettings() {

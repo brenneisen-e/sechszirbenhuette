@@ -438,7 +438,18 @@
       "bad": "Bad & Sauna",
       "umgebung": "Umgebung",
       "extras": "Extras"
-    }
+    },
+    "innen": "Innen",
+    "aussen": "Außen",
+    "more": "Weitere Bilder",
+    "less": "Weniger Bilder",
+    "open": "Bild vergrößern",
+    "close": "Schließen",
+    "prev": "Vorheriges Bild",
+    "next": "Nächstes Bild",
+    "empty": "Keine Bilder in dieser Kategorie",
+    "loading": "Bilder werden geladen …",
+    "label": "Galerie"
   },
   "amenities": {
     "living": {
@@ -570,5 +581,24 @@
     "video": "Video",
     "album": "Mehrere Bilder",
     "post": "Beitrag auf Instagram"
+  },
+  "lage": {
+    "label": "Anfahrt",
+    "title": "So finden Sie zu uns",
+    "intro": "Alleinlage auf 1.700 m am Falkertsee – mit dem Auto bis vor die Hütte. Bad Kleinkirchheim und die Turracher Höhe erreichen Sie in rund 20 Minuten.",
+    "maps": "In Google Maps öffnen",
+    "address": "Adresse",
+    "route": "Anfahrt",
+    "steps": [
+      "A10 Tauernautobahn, Abfahrt Spittal/Millstätter See",
+      "Über Bad Kleinkirchheim Richtung Falkertsee",
+      "Der Heidi-Figur folgen (ca. 8 km Bergstraße)"
+    ],
+    "snow": "November bis April: Schneeketten empfohlen",
+    "contact": "Kontakt",
+    "checkin": "Check-in ab 15 Uhr, Check-out bis 10 Uhr",
+    "tapMap": "Tippen, um die Karte zu bewegen",
+    "lockMap": "Karte sperren",
+    "mapTitle": "Karte zur Sechszirbenhütte"
   }
 }
