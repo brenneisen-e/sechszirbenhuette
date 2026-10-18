@@ -15,7 +15,9 @@ import { BookingSearch } from '@/components/brand/BookingSearch';
 // Wiedergabe: stumm, inline, in Schleife, unabhängig vom Scrollen. Automatischer
 // Start nur ohne reduzierte Bewegung. Außerhalb des Sichtbereichs oder bei
 // verdecktem Tab pausiert der Film; eine bewusste Pause wird nie automatisch
-// aufgehoben. Poster ist ein Standbild aus genau diesem Film.
+// aufgehoben. Das Standbild aus genau diesem Film liegt als Bild mit srcset
+// darüber (/api/hero-poster) und lädt direkt aus dem HTML — es ist das größte
+// Element beim Laden (LCP) — bis der Film das erste Mal läuft.
 
 type HlsLike = { destroy: () => void };
 
@@ -30,7 +32,9 @@ export function Hero() {
   reducedRef.current = reduced;
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  // Standbild als Bild im HTML (LCP), bis der Film einmal läuft
+  const [started, setStarted] = useState(false);
+  const [stillFailed, setStillFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -48,29 +52,12 @@ export function Hero() {
           return;
         }
         setVideoUrl(url);
-        // Standbild aus demselben Stream-Video (Sekunde 1 = Startbild der Schleife)
-        const uid = url.match(/cloudflarestream\.com\/([a-f0-9]+)\//)?.[1];
-        const host = url.match(/^https:\/\/([^/]+)\//)?.[1];
-        if (uid && host) {
-          setPosterUrl(
-            `https://${host}/${uid}/thumbnails/thumbnail.jpg?time=1s&width=1920&height=1080`,
-          );
-        }
       })
       .catch(() => !cancelled && setFailed(true));
     return () => {
       cancelled = true;
     };
   }, []);
-
-  // Kein Stream-Standbild: hinterlegtes Vorschaubild verwenden
-  useEffect(() => {
-    if (posterUrl || !failed) return;
-    fetch('/api/media?category=hero-thumbnail&type=image', { cache: 'no-store' })
-      .then((res) => res.json() as Promise<{ media?: { url: string }[] }>)
-      .then((data) => data.media?.[0]?.url && setPosterUrl(data.media[0].url))
-      .catch(() => {});
-  }, [failed, posterUrl]);
 
   const tryAutoplay = useCallback(() => {
     const video = videoRef.current;
@@ -213,14 +200,32 @@ export function Hero() {
             playsInline
             disablePictureInPicture
             preload="metadata"
-            poster={posterUrl || undefined}
             aria-label={t.brand.videoLabel}
             className="absolute inset-0 h-full w-full object-cover object-[50%_60%]"
-            onPlay={() => setPlaying(true)}
+            onPlay={() => {
+              setPlaying(true);
+              setStarted(true);
+            }}
             onPause={() => setPlaying(false)}
             onError={() => setFailed(true)}
           />
-          {(ready || posterUrl) && !failed && (
+          {!stillFailed && (
+            // eslint-disable-next-line @next/next/no-img-element -- Standbild direkt im HTML (LCP)
+            <img
+              src="/api/hero-poster?w=1920"
+              srcSet="/api/hero-poster?w=640 640w, /api/hero-poster?w=960 960w, /api/hero-poster?w=1280 1280w, /api/hero-poster?w=1920 1920w"
+              sizes="(min-width: 1024px) 58vw, 100vw"
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              decoding="async"
+              onError={() => setStillFailed(true)}
+              className={`pointer-events-none absolute inset-0 h-full w-full object-cover object-[50%_60%] transition-opacity duration-500 motion-reduce:transition-none ${
+                started ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+          )}
+          {(ready || !stillFailed) && !failed && (
             <button
               type="button"
               onClick={toggle}
