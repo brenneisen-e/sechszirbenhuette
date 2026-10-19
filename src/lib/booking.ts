@@ -89,6 +89,8 @@ export function beds24BookingUrl(query: BookingQuery, language: string): string 
     roomid: String(BEDS24_ROOM_ID),
     lang: BEDS24_LANGS.has(language) ? language : 'de',
     referer: 'Website',
+    // ohne das große Kopfbild der Beds24-Seite
+    hideheader: '1',
   });
   const nights = nightsBetween(query.arrival, query.departure);
   if (query.arrival && nights > 0) {

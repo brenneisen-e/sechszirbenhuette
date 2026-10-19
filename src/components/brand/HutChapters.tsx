@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMotion } from '@/contexts/MotionContext';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
+import { useImageVariants } from '@/contexts/SiteSettingsContext';
+import { type ResponsiveSource, responsiveSource } from '@/lib/imageVariants';
 
 // Hüttenporträt in drei Kapiteln.
 //
@@ -17,21 +19,34 @@ import { useScrollProgress } from '@/hooks/useScrollProgress';
 // keine Zooms, kein blockiertes Scrollen. Beim Hereinscrollen öffnen sich zwei
 // Fensterläden über dem Bild (brand.css, nur transform).
 
-const IMAGES = [
+// Bilder je Kapitel: lokale Dateien (800/1400 px) oder ein Bild aus
+// Cloudflare Images, das je nach Bildschirm in passender Größe kommt
+type ChapterImage = { base: string } | { cf: string };
+
+const IMAGES: ChapterImage[] = [
   { base: '/images/brand/kapitel-draussen' },
-  { base: '/images/brand/kapitel-drinnen' },
+  // Stube mit grünem Sofa (Wunsch Malte, 19.10.2026)
+  {
+    cf: 'https://imagedelivery.net/VR8seCaTFFzHRDFZQKPkeQ/489e7248-6d4e-427f-37dc-fda6ab0e4e00/public',
+  },
   { base: '/images/brand/kapitel-zeit' },
 ];
 
 const ENHANCE_QUERY = '(min-width: 1024px) and (min-height: 700px)';
 
-function srcSet(base: string) {
-  return `${base}-800.jpg 800w, ${base}-1400.jpg 1400w`;
+function chapterSource(img: ChapterImage | undefined, variants: boolean): ResponsiveSource {
+  if (!img) return { src: '' };
+  if ('cf' in img) return responsiveSource(img.cf, variants, 'hero', 'large');
+  return {
+    src: `${img.base}-1400.jpg`,
+    srcSet: `${img.base}-800.jpg 800w, ${img.base}-1400.jpg 1400w`,
+  };
 }
 
 export function HutChapters() {
   const { t } = useLanguage();
   const { reduced } = useMotion();
+  const variants = useImageVariants();
   const chapters = t.brand.chapters;
   const sectionRef = useRef<HTMLElement>(null);
   const headingRefs = useRef<(HTMLHeadingElement | null)[]>([]);
@@ -54,10 +69,15 @@ export function HutChapters() {
     if (!enhanced) return;
     for (const img of IMAGES) {
       const pre = new Image();
-      pre.src = `${img.base}-1400.jpg`;
+      const source = chapterSource(img, variants);
+      if (source.srcSet) {
+        pre.sizes = '62vw';
+        pre.srcset = source.srcSet;
+      }
+      pre.src = source.src;
       pre.decode?.().catch(() => {});
     }
-  }, [enhanced]);
+  }, [enhanced, variants]);
 
   // Leselinie: nur solange der Abschnitt sichtbar ist, höchstens ein Update pro Frame
   useEffect(() => {
@@ -123,8 +143,7 @@ export function HutChapters() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={chapter.title}
-                    src={`${IMAGES[i]?.base}-1400.jpg`}
-                    srcSet={srcSet(IMAGES[i]?.base ?? '')}
+                    {...chapterSource(IMAGES[i], variants)}
                     sizes="62vw"
                     alt={i === active ? chapter.alt : ''}
                     aria-hidden={i === active ? undefined : true}
@@ -151,8 +170,7 @@ export function HutChapters() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${IMAGES[i]?.base}-1400.jpg`}
-                  srcSet={srcSet(IMAGES[i]?.base ?? '')}
+                  {...chapterSource(IMAGES[i], variants)}
                   sizes="(min-width: 768px) 58vw, 100vw"
                   alt={chapter.alt}
                   width={1400}

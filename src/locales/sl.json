@@ -257,8 +257,7 @@
     "title": "Rezervirajte neposredno",
     "subtitle": "Preverite razpoložljivost in takoj rezervirajte – neposredno pri nas po najboljši ceni.",
     "direct": {
-      "title": "Neposredna rezervacija = najboljša cena",
-      "text": "Pri nas rezervirate približno 15 % ceneje kot prek Booking.com ali Airbnb."
+      "title": "Rezervirajte zdaj in si zagotovite najboljšo ceno – brez provizije ali dodatnih stroškov."
     },
     "search": {
       "title": "Izberite termin",
@@ -280,57 +279,6 @@
       "loading": "Nalaganje koledarja …",
       "openWindow": "Odpri rezervacijo v novem oknu",
       "secure": "Varna rezervacija prek Beds24"
-    },
-    "prices": {
-      "title": "Cene",
-      "text": "Cene na noč glede na sezono, stroški vključeni. Točno ceno za vaš termin pokaže koledar rezervacij.",
-      "minStayTitle": "Minimalno bivanje",
-      "minStay": [
-        "praviloma 7 noči",
-        "4 noči od 1. do 19. marca, junija in septembra",
-        "3 noči v nizki sezoni in v tednu pred božičem",
-        "kratkoročno včasih tudi manj"
-      ]
-    },
-    "included": {
-      "title": "Vključeno v ceno",
-      "items": [
-        "Elektrika",
-        "Ogrevanje (peleti)",
-        "Voda",
-        "Odvoz odpadkov",
-        "WiFi",
-        "Uporaba savne"
-      ]
-    },
-    "extras": {
-      "title": "Dodatno",
-      "items": [
-        {
-          "label": "Končno čiščenje",
-          "value": "150 €",
-          "note": "s psom 190 €"
-        },
-        {
-          "label": "Turistična taksa",
-          "value": "4,50 €",
-          "note": "na odraslo osebo in noč, otroci do 16 let brezplačno, vključen brezplačen prevoz za goste"
-        },
-        {
-          "label": "Paket perila (neobvezno)",
-          "value": "25 €",
-          "note": "na osebo"
-        }
-      ]
-    },
-    "info": {
-      "title": "Dobro je vedeti",
-      "items": [
-        "Prihod od 15. ure, odhod do 10. ure",
-        "30 % predplačilo z bančnim nakazilom",
-        "Last minute: prihod v 14 dneh 10 % popusta, v 7 dneh 15 %",
-        "Psi so dobrodošli"
-      ]
     },
     "form": {
       "title": "Povpraševanje za Rezervacijo",
@@ -523,7 +471,7 @@
     "claim": "Biti zgoraj.",
     "claimHand": "Biti skupaj.",
     "heroText": "Več kot 250 let stara gorska koča na samem na 1.700 m – tik ob Narodnem parku Nockberge, 800 m od jezera Falkertsee.",
-    "book": "Rezerviraj",
+    "book": "Povpraševanje",
     "videoPause": "Ustavi video",
     "videoPlay": "Predvajaj video",
     "videoLabel": "Video o koči Sechszirbenhütte na Falkertu",
@@ -561,7 +509,7 @@
       {
         "title": "Znotraj",
         "text": "Star les, izba s pečjo na pelete in v celoti opremljena kuhinja. Dve spalnici – ena z zakonsko posteljo, druga z zakonsko in enojno posteljo – za do pet oseb, poleg tega dve kopalnici in ločeno stranišče.",
-        "alt": "Lesena izba s stopniščem, poslikano kmečko omaro in pogledom v kuhinjo"
+        "alt": "Lesena izba s kotno klopjo in zeleno zofo, pes leži na preprogi"
       },
       {
         "title": "Čas za vas",

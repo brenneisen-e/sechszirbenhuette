@@ -252,8 +252,7 @@
     "title": "Book Direct",
     "subtitle": "Check availability and book instantly – directly with us at the best price.",
     "direct": {
-      "title": "Book direct = best price",
-      "text": "Booking with us costs around 15 % less than on Booking.com or Airbnb."
+      "title": "Book now and secure the best price – no commission or extra fees."
     },
     "search": {
       "title": "Choose your dates",
@@ -275,50 +274,6 @@
       "loading": "Loading booking calendar …",
       "openWindow": "Open booking in a new window",
       "secure": "Secure booking via Beds24"
-    },
-    "prices": {
-      "title": "Prices",
-      "text": "Nightly rates by season, utilities included. The booking calendar shows the exact price for your dates.",
-      "minStayTitle": "Minimum stay",
-      "minStay": [
-        "7 nights as a rule",
-        "4 nights from 1 to 19 March, in June and in September",
-        "3 nights in the low season and in the week before Christmas",
-        "sometimes shorter at short notice"
-      ]
-    },
-    "included": {
-      "title": "Included in the price",
-      "items": ["Electricity", "Heating (pellets)", "Water", "Waste disposal", "WiFi", "Sauna use"]
-    },
-    "extras": {
-      "title": "Additional costs",
-      "items": [
-        {
-          "label": "Final cleaning",
-          "value": "€150",
-          "note": "with dog €190"
-        },
-        {
-          "label": "Tourist tax",
-          "value": "€4.50",
-          "note": "per adult and night, children up to 16 free, includes free guest transport"
-        },
-        {
-          "label": "Linen package (optional)",
-          "value": "€25",
-          "note": "per person"
-        }
-      ]
-    },
-    "info": {
-      "title": "Good to know",
-      "items": [
-        "Check-in from 3 pm, check-out by 10 am",
-        "30 % deposit by bank transfer",
-        "Last minute: arrival within 14 days 10 % off, within 7 days 15 % off",
-        "Dogs are welcome"
-      ]
     },
     "form": {
       "title": "Booking Request",
@@ -518,7 +473,7 @@
     "claim": "Up here.",
     "claimHand": "Together.",
     "heroText": "A mountain hut more than 250 years old, standing alone at 1,700 m – right by the Nockberge National Park, 800 m from Lake Falkert.",
-    "book": "Book",
+    "book": "Enquire",
     "videoPause": "Pause video",
     "videoPlay": "Play video",
     "videoLabel": "Film about the Sechszirbenhütte at Falkert",
@@ -556,7 +511,7 @@
       {
         "title": "Inside",
         "text": "Old wood, a parlour with a pellet stove and a fully equipped kitchen. Two bedrooms – one with a double bed, one with a double and a single bed – sleep up to five, plus two bathrooms and a separate WC.",
-        "alt": "Wooden parlour with staircase, painted farmhouse cupboard and a view into the kitchen"
+        "alt": "Wooden parlour with corner bench and green sofa, a dog lying on the rug"
       },
       {
         "title": "Time for you",

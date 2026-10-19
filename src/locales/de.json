@@ -250,8 +250,7 @@
     "title": "Direkt buchen",
     "subtitle": "Verfügbarkeit prüfen und sofort buchen – direkt bei uns zum besten Preis.",
     "direct": {
-      "title": "Direkt buchen = bester Preis",
-      "text": "Bei uns buchen Sie rund 15 % günstiger als über Booking.com oder Airbnb."
+      "title": "Jetzt buchen und den besten Preis sichern – ohne Provision oder Zusatzgebühren."
     },
     "search": {
       "title": "Zeitraum wählen",
@@ -273,50 +272,6 @@
       "loading": "Buchungskalender wird geladen …",
       "openWindow": "Buchung in eigenem Fenster öffnen",
       "secure": "Sichere Buchung über Beds24"
-    },
-    "prices": {
-      "title": "Preise",
-      "text": "Tagespreise je nach Saison, Nebenkosten inklusive. Den genauen Preis für Ihren Zeitraum zeigt der Buchungskalender.",
-      "minStayTitle": "Mindestaufenthalt",
-      "minStay": [
-        "7 Nächte in der Regel",
-        "4 Nächte vom 1. bis 19. März, im Juni und im September",
-        "3 Nächte in der Nebensaison und in der Woche vor Weihnachten",
-        "kurzfristig teils auch kürzer"
-      ]
-    },
-    "included": {
-      "title": "Im Preis enthalten",
-      "items": ["Strom", "Heizung (Pellets)", "Wasser", "Müllentsorgung", "WLAN", "Sauna-Nutzung"]
-    },
-    "extras": {
-      "title": "Zusätzlich",
-      "items": [
-        {
-          "label": "Endreinigung",
-          "value": "150 €",
-          "note": "mit Hund 190 €"
-        },
-        {
-          "label": "Ortstaxe",
-          "value": "4,50 €",
-          "note": "pro Erwachsenem und Nacht, Kinder bis 16 frei, inklusive Gästefreifahrt"
-        },
-        {
-          "label": "Wäschepaket (optional)",
-          "value": "25 €",
-          "note": "pro Person"
-        }
-      ]
-    },
-    "info": {
-      "title": "Gut zu wissen",
-      "items": [
-        "Check-in ab 15 Uhr, Check-out bis 10 Uhr",
-        "Anzahlung 30 % per Überweisung",
-        "Last Minute: Anreise innerhalb von 14 Tagen 10 % günstiger, innerhalb von 7 Tagen 15 %",
-        "Hunde sind willkommen"
-      ]
     },
     "form": {
       "title": "Buchungsanfrage",
@@ -520,7 +475,7 @@
     "claim": "Oben sein.",
     "claimHand": "Bei sich sein.",
     "heroText": "Eine über 250 Jahre alte Berghütte in Alleinlage auf 1.700 m – direkt am Nationalpark Nockberge, 800 m vom Falkertsee.",
-    "book": "Buchen",
+    "book": "Anfragen",
     "videoPause": "Video pausieren",
     "videoPlay": "Video abspielen",
     "videoLabel": "Film über die Sechszirbenhütte am Falkert",
@@ -558,7 +513,7 @@
       {
         "title": "Drinnen",
         "text": "Altes Holz, eine Stube mit Pelletofen und eine voll ausgestattete Küche. Zwei Schlafzimmer – eines mit Doppelbett, eines mit Doppel- und Einzelbett – bieten Platz für bis zu fünf Personen, dazu zwei Bäder und ein separates WC.",
-        "alt": "Holzstube mit Treppe, bemaltem Bauernschrank und Blick in die Küche"
+        "alt": "Stube mit Holzdecke, Eckbank und grünem Sofa, ein Hund liegt auf dem Teppich"
       },
       {
         "title": "Zeit für sich",

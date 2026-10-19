@@ -257,8 +257,7 @@
     "title": "Prenotate direttamente",
     "subtitle": "Verificate la disponibilità e prenotate subito – direttamente da noi al miglior prezzo.",
     "direct": {
-      "title": "Prenotazione diretta = miglior prezzo",
-      "text": "Prenotando da noi risparmiate circa il 15 % rispetto a Booking.com o Airbnb."
+      "title": "Prenotate ora e assicuratevi il miglior prezzo – senza commissioni né costi aggiuntivi."
     },
     "search": {
       "title": "Scegliete le date",
@@ -280,57 +279,6 @@
       "loading": "Caricamento del calendario …",
       "openWindow": "Apri la prenotazione in una nuova finestra",
       "secure": "Prenotazione sicura tramite Beds24"
-    },
-    "prices": {
-      "title": "Prezzi",
-      "text": "Prezzi per notte secondo la stagione, spese accessorie incluse. Il calendario mostra il prezzo esatto per le vostre date.",
-      "minStayTitle": "Soggiorno minimo",
-      "minStay": [
-        "di regola 7 notti",
-        "4 notti dal 1° al 19 marzo, a giugno e a settembre",
-        "3 notti in bassa stagione e nella settimana prima di Natale",
-        "a breve termine talvolta anche meno"
-      ]
-    },
-    "included": {
-      "title": "Incluso nel prezzo",
-      "items": [
-        "Elettricità",
-        "Riscaldamento (pellet)",
-        "Acqua",
-        "Smaltimento rifiuti",
-        "WiFi",
-        "Uso della sauna"
-      ]
-    },
-    "extras": {
-      "title": "In aggiunta",
-      "items": [
-        {
-          "label": "Pulizia finale",
-          "value": "150 €",
-          "note": "con cane 190 €"
-        },
-        {
-          "label": "Tassa di soggiorno",
-          "value": "4,50 €",
-          "note": "per adulto e notte, bambini fino a 16 anni gratis, trasporto gratuito per gli ospiti incluso"
-        },
-        {
-          "label": "Pacchetto biancheria (facoltativo)",
-          "value": "25 €",
-          "note": "a persona"
-        }
-      ]
-    },
-    "info": {
-      "title": "Buono a sapersi",
-      "items": [
-        "Check-in dalle 15, check-out entro le 10",
-        "Acconto del 30 % tramite bonifico",
-        "Last minute: arrivo entro 14 giorni 10 % di sconto, entro 7 giorni 15 %",
-        "I cani sono benvenuti"
-      ]
     },
     "form": {
       "title": "Richiesta di Prenotazione",
@@ -523,7 +471,7 @@
     "claim": "Stare in alto.",
     "claimHand": "Stare insieme.",
     "heroText": "Una baita di montagna di oltre 250 anni, isolata a 1.700 m – accanto al Parco Nazionale Nockberge, a 800 m dal lago Falkertsee.",
-    "book": "Prenota",
+    "book": "Richiedi",
     "videoPause": "Metti in pausa il video",
     "videoPlay": "Riproduci il video",
     "videoLabel": "Video sulla Sechszirbenhütte al Falkert",
@@ -561,7 +509,7 @@
       {
         "title": "Dentro",
         "text": "Legno antico, una stube con stufa a pellet e una cucina completamente attrezzata. Due camere – una con letto matrimoniale, una con letto matrimoniale e letto singolo – per un massimo di cinque persone, più due bagni e un WC separato.",
-        "alt": "Stube in legno con scala, armadio contadino dipinto e vista sulla cucina"
+        "alt": "Stube in legno con panca ad angolo e divano verde, un cane sdraiato sul tappeto"
       },
       {
         "title": "Tempo per voi",
