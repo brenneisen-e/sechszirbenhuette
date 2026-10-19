@@ -32,7 +32,10 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const db = (ctx as { env: Env }).env?.DB;
     if (!db) return back(request, 'error', 'Datenbank nicht erreichbar');
-    const { username, origin } = await completeAuthorization(db, code, state);
+    // Adresse, unter der Instagram zurückgeleitet hat (ohne Abfrageteil)
+    const here = new URL(request.url);
+    const calledAt = `${here.origin}${here.pathname}`;
+    const { username, origin } = await completeAuthorization(db, code, state, calledAt);
     return back(request, 'ok', `Verbunden mit @${username}`, origin);
   } catch (e) {
     return back(request, 'error', e instanceof Error ? e.message : 'Verbinden fehlgeschlagen');

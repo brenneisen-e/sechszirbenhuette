@@ -197,16 +197,18 @@ export async function createAuthorizeUrl(db: D1Database, origin: string): Promis
   const secret = await getSetting(db, KEYS.appSecret);
   if (!appId || !secret) throw new Error('Erst Instagram-App-ID und App-Geheimnis speichern');
   const state = randomState();
+  // Genau diese Adresse muss beim Tausch des Codes wieder mitgeschickt werden
+  const redirectUri = redirectUriFor(origin);
   await setSetting(
     db,
     KEYS.state,
-    JSON.stringify({ state, expiresAt: Date.now() + 15 * 60 * 1000, origin }),
+    JSON.stringify({ state, expiresAt: Date.now() + 15 * 60 * 1000, origin, redirectUri }),
   );
   const params = new URLSearchParams({
     enable_fb_login: '0',
     force_reauth: 'true',
     client_id: appId,
-    redirect_uri: redirectUriFor(origin),
+    redirect_uri: redirectUri,
     response_type: 'code',
     scope: INSTAGRAM_SCOPE,
     state,
@@ -214,15 +216,26 @@ export async function createAuthorizeUrl(db: D1Database, origin: string): Promis
   return `${OAUTH_AUTHORIZE}?${params.toString()}`;
 }
 
-/** Einmalwert prüfen und verbrauchen; liefert die Herkunft der Anmeldung */
-async function consumeState(db: D1Database, state: string): Promise<string | null> {
+/**
+ * Einmalwert prüfen und verbrauchen; liefert die Herkunft der Anmeldung und
+ * die beim Start verwendete Weiterleitungsadresse
+ */
+async function consumeState(
+  db: D1Database,
+  state: string,
+): Promise<{ origin: string; redirectUri?: string } | null> {
   const raw = await getSetting(db, KEYS.state);
   await deleteSetting(db, KEYS.state);
   if (!raw || !state) return null;
   try {
-    const saved = JSON.parse(raw) as { state?: string; expiresAt?: number; origin?: string };
+    const saved = JSON.parse(raw) as {
+      state?: string;
+      expiresAt?: number;
+      origin?: string;
+      redirectUri?: string;
+    };
     if (saved.state !== state || !saved.expiresAt || saved.expiresAt < Date.now()) return null;
-    return saved.origin ?? null;
+    return saved.origin ? { origin: saved.origin, redirectUri: saved.redirectUri } : null;
   } catch {
     return null;
   }
@@ -256,10 +269,16 @@ export async function completeAuthorization(
   db: D1Database,
   code: string,
   state: string,
+  calledAt?: string,
 ): Promise<{ username: string; origin: string }> {
-  const origin = await consumeState(db, state);
-  if (!origin)
+  const saved = await consumeState(db, state);
+  if (!saved)
     throw new Error('Anmeldung abgelaufen oder ungültig — bitte im Admin Center neu starten');
+  const { origin } = saved;
+  // Instagram verlangt beim Tausch exakt die Adresse aus dem Anmeldedialog —
+  // das ist die, unter der der Rücksprung gerade ankommt (calledAt), sonst die
+  // beim Start gespeicherte
+  const redirectUri = calledAt ?? saved.redirectUri ?? redirectUriFor(origin);
   const appId = await getSetting(db, KEYS.appId);
   const secret = await getSetting(db, KEYS.appSecret);
   if (!appId || !secret) throw new Error('Instagram-App-ID oder App-Geheimnis fehlt');
@@ -268,7 +287,7 @@ export async function completeAuthorization(
     client_id: appId,
     client_secret: secret,
     grant_type: 'authorization_code',
-    redirect_uri: redirectUriFor(origin),
+    redirect_uri: redirectUri,
     code: code.replace(/#_$/, ''),
   });
   const res = await fetch(
