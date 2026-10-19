@@ -178,6 +178,17 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // Handy: aktiven Tab in der unteren, seitlich scrollbaren Leiste sichtbar machen
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(`[data-mobile-tab="${activeTab}"]`);
+      const bar = el?.parentElement;
+      if (!el || !bar) return;
+      bar.scrollLeft = el.offsetLeft - (bar.clientWidth - el.offsetWidth) / 2;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTab, isInitialLoading]);
+
   const toggleDemoMode = () => {
     const newValue = !isDemoMode;
     setIsDemoMode(newValue);
@@ -289,8 +300,8 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
             </div>
           </div>
 
-          {/* Desktop Tab Navigation */}
-          <div className="flex gap-1 overflow-x-auto -mb-px">
+          {/* Desktop Tab Navigation — bricht um, damit alle Tabs sichtbar sind */}
+          <div className="flex flex-wrap gap-x-1 -mb-px">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -376,6 +387,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
             return (
               <button
                 key={tab.id}
+                data-mobile-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex flex-col items-center justify-center gap-0.5 shrink-0 w-16 transition-colors ${
                   isActive ? 'text-green-600' : 'text-gray-400 active:text-gray-600'
