@@ -24,8 +24,8 @@ export default function HomePage() {
       <IntroText />
       <Ferienhaus />
       <Galerie />
-      <Instagram />
       <Bewertungen />
+      <Instagram />
       <Location />
       <Umgebung />
       <HostGreeting />
