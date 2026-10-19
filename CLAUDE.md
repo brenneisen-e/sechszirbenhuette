@@ -58,7 +58,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Kanal @sechszirbenhuette auf der Startseite (`src/components/sections/Instagram.tsx`), Daten von `/api/instagram` (öffentlich, zwischengespeichert in `settings.instagram_feed_cache`, stündlich neu, nach Fehlschlag frühestens nach 15 Min.)
 - Server `src/lib/server/instagram.ts`: „Instagram API mit Instagram-Login“ (Meta-App mit Instagram-App-ID/-Geheimnis, Scope `instagram_business_basic`), Schlüssel 60 Tage, wird nach 7 Tagen verlängert; Geheimnis und Schlüssel verlassen den Server nie
 - Admin-Tab „Instagram“ (`src/components/admin/InstagramPanel.tsx`, API `src/app/api/admin/instagram/route.ts`): Anleitung, App-Daten, „Mit Instagram verbinden“ oder Schlüssel einfügen, Feed an/aus
-- Rücksprung `src/app/api/instagram/callback/route.ts` liegt bewusst außerhalb von `/api/admin`, geschützt durch den Einmalwert `state` (15 Min., einmal nutzbar)
+- Rücksprung `src/app/api/instagram/callback/route.ts` liegt bewusst außerhalb von `/api/admin`, geschützt durch den Einmalwert `state` (15 Min., einmal nutzbar). In der Meta-App ist genau eine Weiterleitungsadresse eingetragen: `https://sechszirbenhuette.com/api/instagram/callback` (auch beim Admin Center über www; zurück geht es zur Herkunft)
 
 ## Corporate Design (öffentliche Website)
 

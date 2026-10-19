@@ -13,8 +13,8 @@ interface Env {
 // Fall mit. Geschützt durch den Einmalwert (state), den nur das Admin Center
 // erzeugt und der 15 Minuten gilt. Danach zurück ins Admin Center.
 
-function back(request: NextRequest, result: 'ok' | 'error', message: string) {
-  const url = new URL('/admin', request.url);
+function back(request: NextRequest, result: 'ok' | 'error', message: string, origin?: string) {
+  const url = new URL('/admin', origin ?? request.url);
   url.searchParams.set('tab', 'instagram');
   url.searchParams.set('instagram', result);
   url.searchParams.set('message', message.slice(0, 300));
@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const db = (ctx as { env: Env }).env?.DB;
     if (!db) return back(request, 'error', 'Datenbank nicht erreichbar');
-    const { username } = await completeAuthorization(db, code, state);
-    return back(request, 'ok', `Verbunden mit @${username}`);
+    const { username, origin } = await completeAuthorization(db, code, state);
+    return back(request, 'ok', `Verbunden mit @${username}`, origin);
   } catch (e) {
     return back(request, 'error', e instanceof Error ? e.message : 'Verbinden fehlgeschlagen');
   }

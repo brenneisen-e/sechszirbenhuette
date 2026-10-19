@@ -116,8 +116,13 @@ function randomState(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Eine einzige Weiterleitungsadresse für die Meta-App, egal ob das Admin
+// Center mit oder ohne www geöffnet wird; nur lokal zählt die eigene Adresse
+const CANONICAL_ORIGIN = 'https://sechszirbenhuette.com';
+
 export function redirectUriFor(origin: string): string {
-  return `${origin}/api/instagram/callback`;
+  const local = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  return `${local ? origin : CANONICAL_ORIGIN}/api/instagram/callback`;
 }
 
 // ============================================================================
@@ -251,7 +256,7 @@ export async function completeAuthorization(
   db: D1Database,
   code: string,
   state: string,
-): Promise<{ username: string }> {
+): Promise<{ username: string; origin: string }> {
   const origin = await consumeState(db, state);
   if (!origin)
     throw new Error('Anmeldung abgelaufen oder ungültig — bitte im Admin Center neu starten');
@@ -287,7 +292,8 @@ export async function completeAuthorization(
   await saveProfileSettings(db, profile);
   await deleteSetting(db, KEYS.lastError);
   await deleteSetting(db, KEYS.feed);
-  return { username: profile.username };
+  // Herkunft des Admin Centers (mit oder ohne www), dorthin geht es zurück
+  return { username: profile.username, origin };
 }
 
 /** Zugangsschlüssel aus dem Meta-Dashboard übernehmen (gilt dort 60 Tage) */
