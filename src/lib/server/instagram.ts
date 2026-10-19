@@ -15,6 +15,7 @@
 // Beiträge) wird zwischengespeichert, weil die Bildadressen von Instagram
 // nach einigen Tagen ablaufen und Meta Abrufe begrenzt.
 
+import { writeAppLog } from '@/lib/server/appLog';
 import { getSetting, setSetting } from '@/lib/server/beds24';
 
 const GRAPH = 'https://graph.instagram.com';
@@ -213,6 +214,14 @@ export async function createAuthorizeUrl(db: D1Database, origin: string): Promis
     scope: INSTAGRAM_SCOPE,
     state,
   });
+  await writeAppLog(
+    db,
+    'info',
+    'instagram',
+    'authorize',
+    'Anmeldung bei Instagram gestartet',
+    JSON.stringify({ origin, redirectUri, appId }),
+  );
   return `${OAUTH_AUTHORIZE}?${params.toString()}`;
 }
 
@@ -224,8 +233,13 @@ async function consumeState(
   db: D1Database,
   state: string,
 ): Promise<{ origin: string; redirectUri?: string } | null> {
-  const raw = await getSetting(db, KEYS.state);
-  await deleteSetting(db, KEYS.state);
+  // Lesen und Löschen in einem Schritt: kommt der Rücksprung doppelt an,
+  // bekommt nur eine Anfrage den Einmalwert
+  const row = await db
+    .prepare('DELETE FROM settings WHERE key = ? RETURNING value')
+    .bind(KEYS.state)
+    .first<{ value: string }>();
+  const raw = row?.value ?? null;
   if (!raw || !state) return null;
   try {
     const saved = JSON.parse(raw) as {
@@ -264,31 +278,48 @@ async function exchangeLongLived(
   return { token: data.access_token, expiresIn: data.expires_in };
 }
 
-/** Rücksprung von Instagram: Code gegen Schlüssel tauschen und Profil lesen */
-export async function completeAuthorization(
-  db: D1Database,
-  code: string,
-  state: string,
-  calledAt?: string,
-): Promise<{ username: string; origin: string }> {
-  const saved = await consumeState(db, state);
-  if (!saved)
-    throw new Error('Anmeldung abgelaufen oder ungültig — bitte im Admin Center neu starten');
-  const { origin } = saved;
-  // Instagram verlangt beim Tausch exakt die Adresse aus dem Anmeldedialog —
-  // das ist die, unter der der Rücksprung gerade ankommt (calledAt), sonst die
-  // beim Start gespeicherte
-  const redirectUri = calledAt ?? saved.redirectUri ?? redirectUriFor(origin);
-  const appId = await getSetting(db, KEYS.appId);
-  const secret = await getSetting(db, KEYS.appSecret);
-  if (!appId || !secret) throw new Error('Instagram-App-ID oder App-Geheimnis fehlt');
+/** Einmalwert fehlt, ist abgelaufen oder schon verbraucht */
+export class InstagramStateError extends Error {}
 
+/** Mit diesem Code wurde gerade erst verbunden (doppelter Rücksprung)? */
+export async function recentlyConnected(db: D1Database): Promise<string | null> {
+  const [token, refreshedAt, username] = await Promise.all([
+    getSetting(db, KEYS.token),
+    getSetting(db, KEYS.refreshedAt),
+    getSetting(db, KEYS.username),
+  ]);
+  const age = Date.now() - Date.parse(refreshedAt ?? '');
+  return token && username && age >= 0 && age < 2 * 60 * 1000 ? username : null;
+}
+
+/**
+ * Adressen für den Code-Tausch: zuerst die, unter der der Rücksprung ankam,
+ * dann die beim Start gespeicherte; jeweils auch mit/ohne Schrägstrich am Ende,
+ * falls Meta die eingetragene Adresse anders schreibt
+ */
+function redirectCandidates(uris: (string | undefined)[]): string[] {
+  const list: string[] = [];
+  const add = (u: string) => {
+    if (!list.includes(u)) list.push(u);
+  };
+  const base = uris.filter((u): u is string => !!u);
+  base.forEach(add);
+  base.forEach((u) => add(u.endsWith('/') ? u.slice(0, -1) : `${u}/`));
+  return list.slice(0, 5);
+}
+
+async function exchangeCode(
+  appId: string,
+  secret: string,
+  code: string,
+  redirectUri: string,
+): Promise<{ token?: string; status: number; error?: string }> {
   const form = new URLSearchParams({
     client_id: appId,
     client_secret: secret,
     grant_type: 'authorization_code',
     redirect_uri: redirectUri,
-    code: code.replace(/#_$/, ''),
+    code,
   });
   const res = await fetch(
     OAUTH_TOKEN,
@@ -302,8 +333,68 @@ export async function completeAuthorization(
     access_token?: string;
     data?: { access_token?: string }[];
   };
-  const shortToken = data.access_token ?? data.data?.[0]?.access_token;
-  if (!res.ok || !shortToken) throw new Error(metaError(data, res.status));
+  const token = data.access_token ?? data.data?.[0]?.access_token;
+  return res.ok && token
+    ? { token, status: res.status }
+    : { status: res.status, error: metaError(data, res.status) };
+}
+
+/** Rücksprung von Instagram: Code gegen Schlüssel tauschen und Profil lesen */
+export async function completeAuthorization(
+  db: D1Database,
+  code: string,
+  state: string,
+  calledAt?: string,
+): Promise<{ username: string; origin: string }> {
+  const saved = await consumeState(db, state);
+  if (!saved) {
+    await writeAppLog(
+      db,
+      'warn',
+      'instagram',
+      'connect',
+      'Rücksprung ohne gültigen Einmalwert',
+      JSON.stringify({ calledAt }),
+    );
+    throw new InstagramStateError(
+      'Anmeldung abgelaufen oder ungültig — bitte im Admin Center neu starten',
+    );
+  }
+  const { origin } = saved;
+  const appId = await getSetting(db, KEYS.appId);
+  const secret = await getSetting(db, KEYS.appSecret);
+  if (!appId || !secret) throw new Error('Instagram-App-ID oder App-Geheimnis fehlt');
+
+  // Instagram verlangt beim Tausch exakt die Adresse aus dem Anmeldedialog.
+  // Weitere Versuche nur, solange Instagram genau das bemängelt.
+  const cleanCode = code.replace(/#_$/, '');
+  const attempts: { redirectUri: string; status: number; error?: string }[] = [];
+  let shortToken: string | undefined;
+  for (const uri of redirectCandidates([calledAt, saved.redirectUri, redirectUriFor(origin)])) {
+    const result = await exchangeCode(appId, secret, cleanCode, uri);
+    attempts.push({ redirectUri: uri, status: result.status, error: result.error });
+    if (result.token) {
+      shortToken = result.token;
+      break;
+    }
+    if (!/redirect_uri/i.test(result.error ?? '')) break;
+  }
+  await writeAppLog(
+    db,
+    shortToken ? 'info' : 'error',
+    'instagram',
+    'connect',
+    shortToken ? 'Code gegen Schlüssel getauscht' : 'Code-Tausch abgelehnt',
+    JSON.stringify({
+      calledAt,
+      storedRedirectUri: saved.redirectUri,
+      origin,
+      appId,
+      codeLength: cleanCode.length,
+      attempts,
+    }),
+  );
+  if (!shortToken) throw new Error(attempts.at(-1)?.error ?? 'Code-Tausch fehlgeschlagen');
 
   const long = await exchangeLongLived(shortToken, secret);
   const profile = await fetchProfile(long.token);

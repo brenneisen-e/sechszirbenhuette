@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-import { completeAuthorization } from '@/lib/server/instagram';
+import {
+  completeAuthorization,
+  InstagramStateError,
+  recentlyConnected,
+} from '@/lib/server/instagram';
 
 interface Env {
   DB: D1Database;
@@ -35,8 +39,15 @@ export async function GET(request: NextRequest) {
     // Adresse, unter der Instagram zurückgeleitet hat (ohne Abfrageteil)
     const here = new URL(request.url);
     const calledAt = `${here.origin}${here.pathname}`;
-    const { username, origin } = await completeAuthorization(db, code, state, calledAt);
-    return back(request, 'ok', `Verbunden mit @${username}`, origin);
+    try {
+      const { username, origin } = await completeAuthorization(db, code, state, calledAt);
+      return back(request, 'ok', `Verbunden mit @${username}`, origin);
+    } catch (e) {
+      // Doppelter Rücksprung: die andere Anfrage hat schon verbunden
+      const username = e instanceof InstagramStateError ? await recentlyConnected(db) : null;
+      if (username) return back(request, 'ok', `Verbunden mit @${username}`);
+      throw e;
+    }
   } catch (e) {
     return back(request, 'error', e instanceof Error ? e.message : 'Verbinden fehlgeschlagen');
   }
