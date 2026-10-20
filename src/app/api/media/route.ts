@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+import { isAdminAuthenticated } from '@/lib/server/adminAuth';
+
 interface MediaRecord {
   id: string;
   file_key: string;
@@ -226,7 +228,11 @@ export async function GET(request: NextRequest) {
 }
 
 // Update media record (category, alt_text, title, display_order)
+// Ändern nur mit Admin-Session (Route liegt nicht unter /api/admin)
 export async function PATCH(request: NextRequest) {
+  if (!(await isAdminAuthenticated(request))) {
+    return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
+  }
   try {
     const env = await getCloudflareEnv();
 

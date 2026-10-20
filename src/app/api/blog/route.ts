@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+import { isAdminAuthenticated } from '@/lib/server/adminAuth';
+
 interface BlogPost {
   id: string;
   slug: string;
@@ -54,12 +56,21 @@ async function getCloudflareEnv(): Promise<CloudflareEnv | null> {
   }
 }
 
+// Die Route liegt nicht unter /api/admin und ist deshalb nicht durch die
+// Middleware geschützt: Lesen ist öffentlich, aber nur veröffentlichte
+// Beiträge; Entwürfe sowie Anlegen, Ändern und Löschen nur mit Admin-Session.
+function unauthorized() {
+  return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
+}
+
 // GET - List all blog posts or get single post by slug
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get('slug');
-  const status = searchParams.get('status'); // 'published' | 'draft' | null (all)
   const includeImages = searchParams.get('images') === 'true';
+  const isAdmin = await isAdminAuthenticated(request);
+  // 'published' | 'draft' | null (alle) — ohne Anmeldung immer nur veröffentlichte
+  const status = isAdmin ? searchParams.get('status') : 'published';
 
   try {
     const env = await getCloudflareEnv();
@@ -73,7 +84,7 @@ export async function GET(request: NextRequest) {
         .bind(slug)
         .first<BlogPost>();
 
-      if (!post) {
+      if (!post || (post.status !== 'published' && !isAdmin)) {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 });
       }
 
@@ -118,7 +129,9 @@ export async function GET(request: NextRequest) {
       { posts: result.results || [] },
       {
         headers: {
-          'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300',
+          'Cache-Control': isAdmin
+            ? 'no-store'
+            : 'public, max-age=60, s-maxage=60, stale-while-revalidate=300',
         },
       },
     );
@@ -130,6 +143,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Create new blog post (admin only)
 export async function POST(request: NextRequest) {
+  if (!(await isAdminAuthenticated(request))) return unauthorized();
   try {
     const env = await getCloudflareEnv();
     if (!env?.DB) {
@@ -210,6 +224,7 @@ export async function POST(request: NextRequest) {
 
 // PUT - Update blog post (admin only)
 export async function PUT(request: NextRequest) {
+  if (!(await isAdminAuthenticated(request))) return unauthorized();
   try {
     const env = await getCloudflareEnv();
     if (!env?.DB) {
@@ -321,6 +336,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - Delete blog post (admin only)
 export async function DELETE(request: NextRequest) {
+  if (!(await isAdminAuthenticated(request))) return unauthorized();
   const { searchParams } = new URL(request.url);
   let id = searchParams.get('id');
 

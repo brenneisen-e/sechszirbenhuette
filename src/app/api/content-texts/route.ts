@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
+import { isAdminAuthenticated } from '@/lib/server/adminAuth';
+
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
   all<T>(): Promise<{ results?: T[] }>;
@@ -218,7 +220,11 @@ export async function GET() {
 }
 
 // POST - Update content text (requires authentication)
+// Ändern nur mit Admin-Session (Route liegt nicht unter /api/admin)
 export async function POST(request: NextRequest) {
+  if (!(await isAdminAuthenticated(request))) {
+    return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
+  }
   try {
     const env = await getCloudflareEnv();
     if (!env) {
