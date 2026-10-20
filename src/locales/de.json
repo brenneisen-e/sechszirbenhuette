@@ -551,5 +551,12 @@
     "tapMap": "Tippen, um die Karte zu bewegen",
     "lockMap": "Karte sperren",
     "mapTitle": "Karte zur Sechszirbenhütte"
+  },
+  "blogTeaser": {
+    "label": "Blog",
+    "title": "Neues aus den Nockbergen",
+    "intro": "Wanderungen, Ausflüge und Tipps für ruhige Tage am Falkert – frisch aus unserem Blog.",
+    "all": "Alle Beiträge",
+    "read": "Weiterlesen"
   }
 }

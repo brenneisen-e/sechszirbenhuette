@@ -547,5 +547,12 @@
     "tapMap": "Tapnite za premikanje zemljevida",
     "lockMap": "Zakleni zemljevid",
     "mapTitle": "Zemljevid do koče Sechszirbenhütte"
+  },
+  "blogTeaser": {
+    "label": "Blog",
+    "title": "Novice iz Nockbergov",
+    "intro": "Pohodi, izleti in nasveti za mirne dni na Falkertu – sveže z našega bloga.",
+    "all": "Vsi prispevki",
+    "read": "Preberi več"
   }
 }

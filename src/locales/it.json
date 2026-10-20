@@ -547,5 +547,12 @@
     "tapMap": "Toccare per muovere la mappa",
     "lockMap": "Blocca mappa",
     "mapTitle": "Mappa per la Sechszirbenhütte"
+  },
+  "blogTeaser": {
+    "label": "Blog",
+    "title": "Novità dai Nockberge",
+    "intro": "Escursioni, gite e consigli per giornate tranquille al Falkert – dal nostro blog.",
+    "all": "Tutti gli articoli",
+    "read": "Continua a leggere"
   }
 }

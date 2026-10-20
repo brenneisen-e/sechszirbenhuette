@@ -32,6 +32,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
   - Passwort als PBKDF2-Hash in `settings.admin_code_hash` — setzen im Admin Center (Tab System) oder mit `npm run set-admin-password` (wirkt sofort)
   - Notfall-Passwort als Cloudflare Pages Secret `ADMIN_PASSWORD` — greift erst ab dem nächsten Deployment
   - Sessions serverseitig in `admin_auth_sessions`, gespeichert nur der SHA-256-Hash des Tokens
+- **WICHTIG:** Öffentliche Routen außerhalb von `/api/admin` mit schreibenden Methoden prüfen selbst `isAdminAuthenticated(request)`: `/api/blog` (POST/PUT/DELETE, Entwürfe nur für Admins), `/api/content-texts` (POST), `/api/media` (PATCH), `/api/site-settings` (POST)
 - **WICHTIG:** `src/middleware.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`, Instagram-Rücksprung `/api/instagram/callback`) gehören NICHT unter `/api/admin`.
 
 ## Beds24
@@ -81,7 +82,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 ## Wichtige Pfade
 
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`
-- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`
+- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite die drei neuesten Beiträge: `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“)
 - **Blog-API:** `src/app/api/blog/route.ts` (GET/POST/PUT/DELETE)
 - **Media-API:** `src/app/api/admin/media/route.ts` (Upload) + `src/app/api/media/route.ts` (lesen)
 - **DB-Schema:** `db/schema.sql`, Migrations: `migrations/`

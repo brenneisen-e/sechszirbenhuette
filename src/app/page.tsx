@@ -7,6 +7,7 @@ import { Location } from '@/components/sections/Location';
 import { Umgebung } from '@/components/sections/Umgebung';
 import { Galerie } from '@/components/sections/Galerie';
 import { Instagram } from '@/components/sections/Instagram';
+import { BlogTeaser } from '@/components/sections/BlogTeaser';
 import { Buchung } from '@/components/sections/Buchung';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
 import { Orientation } from '@/components/brand/Orientation';
@@ -28,6 +29,7 @@ export default function HomePage() {
       <Instagram />
       <Location />
       <Umgebung />
+      <BlogTeaser />
       <HostGreeting />
       <FacadeBand animated />
       <Buchung />
