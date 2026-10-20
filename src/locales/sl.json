@@ -271,14 +271,9 @@
       "nights": "noči",
       "night": "noč",
       "invalid": "Odhod mora biti po prihodu.",
-      "maxGuests": "Koča sprejme do 5 oseb."
-    },
-    "widget": {
-      "title": "Koledar rezervacij",
-      "frameTitle": "Koledar rezervacij koče Sechszirbenhütte",
-      "loading": "Nalaganje koledarja …",
-      "openWindow": "Odpri rezervacijo v novem oknu",
-      "secure": "Varna rezervacija prek Beds24"
+      "maxGuests": "Koča sprejme do 5 oseb.",
+      "required": "Izberite prihod in odhod.",
+      "hint": "Odpre obrazec za rezervacijo s podrobnostmi cene v novem oknu."
     },
     "form": {
       "title": "Povpraševanje za Rezervacijo",
@@ -308,7 +303,8 @@
       "submit": "Pošlji Povpraševanje",
       "success": "Hvala! Vaše povpraševanje je bilo uspešno oddano.",
       "error": "Prišlo je do napake. Prosimo, poskusite znova pozneje."
-    }
+    },
+    "secure": "Varna rezervacija prek Beds24"
   },
   "bewertungen": {
     "title": "Ocene Gostov",

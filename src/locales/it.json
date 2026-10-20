@@ -271,14 +271,9 @@
       "nights": "notti",
       "night": "notte",
       "invalid": "La partenza deve essere dopo l'arrivo.",
-      "maxGuests": "La baita ospita fino a 5 persone."
-    },
-    "widget": {
-      "title": "Calendario prenotazioni",
-      "frameTitle": "Calendario prenotazioni della Sechszirbenhütte",
-      "loading": "Caricamento del calendario …",
-      "openWindow": "Apri la prenotazione in una nuova finestra",
-      "secure": "Prenotazione sicura tramite Beds24"
+      "maxGuests": "La baita ospita fino a 5 persone.",
+      "required": "Scegliete arrivo e partenza.",
+      "hint": "Apre il modulo di prenotazione con il dettaglio dei prezzi in una nuova finestra."
     },
     "form": {
       "title": "Richiesta di Prenotazione",
@@ -308,7 +303,8 @@
       "submit": "Invia Richiesta",
       "success": "Grazie! La vostra richiesta è stata inviata con successo.",
       "error": "Si è verificato un errore. Vi preghiamo di riprovare più tardi."
-    }
+    },
+    "secure": "Prenotazione sicura tramite Beds24"
   },
   "bewertungen": {
     "title": "Recensioni degli Ospiti",

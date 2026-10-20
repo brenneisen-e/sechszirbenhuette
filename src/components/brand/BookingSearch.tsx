@@ -4,19 +4,19 @@ import { useEffect, useId, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   addDays,
-  BOOKING_SEARCH_EVENT,
+  beds24FormUrl,
   type BookingQuery,
   DEFAULT_QUERY,
   MAX_GUESTS,
   nightsBetween,
+  openBeds24Form,
   readBookingQuery,
-  requestBookingSearch,
   todayIso,
 } from '@/lib/booking';
 
-// Kompakte Suche: Anreise, Abreise, Personen. Im Hero (auf Grün) ist der
-// Knopf der rote Buchen-Button, im Buchungsbereich (auf Leinen) ein grüner.
-// Beide Suchen bleiben über das Ereignis aus lib/booking.ts gleich.
+// Kompakte Suche: Anreise, Abreise, Personen. „Anfragen“ (roter Knopf) öffnet
+// direkt das Beds24-Buchungsformular mit Preisaufstellung in einem neuen
+// Fenster (lib/booking.ts). Hero auf Grün, Buchungsbereich auf Leinen.
 
 interface Props {
   variant: 'hero' | 'section';
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function BookingSearch({ variant, className = '' }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const s = t.buchung.search;
   const id = useId();
   const [query, setQuery] = useState<BookingQuery>(DEFAULT_QUERY);
@@ -34,9 +34,6 @@ export function BookingSearch({ variant, className = '' }: Props) {
   useEffect(() => {
     setToday(todayIso());
     setQuery(readBookingQuery(new URLSearchParams(window.location.search)));
-    const onSearch = (e: Event) => setQuery((e as CustomEvent<BookingQuery>).detail);
-    window.addEventListener(BOOKING_SEARCH_EVENT, onSearch);
-    return () => window.removeEventListener(BOOKING_SEARCH_EVENT, onSearch);
   }, []);
 
   const nights = nightsBetween(query.arrival, query.departure);
@@ -56,7 +53,11 @@ export function BookingSearch({ variant, className = '' }: Props) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.arrival && nightsBetween(query.arrival, query.departure) < 1) {
+    if (!query.arrival || !query.departure) {
+      setError(s.required);
+      return;
+    }
+    if (nightsBetween(query.arrival, query.departure) < 1) {
       setError(s.invalid);
       return;
     }
@@ -64,8 +65,10 @@ export function BookingSearch({ variant, className = '' }: Props) {
       setError(s.maxGuests);
       return;
     }
+    const url = beds24FormUrl(query, language);
+    if (!url) return;
     setError('');
-    requestBookingSearch(query);
+    openBeds24Form(url);
   };
 
   const label = onHero ? 'text-holz' : 'text-rinde';
@@ -151,18 +154,12 @@ export function BookingSearch({ variant, className = '' }: Props) {
         {error || (nights > 0 ? `${nights} ${nights === 1 ? s.night : s.nights}` : ' ')}
       </p>
 
-      {onHero ? (
-        <button type="submit" className="brand-cta mt-2 w-full sm:w-auto">
-          {t.brand.book}
-        </button>
-      ) : (
-        <button
-          type="submit"
-          className="mt-2 inline-flex min-h-[48px] w-full items-center justify-center rounded-[4px] bg-zirbe px-5 text-leinen transition-colors hover:bg-[#2f4a41]"
-        >
-          {s.submit}
-        </button>
-      )}
+      <button type="submit" className={`brand-cta mt-2 w-full ${onHero ? 'sm:w-auto' : ''}`}>
+        {t.brand.book}
+      </button>
+      <p className={`mt-2 text-[0.875rem] ${onHero ? 'text-leinen/80' : 'text-rinde/75'}`}>
+        {s.hint}
+      </p>
     </form>
   );
 }

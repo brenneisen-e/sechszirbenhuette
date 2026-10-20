@@ -264,14 +264,9 @@
       "nights": "Nächte",
       "night": "Nacht",
       "invalid": "Die Abreise muss nach der Anreise liegen.",
-      "maxGuests": "Die Hütte bietet Platz für bis zu 5 Personen."
-    },
-    "widget": {
-      "title": "Buchungskalender",
-      "frameTitle": "Buchungskalender der Sechszirbenhütte",
-      "loading": "Buchungskalender wird geladen …",
-      "openWindow": "Buchung in eigenem Fenster öffnen",
-      "secure": "Sichere Buchung über Beds24"
+      "maxGuests": "Die Hütte bietet Platz für bis zu 5 Personen.",
+      "required": "Bitte Anreise und Abreise wählen.",
+      "hint": "Öffnet das Buchungsformular mit Preisaufstellung in einem neuen Fenster."
     },
     "form": {
       "title": "Buchungsanfrage",
@@ -301,7 +296,8 @@
       "submit": "Anfrage absenden",
       "success": "Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt.",
       "error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
-    }
+    },
+    "secure": "Sichere Buchung über Beds24"
   },
   "bewertungen": {
     "title": "Gästebewertungen",

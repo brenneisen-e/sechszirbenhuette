@@ -266,14 +266,9 @@
       "nights": "nights",
       "night": "night",
       "invalid": "Departure must be after arrival.",
-      "maxGuests": "The hut sleeps up to 5 people."
-    },
-    "widget": {
-      "title": "Booking calendar",
-      "frameTitle": "Booking calendar of the Sechszirbenhütte",
-      "loading": "Loading booking calendar …",
-      "openWindow": "Open booking in a new window",
-      "secure": "Secure booking via Beds24"
+      "maxGuests": "The hut sleeps up to 5 people.",
+      "required": "Please choose arrival and departure.",
+      "hint": "Opens the booking form with the price breakdown in a new window."
     },
     "form": {
       "title": "Booking Request",
@@ -303,7 +298,8 @@
       "submit": "Send Inquiry",
       "success": "Thank you! Your inquiry has been successfully submitted.",
       "error": "An error occurred. Please try again later."
-    }
+    },
+    "secure": "Secure booking via Beds24"
   },
   "bewertungen": {
     "title": "Guest Reviews",

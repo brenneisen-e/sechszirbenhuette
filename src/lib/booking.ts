@@ -1,21 +1,17 @@
-// Direktbuchung über Beds24: Buchungsseite der Unterkunft 359833, nur das
+// Direktbuchung über Beds24: Buchungsformular der Unterkunft 359833, nur das
 // Zimmer 741929 („Sechszirbenhütte Falkert 1.700 m“). Preise, Endreinigung,
 // Ortstaxe, Hund, Wäschepaket, Anzahlung und Last-Minute-Rabatte rechnet
-// Beds24 selbst — die Website zeigt nur, was Beds24 ausgibt.
+// Beds24 selbst — die Website zeigt keine Preise.
 //
-// Die Suche (Anreise, Abreise, Personen) kann überall auf der Seite stehen
-// (Hero, Buchungsbereich): Sie schreibt den Zeitraum in die Adresse
-// (?anreise=…&abreise=…&erwachsene=…&kinder=…#buchung) und meldet ihn per
-// Ereignis an den Buchungsbereich, der den Kalender damit lädt. Von anderen
-// Seiten aus führt dieselbe Adresse auf die Startseite.
-
-import { motionReducedNow } from '@/contexts/MotionContext';
+// Die Suche (Anreise, Abreise, Personen; Hero und Buchungsbereich) springt mit
+// „Anfragen“ direkt in das Beds24-Formular mit Preisaufstellung und
+// Gästedaten (br1-<Zimmer>=Book), in einem neuen Fenster. Kein eingebetteter
+// Beds24-Kalender mehr (Entscheidung Eike/Malte, 20.10.2026). Ein Zeitraum in
+// der Adresse (?anreise=…&abreise=…&erwachsene=…&kinder=…) füllt die Suche vor.
 
 export const BEDS24_PROP_ID = 359833;
 export const BEDS24_ROOM_ID = 741929;
 export const MAX_GUESTS = 5;
-
-export const BOOKING_SEARCH_EVENT = 'szh:booking-search';
 
 export interface BookingQuery {
   /** erste Nacht, YYYY-MM-DD */
@@ -71,53 +67,31 @@ export function readBookingQuery(params: URLSearchParams): BookingQuery {
   return query;
 }
 
-export function bookingSearchParams(query: BookingQuery): URLSearchParams {
-  const params = new URLSearchParams();
-  if (query.arrival) params.set('anreise', query.arrival);
-  if (query.departure) params.set('abreise', query.departure);
-  params.set('erwachsene', String(query.adults));
-  params.set('kinder', String(query.children));
-  return params;
-}
-
 const BEDS24_LANGS = new Set(['de', 'en', 'it', 'sl']);
 
-/** Adresse der Beds24-Buchungsseite, mit Zeitraum, sobald er vollständig ist */
-export function beds24BookingUrl(query: BookingQuery, language: string): string {
+/** Direktlink ins Beds24-Buchungsformular; null ohne vollständigen Zeitraum */
+export function beds24FormUrl(query: BookingQuery, language: string): string | null {
+  const nights = nightsBetween(query.arrival, query.departure);
+  if (!query.arrival || nights < 1) return null;
   const params = new URLSearchParams({
     propid: String(BEDS24_PROP_ID),
     roomid: String(BEDS24_ROOM_ID),
     lang: BEDS24_LANGS.has(language) ? language : 'de',
     referer: 'Website',
-    // ohne das große Kopfbild der Beds24-Seite
     hideheader: '1',
+    checkin: query.arrival,
+    numnight: String(nights),
+    numadult: String(query.adults),
+    numchild: String(query.children),
+    // überspringt die Zimmerauswahl: direkt Preisaufstellung und Gästedaten
+    [`br1-${BEDS24_ROOM_ID}`]: 'Book',
   });
-  const nights = nightsBetween(query.arrival, query.departure);
-  if (query.arrival && nights > 0) {
-    params.set('checkin', query.arrival);
-    params.set('numnight', String(nights));
-  }
-  params.set('numadult', String(query.adults));
-  params.set('numchild', String(query.children));
   return `https://beds24.com/booking2.php?${params.toString()}`;
 }
 
-/**
- * Suche auslösen: Auf der Startseite Adresse ergänzen, Buchungsbereich
- * benachrichtigen und hinscrollen; auf anderen Seiten zur Startseite wechseln.
- */
-export function requestBookingSearch(query: BookingQuery): void {
-  const target = `/?${bookingSearchParams(query).toString()}#buchung`;
-  if (window.location.pathname !== '/') {
-    window.location.assign(target);
-    return;
-  }
-  window.history.replaceState(window.history.state, '', target);
-  window.dispatchEvent(new CustomEvent<BookingQuery>(BOOKING_SEARCH_EVENT, { detail: query }));
-  // Desktop: Abschnitt mit Suche und Kalender nebeneinander; schmaler direkt
-  // zum Kalender, der dort unter der Suche steht
-  const wide = window.matchMedia('(min-width: 1024px)').matches;
-  document
-    .getElementById(wide ? 'buchung' : 'buchung-kalender')
-    ?.scrollIntoView({ behavior: motionReducedNow() ? 'auto' : 'smooth', block: 'start' });
+/** Formular in neuem Fenster öffnen; blockiert der Browser das, im selben */
+export function openBeds24Form(url: string): void {
+  const win = window.open(url, '_blank');
+  if (win) win.opener = null;
+  else window.location.assign(url);
 }
