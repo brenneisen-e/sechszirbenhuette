@@ -17,16 +17,22 @@ import {
   Settings,
   SlidersHorizontal,
   Instagram,
+  LayoutDashboard,
   Loader2,
   LogOut,
 } from 'lucide-react';
 import AdminLogin from '@/components/admin/AdminLogin';
 import DemoModeToggle from '@/components/admin/DemoModeToggle';
-import PartnerSwitch from '@/components/admin/PartnerSwitch';
+import HutSwitch, { hutViewUrl, readHutView } from '@/components/admin/HutSwitch';
+import type { HutView } from '@/lib/dashboard/hutDashboard';
 
 // Lazy load heavy components with ssr:false (admin is client-only)
 const AdminLoadingFallback = () => <div className="animate-pulse h-96 bg-gray-100 rounded-lg" />;
 
+const HutDashboard = dynamic(() => import('@/components/admin/HutDashboard'), {
+  ssr: false,
+  loading: AdminLoadingFallback,
+});
 const GuestDatabase = dynamic(() => import('@/components/admin/GuestDatabase'), {
   ssr: false,
   loading: AdminLoadingFallback,
@@ -103,6 +109,7 @@ function FullScreenLoader() {
 }
 
 type AdminTab =
+  | 'dashboard'
   | 'guests'
   | 'finances'
   | 'utilities'
@@ -123,6 +130,7 @@ const TABS: {
   shortLabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
+  { id: 'dashboard', label: 'Übersicht', shortLabel: 'Übersicht', icon: LayoutDashboard },
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
@@ -140,18 +148,23 @@ const TABS: {
 
 function tabFromSearch(search: string): AdminTab {
   const tab = new URLSearchParams(search).get('tab');
-  // Unbekannte Tabs (z.B. beim Wechsel aus dem Admin Center der Natberger
-  // Hütte) landen auf den Gästen statt auf einer leeren Seite
-  return TABS.find((t) => t.id === tab)?.id ?? 'guests';
+  // Ohne bzw. mit unbekanntem Tab (z.B. beim Wechsel aus dem Admin Center der
+  // Natberger Hütte) startet die Übersicht statt einer leeren Seite
+  return TABS.find((t) => t.id === tab)?.id ?? 'dashboard';
 }
 
 function getInitialTab(): AdminTab {
-  if (typeof window === 'undefined') return 'guests';
+  if (typeof window === 'undefined') return 'dashboard';
   return tabFromSearch(window.location.search);
 }
 
+// „Beide Hütten“ zeigen nur die Übersicht und die Preisübersicht
+const BOTH_HUTS_TABS: AdminTab[] = ['dashboard', 'prices'];
+
 function AdminPageContent({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTabState] = useState<AdminTab>(getInitialTab);
+  // Hütten-Umschalter im Kopf: nur diese Hütte oder beide
+  const [hutView, setHutView] = useState<HutView>(readHutView);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [financeRefreshKey, setFinanceRefreshKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -173,7 +186,10 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
 
   // Sync browser back/forward with tab state
   useEffect(() => {
-    const onPopState = () => setActiveTabState(tabFromSearch(window.location.search));
+    const onPopState = () => {
+      setActiveTabState(tabFromSearch(window.location.search));
+      setHutView(readHutView());
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
@@ -206,8 +222,22 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
       setFinanceRefreshKey((prev) => prev + 1);
     }
     setActiveTabState(tab);
-    window.history.pushState(null, '', `/admin?tab=${tab}`);
+    window.history.pushState(null, '', hutViewUrl(readHutView(), tab));
   }, []);
+
+  // Im Kopf steht, was zu sehen ist: Tabs ohne Zwei-Hütten-Ansicht zeigen
+  // nur diese Hütte — „Beide“ bleibt für die Übersicht gemerkt
+  const headerView: HutView = BOTH_HUTS_TABS.includes(activeTab) ? hutView : 'own';
+
+  const changeHutView = (view: HutView) => {
+    setHutView(view);
+    const tab = view === 'both' && !BOTH_HUTS_TABS.includes(activeTab) ? 'dashboard' : activeTab;
+    if (tab !== activeTab) {
+      if (tab === 'finances') setFinanceRefreshKey((prev) => prev + 1);
+      setActiveTabState(tab);
+    }
+    window.history.replaceState(null, '', hutViewUrl(view, tab));
+  };
 
   const handleDataLoaded = () => {
     setIsInitialLoading(false);
@@ -248,12 +278,12 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
               <Home className="w-5 h-5" />
             </a>
           </div>
-          <h1 className="text-sm font-medium text-gray-900">
+          <h1 className="min-w-0 truncate px-2 text-sm font-medium text-gray-900">
             {TABS.find((t) => t.id === activeTab)?.label}
           </h1>
-          <div className="flex items-center gap-2">
-            <PartnerSwitch tab={activeTab} compact />
-            <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
+          <div className="flex shrink-0 items-center gap-2">
+            <HutSwitch tab={activeTab} view={headerView} onViewChange={changeHutView} compact />
+            <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} compact />
             <button
               onClick={onLogout}
               title="Abmelden"
@@ -281,7 +311,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <PartnerSwitch tab={activeTab} />
+              <HutSwitch tab={activeTab} view={headerView} onViewChange={changeHutView} />
               <DemoModeToggle isDemoMode={isDemoMode} onToggle={toggleDemoMode} />
               <button
                 onClick={onLogout}
@@ -327,6 +357,8 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
         <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
+          {activeTab === 'dashboard' && <HutDashboard view={hutView} />}
+
           {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 
           {activeTab === 'finances' && (

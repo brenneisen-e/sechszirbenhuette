@@ -131,7 +131,7 @@ export async function listRoomOptions(db: D1Database): Promise<Outcome<RoomOptio
  * sonst das erste mit Preisen, sonst das erste — immer nur innerhalb der
  * gewählten Unterkunft.
  */
-async function resolveRoom(db: D1Database): Promise<Outcome<RoomOption>> {
+export async function resolveRoom(db: D1Database): Promise<Outcome<RoomOption>> {
   const options = await listRoomOptions(db);
   if (!options.data) return { error: options.error, status: options.status };
   const fixed = Number(await getSetting(db, KEY_ROOM_ID));

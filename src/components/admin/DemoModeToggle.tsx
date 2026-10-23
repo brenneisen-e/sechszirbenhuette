@@ -5,9 +5,30 @@ import { Eye, EyeOff } from 'lucide-react';
 interface DemoModeToggleProps {
   isDemoMode: boolean;
   onToggle: () => void;
+  /** Nur das Symbol (Handy-Kopf) — der Hinweisbalken zeigt den aktiven Modus */
+  compact?: boolean;
 }
 
-export default function DemoModeToggle({ isDemoMode, onToggle }: DemoModeToggleProps) {
+export default function DemoModeToggle({
+  isDemoMode,
+  onToggle,
+  compact = false,
+}: DemoModeToggleProps) {
+  if (compact) {
+    return (
+      <button
+        onClick={onToggle}
+        className={`p-1 rounded-md transition-colors ${
+          isDemoMode ? 'bg-amber-100 text-amber-800' : 'text-gray-400 hover:text-gray-600'
+        }`}
+        title={isDemoMode ? 'Demo-Modus deaktivieren' : 'Demo-Modus aktivieren'}
+        aria-pressed={isDemoMode}
+      >
+        {isDemoMode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={onToggle}

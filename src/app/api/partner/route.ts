@@ -7,6 +7,7 @@ import {
   ensureAuthTables,
   sessionCookieOptions,
 } from '@/lib/server/adminAuth';
+import { getOwnDashboardData, saveOwnPlatformConfig } from '@/lib/server/hutDashboard';
 import {
   clearConnection,
   completePairing,
@@ -86,6 +87,11 @@ export async function POST(request: NextRequest) {
         return reply(await restoreOwnSnapshot(db, Number(body.snapshotId)));
       case 'saveRules':
         return reply(await saveOwnRules(db, body.rules));
+      // Übersicht (src/lib/server/hutDashboard.ts) — ohne Gastnamen
+      case 'dashboardData':
+        return reply(await getOwnDashboardData(db, body.from, body.to, { names: false }));
+      case 'savePlatformConfig':
+        return reply(await saveOwnPlatformConfig(db, body.config));
       default:
         return NextResponse.json({ error: 'Unbekannte Aktion' }, { status: 400 });
     }
