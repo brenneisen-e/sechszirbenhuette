@@ -16,10 +16,11 @@ import {
 
 // Kompakte Suche: Anreise, Abreise, Personen. „Anfragen“ (roter Knopf) öffnet
 // direkt das Beds24-Buchungsformular mit Preisaufstellung in einem neuen
-// Fenster (lib/booking.ts). Hero auf Grün, Buchungsbereich auf Leinen.
+// Fenster (lib/booking.ts). Hero auf Grün (schmal untereinander, „bar“ als
+// Leiste in einer Zeile im Aufmacher), Buchungsbereich auf Leinen.
 
 interface Props {
-  variant: 'hero' | 'section';
+  variant: 'hero' | 'bar' | 'section';
   className?: string;
 }
 
@@ -37,7 +38,9 @@ export function BookingSearch({ variant, className = '' }: Props) {
   }, []);
 
   const nights = nightsBetween(query.arrival, query.departure);
-  const onHero = variant === 'hero';
+  // Leiste und Hero stehen auf Grün
+  const onHero = variant !== 'section';
+  const bar = variant === 'bar';
 
   const setArrival = (arrival: string) => {
     setError('');
@@ -80,9 +83,35 @@ export function BookingSearch({ variant, className = '' }: Props) {
   const adultOptions = Array.from({ length: MAX_GUESTS }, (_, i) => i + 1);
   const childOptions = Array.from({ length: MAX_GUESTS - query.adults + 1 }, (_, i) => i);
 
+  const status = (
+    <p
+      className={`min-h-[1.5rem] text-[0.9375rem] ${bar ? '' : 'mt-2'} ${
+        onHero ? 'text-leinen' : 'text-rinde'
+      }`}
+      aria-live="polite"
+    >
+      {error || (nights > 0 ? `${nights} ${nights === 1 ? s.night : s.nights}` : ' ')}
+    </p>
+  );
+  const hint = (
+    <p
+      className={`text-[0.875rem] ${bar ? '' : 'mt-2'} ${
+        onHero ? 'text-leinen/80' : 'text-rinde/75'
+      }`}
+    >
+      {s.hint}
+    </p>
+  );
+
   return (
     <form onSubmit={submit} className={className} aria-label={s.title} noValidate>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2">
+      <div
+        className={
+          bar
+            ? 'grid grid-cols-[repeat(4,minmax(0,1fr))_auto] items-end gap-3'
+            : 'grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2'
+        }
+      >
         <label htmlFor={`${id}-in`} className={`text-[0.9375rem] ${label}`}>
           {s.arrival}
           <input
@@ -145,21 +174,28 @@ export function BookingSearch({ variant, className = '' }: Props) {
             ))}
           </select>
         </label>
+        {bar && (
+          <button type="submit" className="brand-cta brand-cta--compact">
+            {t.brand.book}
+          </button>
+        )}
       </div>
 
-      <p
-        className={`mt-2 min-h-[1.5rem] text-[0.9375rem] ${onHero ? 'text-leinen' : 'text-rinde'}`}
-        aria-live="polite"
-      >
-        {error || (nights > 0 ? `${nights} ${nights === 1 ? s.night : s.nights}` : ' ')}
-      </p>
-
-      <button type="submit" className={`brand-cta mt-2 w-full ${onHero ? 'sm:w-auto' : ''}`}>
-        {t.brand.book}
-      </button>
-      <p className={`mt-2 text-[0.875rem] ${onHero ? 'text-leinen/80' : 'text-rinde/75'}`}>
-        {s.hint}
-      </p>
+      {bar ? (
+        // Leiste: Nächte bzw. Hinweis und Erklärung in einer Zeile darunter
+        <div className="mt-2 flex items-baseline justify-between gap-6">
+          {status}
+          {hint}
+        </div>
+      ) : (
+        <>
+          {status}
+          <button type="submit" className={`brand-cta mt-2 w-full ${onHero ? 'sm:w-auto' : ''}`}>
+            {t.brand.book}
+          </button>
+          {hint}
+        </>
+      )}
     </form>
   );
 }

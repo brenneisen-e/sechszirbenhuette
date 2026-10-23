@@ -555,6 +555,9 @@
     "title": "News from the Nockberge",
     "intro": "Hikes, day trips and tips for quiet days at Falkert – fresh from our blog.",
     "all": "All posts",
-    "read": "Read more"
+    "read": "Read more",
+    "prev": "Previous posts",
+    "next": "More posts",
+    "slider": "Posts from the blog"
   }
 }

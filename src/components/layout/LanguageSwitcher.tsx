@@ -60,9 +60,11 @@ const languages: { code: Language; flag: React.ReactNode; label: string }[] = [
 
 interface LanguageSwitcherProps {
   isScrolled?: boolean;
+  /** Auswahl links bündig aufklappen (Schalter am linken Rand) */
+  alignLeft?: boolean;
 }
 
-export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ isScrolled = true, alignLeft = false }: LanguageSwitcherProps) {
   const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -99,7 +101,9 @@ export function LanguageSwitcher({ isScrolled = true }: LanguageSwitcherProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 overflow-hidden">
+        <div
+          className={`absolute ${alignLeft ? 'left-0' : 'right-0'} mt-2 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 overflow-hidden`}
+        >
           {languages.map((lang) => (
             <button
               key={lang.code}

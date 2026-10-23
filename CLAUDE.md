@@ -79,6 +79,8 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 
 ## Layout der Startseite (Briefing 18.10.2026)
 
+- Kopf und Aufmacher im früheren Aufbau mit neuem Schriftbild (Zwischenstand, Wunsch 23.10.2026): `src/components/layout/Header.tsx` — Logo-Schild (`.brand-logo-sign`, weißes Logo 240 px auf Grün) in der Mitte, Ziele in Versalien (`.brand-nav-link`) links/rechts daneben, außen links Sprache, außen rechts „Anfragen“; Startseite durchsichtig über dem Film, ab 1024 px fest mit Leinenfläche beim Scrollen, schmaler scrollt er mit; Unterseiten Leinenfläche. `src/components/sections/Hero.tsx` — Film vollflächig, Ort/Leitidee/Einleitung mittig in der Grundschrift (`.brand-hero-title`, Northwell nie über dem Film), ab 1024 px Suchleiste (`BookingSearch variant="bar"`) im Bild, schmaler Suche auf Grün darunter. Ab dem Abschnitt „Die Hütte in Kürze“ gilt der neue Aufbau
+
 - Abschnitte: Klasse `brand-section` (Abstände Handy/Tablet/Desktop) und Kopf `src/components/brand/SectionHeader.tsx` (Marke, Überschrift, Einleitung, optional Handlung) — Schriftgrößen aus `brand.css` (clamp), nicht aus den Admin-Texten
 - Ausstattung: Desktop 12 Spalten (Kopf + Grundriss haftend links, Karten rechts), Tablet 2 Spalten, Handy Wischreihe (`brand-snap-row`)
 - Galerie: Bento (je 8 Bilder ein Leitbild 2×2 und ein breites 2×1, Reihenfolge aus dem Tab Bilder), „Weitere Bilder“, Lightbox mit Tastatur/Wischen
@@ -89,7 +91,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 ## Wichtige Pfade
 
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`
-- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite die drei neuesten Beiträge: `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“)
+- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite ein Slider mit den bis zu zwölf neuesten Beiträgen: `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“, `.brand-slider`: Handy wischen, Tablet gut zwei, Desktop drei Karten, Pfeile + Fortschrittsleiste)
 - **Blog-API:** `src/app/api/blog/route.ts` (GET/POST/PUT/DELETE)
 - **Media-API:** `src/app/api/admin/media/route.ts` (Upload) + `src/app/api/media/route.ts` (lesen)
 - **DB-Schema:** `db/schema.sql`, Migrations: `migrations/`

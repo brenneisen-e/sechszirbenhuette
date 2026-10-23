@@ -6,11 +6,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMotion } from '@/contexts/MotionContext';
 import { BookingSearch } from '@/components/brand/BookingSearch';
 
-// Aufmacher: das bestehende Hüttenvideo (Medienkategorie „hero“, Cloudflare
-// Stream/HLS) bleibt die prägende Medienfläche. Leitidee, Ort und Buchen stehen
-// auf einer ruhigen, deckenden grünen Fläche daneben (mobil darunter) — nie
-// über dem laufenden Film. Buchen ist dort eine kompakte Suche (Anreise,
-// Abreise, Personen), die den Beds24-Kalender im Abschnitt #buchung lädt.
+// Aufmacher im früheren Aufbau, mit dem neuen Schriftbild: das Hüttenvideo
+// (Medienkategorie „hero“, Cloudflare Stream/HLS) füllt den ganzen Bildschirm,
+// die Navigation liegt durchsichtig darüber. Ort, Leitidee und Einleitung
+// stehen mittig auf dem abgedunkelten Film — in der Grundschrift (Northwell nie
+// über Film oder Fotos). Buchen: ab 1024 px eine Suchleiste auf deckendem Grün
+// im Bild, schmaler die kompakte Suche auf Grün unter dem Film.
 //
 // Wiedergabe: stumm, inline, in Schleife, unabhängig vom Scrollen. Automatischer
 // Start nur ohne reduzierte Bewegung. Außerhalb des Sichtbereichs oder bei
@@ -24,7 +25,7 @@ type HlsLike = { destroy: () => void };
 const STILL_SRC = '/api/hero-poster?w=1920';
 const STILL_SRCSET =
   '/api/hero-poster?w=640 640w, /api/hero-poster?w=960 960w, /api/hero-poster?w=1280 1280w, /api/hero-poster?w=1920 1920w';
-const STILL_SIZES = '(min-width: 1024px) 58vw, 100vw';
+const STILL_SIZES = '100vw';
 
 export function Hero() {
   const { t } = useLanguage();
@@ -204,72 +205,85 @@ export function Hero() {
         imageSizes={STILL_SIZES}
         fetchPriority="high"
       />
-      <div className="lg:grid lg:min-h-[max(560px,calc(100svh-var(--header-height)))] lg:grid-cols-12">
-        {/* Film: großzügig, mobil oben */}
-        <div className="relative h-[46svh] min-h-[260px] overflow-hidden bg-zirbe lg:order-2 lg:col-span-7 lg:h-auto">
-          <video
-            ref={videoRef}
-            id="hero-video"
-            muted
-            loop
-            playsInline
-            disablePictureInPicture
-            preload="metadata"
-            aria-label={t.brand.videoLabel}
-            className="absolute inset-0 h-full w-full object-cover object-[50%_60%]"
-            onPlay={() => {
-              setPlaying(true);
-              setStarted(true);
-            }}
-            onPause={() => setPlaying(false)}
-            onError={() => setFailed(true)}
+      <div className="relative isolate flex min-h-[max(560px,100svh)] flex-col overflow-hidden bg-rinde lg:min-h-[max(680px,100svh)]">
+        {/* Film über die ganze Fläche */}
+        <video
+          ref={videoRef}
+          id="hero-video"
+          muted
+          loop
+          playsInline
+          disablePictureInPicture
+          preload="metadata"
+          aria-label={t.brand.videoLabel}
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-[50%_60%]"
+          onPlay={() => {
+            setPlaying(true);
+            setStarted(true);
+          }}
+          onPause={() => setPlaying(false)}
+          onError={() => setFailed(true)}
+        />
+        {!stillFailed && (
+          // eslint-disable-next-line @next/next/no-img-element -- Standbild direkt im HTML (LCP)
+          <img
+            src={STILL_SRC}
+            srcSet={STILL_SRCSET}
+            sizes={STILL_SIZES}
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+            decoding="async"
+            onError={() => setStillFailed(true)}
+            className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-[50%_60%] transition-opacity duration-500 motion-reduce:transition-none ${
+              started ? 'opacity-0' : 'opacity-100'
+            }`}
           />
-          {!stillFailed && (
-            // eslint-disable-next-line @next/next/no-img-element -- Standbild direkt im HTML (LCP)
-            <img
-              src={STILL_SRC}
-              srcSet={STILL_SRCSET}
-              sizes={STILL_SIZES}
-              alt=""
-              aria-hidden="true"
-              fetchPriority="high"
-              decoding="async"
-              onError={() => setStillFailed(true)}
-              className={`pointer-events-none absolute inset-0 h-full w-full object-cover object-[50%_60%] transition-opacity duration-500 motion-reduce:transition-none ${
-                started ? 'opacity-0' : 'opacity-100'
-              }`}
-            />
-          )}
-          {(ready || !stillFailed) && !failed && (
-            <button
-              type="button"
-              onClick={toggle}
-              disabled={!ready}
-              aria-pressed={!playing}
-              className="absolute bottom-4 left-4 inline-flex min-h-[44px] items-center gap-2 rounded-[4px] bg-zirbe px-4 text-[0.9375rem] text-leinen hover:bg-[#2f4a41] disabled:opacity-70 md:bottom-6 md:left-6"
-            >
-              {playing ? <Pause size={18} aria-hidden /> : <Play size={18} aria-hidden />}
-              {playing ? t.brand.videoPause : t.brand.videoPlay}
-            </button>
-          )}
+        )}
+        {/* Abdunkeln: oben für die Navigation, in der Mitte für die Leitidee,
+            unten für die Suchleiste */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(32,40,36,0.66)_0%,rgba(32,40,36,0.30)_26%,rgba(32,40,36,0.36)_58%,rgba(32,40,36,0.74)_100%)]"
+        />
+
+        <div className="brand-container flex flex-1 flex-col items-center justify-center pb-20 pt-[calc(var(--header-height)+1.5rem)] text-center text-leinen lg:pb-24">
+          <p className="brand-label text-holz [text-shadow:0_1px_8px_rgba(0,0,0,0.4)]">
+            {t.brand.place}
+          </p>
+          <h1 id="hero-title" className="mt-5 [text-shadow:0_2px_18px_rgba(0,0,0,0.35)] md:mt-6">
+            <span className="brand-hero-title block">{t.brand.claim}</span>
+            <span className="brand-hero-title block">{t.brand.claimHand}</span>
+          </h1>
+          <p className="mt-6 max-w-[38rem] text-leinen [text-shadow:0_1px_10px_rgba(0,0,0,0.45)] md:mt-8">
+            {t.brand.heroText}
+          </p>
+          {/* ab 1024 px: Suche als Leiste im Bild */}
+          <div className="mt-10 hidden w-full max-w-[62rem] lg:block">
+            <div className="on-zirbe rounded-[4px] bg-zirbe px-6 pb-4 pt-5 text-left">
+              <BookingSearch variant="bar" />
+            </div>
+          </div>
         </div>
 
-        {/* Ruhige, deckende grüne Fläche für Leitidee und Buchen */}
-        <div className="on-zirbe flex flex-col justify-center bg-zirbe text-leinen lg:order-1 lg:col-span-5">
-          <div className="px-6 py-10 sm:px-12 md:py-14 lg:py-16 xl:pl-[max(3rem,calc((100vw-1280px)/2))] xl:pr-16">
-            <p className="brand-label text-holz">{t.brand.place}</p>
-            <h1 id="hero-title" className="mt-6">
-              <span className="brand-h1 block text-leinen">{t.brand.claim}</span>
-              <span className="brand-hand mt-2 block whitespace-nowrap text-leinen [font-size:min(var(--fs-hand),4.25rem)]">
-                {t.brand.claimHand}
-              </span>
-            </h1>
-            <p className="mt-6 max-w-[30rem] text-leinen">{t.brand.heroText}</p>
-            <BookingSearch
-              variant="hero"
-              className="mt-8 max-w-[30rem] md:max-w-none lg:max-w-[30rem]"
-            />
-          </div>
+        {(ready || !stillFailed) && !failed && (
+          <button
+            type="button"
+            onClick={toggle}
+            disabled={!ready}
+            aria-pressed={!playing}
+            className="absolute bottom-4 left-4 inline-flex min-h-[44px] items-center gap-2 rounded-[4px] bg-zirbe px-4 text-[0.9375rem] text-leinen hover:bg-[#2f4a41] disabled:opacity-70 md:bottom-6 md:left-6"
+          >
+            {playing ? <Pause size={18} aria-hidden /> : <Play size={18} aria-hidden />}
+            {playing ? t.brand.videoPause : t.brand.videoPlay}
+          </button>
+        )}
+      </div>
+
+      {/* schmaler: Suche auf Grün unter dem Film */}
+      <div className="on-zirbe bg-zirbe py-10 text-leinen lg:hidden">
+        <div className="brand-container">
+          <BookingSearch variant="hero" className="mx-auto max-w-[36rem]" />
         </div>
       </div>
     </section>

@@ -557,6 +557,9 @@
     "title": "Neues aus den Nockbergen",
     "intro": "Wanderungen, Ausflüge und Tipps für ruhige Tage am Falkert – frisch aus unserem Blog.",
     "all": "Alle Beiträge",
-    "read": "Weiterlesen"
+    "read": "Weiterlesen",
+    "prev": "Vorherige Beiträge",
+    "next": "Weitere Beiträge",
+    "slider": "Beiträge aus dem Blog"
   }
 }

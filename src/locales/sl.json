@@ -553,6 +553,9 @@
     "title": "Novice iz Nockbergov",
     "intro": "Pohodi, izleti in nasveti za mirne dni na Falkertu – sveže z našega bloga.",
     "all": "Vsi prispevki",
-    "read": "Preberi več"
+    "read": "Preberi več",
+    "prev": "Prejšnji prispevki",
+    "next": "Več prispevkov",
+    "slider": "Prispevki iz bloga"
   }
 }
