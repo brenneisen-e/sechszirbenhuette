@@ -47,16 +47,17 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 - Beide Admin Center sind gekoppelt („Partner“): `src/lib/server/partner.ts`, Gegenstück `lib/server/partner.ts` im Repo `natbergerhuette` — **gleiches Protokoll, Änderungen immer in beiden Repos**
   - Kopplung per Code im Tab „Preisübersicht“; Adresse und gemeinsamer Schlüssel in `settings` (`partner_url`, `partner_secret`, `partner_name`, `partner_hut`)
   - `/api/partner`: Aufrufe von Server zu Server, HMAC-signiert (Zeitstempel, Einmalwert in `partner_nonces`, Body) — keine Admin-Session
-  - Hütten-Umschalter im Kopf (`src/components/admin/HutSwitch.tsx`, Handy als Auswahlmenü): eigene Hütte | andere Hütte | Beide. Andere Hütte = Wechsel per einmaligem Ticket, direkte Anmeldung nur mit `settings.partner_sso_allowed = 1`. „Beide“ = Übersicht beider Hütten hier (`?huts=both`), nur in den Tabs Übersicht und Preisübersicht
+  - Hütten-Umschalter im Kopf (`src/components/admin/HutSwitch.tsx`, Handy als Auswahlmenü): eigene Hütte | andere Hütte | Beide. Andere Hütte = Wechsel per einmaligem Ticket, direkte Anmeldung nur mit `settings.partner_sso_allowed = 1`. „Beide“ = beide Hütten hier (`?huts=both`), nur in den Tabs Portalpreise und Preisübersicht
 - Tab „Preisübersicht“: `src/components/admin/PriceOverview.tsx` + `price-overview/*`, API `src/app/api/admin/price-overview/route.ts`
 - Rechenlogik `src/lib/pricing/dynamicPricing.ts` liegt **identisch** im Repo `natbergerhuette`; Nachfrage je Nacht aus `src/lib/demand/*` (Kopie aus `natbergerhuette/lib/demand`, angepasst an `noUncheckedIndexedAccess`)
 - Saisonpreise eines Jahres mit einem Klick: `src/lib/pricing/seasonPlan.ts` (identisch in beiden Repos, derzeit nur Natberger Hütte 2027), Vorschau und Übernahme in `price-overview/SeasonPlanPanel.tsx`
 - Server `src/lib/server/priceOverview.ts`: nur Zimmer der gewählten Unterkunft (`settings.beds24_property_id`), schreibt nur `price1`/`minStay`, vorher Sicherung (`beds24Snapshots.ts`); Regeln in `settings.price_rules`
 - Schreibt die Preisübersicht Preise, weichen sie danach ggf. von den Saisonpreisen im Tab „Mietpreise“ ab (Beds24SeasonSync zeigt das an)
 
-## Übersicht (Start-Tab)
+## Portalpreise
 
-- Tab „Übersicht“ (`src/components/admin/HutDashboard.tsx` + `hut-dashboard/*`): tagesaktuelle Preise je Plattform und Belegung, Woche/Monat, blättern per Pfeil/Pfeiltaste/Wischen; Start-Tab des Admin Centers
+- Start des Admin Centers: Tab „Gäste“ mit dem Kalender (Wunsch 27.10.2026)
+- Tab „Portalpreise“ (`src/components/admin/HutDashboard.tsx` + `hut-dashboard/*`, Tab-ID `platforms`, früher „Übersicht“/`dashboard`): tagesaktuelle Preise je Plattform und Belegung, Woche/Monat, blättern per Pfeil/Pfeiltaste/Wischen
 - `src/lib/dashboard/hutDashboard.ts`, `src/lib/server/hutDashboard.ts` und die Komponenten liegen **identisch** im Repo `natbergerhuette` (dort ohne `src/`) — Änderungen immer in beiden Repos
 - Server liest aus Beds24 nur (Kalender mit price1–16, Mindestaufenthalt, Verfügbarkeit, Buchungen des Zimmers über `resolveRoom`); API `src/app/api/admin/dashboard/route.ts`, Partner-Aktionen `dashboardData` (ohne Gastnamen) und `savePlatformConfig`
 - Plattformpreise: Kanal-Multiplikatoren gibt Beds24 nicht über die API heraus → `settings.platform_prices` je Hütte (Preisfeld, Faktor, ± €/Nacht, Rundung), einstellbar über „Plattformpreise“
@@ -90,6 +91,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 
 ## Wichtige Pfade
 
+- **Datumsfelder im Admin Center:** `src/components/admin/shared/GermanDateInput.tsx` (TT.MM.JJJJ unabhängig von der Browsersprache, identisch im Repo `natbergerhuette`), kein `<input type="date">`
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`
 - **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite ein Slider mit den bis zu zwölf neuesten Beiträgen: `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“, `.brand-slider`: Handy wischen, Tablet gut zwei, Desktop drei Karten, Pfeile + Fortschrittsleiste)
 - **Blog-API:** `src/app/api/blog/route.ts` (GET/POST/PUT/DELETE)

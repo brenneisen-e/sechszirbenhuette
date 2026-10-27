@@ -5,6 +5,8 @@ import { Calculator, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { DEMAND_COLOR } from '@/lib/demand/scoring';
 import { type FixedPeriod, LEVEL_NAMES, type PriceRules } from '@/lib/pricing/dynamicPricing';
 
+import { GermanDateInput } from '../shared/GermanDateInput';
+
 // Preisregeln einer Hütte bearbeiten. Die Tabelle darunter rechnet mit dem
 // Entwurf sofort neu — gespeichert wird erst mit „Speichern“ (bzw. beim
 // Übernehmen von Vorschlägen).
@@ -250,17 +252,15 @@ export default function RulesEditor({
                 key={i}
                 className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_6rem_5rem_1.5fr_auto] gap-2 items-center"
               >
-                <input
-                  type="date"
+                <GermanDateInput
                   value={f.from}
-                  onChange={(e) => setFixed(i, { from: e.target.value })}
-                  className={`${inputClass} w-full`}
+                  onChange={(v) => setFixed(i, { from: v })}
+                  className={`${inputClass} w-full pr-8`}
                 />
-                <input
-                  type="date"
+                <GermanDateInput
                   value={f.to}
-                  onChange={(e) => setFixed(i, { to: e.target.value })}
-                  className={`${inputClass} w-full`}
+                  onChange={(v) => setFixed(i, { to: v })}
+                  className={`${inputClass} w-full pr-8`}
                 />
                 <input
                   type="number"

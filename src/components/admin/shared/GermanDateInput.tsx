@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GermanDateInputProps {
@@ -136,6 +136,9 @@ export function GermanDateInput({
     if (iso) {
       onChange(iso);
       setInputValue(formatToGerman(iso));
+    } else if (!inputValue.trim()) {
+      // Feld geleert → kein Datum, wie beim Datumsfeld des Browsers
+      if (value) onChange('');
     } else if (value) {
       // Reset to last valid value
       setInputValue(formatToGerman(value));

@@ -36,7 +36,7 @@ import TodayCard from './hut-dashboard/TodayCard';
 import WeekView from './hut-dashboard/WeekView';
 import { viennaToday } from './price-overview/api';
 
-// Tab „Übersicht“ (Startseite des Admin Centers): Wie stehen die Hütten heute
+// Reiter „Portalpreise“ (Bereich Preise): Wie stehen die Hütten heute
 // da, was kostet eine Nacht auf Booking.com, FeWo-direkt, Feratel …, und wo
 // ist noch etwas frei? Wochenweise oder monatsweise, durchwischen bzw. mit
 // den Pfeilen blättern. Im Kopf des Admin Centers lässt sich zwischen der
@@ -191,7 +191,7 @@ export default function HutDashboard({ view }: Props) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-        <span className="ml-3 text-sm text-gray-500">Lade Übersicht aus Beds24…</span>
+        <span className="ml-3 text-sm text-gray-500">Lade Portalpreise aus Beds24…</span>
       </div>
     );
   }

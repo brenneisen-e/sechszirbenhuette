@@ -11,7 +11,7 @@ interface Env {
   DB: D1Database;
 }
 
-// Tab „Übersicht“ (src/components/admin/HutDashboard.tsx): Preise je Plattform
+// Reiter „Portalpreise“ (src/components/admin/HutDashboard.tsx): Preise je Plattform
 // und Belegung. Eigene Hütte direkt aus Beds24, die Partner-Hütte über ihr
 // eigenes Admin Center (/api/partner, Aktion dashboardData — dort ohne
 // Gastnamen).
@@ -30,10 +30,10 @@ function fromOutcome<T>(outcome: Outcome<T>): HutResponse<T> {
 
 function fromPartner<T>(result: PartnerResult<{ data?: T }>, partnerName: string): HutResponse<T> {
   if (result.data?.data !== undefined) return { data: result.data.data };
-  // Ältere Version des anderen Admin Centers kennt die Übersicht noch nicht
+  // Ältere Version des anderen Admin Centers kennt die Portalpreise noch nicht
   if (result.error === 'Unbekannte Aktion') {
     return {
-      error: `Das Admin Center der ${partnerName} hat die Übersicht noch nicht — bitte dort die neue Version ausrollen`,
+      error: `Das Admin Center der ${partnerName} hat die Portalpreise noch nicht — bitte dort die neue Version ausrollen`,
     };
   }
   return { error: result.error || 'Keine Antwort', needsRoom: result.needsRoom === true };

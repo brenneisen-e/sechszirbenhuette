@@ -17,7 +17,7 @@ import {
   Settings,
   SlidersHorizontal,
   Instagram,
-  LayoutDashboard,
+  BadgeEuro,
   Loader2,
   LogOut,
 } from 'lucide-react';
@@ -109,7 +109,7 @@ function FullScreenLoader() {
 }
 
 type AdminTab =
-  | 'dashboard'
+  | 'platforms'
   | 'guests'
   | 'finances'
   | 'utilities'
@@ -130,7 +130,6 @@ const TABS: {
   shortLabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: 'dashboard', label: 'Übersicht', shortLabel: 'Übersicht', icon: LayoutDashboard },
   { id: 'guests', label: 'Gäste', shortLabel: 'Gäste', icon: Users },
   { id: 'finances', label: 'Finanzen', shortLabel: 'Finanzen', icon: Euro },
   { id: 'utilities', label: 'Nebenkosten', shortLabel: 'NK', icon: Calculator },
@@ -141,25 +140,28 @@ const TABS: {
   { id: 'reviews', label: 'Bewertungen', shortLabel: 'Reviews', icon: Star },
   { id: 'guestapp', label: 'Gäste-App', shortLabel: 'App', icon: Smartphone },
   { id: 'beds24', label: 'Beds24', shortLabel: 'B24', icon: Link2 },
+  { id: 'platforms', label: 'Portalpreise', shortLabel: 'Portale', icon: BadgeEuro },
   { id: 'prices', label: 'Preisübersicht', shortLabel: 'Preisüb.', icon: SlidersHorizontal },
   { id: 'instagram', label: 'Instagram', shortLabel: 'Insta', icon: Instagram },
   { id: 'system', label: 'System', shortLabel: 'System', icon: Settings },
 ];
 
 function tabFromSearch(search: string): AdminTab {
-  const tab = new URLSearchParams(search).get('tab');
+  const raw = new URLSearchParams(search).get('tab');
+  // „dashboard“ hieß früher die heutige Seite Portalpreise
+  const tab = raw === 'dashboard' ? 'platforms' : raw;
   // Ohne bzw. mit unbekanntem Tab (z.B. beim Wechsel aus dem Admin Center der
-  // Natberger Hütte) startet die Übersicht statt einer leeren Seite
-  return TABS.find((t) => t.id === tab)?.id ?? 'dashboard';
+  // Natberger Hütte) starten die Gäste mit dem Kalender statt einer leeren Seite
+  return TABS.find((t) => t.id === tab)?.id ?? 'guests';
 }
 
 function getInitialTab(): AdminTab {
-  if (typeof window === 'undefined') return 'dashboard';
+  if (typeof window === 'undefined') return 'guests';
   return tabFromSearch(window.location.search);
 }
 
-// „Beide Hütten“ zeigen nur die Übersicht und die Preisübersicht
-const BOTH_HUTS_TABS: AdminTab[] = ['dashboard', 'prices'];
+// „Beide Hütten“ zeigen nur die Portalpreise und die Preisübersicht
+const BOTH_HUTS_TABS: AdminTab[] = ['platforms', 'prices'];
 
 function AdminPageContent({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTabState] = useState<AdminTab>(getInitialTab);
@@ -226,12 +228,12 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
   }, []);
 
   // Im Kopf steht, was zu sehen ist: Tabs ohne Zwei-Hütten-Ansicht zeigen
-  // nur diese Hütte — „Beide“ bleibt für die Übersicht gemerkt
+  // nur diese Hütte — „Beide“ bleibt für die Portalpreise gemerkt
   const headerView: HutView = BOTH_HUTS_TABS.includes(activeTab) ? hutView : 'own';
 
   const changeHutView = (view: HutView) => {
     setHutView(view);
-    const tab = view === 'both' && !BOTH_HUTS_TABS.includes(activeTab) ? 'dashboard' : activeTab;
+    const tab = view === 'both' && !BOTH_HUTS_TABS.includes(activeTab) ? 'platforms' : activeTab;
     if (tab !== activeTab) {
       if (tab === 'finances') setFinanceRefreshKey((prev) => prev + 1);
       setActiveTabState(tab);
@@ -357,7 +359,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
       {/* Content Area */}
       <div className="pt-14 pb-20 md:pt-0 md:pb-8">
         <div className="mx-auto px-2 md:px-6 lg:px-8 max-w-[1800px] md:py-6" key={activeTab}>
-          {activeTab === 'dashboard' && <HutDashboard view={hutView} />}
+          {activeTab === 'platforms' && <HutDashboard view={hutView} />}
 
           {activeTab === 'guests' && <GuestDatabase demoMode={isDemoMode} />}
 

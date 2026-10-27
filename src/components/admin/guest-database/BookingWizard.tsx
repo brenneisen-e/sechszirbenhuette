@@ -44,7 +44,7 @@ import {
 import PositionsEditor from '@/components/admin/positions/PositionsEditor';
 import type { BookingPosition } from '@/lib/types/positions';
 import type { PositionCalcContext } from '@/lib/utils/positionCalculator';
-import { GermanDateInput } from './GermanDateInput';
+import { GermanDateInput } from '../shared/GermanDateInput';
 
 // ============================================================================
 // TYPES

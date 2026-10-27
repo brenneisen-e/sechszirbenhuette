@@ -1,4 +1,4 @@
-// Übersicht im Admin Center (Tab „Übersicht“): tagesaktuelle Preise je
+// Portalpreise im Admin Center (Reiter „Portalpreise“): tagesaktuelle Preise je
 // Plattform und Belegung beider Hütten. Liegt identisch in beiden Repos
 // (natbergerhuette: lib/dashboard, sechszirbenhuette: src/lib/dashboard) —
 // Änderungen in beiden Repos nachziehen, die Daten werden zwischen den Admin

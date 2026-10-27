@@ -1,4 +1,4 @@
-// Daten der eigenen Hütte für den Tab „Übersicht“ (Preise je Plattform,
+// Daten der eigenen Hütte für den Reiter „Portalpreise“ (Preise je Plattform,
 // Belegung). Gelesen vom eigenen Admin Center (/api/admin/dashboard) und vom
 // verbundenen Admin Center der Partner-Hütte (/api/partner, Aktion
 // dashboardData). Liegt bis auf die Kommentare identisch in beiden Repos.

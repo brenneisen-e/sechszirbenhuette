@@ -69,7 +69,7 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
   const [success, setSuccess] = useState('');
 
   // View state (guests table vs calendar vs tasks)
-  const [activeView, setActiveView] = useState<'guests' | 'calendar' | 'tasks'>('guests');
+  const [activeView, setActiveView] = useState<'guests' | 'calendar' | 'tasks'>('calendar');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [selectedGuestId, setSelectedGuestId] = useState<number | null>(null);
 
@@ -1739,17 +1739,6 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
       {/* View Tabs */}
       <div className="flex gap-6 border-b border-gray-200">
         <button
-          onClick={() => setActiveView('guests')}
-          className={`px-1 py-2 flex items-center gap-2 text-sm font-medium transition-colors border-b-2 ${
-            activeView === 'guests'
-              ? 'border-green-600 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Gäste
-        </button>
-        <button
           onClick={() => setActiveView('calendar')}
           className={`px-1 py-2 flex items-center gap-2 text-sm font-medium transition-colors border-b-2 ${
             activeView === 'calendar'
@@ -1759,6 +1748,17 @@ export default function GuestDatabase({ onDataLoaded, demoMode = false }: GuestD
         >
           <CalendarDays className="w-4 h-4" />
           Kalender
+        </button>
+        <button
+          onClick={() => setActiveView('guests')}
+          className={`px-1 py-2 flex items-center gap-2 text-sm font-medium transition-colors border-b-2 ${
+            activeView === 'guests'
+              ? 'border-green-600 text-gray-900'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Gäste
         </button>
         <button
           onClick={() => setActiveView('tasks')}

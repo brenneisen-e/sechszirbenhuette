@@ -1,4 +1,4 @@
-// Aufrufe des Tabs „Übersicht“ (/api/admin/dashboard)
+// Aufrufe des Reiters „Portalpreise“ (/api/admin/dashboard)
 
 import {
   type DashboardData,
