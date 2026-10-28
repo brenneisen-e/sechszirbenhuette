@@ -155,12 +155,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ungültiger Zugangscode' }, { status: 401 });
     }
 
-    // Check validity period
+    // Ablauf prüfen (tagesgenau, damit der Code am Abreisetag noch gilt).
+    // Eine "valid_from"-Sperre gibt es bewusst nicht: Gäste sollen die App
+    // auch vor Anreise nutzen können.
     const now = new Date().toISOString();
-    if (token.valid_from && now < (token.valid_from as string)) {
-      return NextResponse.json({ error: 'Zugang noch nicht aktiv' }, { status: 401 });
-    }
-    if (token.valid_until && now > (token.valid_until as string)) {
+    const today = now.slice(0, 10);
+    if (token.valid_until && today > (token.valid_until as string).slice(0, 10)) {
       return NextResponse.json({ error: 'Zugang abgelaufen' }, { status: 401 });
     }
 
