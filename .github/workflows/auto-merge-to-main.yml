@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'claude/**'
+      - 'ccr-**'
 
 concurrency:
   group: auto-merge-${{ github.ref }}

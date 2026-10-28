@@ -108,6 +108,6 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 
 ## Git / Branching
 
-- Feature-Branches: `claude/<topic>-<random>`
+- Feature-Branches: `claude/<topic>-<random>` oder `ccr-<random>` — beide werden nach grünem Build automatisch nach `main` gemergt (`.github/workflows/auto-merge-to-main.yml`)
 - Nie direkt auf `main` pushen.
 - PRs nur auf explizite Anfrage erstellen.
