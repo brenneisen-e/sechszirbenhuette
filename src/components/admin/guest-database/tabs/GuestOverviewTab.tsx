@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Mail,
   Phone,
@@ -12,6 +12,7 @@ import {
   CalendarRange,
   CheckCircle2,
   Clock,
+  Copy,
   CreditCard,
   MessageSquare,
   Plus,
@@ -20,11 +21,19 @@ import {
   Save,
   X,
   Loader2,
+  Smartphone,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import type { Guest, Booking, BankPayment, GuestNote } from '../types';
 import { FlagIcon } from '../FlagIcon';
 import { getEffectiveBookingAmount } from '../helpers';
+
+// Aktiver Gäste-App-Zugang (aus guest_access_tokens) für den Deeplink
+interface GuestAppToken {
+  booking_id: number;
+  access_code: string;
+  is_active: number;
+}
 
 interface GuestOverviewTabProps {
   guest: Guest;
@@ -79,6 +88,85 @@ export function GuestOverviewTab({
   const [editContent, setEditContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [appToken, setAppToken] = useState<GuestAppToken | null>(null);
+  const [appLinkCopied, setAppLinkCopied] = useState(false);
+  const [creatingToken, setCreatingToken] = useState(false);
+
+  const latestBooking = [...bookings].sort((a, b) =>
+    (b.arrival_date || '').localeCompare(a.arrival_date || ''),
+  )[0];
+
+  // Gäste-App-Zugangscode der neuesten Buchung dieses Gasts laden,
+  // um den Direkt-Link anzeigen zu können (wie in der Natberger Hütte)
+  useEffect(() => {
+    let cancelled = false;
+    const loadToken = async () => {
+      try {
+        const res = await fetch('/api/admin/guest-app', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'list_tokens' }),
+        });
+        const data = (await res.json()) as { tokens?: GuestAppToken[] };
+        if (cancelled) return;
+        const orderedBookingIds = [...bookings]
+          .sort((a, b) => (b.arrival_date || '').localeCompare(a.arrival_date || ''))
+          .map((b) => b.id);
+        const match = orderedBookingIds
+          .map((id) => (data.tokens || []).find((t) => t.booking_id === id && t.is_active === 1))
+          .find(Boolean);
+        setAppToken(match || null);
+      } catch {
+        /* ignore */
+      }
+    };
+    loadToken();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookings]);
+
+  const getGuestAppLink = (token: GuestAppToken) => {
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${base}/gaeste?code=${token.access_code}&lang=de`;
+  };
+
+  const copyGuestAppLink = (token: GuestAppToken) => {
+    navigator.clipboard.writeText(getGuestAppLink(token));
+    setAppLinkCopied(true);
+    setTimeout(() => setAppLinkCopied(false), 2000);
+  };
+
+  // Gäste-App-Zugangscode für die neueste Buchung dieses Gasts erstellen,
+  // falls noch keiner existiert (sonst müsste man in den Gäste-App-Tab wechseln)
+  const handleCreateToken = async () => {
+    if (!latestBooking) return;
+    setCreatingToken(true);
+    try {
+      const res = await fetch('/api/admin/guest-app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_token',
+          booking_id: latestBooking.id,
+          guest_name: guest.guest_name,
+          valid_until: latestBooking.departure_date || undefined,
+        }),
+      });
+      const data = (await res.json()) as { access_code?: string };
+      if (data.access_code) {
+        setAppToken({
+          booking_id: latestBooking.id,
+          access_code: data.access_code,
+          is_active: 1,
+        });
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setCreatingToken(false);
+    }
+  };
 
   // Note handling functions
   const handleAddNote = async () => {
@@ -179,6 +267,47 @@ export function GuestOverviewTab({
                   {guest.phone}
                 </a>
               </div>
+            )}
+            {appToken && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Smartphone className="w-4 h-4 text-gray-400" />
+                <a
+                  href={getGuestAppLink(appToken)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-600"
+                >
+                  Gäste-App
+                </a>
+                <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded font-mono">
+                  {appToken.access_code}
+                </code>
+                <button
+                  onClick={() => copyGuestAppLink(appToken)}
+                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="Link kopieren (Code ist schon eingetragen)"
+                >
+                  {appLinkCopied ? (
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            )}
+            {!appToken && bookings.length > 0 && (
+              <button
+                onClick={handleCreateToken}
+                disabled={creatingToken}
+                className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark disabled:opacity-50"
+              >
+                {creatingToken ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Smartphone className="w-4 h-4" />
+                )}
+                Gäste-App-Zugang erstellen
+              </button>
             )}
             {guest.address && (
               <div className="flex items-start gap-2 text-gray-600 mt-3 pt-3 border-t border-gray-100">

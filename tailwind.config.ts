@@ -34,6 +34,11 @@ const config: Config = {
         moos: '#8d987e',
         holz: '#d7c3a2',
         primary: {
+          // bg-primary/text-primary/hover:bg-primary-dark im Admin Center
+          // (Komponenten aus der Natberger Hütte) — ohne DEFAULT blieben z. B.
+          // „Zum Gast“-Knöpfe weiß auf Weiß
+          DEFAULT: '#263d35',
+          dark: '#1a2b25',
           50: '#f0f9ff',
           100: '#e0f2fe',
           200: '#bae6fd',
