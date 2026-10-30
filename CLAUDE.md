@@ -4,9 +4,10 @@ Projekt-Notizen für Claude Code. Kurz halten, stur befolgen.
 
 ## Harte Regeln
 
-- **Build muss immer perfekt sein.** Kein Commit/Push, solange `npm run build` eine Warning, eine Deprecation oder einen Fehler zeigt. Lockfile-Patches, die Next.js beim Build vornimmt, gehören ins Repo (committen).
+- **Build muss immer perfekt sein — ausnahmslos.** Kein Commit/Push, solange `npm run build` **oder** `npm run pages:build` (der Cloudflare-Build) eine Warning, eine Deprecation, einen Hinweis/eine Empfehlung („consider updating …“, „experimental“, „unsupported“) oder einen Fehler zeigt. Nichts davon „für später“ liegen lassen oder nur erwähnen, sondern sofort beheben. Einzige Ausnahme: die Meldung „Proxy environment variables detected“, die nur in der Claude-Sandbox erscheint. Lockfile-/tsconfig-Patches, die Next.js beim Build vornimmt, gehören ins Repo (committen).
+- Sicherheits-Flags wie `--dangerouslyUseUnsupportedNextVersion` sind keine Lösung — stattdessen Abhängigkeiten aktualisieren.
 - **Typecheck muss grün sein.** `npm run typecheck` läuft auch im pre-commit Hook (lefthook) — nicht umgehen.
-- Vor dem Push immer `npm run build` laufen lassen, nicht nur Typecheck.
+- Vor dem Push immer `npm run build` **und** `npm run pages:build` laufen lassen, nicht nur Typecheck. Läuft der Cloudflare-Build nicht durch, geht nichts live (so stand die Website 20.–30.10.2026 still).
 - Keine `--no-verify` Commits, keine Hook-Skips.
 
 ## Commands
@@ -21,7 +22,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 
 ## Stack-Kurzfassung
 
-- Next.js 15 (App Router, `'use client'` häufig) auf Cloudflare Pages/Workers via `@opennextjs/cloudflare`
+- Next.js 16 (App Router, `'use client'` häufig) auf Cloudflare Pages/Workers via `@opennextjs/cloudflare`
 - D1 (SQLite) als DB — Zugriff über `getCloudflareContext().env.DB`
 - Cloudflare Images für Uploads (über `/api/admin/media`)
 - Tailwind + framer-motion + lucide-react
@@ -33,7 +34,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
   - Notfall-Passwort als Cloudflare Pages Secret `ADMIN_PASSWORD` — greift erst ab dem nächsten Deployment
   - Sessions serverseitig in `admin_auth_sessions`, gespeichert nur der SHA-256-Hash des Tokens
 - **WICHTIG:** Öffentliche Routen außerhalb von `/api/admin` mit schreibenden Methoden prüfen selbst `isAdminAuthenticated(request)`: `/api/blog` (POST/PUT/DELETE, Entwürfe nur für Admins), `/api/content-texts` (POST), `/api/media` (PATCH), `/api/site-settings` (POST)
-- **WICHTIG:** `src/proxy.ts` schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`, Instagram-Rücksprung `/api/instagram/callback`) gehören NICHT unter `/api/admin`.
+- **WICHTIG:** `cloudflare-worker.js` (Einstieg des Cloudflare-Workers, vor Next.js; kein `middleware.ts`/`proxy.ts`, da Next 16 dort nur Node erlaubt) schützt jede Route unter `/api/admin`. Öffentlich nur `/api/admin/auth` und `/api/admin/media/file/…` (Website-Bilder). Endpunkte für Dritte (Beds24-Webhook, Buchungsschluss, Partner-Verbindung `/api/partner`, Instagram-Rücksprung `/api/instagram/callback`) gehören NICHT unter `/api/admin`. Achtung: Bei `npm run dev` läuft kein Worker, dort ist die Schranke nicht aktiv — nur lokal nutzen.
 
 ## Beds24
 

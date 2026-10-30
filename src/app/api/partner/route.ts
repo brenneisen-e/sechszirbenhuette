@@ -32,7 +32,7 @@ interface Env {
 
 // Schnittstelle für das verbundene Admin Center der Natberger Hütte
 // (lib/server/partner.ts). Liegt bewusst nicht unter /api/admin (Admin-Login
-// in src/proxy.ts): Aufrufer ist der andere Server, nicht der Browser.
+// in cloudflare-worker.js): Aufrufer ist der andere Server, nicht der Browser.
 // Jede Anfrage ist mit dem gemeinsamen Schlüssel signiert und wird nur
 // einmal angenommen.
 

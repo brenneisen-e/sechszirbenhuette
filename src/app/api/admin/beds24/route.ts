@@ -48,7 +48,7 @@ interface Env {
 }
 
 // Beds24 API v2 (Channel-Manager für Booking.com, Feratel und FeWo-direkt).
-// Auth: Admin-Session, geprüft in src/proxy.ts.
+// Auth: Admin-Session, geprüft in cloudflare-worker.js.
 // Verbindung: In Beds24 unter Settings → Apps & Integrations → API einen
 // Invite Code erzeugen, hier einlösen. Der zurückgegebene Refresh-Token ist
 // langlebig und wird in der settings-Tabelle gespeichert; daraus werden bei

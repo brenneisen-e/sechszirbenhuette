@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Auth: Admin-Session, geprüft in src/proxy.ts
+    // Auth: Admin-Session, geprüft in cloudflare-worker.js
 
     const body = (await request.json()) as {
       guests?: Partial<GuestRecord>[];
@@ -235,7 +235,7 @@ export async function PUT(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Auth: Admin-Session, geprüft in src/proxy.ts
+    // Auth: Admin-Session, geprüft in cloudflare-worker.js
 
     const body = (await request.json()) as Partial<GuestRecord> & { id: number };
     const { id, ...updates } = body;
@@ -334,7 +334,7 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as { env: Env }).env;
 
-    // Auth: Admin-Session, geprüft in src/proxy.ts
+    // Auth: Admin-Session, geprüft in cloudflare-worker.js
 
     const { searchParams } = new URL(request.url);
     const guestId = searchParams.get('id');

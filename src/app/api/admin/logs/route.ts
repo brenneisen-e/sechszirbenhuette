@@ -3,7 +3,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 import { ensureAppLogsTable } from '@/lib/server/appLog';
 
-// Auth: Admin-Session, geprüft in src/proxy.ts.
+// Auth: Admin-Session, geprüft in cloudflare-worker.js.
 
 export async function GET(request: NextRequest) {
   try {

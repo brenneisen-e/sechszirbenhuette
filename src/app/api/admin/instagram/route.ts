@@ -17,7 +17,7 @@ interface Env {
 }
 
 // Instagram-Anbindung im Admin Center (src/components/admin/InstagramPanel.tsx).
-// Auth: Admin-Session, geprüft in src/proxy.ts. App-Geheimnis und
+// Auth: Admin-Session, geprüft in cloudflare-worker.js. App-Geheimnis und
 // Zugangsschlüssel werden nie zurückgegeben.
 
 async function getDb(): Promise<D1Database | null> {

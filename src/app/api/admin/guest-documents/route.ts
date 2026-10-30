@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as unknown as { env: Env }).env;
 
-    // Auth: Admin-Session, geprüft in src/proxy.ts
+    // Auth: Admin-Session, geprüft in cloudflare-worker.js
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });
@@ -197,7 +197,7 @@ export async function DELETE(request: NextRequest) {
     const ctx = await getCloudflareContext();
     const env = (ctx as unknown as { env: Env }).env;
 
-    // Auth: Admin-Session, geprüft in src/proxy.ts
+    // Auth: Admin-Session, geprüft in cloudflare-worker.js
 
     if (!env.DB) {
       return NextResponse.json({ error: 'D1 Database binding not configured.' }, { status: 500 });

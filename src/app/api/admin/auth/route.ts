@@ -22,7 +22,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
  * ============================================================================
  *
  * Diese Route ist als einzige unter /api/admin ohne Anmeldung erreichbar
- * (Ausnahme in src/proxy.ts) — sonst käme niemand zum Login.
+ * (Ausnahme in cloudflare-worker.js) — sonst käme niemand zum Login.
  *
  * Woher das Passwort kommt:
  *  - `settings.admin_code_hash` — der reguläre Weg. Gesetzt im Admin Center

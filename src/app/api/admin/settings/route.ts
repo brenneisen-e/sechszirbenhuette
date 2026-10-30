@@ -9,7 +9,7 @@ interface Env {
   CLOUDFLARE_API_TOKEN?: string;
 }
 
-// Auth: Admin-Session, geprüft in src/proxy.ts
+// Auth: Admin-Session, geprüft in cloudflare-worker.js
 async function isAuthenticated(_request: NextRequest, _env: Env): Promise<boolean> {
   return true;
 }

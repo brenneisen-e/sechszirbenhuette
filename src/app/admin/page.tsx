@@ -440,7 +440,7 @@ function AdminPageContent({ onLogout }: { onLogout: () => void }) {
 
 export default function AdminPage() {
   // Eigener Login (Passwort) — ohne gültige Session nur die Anmeldemaske.
-  // Die eigentliche Prüfung macht der Server (src/proxy.ts).
+  // Die eigentliche Prüfung macht der Server (cloudflare-worker.js).
   const [authState, setAuthState] = useState<'checking' | 'anonymous' | 'authenticated'>(
     'checking',
   );
