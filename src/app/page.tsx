@@ -11,7 +11,6 @@ import { BlogTeaser } from '@/components/sections/BlogTeaser';
 import { Buchung } from '@/components/sections/Buchung';
 import { AdminPreviewListener } from '@/components/ui/AdminPreviewListener';
 import { Orientation } from '@/components/brand/Orientation';
-import { FacadeBand } from '@/components/brand/FacadeBand';
 import { HutChapters } from '@/components/brand/HutChapters';
 import { HostGreeting } from '@/components/brand/HostGreeting';
 
@@ -20,7 +19,6 @@ export default function HomePage() {
     <div className="brand-page">
       <Hero />
       <Orientation />
-      <FacadeBand animated />
       <HutChapters />
       <IntroText />
       <Ferienhaus />
@@ -31,7 +29,6 @@ export default function HomePage() {
       <Umgebung />
       <BlogTeaser />
       <HostGreeting />
-      <FacadeBand animated />
       <Buchung />
       <Suspense fallback={null}>
         <AdminPreviewListener />

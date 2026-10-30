@@ -6,7 +6,6 @@ import { useContentTexts } from '@/contexts/ContentTextsContext';
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Instagram } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/constants';
-import { FacadeBand } from '@/components/brand/FacadeBand';
 import { MotionToggle } from '@/components/brand/MotionToggle';
 
 export function Footer() {
@@ -21,11 +20,9 @@ export function Footer() {
 
   const currentYear = new Date().getFullYear();
 
-  // Abschluss: zweites, immer statisches Fassadenband mit Leinenabstand, dann
-  // die dunkelgrüne Fläche. Links hell und unterstrichen.
+  // Abschluss: dunkelgrüne Fläche, Links hell und unterstrichen.
   return (
     <>
-      <FacadeBand />
       <footer className="brand-footer on-zirbe bg-zirbe text-leinen relative z-10">
         <div className="brand-container py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
