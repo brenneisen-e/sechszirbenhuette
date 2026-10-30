@@ -58,9 +58,3 @@ jobs:
             || git merge --no-ff "$FEATURE_SHA" \
                  -m "Auto-merge ${FEATURE_BRANCH} into main (${FEATURE_SHA::7})"
           git push origin main
-
-  # Push mit GITHUB_TOKEN löst keine anderen Workflows aus — darum hier direkt
-  deploy:
-    needs: merge
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit

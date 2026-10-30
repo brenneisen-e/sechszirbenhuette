@@ -5,6 +5,11 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages Projekt - Output von OpenNext
 pages_build_output_dir = ".open-next/assets"
 
+# _worker.js wird in scripts/pages-build.mjs mit dem wrangler aus package.json
+# gebündelt — Pages soll es unverändert hochladen (sein eigener, älterer
+# Bündler macht Next.js 16 kaputt)
+no_bundle = true
+
 # D1 Datenbank Binding
 # Nach `wrangler d1 create sechszirbenhuette-db` die database_id einfügen
 [[d1_databases]]
