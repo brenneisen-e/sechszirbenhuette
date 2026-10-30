@@ -14,7 +14,7 @@ function isPublic(pathname: string): boolean {
   return pathname === '/api/admin/auth' || pathname.startsWith('/api/admin/media/file/');
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (isPublic(request.nextUrl.pathname)) {
     return NextResponse.next();
   }

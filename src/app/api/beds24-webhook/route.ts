@@ -25,7 +25,7 @@ interface Env {
 // Vrbo …). Auth über den key-Parameter (Zufallswert aus der settings-Tabelle).
 //
 // WICHTIG: Diese Route liegt bewusst NICHT unter /api/admin — Beds24 hat keine
-// Admin-Session (src/middleware.ts).
+// Admin-Session (src/proxy.ts).
 export async function POST(request: NextRequest) {
   try {
     const ctx = await getCloudflareContext();

@@ -6,7 +6,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
  * ============================================================================
  *
  * Das Admin Center hat einen eigenen Login mit Admin-Passwort. Die Prüfung
- * passiert zentral in src/middleware.ts für jede Route unter /api/admin —
+ * passiert zentral in src/proxy.ts für jede Route unter /api/admin —
  * sie ist die einzige Schranke, das Admin Center hängt nicht an Cloudflare
  * Zero Trust. Deshalb gilt:
  *

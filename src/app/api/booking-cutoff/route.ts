@@ -11,7 +11,7 @@ interface Env {
 // Täglicher Buchungsschluss (lib/server/bookingCutoff.ts) und „Buchbar bis“
 // (lib/server/bookingHorizon.ts), aufgerufen vom
 // geplanten GitHub-Workflow .github/workflows/buchungsschluss.yml. Liegt
-// bewusst nicht unter /api/admin (Admin-Login in src/middleware.ts).
+// bewusst nicht unter /api/admin (Admin-Login in src/proxy.ts).
 //
 // Bewusst ohne Anmeldung: Der Aufruf kann nur das auslösen, was die
 // Einstellung im Admin Center ohnehin vorgibt — den heutigen Tag bzw. die Tage

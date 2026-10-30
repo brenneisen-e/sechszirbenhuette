@@ -47,7 +47,7 @@
     "framer-motion": "^12.26.2",
     "hls.js": "^1.5.0",
     "lucide-react": "^0.562.0",
-    "next": "^15.0.0",
+    "next": "^16.4.3",
     "postcss": "^8.5.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260116.0",
     "@eslint/js": "^9.39.4",
-    "@opennextjs/cloudflare": "^1.14.8",
+    "@opennextjs/cloudflare": "^1.20.14",
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
     "eslint": "^9.39.4",
@@ -72,8 +72,8 @@
     "wrangler": "^4.79.0"
   },
   "optionalDependencies": {
-    "@next/swc-linux-x64-gnu": "15.5.14",
-    "@next/swc-linux-x64-musl": "15.5.14"
+    "@next/swc-linux-x64-gnu": "16.4.3",
+    "@next/swc-linux-x64-musl": "16.4.3"
   },
   "overrides": {
     "glob@<13": "13.0.6",

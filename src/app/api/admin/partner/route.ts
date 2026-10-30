@@ -21,7 +21,7 @@ interface Env {
 
 // Verbindung zum Admin Center der Natberger Hütte verwalten
 // (lib/server/partner.ts): koppeln, prüfen, trennen, direkt wechseln.
-// Auth: Admin-Session, geprüft in src/middleware.ts. Der geheime Schlüssel
+// Auth: Admin-Session, geprüft in src/proxy.ts. Der geheime Schlüssel
 // geht nur beim Erzeugen des Kopplungscodes an den Browser — danach nie wieder.
 
 export async function POST(request: NextRequest) {

@@ -9,7 +9,7 @@ interface Env {
   CLOUDFLARE_API_TOKEN?: string;
 }
 
-// Auth: Admin-Session, geprüft in src/middleware.ts
+// Auth: Admin-Session, geprüft in src/proxy.ts
 async function isAuthenticated(_request: NextRequest, _env: Env): Promise<boolean> {
   return true;
 }

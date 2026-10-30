@@ -18,7 +18,7 @@ interface Env {
 }
 
 // Preisübersicht beider Hütten (src/components/admin/PriceOverview.tsx).
-// Auth: Admin-Session, geprüft in src/middleware.ts. Eigene Hütte direkt über
+// Auth: Admin-Session, geprüft in src/proxy.ts. Eigene Hütte direkt über
 // Beds24 (nur die gewählte Unterkunft), die Natberger Hütte über ihr eigenes
 // Admin Center (/api/partner) — dort gelten deren Regeln.
 
