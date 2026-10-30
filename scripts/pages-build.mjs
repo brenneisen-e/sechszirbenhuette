@@ -1,20 +1,26 @@
 // Build für Cloudflare Pages (`npm run pages:build`, auch im Git-Build von
 // Cloudflare bei jedem Push auf main).
 //
-// Der Worker wird hier mit dem wrangler aus package.json fertig gebündelt;
-// wrangler.toml sagt Pages mit `no_bundle = true`, dass es _worker.js
-// unverändert hochladen soll. Grund: Pages bündelt sonst mit einer eigenen,
-// älteren wrangler-Version, deren Ersatz für node:timers schreibgeschützt
-// ist — Next.js 16 überschreibt dort setImmediate, jede Seite lieferte 500
+// Problem: Beim Hochladen bündelt Pages _worker.js immer selbst neu — mit
+// seinem eigenen wrangler 3.114 (no_bundle wird ignoriert). Der ersetzt
+// Node-Bausteine (node:timers, node:module …) durch unvollständige
+// Nachbauten aus unenv; Next.js 16 scheitert daran, jede Seite lieferte 500
 // (30.10.2026).
 //
-// Ablauf:
+// Lösung:
 // 1. OpenNext-Build (.open-next/)
 // 2. Worker-Einstieg cloudflare-worker.js (Admin-Schranke) + OpenNext-Worker
-//    samt Modulen in einen Arbeitsordner kopieren
-// 3. mit wrangler zu einer einzigen Datei bündeln (.open-next/assets/_worker.js/index.js)
-// 4. nur Bündel, statische Dateien und _routes.json landen in
-//    .open-next/assets (kein Servercode mehr unter öffentlichen Adressen)
+//    mit dem wrangler aus package.json zu einer Datei bündeln
+// 3. jeden statischen Import eines Node-Bausteins durch
+//    process.getBuiltinModule(…) ersetzen — dann gibt es für den Bündler von
+//    Pages nichts mehr zu ersetzen, und zur Laufzeit kommt das echte Modul
+//    der Cloudflare-Laufzeit
+// 4. Ergebnis als .open-next/assets/_worker.js/index.js; in
+//    .open-next/assets liegen sonst nur statische Dateien und _routes.json
+//
+// Prüfen wie in Produktion: mit wrangler 3.114 bündeln
+// (`wrangler deploy --dry-run --outdir …`) und das Ergebnis mit dem
+// aktuellen wrangler ungebündelt starten.
 
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -63,16 +69,40 @@ run('npx', [
   ...compatFlags.flatMap((flag) => ['--compatibility-flags', flag]),
 ]);
 
-// Node-Bausteine ohne Präfix (z. B. "path") als "node:path" importieren —
-// ungebündelt nimmt Pages nur Importe an, die die Laufzeit selbst kennt
+// Node-Bausteine ohne Präfix (z. B. "path") einheitlich als "node:path"
 const builtins = new Set(builtinModules.filter((name) => !name.startsWith('_')));
-const worker = readFileSync(join(BUNDLE, '_worker.js'), 'utf8').replace(
+let worker = readFileSync(join(BUNDLE, '_worker.js'), 'utf8').replace(
   /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)"([^"]+)"/g,
   (match, prefix, spec) => (builtins.has(spec) ? `${prefix}"node:${spec}"` : match),
 );
-// Als Ordner _worker.js/index.js: den lädt Pages mit no_bundle unverändert
-// hoch (eine einzelne _worker.js prüft wrangler im iife-Format, das am
-// Top-level-await des Bündels scheitert)
+
+// Statische Importe von Node-Bausteinen → process.getBuiltinModule(…).
+// `globalThis["pro" + "cess"]`, damit der Bündler von Pages hier nicht
+// seinen process-Nachbau einsetzt.
+worker = worker.replace(
+  /^import\s+([^;"]+?)\s+from\s*"(node:[^"]+)";?$/gm,
+  (statement, clause, spec) => {
+    const mod = `__nodeBuiltin(${JSON.stringify(spec)})`;
+    const binding = clause.trim();
+    if (binding.startsWith('* as ')) return `const ${binding.slice(5).trim()} = ${mod};`;
+    if (binding.startsWith('{') && binding.endsWith('}')) {
+      const names = binding
+        .slice(1, -1)
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean)
+        .map((name) => name.replace(/^(\S+)\s+as\s+(\S+)$/, '$1: $2'));
+      return `const { ${names.join(', ')} } = ${mod};`;
+    }
+    if (/^[\w$]+$/.test(binding)) return `const ${binding} = ${mod};`;
+    throw new Error(`Unbekannte Importform im Worker: ${statement}`);
+  },
+);
+const leftover = worker.match(/(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)"node:[^"]+"/);
+if (leftover) throw new Error(`Node-Import nicht ersetzt: ${leftover[0]}`);
+worker =
+  'const __nodeBuiltin = (name) => globalThis["pro" + "cess"].getBuiltinModule(name);\n' + worker;
+
 mkdirSync(join(ASSETS, '_worker.js'), { recursive: true });
 writeFileSync(join(ASSETS, '_worker.js', 'index.js'), worker);
 cpSync(join('public', '_routes.json'), join(ASSETS, '_routes.json'));
