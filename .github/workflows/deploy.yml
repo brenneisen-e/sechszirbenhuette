@@ -18,9 +18,7 @@ on:
   workflow_call:
     secrets:
       CLOUDFLARE_API_TOKEN:
-        required: true
-      CLOUDFLARE_ACCOUNT_ID:
-        required: true
+        required: false
 
 concurrency:
   group: deploy-production
@@ -31,15 +29,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ACCOUNT_ID: 3e23f2f1cf587388e6a90604f1d5e334 # wie in wrangler.toml
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
+      - name: Cloudflare-Token vorhanden?
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::GitHub-Secret CLOUDFLARE_API_TOKEN fehlt (Settings → Secrets and variables → Actions). Token bei Cloudflare mit dem Recht „Cloudflare Pages: Edit“ anlegen."
+            exit 1
+          fi
       - run: npm ci
       - run: npm run pages:build
       - name: Auf Cloudflare Pages veröffentlichen
