@@ -23,6 +23,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 ## Stack-Kurzfassung
 
 - Next.js 16 (App Router, `'use client'` häufig) auf Cloudflare Pages/Workers via `@opennextjs/cloudflare`
+- **Deployment:** GitHub Actions `.github/workflows/deploy.yml` (`wrangler pages deploy` mit dem wrangler aus package.json), aufgerufen vom Auto-Merge nach `main`. Der Git-Build von Cloudflare Pages bricht bewusst ab (`scripts/no-pages-git-build.mjs`): sein älterer wrangler bündelt `_worker.js` so, dass Next.js 16 auf 500 läuft (30.10.2026)
 - D1 (SQLite) als DB — Zugriff über `getCloudflareContext().env.DB`
 - Cloudflare Images für Uploads (über `/api/admin/media`)
 - Tailwind + framer-motion + lucide-react
