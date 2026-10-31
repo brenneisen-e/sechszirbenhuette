@@ -552,12 +552,10 @@
   },
   "blogTeaser": {
     "label": "Blog",
-    "title": "News from the Nockberge",
-    "intro": "Hikes, day trips and tips for quiet days at Falkert – fresh from our blog.",
+    "title": "Tips for your days at Falkert",
+    "intro": "Hikes from the hut door, holidays with your dog and day trips in Carinthia – the essentials from our blog.",
     "all": "All posts",
     "read": "Read more",
-    "prev": "Previous posts",
-    "next": "More posts",
-    "slider": "Posts from the blog"
+    "list": "Selected posts from the blog"
   }
 }

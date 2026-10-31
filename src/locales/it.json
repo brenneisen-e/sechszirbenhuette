@@ -550,12 +550,10 @@
   },
   "blogTeaser": {
     "label": "Blog",
-    "title": "Novità dai Nockberge",
-    "intro": "Escursioni, gite e consigli per giornate tranquille al Falkert – dal nostro blog.",
+    "title": "Consigli per le vostre giornate al Falkert",
+    "intro": "Escursioni dalla porta della baita, vacanze con il cane e gite in Carinzia – il meglio dal nostro blog.",
     "all": "Tutti gli articoli",
     "read": "Continua a leggere",
-    "prev": "Articoli precedenti",
-    "next": "Altri articoli",
-    "slider": "Articoli dal blog"
+    "list": "Articoli selezionati dal blog"
   }
 }

@@ -94,7 +94,7 @@ npm run preview      # Cloudflare Workers Preview (opennextjs-cloudflare + wrang
 
 - **Datumsfelder im Admin Center:** `src/components/admin/shared/GermanDateInput.tsx` (TT.MM.JJJJ unabhängig von der Browsersprache, identisch im Repo `natbergerhuette`), kein `<input type="date">`
 - **Blog-Editor (Admin):** `src/components/admin/BlogEditor.tsx` + `src/components/admin/blog-editor/*`
-- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite ein Slider mit den bis zu zwölf neuesten Beiträgen: `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“, `.brand-slider`: Handy wischen, Tablet gut zwei, Desktop drei Karten, Pfeile + Fortschrittsleiste)
+- **Öffentliche Blog-Seite:** `src/app/blog/[slug]/page.tsx`; auf der Startseite ein Modul mit drei Teasern (Wunsch 31.10.2026): `src/components/sections/BlogTeaser.tsx` (unter „Umgebung“; Auswahl per `FEATURED_SLUGS`, erster = Leitbeitrag groß links, zwei rechts; fehlt einer, füllen die neuesten auf)
 - **Blog-API:** `src/app/api/blog/route.ts` (GET/POST/PUT/DELETE)
 - **Media-API:** `src/app/api/admin/media/route.ts` (Upload) + `src/app/api/media/route.ts` (lesen)
 - **DB-Schema:** `db/schema.sql`, Migrations: `migrations/`

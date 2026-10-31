@@ -550,12 +550,10 @@
   },
   "blogTeaser": {
     "label": "Blog",
-    "title": "Novice iz Nockbergov",
-    "intro": "Pohodi, izleti in nasveti za mirne dni na Falkertu – sveže z našega bloga.",
+    "title": "Nasveti za vaše dni na Falkertu",
+    "intro": "Pohodi izpred koče, dopust s psom in izleti po Koroški – najpomembnejše z našega bloga.",
     "all": "Vsi prispevki",
     "read": "Preberi več",
-    "prev": "Prejšnji prispevki",
-    "next": "Več prispevkov",
-    "slider": "Prispevki iz bloga"
+    "list": "Izbrani prispevki iz bloga"
   }
 }

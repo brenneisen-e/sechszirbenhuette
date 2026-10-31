@@ -554,12 +554,10 @@
   },
   "blogTeaser": {
     "label": "Blog",
-    "title": "Neues aus den Nockbergen",
-    "intro": "Wanderungen, Ausflüge und Tipps für ruhige Tage am Falkert – frisch aus unserem Blog.",
+    "title": "Tipps für Ihre Tage am Falkert",
+    "intro": "Wandern ab der Hüttentür, Urlaub mit Hund und Ausflüge in Kärnten – das Wichtigste aus unserem Blog.",
     "all": "Alle Beiträge",
     "read": "Weiterlesen",
-    "prev": "Vorherige Beiträge",
-    "next": "Weitere Beiträge",
-    "slider": "Beiträge aus dem Blog"
+    "list": "Ausgewählte Beiträge aus dem Blog"
   }
 }

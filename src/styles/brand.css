@@ -434,38 +434,3 @@ html[data-motion='reduce'] {
 .brand-snap-row > * {
   scroll-snap-align: start;
 }
-
-/* Slider (Blog auf der Startseite): Handy eine Karte plus Anschnitt der
-   nächsten, Tablet gut zwei, Desktop genau drei Karten. Läuft bis an den Rand
-   des Inhaltsbereichs; geblättert wird per Wischen, Pfeilen oder Tastatur. */
-.brand-slider {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(80vw, 21rem);
-  gap: 1rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--space-gutter);
-  padding-inline: var(--space-gutter);
-  margin-inline: calc(-1 * var(--space-gutter));
-  padding-bottom: 0.25rem;
-  scrollbar-width: none;
-}
-.brand-slider::-webkit-scrollbar {
-  display: none;
-}
-.brand-slider > * {
-  scroll-snap-align: start;
-}
-@media (min-width: 768px) {
-  .brand-slider {
-    grid-auto-columns: calc((100% - 1.5rem) / 2.15);
-    gap: 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .brand-slider {
-    grid-auto-columns: calc((100% - 3rem) / 3);
-  }
-}
